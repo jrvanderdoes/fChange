@@ -18,8 +18,9 @@
 #'
 #' @param eigsList A list of vectors of length $1$ or $m$ with the eigenvalues
 #'     for each group
-#' @param basesList A list of bases (eigenfunctions), length 1 or m, for each
-#'     group. Define the basis on c(0,1) to ensure it works
+#' @param basesList A list of bases (eigenfunctions), length 1 or m
+#'
+#'     Define the basis using fda on c(0,1) to ensure it works
 #'     (TODO:: Remove this restriction)
 #' @param meansList A list of means, length 1 or m, for each group
 #' @param distsArray A vector of distributions, length 1 or m, for each group
@@ -32,19 +33,18 @@
 #' @param silent A Boolean that toggles running output
 #'
 #' @return A data.frame of m columns length(evals) rows (TODO:: Verify)
-#' @export
 #'
-#' @import fda stats
+#' @export
 #'
 #' @examples
 #' # Create 200 functions with a midway change point. The change point
 #' #     is a change point in the eigenvalues, eigenfunctions, means,
 #' #     distributions, and VAR(1) strength
-#' data_KL <- gen_FD_KL_Expansion(ns = c(100,100),
+#' data_KL <- generate_data_fd(ns = c(100,100),
 #'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,)),
-#'     basesList = list(create.bspline.basis(nbasis=4, norder=4),
-#'                      create.fourier.basis()),
+#'                     c(3,2)),
+#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
+#'                      fda::create.fourier.basis()),
 #'     meansList = c(0,0.5),
 #'     distsArray = c('Normal','Binomial'),
 #'     evals = seq(0,1,0.05),
@@ -86,10 +86,10 @@ generate_data_fd <- function(ns,
 
   getPsiList <- function(D, m,eigsList,kappasArray){
     psi <- list()
-    normsSD <- rnorm(max(D), mean=0, sd=1)
+    normsSD <- stats::rnorm(max(D), mean=0, sd=1)
 
     for(i in 1:m){
-      groupSD <- stats::normsSD[1:D[i]] * sqrt(eigsList[[i]])
+      groupSD <- normsSD[1:D[i]] * sqrt(eigsList[[i]])
       psi0 <- groupSD %*% t(groupSD)
       psi0 <- psi0 / sqrt(sum(psi0^2)) ## TODO:: Check this
       psi[[i]] <- kappasArray[i] * psi0
