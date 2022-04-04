@@ -44,7 +44,7 @@
 #'     eigsList = list(c(3,2,1,0.5),
 #'                     c(3,2)),
 #'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.fourier.basis()),
+#'                      fda::create.fourier.basis(nbasis=2)),
 #'     meansList = c(0,0.5),
 #'     distsArray = c('Normal','Binomial'),
 #'     evals = seq(0,1,0.05),
