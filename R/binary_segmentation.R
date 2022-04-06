@@ -41,7 +41,7 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0))
 #' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){floor(log(ncol(data)))})
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(100,100),
 #'     eigsList = list(c(3,2,1,0.5),
@@ -53,7 +53,7 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){floor(log(ncol(data)))})
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 #'
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(100,100,100),
@@ -68,7 +68,7 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0,0))
 #' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){floor(log(ncol(data)))})
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 complete_binary_segmentation <- function(data,
                                          test_statistic_function,
                                          cutoff_function,
@@ -136,9 +136,9 @@ complete_binary_segmentation <- function(data,
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0))
 #' single_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){floor(log(ncol(data)))})
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 #' single_binary_segmentation(data_KL, compute_Mn, welsh_approximation,
-#'     function(data){floor(log(ncol(data)))})
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 #'
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(100,100),
@@ -151,18 +151,19 @@ complete_binary_segmentation <- function(data,
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' single_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){floor(log(ncol(data)))})
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 #' single_binary_segmentation(data_KL, compute_Mn, welsh_approximation,
-#'     function(data){floor(log(ncol(data)))})
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 single_binary_segmentation <- function(data, test_statistic_function,
                                        cutoff_function,
                                        trim_function,
-                                       alpha=0.05, ... ){
+                                       alpha=0.05, include_value=F,
+                                       ... ){
   # Trim & stopping criteria
   trim_amt <- trim_function(data)
   nStart <- 1+trim_amt
-  nEnd <- ncol(data)-trim_amt
-  if(nStart> nEnd) return()
+  nEnd <- ncol(as.data.frame(data))-trim_amt
+  if(nStart> nEnd) ifelse(include_value,return(c(NA,NA)),return(NA))
 
   # Find test statistic at every candidate change point
   test_stat <- rep(NA, ncol(data))
@@ -172,12 +173,104 @@ single_binary_segmentation <- function(data, test_statistic_function,
   test_stat_full <- test_statistic_function(data, ...)
 
   # Return index of max change point if larger than cutoff
-  ifelse(test_stat_full > cutoff_function(data, alpha),
-         which.max(test_stat),
-         NA)
+  return_value <- ifelse(test_stat_full > cutoff_function(data, alpha),
+                which.max(test_stat),
+                NA)
+
+  # Add in value
+  if(include_value){
+    if(!is.na(return_value)){
+      return_value <- c(return_value, max(test_stat, na.rm = T))
+    } else{
+      return_value <- c(return_value, NA)
+    }
+  }
+
+  return_value
 }
 
+#' Wild Binary Segmentation
+#'
+#' @param data Numeric data.frame with rows for evaluated values and columns
+#'    indicating FD
+#' @param M Numeric value
+#'
+#' Indicates the number of intervals to examine
+#'
+#' @param add_full Boolean value
+#'
+#' Indicates if the entire interval should be added
+#'
+#' @param block_size (Optional) Numeric value
+#'
+#' Indicates the minimum block size
+#'
+#' @param ... Additional parameters to pass into
+#'     \code{single_binary_segmentation}
+#'
+#' @return Numeric values indicating the change points detected
+#' @export
+#'
+#' @examples
+#' # Setup Data
+#' data_KL <- generate_data_fd(ns = c(12,12,12),
+#'     eigsList = list(c(3,2,1,0.5),
+#'                     c(3,2,1,0.5),
+#'                     c(3,2,1,0.5)),
+#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
+#'                      fda::create.bspline.basis(nbasis=4, norder=4),
+#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
+#'     meansList = c(-1,0,1),
+#'     distsArray = c('Normal','Normal','Normal'),
+#'     evals = seq(0,1,0.05),
+#'     kappasArray = c(0,0,0))
+#'
+#' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#' wild_binary_segmentation(data=data_KL,
+#'     test_statistic_function=compute_Tn,
+#'     cutoff_function=welsh_approximation,
+#'     trim_function=function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
+                                     ...){
+  # Setup
+  n <- ncol(data)
+  cps <- c()
+  result <- matrix(ncol=2, nrow = M+add_full)
 
+  # Test
+  if(n<=1) return()
+
+  # Run
+  if(add_full){
+    result[1,] <- single_binary_segmentation(data, include_value=T, ...)
+  }
+
+  for(i in add_full+1:M){
+    min_pt <- sample(1:(n-block_size+1), 1)
+    max_pt <- sample((min_pt+block_size-1):n, 1)
+
+    # Must return location and value
+    # This needs to return location and values!
+    result[i,] <- single_binary_segmentation(data[,min_pt:max_pt], include_value=T, ...)
+  }
+
+  # Select best and continue if reasonable
+  if(nrow(na.omit(result))){
+    cp_loc <- result[which.max(result[,2]),1]
+
+    cps <- c(wild_binary_segmentation(data[,min_pt:cp_loc],
+                 M=M, add_full=add_full,block_size=block_size,
+                 ...),
+             cp_loc,
+             wild_binary_segmentation(data[,(cp_loc+1):max_pt],
+                 M=M, add_full=add_full,block_size=block_size,
+                 ...) + cp_loc
+          )
+  }
+
+  cps
+}
 
 ## This is multiple single_binary_segmentation for complete_binary_segmentation
 .detectChangePoints <-  function(data, test_statistic_function,
@@ -203,7 +296,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
                addAmt+potential_cp,'): Segment Data and Re-Search\n'))
 
   return(c(
-    .detectChangePoints(data=data[,1:(potential_cp-1)],
+    .detectChangePoints(data=data[,1:potential_cp],
                        test_statistic_function=test_statistic_function,
                        cutoff_function=cutoff_function,
                        trim_function=trim_function,
@@ -212,7 +305,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
                        silent=silent,
                        ...),
     potential_cp + addAmt,
-    .detectChangePoints(data=data[,potential_cp:ncol(data)],
+    .detectChangePoints(data=data[,(potential_cp+1):ncol(data)],
                        test_statistic_function=test_statistic_function,
                        cutoff_function=cutoff_function,
                        trim_function=trim_function,
@@ -224,7 +317,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
 }
 
 
-## This is verification step in complete_binary_segemetation
+## This is verification step in complete_binary_segmentation
 .verify <- function(CPsVals, data, test_statistic_function,
                     cutoff_function,
                     trim_function,
@@ -234,7 +327,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
   if(!silent) cat('-- Verify Step --\n')
 
   if(length(CPsVals)>=1){ # If there was a CP detected
-    tmp_cps <- c(1,CPsVals-1, ncol(data))
+    tmp_cps <- c(1,CPsVals, ncol(data))
     newCPVals <- c()
     for(i in 2:(length(tmp_cps)-1)){
       tmp <- .detectChangePoints(data = data[tmp_cps[i-1]:tmp_cps[i+1]],

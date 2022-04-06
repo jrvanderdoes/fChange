@@ -64,7 +64,7 @@ data_KL <- generate_data_fd(ns = c(200),
     evals = seq(0,1,0.05),
     kappasArray = c(0))
 complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){floor(log(ncol(data)))})
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 # Setup Data
 data_KL <- generate_data_fd(ns = c(100,100),
     eigsList = list(c(3,2,1,0.5),
@@ -76,7 +76,7 @@ data_KL <- generate_data_fd(ns = c(100,100),
     evals = seq(0,1,0.05),
     kappasArray = c(0,0))
 complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){floor(log(ncol(data)))})
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 
 # Setup Data
 data_KL <- generate_data_fd(ns = c(100,100,100),
@@ -91,5 +91,5 @@ data_KL <- generate_data_fd(ns = c(100,100,100),
     evals = seq(0,1,0.05),
     kappasArray = c(0,0,0))
 complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){floor(log(ncol(data)))})
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 }

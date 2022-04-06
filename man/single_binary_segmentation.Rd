@@ -10,6 +10,7 @@ single_binary_segmentation(
   cutoff_function,
   trim_function,
   alpha = 0.05,
+  include_value = F,
   ...
 )
 }
@@ -51,9 +52,9 @@ data_KL <- generate_data_fd(ns = c(200),
     evals = seq(0,1,0.05),
     kappasArray = c(0))
 single_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){floor(log(ncol(data)))})
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 single_binary_segmentation(data_KL, compute_Mn, welsh_approximation,
-    function(data){floor(log(ncol(data)))})
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 
 # Setup Data
 data_KL <- generate_data_fd(ns = c(100,100),
@@ -66,7 +67,7 @@ data_KL <- generate_data_fd(ns = c(100,100),
     evals = seq(0,1,0.05),
     kappasArray = c(0,0))
 single_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){floor(log(ncol(data)))})
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 single_binary_segmentation(data_KL, compute_Mn, welsh_approximation,
-    function(data){floor(log(ncol(data)))})
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 }
