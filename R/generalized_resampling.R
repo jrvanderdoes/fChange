@@ -13,7 +13,7 @@
 #'
 #' @param fn Function that returns the test statistic value
 #' @param iters Numeric value indicating number iterations used in bootstrapping
-#' @param replace Boolean value indicating bootrapping (F) or purmutation (T)
+#' @param replace Boolean value indicating bootstrapping (T) or permutation (F)
 #' @param alpha Numeric value in (0,1) to get the correct percentile
 #' @param silent Boolean to silence output helpful to a user
 #' @param ... Optional arguments passed into \code{fn}
@@ -39,7 +39,7 @@
 #'     blockSize=ncol(data_KL)^(1/3),
 #'     fn=compute_Tn, iters=1000, replace=F)
 generalized_resampling <- function(X, blockSize, fn, iters,
-                                   replace=T, alpha=0.05, silent=F, ...){
+                                   replace=F, alpha=0.05, silent=F, ...){
 
   if(!silent){
     st<-Sys.time()
@@ -63,7 +63,7 @@ generalized_resampling <- function(X, blockSize, fn, iters,
     idxs <- .convertSamplesToDF(idxs)
 
 
-  bssamples <- sapply(idxs,
+  bssamples <- sapply(as.data.frame(idxs),
                       function(loop_iter,fn,X1,...){ fn(X1[,na.omit(loop_iter)], ...) },
                       X1=X,fn=fn,...)
 

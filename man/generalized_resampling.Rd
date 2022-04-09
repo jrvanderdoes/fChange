@@ -9,7 +9,7 @@ generalized_resampling(
   blockSize,
   fn,
   iters,
-  replace = T,
+  replace = F,
   alpha = 0.05,
   silent = F,
   ...
@@ -28,7 +28,7 @@ account for dependence in the data}
 
 \item{iters}{Numeric value indicating number iterations used in bootstrapping}
 
-\item{replace}{Boolean value indicating bootrapping (F) or purmutation (T)}
+\item{replace}{Boolean value indicating bootstrapping (T) or permutation (F)}
 
 \item{alpha}{Numeric value in (0,1) to get the correct percentile}
 
