@@ -27,8 +27,9 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' welsh_approximation(data_KL)
-welsh_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]), W = NULL, W1 = NULL, M=100,
-                   h = TVal^(1/3), K = bartlett_kernel){
+welsh_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
+                                W = NULL, W1 = NULL, M=100,
+                                h = TVal^(1/3), K = bartlett_kernel){
   ## Code
   if(is.null(W)){
     W <- as.data.frame(sapply(rep(0,M),sde::BM, N=length(X[,1])-1))
@@ -130,10 +131,10 @@ bartlett_kernel <- function(l, h){
 
   ## Code
   eps1 <- exp(complex(real=0,imaginary = 1) * (t(X) %*% v1))
-  eps1Bar <- 1/TVal * sum(eps1)
+  eps1Bar <- mean(eps1)#1/TVal * sum(eps1)
 
   eps2 <- exp(complex(real=0,imaginary = 1) * (t(X) %*% v2))
-  eps2Bar <- 1/TVal * sum(eps2)
+  eps2Bar <- mean(eps2)#1/TVal * sum(eps2)
 
   gammaHat <- rep(NA, length((1-TVal):(TVal-1)))
 
