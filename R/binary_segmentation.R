@@ -8,7 +8,7 @@
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
 #' @param test_statistic_function Function with the first argument being data
-#'     and the second argument optional argument for candidate change points.
+#'     and the second argument argument for candidate change points.
 #'     Additional arguments passed in via ... . Return a single numeric value.
 #' @param cutoff_function Function with first argument being data and the second
 #'     argument being alpha. No other arguments given. Return single numeric
@@ -160,7 +160,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
                                        alpha=0.05, include_value=F,
                                        ... ){
   # Trim & stopping criteria
-  trim_amt <- trim_function(data)
+  trim_amt <- trim_function(data, ...)
   nStart <- 1+trim_amt
   nEnd <- ncol(as.data.frame(data))-trim_amt
   if(nStart> nEnd) ifelse(include_value,return(c(NA,NA)),return(NA))
@@ -170,10 +170,10 @@ single_binary_segmentation <- function(data, test_statistic_function,
   for(k in nStart:nEnd){
     test_stat[k] <- test_statistic_function(data, k, ...)
   }
-  test_stat_full <- test_statistic_function(data, ...)
+  test_stat_full <- max(test_stat, na.rm = T)
 
   # Return index of max change point if larger than cutoff
-  return_value <- ifelse(test_stat_full > cutoff_function(data, alpha),
+  return_value <- ifelse(test_stat_full >= cutoff_function(data, alpha, ...),
                 which.max(test_stat),
                 NA)
 
@@ -328,20 +328,20 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
 
   if(length(CPsVals)>=1){ # If there was a CP detected
     tmp_cps <- c(1,CPsVals, ncol(data))
-    newCPVals <- c()
+    newCPVals <- c(1)
     for(i in 2:(length(tmp_cps)-1)){
-      tmp <- .detectChangePoints(data = data[tmp_cps[i-1]:tmp_cps[i+1]],
+      tmp <- .detectChangePoints(data = data[,max(newCPVals):tmp_cps[i+1]],
                                 test_statistic_function=test_statistic_function,
                                 cutoff_function=cutoff_function,
                                 trim_function=trim_function,
                                 alpha=alpha,
                                 silent = silent,
-                                addAmt=tmp_cps[i-1]-1,
+                                addAmt=max(newCPVals)-1,
                                 ... )
 
       newCPVals <- c(newCPVals, tmp)
     }
-    CPsVals <- newCPVals
+    CPsVals <- newCPVals[-1]
   } else{
     CPsVals <- .detectChangePoints(data=data,
                                   test_statistic_function=test_statistic_function,

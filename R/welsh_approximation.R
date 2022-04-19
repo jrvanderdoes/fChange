@@ -29,7 +29,8 @@
 #' welsh_approximation(data_KL)
 welsh_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
                                 W = NULL, W1 = NULL, M=100,
-                                h = TVal^(1/3), K = bartlett_kernel){
+                                h = TVal^(1/3), K = bartlett_kernel,
+                                ...){
   ## Code
   if(is.null(W)){
     W <- as.data.frame(sapply(rep(0,M),sde::BM, N=length(X[,1])-1))

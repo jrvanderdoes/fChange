@@ -44,7 +44,7 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' compute_Tn(data_KL)
-compute_Tn <- function(X, k=NULL, M=100, W=NULL){
+compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
   n <- length(X[1,])
   Xn <- length(X[,1])
 
@@ -125,7 +125,7 @@ compute_Tn <- function(X, k=NULL, M=100, W=NULL){
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' compute_Mn(data_KL)
-compute_Mn <- function(X, k=NULL, M=100, W=NULL){
+compute_Mn <- function(X, k=NULL, M=100, W=NULL, ...){
 
   n <- length(X[1,])
   xSeq <- seq(1/n, 1, 1/n)
