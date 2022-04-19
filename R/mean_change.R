@@ -50,7 +50,7 @@
 #' mean_change(data_KL)
 mean_change <- function(data, M=1000, h=0,
                      K = bartlett_kernel, alpha=0.05,
-                     inc.pval=F){
+                     inc.pval=F, ...){
   ## Code
   n <- ncol(data)
 
@@ -74,7 +74,7 @@ mean_change <- function(data, M=1000, h=0,
 
   Ceps <- .estimateCeps(data, h, K)
 
-  lambda <- eigen(Ceps/ncol(data))$values
+  lambda <- eigen(Ceps/n)$values
 
   ## Define and simulate asymptotic distribution for p-value
   asymp_dist <- function(n, lambda){
@@ -85,8 +85,8 @@ mean_change <- function(data, M=1000, h=0,
     max(colSums(BridgeLam))
   }
 
-  values_sim <- sapply(1:M, function(k, lambda) asymp_dist(n, lambda),
-                       lambda=lambda)
+  values_sim <- sapply(1:M, function(k, lambda, n) asymp_dist(n, lambda),
+                       lambda=lambda, n=n)
   p <- sum(Tn <= values_sim)/M
 
   # Just return CP for now
@@ -133,4 +133,34 @@ mean_change <- function(data, M=1000, h=0,
   }
 
   Ceps
+}
+
+
+compute_mean_stat <- function(data, k, ...){
+  n <- ncol(data)
+
+  sum((rowSums(data[,1:k]) - (k/n)*rowSums(data))^2)/n
+}
+
+compute_mean_cutoff <- function(data, alpha, h=0,
+                                K=bartlett_kernel, M=1000, ...){
+  n <- ncol(data)
+  ## Estimate eigenvalues (lambda_i, 1<=i<=d)
+  Ceps <- .estimateCeps(data, h, K)
+
+  lambda <- eigen(Ceps/n)$values
+
+  ## Define and simulate asymptotic distribution for p-value
+  asymp_dist <- function(n, lambda){
+    BridgeLam= matrix(0,length(lambda),n)
+    for(j in (1:length(lambda))){
+      BridgeLam[j,]=lambda[j]*(sde::BBridge(x=0,y=0,t0=0,T=1,N=n-1)^2)
+    }
+    max(colSums(BridgeLam))
+  }
+
+  values_sim <- sapply(1:M, function(k, lambda, n) asymp_dist(n, lambda),
+                       lambda=lambda,n=n)
+
+  quantile(values_sim,1-alpha)
 }
