@@ -20,7 +20,7 @@ complete_binary_segmentation(
 indicating FD}
 
 \item{test_statistic_function}{Function with the first argument being data
-and the second argument optional argument for candidate change points.
+and the second argument argument for candidate change points.
 Additional arguments passed in via ... . Return a single numeric value.}
 
 \item{cutoff_function}{Function with first argument being data and the second

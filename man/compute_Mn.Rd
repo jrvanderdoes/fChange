@@ -4,7 +4,7 @@
 \alias{compute_Mn}
 \title{Compute Mn Test Statistic}
 \usage{
-compute_Mn(X, k = NULL, M = 100, W = NULL)
+compute_Mn(X, k = NULL, M = 100, W = NULL, ...)
 }
 \arguments{
 \item{X}{Numeric data.frame with rows for evaluated values and columns

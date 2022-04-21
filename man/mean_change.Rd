@@ -10,7 +10,8 @@ mean_change(
   h = 0,
   K = bartlett_kernel,
   alpha = 0.05,
-  inc.pval = F
+  inc.pval = F,
+  ...
 )
 }
 \arguments{

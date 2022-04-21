@@ -4,14 +4,17 @@
 \alias{plot_fd}
 \title{Plot functional data}
 \usage{
-plot_fd(data, eval_points = NULL, plot_title = NULL)
+plot_fd(data, eval_points = 1:nrow(data), CPs = NULL, plot_title = NULL)
 }
 \arguments{
 \item{data}{An fd object or a data.frame of evaluated fd objects
-(the columns bieng lines and the rows the evaluated points)}
+(the columns being lines and the rows the evaluated points)}
 
-\item{eval_points}{An optional vector containing the points at which the
+\item{eval_points}{An vector containing the points at which the
 evaluated data was evaluated at}
+
+\item{CPs}{(Optional) Vectors of numeric values indicating the location of
+change points}
 
 \item{plot_title}{Optional string to title the plot}
 }
@@ -24,7 +27,7 @@ A plotly plot
 \examples{
 # Generate Data with a mean change point
 evalPts <- seq(0,1,0.05)
-data_KL <- generate_data_fd(ns = c(100,100),
+data_KL <- generate_data_fd(ns = c(200,200),
                                eigsList = list(c(3,2,1,0.5),
                                                c(3,2,1,0.5)),
                                basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
@@ -35,8 +38,6 @@ data_KL <- generate_data_fd(ns = c(100,100),
                                kappasArray = c(0,0))
 plot_fd(data=data_KL,eval_points=evalPts)
 
-# Plot an FD object. Note differences are due to plotting the smoothed data
-data_fd <- fda::Data2fd(argvals=evalPts, y=as.matrix(data_KL),
-                   basisobj=fda::create.bspline.basis(rangeval=range(evalPts)))
-plot_fd(data=data_fd)
+plot_fd(data=data_KL,eval_points=evalPts, CPs=200)
+plot_fd(data=data_KL,eval_points=evalPts, CPs=seq(40,360,20))
 }

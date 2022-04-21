@@ -12,7 +12,8 @@ welsh_approximation(
   W1 = NULL,
   M = 100,
   h = TVal^(1/3),
-  K = bartlett_kernel
+  K = bartlett_kernel,
+  ...
 )
 }
 \arguments{

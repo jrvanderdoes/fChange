@@ -4,7 +4,7 @@
 \alias{compute_Tn}
 \title{Compute Tn Test Statistic}
 \usage{
-compute_Tn(X, k = NULL, M = 100, W = NULL)
+compute_Tn(X, k = NULL, M = 100, W = NULL, ...)
 }
 \arguments{
 \item{X}{Numeric data.frame with rows for evaluated values and columns
