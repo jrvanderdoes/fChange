@@ -4,7 +4,16 @@
 \alias{plot_fd}
 \title{Plot functional data}
 \usage{
-plot_fd(data, eval_points = 1:nrow(data), CPs = NULL, plot_title = NULL)
+plot_fd(
+  data,
+  eval_points = 1:nrow(data),
+  CPs = NULL,
+  plot_title = NULL,
+  val_axis_title = "Value",
+  eval_axis_title = "EvalRange",
+  FD_axis_title = "FD Sims",
+  FDReps = 1:ncol(data)
+)
 }
 \arguments{
 \item{data}{An fd object or a data.frame of evaluated fd objects

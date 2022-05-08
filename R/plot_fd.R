@@ -31,32 +31,42 @@
 #'
 #' plot_fd(data=data_KL,eval_points=evalPts, CPs=200)
 #' plot_fd(data=data_KL,eval_points=evalPts, CPs=seq(40,360,20))
-plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL){
+plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
+                    val_axis_title = 'Value', eval_axis_title='EvalRange',
+                    FD_axis_title = 'FD Sims',FDReps=1:ncol(data)){
 
   if(!is.null(CPs)){
-    plot <- .plot_evalfd_3dlines_cps(data, eval_points, CPs, plot_title)
+    plot <- .plot_evalfd_3dlines_cps(data, eval_points, CPs, plot_title,
+                                     val_axis_title, eval_axis_title,
+                                     FD_axis_title)#,FDReps)
   }else{
-    plot <- .plot_evalfd_3dlines(data, eval_points, plot_title)
+    plot <- .plot_evalfd_3dlines(data, eval_points, plot_title,
+                                 val_axis_title, eval_axis_title,
+                                 FD_axis_title,FDReps)
   }
 
   plot
 }
 
 
-.plot_evalfd_3dlines <- function(fd_eval, singleRangeSeq, titleVal=NULL){
+.plot_evalfd_3dlines <- function(fd_eval, singleRangeSeq, titleVal=NULL,
+                                 val_axis_title = 'Value',
+                                 eval_axis_title='EvalRange',
+                                 FD_axis_title = 'FD Sims',
+                                 FDReps = 1:ncol(fd_eval)){
 
   number <- length(fd_eval[1,])
   valRange <- c(min(fd_eval),max(fd_eval))
 
   plotData <- data.frame('evalRange'=singleRangeSeq,
-                         'FDRep'=1,
+                         'FDRep'=FDReps[1],
                          'Value'=fd_eval[,1])
 
   for(i in 2:number){
     plotData <- rbind(plotData,
                       data.frame('evalRange'=singleRangeSeq,
-                                 'FDRep'=i,
-                                 'Value'=fd_eval[,i])
+                                 'FDRep'=FDReps[i],
+                                 'Value'=as.factor(fd_eval[,i]))
     )
   }
 
@@ -69,15 +79,15 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL)
     magrittr::`%>%`(
       magrittr::`%>%`(
         plotly::plot_ly(plotData,
-                        x = ~as.factor(FDRep), y = ~evalRange, z = ~Value,
+                        x = ~FDRep, y = ~evalRange, z = ~Value,
                         type = 'scatter3d', mode = 'lines',
-                        color = ~as.factor(FDRep),
+                        color = ~ as.factor(FDRep),
                         colors = tmpColors),
         plotly::layout(
           scene = list(
-            yaxis = list(title = "EvalRange"),
-            xaxis = list(title = "FD Sims"),
-            zaxis = list(title = "Value")
+            yaxis = list(title = eval_axis_title),
+            xaxis = list(title = FD_axis_title),
+            zaxis = list(title = val_axis_title)
           ))),
       plotly::layout(title = titleVal, scene = scene)),
     plotly::layout(showlegend = FALSE))
@@ -102,7 +112,10 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL)
 }
 
 .plot_evalfd_3dlines_cps <- function(fd_eval, singleRangeSeq, CPs,
-                                     titleVal=NULL){
+                                     titleVal=NULL,
+                                     val_axis_title = 'Value',
+                                     eval_axis_title='EvalRange',
+                                     FD_axis_title = 'FD Sims'){
 
   number <- length(fd_eval[1,])
   valRange <- c(min(fd_eval),max(fd_eval))
@@ -159,9 +172,9 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL)
                         colors = tmpColors),
         plotly::layout(
           scene = list(
-            yaxis = list(title = "EvalRange"),
-            xaxis = list(title = "FD Sims"),
-            zaxis = list(title = "Value")
+            yaxis = list(title = eval_axis_title),
+            xaxis = list(title = FD_axis_title),
+            zaxis = list(title = val_axis_title)
           ))),
       plotly::layout(title = titleVal, scene = scene)),
     plotly::layout(showlegend = FALSE))
