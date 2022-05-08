@@ -55,6 +55,7 @@ compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
   }
 
   if(!is.null(k)){
+    #return_value <- 1/M * sum(sapply(W, .combZnInt, X1=X, n=n, nx=0:k))
     return_value <- 1/M * rowSums(sapply(W,.combZn,nx=0:n,X1=X,n=n))[k]
   }else{
     return_value <- 1/M * sum(sapply(W, .combZnInt, X1=X, n=n, nx=0:n))
@@ -155,6 +156,7 @@ compute_Mn <- function(X, k=NULL, M=100, W=NULL, ...){
 
   # Compute abs(Zn^2), Zn= sqrt(n)*(f(v,x)-floor(nx)/n*f(v,1))
   #   sqrt(n)/n = 1/sqrt(n)
-  abs(1/sqrt(n)*(nfx-nx/n*nfx[length(nfx)]))^2
+
+  (abs(1/sqrt(n)*(nfx-nx/n*nfx[length(nfx)]))^2)[-1]
 }
 

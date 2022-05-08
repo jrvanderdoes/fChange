@@ -310,7 +310,7 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
                        cutoff_function=cutoff_function,
                        trim_function=trim_function,
                        alpha=alpha,
-                       addAmt=addAmt+potential_cp-1,
+                       addAmt=addAmt+potential_cp,
                        silent=silent,
                        ...)
   ))
@@ -330,16 +330,13 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
     tmp_cps <- c(1,CPsVals, ncol(data))
     newCPVals <- c(1)
     for(i in 2:(length(tmp_cps)-1)){
-      tmp <- .detectChangePoints(data = data[,max(newCPVals):tmp_cps[i+1]],
+      tmp <- single_binary_segmentation(data = data[,max(newCPVals):tmp_cps[i+1]],
                                 test_statistic_function=test_statistic_function,
                                 cutoff_function=cutoff_function,
                                 trim_function=trim_function,
                                 alpha=alpha,
-                                silent = silent,
-                                addAmt=max(newCPVals)-1,
-                                ... )
-
-      newCPVals <- c(newCPVals, tmp)
+                                ... ) + max(newCPVals)-1
+      newCPVals <- c(newCPVals, ifelse(is.na(tmp),NULL,tmp))
     }
     CPsVals <- newCPVals[-1]
   } else{
