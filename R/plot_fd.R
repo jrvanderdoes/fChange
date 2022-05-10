@@ -36,7 +36,7 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
                     FD_axis_title = 'FD Sims',FDReps=1:ncol(data)){
 
   if(!is.null(CPs)){
-    plot <- .plot_evalfd_3dlines_cps(data, eval_points, CPs, plot_title,
+    plot <- .plot_evalfd_3dlines_cps(data, eval_points, CPs[order(CPs)], plot_title,
                                      val_axis_title, eval_axis_title,
                                      FD_axis_title)#,FDReps)
   }else{

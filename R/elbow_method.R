@@ -43,9 +43,7 @@
 #'                   trim_function = trim_function,
 #'                   alpha = 0.05, M=1000)
 #' print(results[[2]])
-#' tmp_or <- results[[1]]$CP[1:22]
-#' tmp_or <- results[order(tmp_or)]
-#' plot_fd(data_KL, CPs=tmp_or)
+#' plot_fd(data_KL, CPs=results[[1]]$CP[1:2])
 elbow_method <- function(data, test_statistic_function,
                          cutoff_function, trim_function,
                          alpha=0.05, errorType = 'L2', ... ){
