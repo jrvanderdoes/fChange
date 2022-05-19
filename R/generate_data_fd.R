@@ -76,7 +76,15 @@ generate_data_fd <- function(ns,
   ## Functions
   checkLength <- function(dataList, name, m){
     if(length(dataList) == 1){
-      dataList <- list(rep(dataList[[1]], m))
+      if(fda::is.basis(dataList[[1]])){
+        retList <- list()
+        for(i in 1:m){
+          retList <- append(retList,dataList)
+        }
+        dataList <- retList
+      }else{
+        dataList <- list(rep(dataList[[1]], m))
+      }
     } else if(length(dataList) != m){
       stop(paste(name,'is length',length(dataList),'not 1 or',m,'\n'))
     }

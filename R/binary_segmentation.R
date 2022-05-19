@@ -90,7 +90,7 @@ complete_binary_segmentation <- function(data,
   # Verify as desired
   if(final_verify){
 
-    CPsVals <- .verify(CPsVals=CPsVals, data=data,
+    CPsVals <- changepoint_verification(CPsVals=CPsVals, data=data,
                       test_statistic_function=test_statistic_function,
                       cutoff_function=cutoff_function,
                       trim_function=trim_function,
@@ -136,8 +136,6 @@ complete_binary_segmentation <- function(data,
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0))
 #' single_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
-#' single_binary_segmentation(data_KL, compute_Mn, welsh_approximation,
 #'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 #'
 #' # Setup Data
@@ -314,43 +312,4 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
                        silent=silent,
                        ...)
   ))
-}
-
-
-## This is verification step in complete_binary_segmentation
-.verify <- function(CPsVals, data, test_statistic_function,
-                    cutoff_function,
-                    trim_function,
-                    alpha,
-                    silent = F,
-                    ...){
-  if(!silent) cat('-- Verify Step --\n')
-
-  if(length(CPsVals)>=1){ # If there was a CP detected
-    tmp_cps <- c(1,CPsVals, ncol(data))
-    newCPVals <- c(1)
-    for(i in 2:(length(tmp_cps)-1)){
-      tmp <- single_binary_segmentation(data = data[,max(newCPVals):tmp_cps[i+1]],
-                                test_statistic_function=test_statistic_function,
-                                cutoff_function=cutoff_function,
-                                trim_function=trim_function,
-                                alpha=alpha,
-                                ... ) + max(newCPVals)-1
-      newCPVals <- c(newCPVals, ifelse(is.na(tmp),NULL,tmp))
-    }
-    CPsVals <- newCPVals[-1]
-  } else{
-    CPsVals <- .detectChangePoints(data=data,
-                                  test_statistic_function=test_statistic_function,
-                                  cutoff_function=cutoff_function,
-                                  trim_function=trim_function,
-                                  alpha=alpha,
-                                  silent = silent,
-                                  ... )
-  }
-
-  # Order
-  if(sum(is.na(CPsVals))==length(CPsVals))
-    return(NA)
-  CPsVals[order(CPsVals)]
 }
