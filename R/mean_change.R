@@ -139,7 +139,7 @@ mean_change <- function(data, M=1000, h=0,
 compute_mean_stat <- function(data, k, ...){
   n <- ncol(data)
 
-  sum((rowSums(data[,1:k]) - (k/n)*rowSums(data))^2)/n
+  sum((rowSums(as.data.frame(data[,1:k])) - (k/n)*rowSums(as.data.frame(data)))^2)/n
 }
 
 compute_mean_cutoff <- function(data, alpha, h=0,
