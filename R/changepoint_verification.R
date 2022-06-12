@@ -24,36 +24,41 @@
 #' @export
 #'
 #' @examples
-changepoint_verification <- function(CPsVals, data, test_statistic_function,
-                                     cutoff_function,
-                                     trim_function,
-                                     alpha,
+changepoint_verification <- function(CPsVals, data,
+                                     test_statistic_function =NULL,
+                                     changepoint_function =NULL,
                                      silent = F,
                                      ...){
+
   if(!silent) cat('-- Verify Step --\n')
 
   if(length(CPsVals)>=1){ # If there was a CP detected
-    tmp_cps <- c(1,CPsVals, ncol(data))
-    newCPVals <- c(1)
+    tmp_cps <- c(0,CPsVals, ncol(data))
+    tmp_cps <- tmp_cps[order(tmp_cps)]
+    CPsVals <- c()
     for(i in 2:(length(tmp_cps)-1)){
-      tmp <- single_binary_segmentation(data = data[,max(newCPVals):tmp_cps[i+1]],
-                                        test_statistic_function=test_statistic_function,
-                                        cutoff_function=cutoff_function,
-                                        trim_function=trim_function,
-                                        alpha=alpha,
-                                        ... ) + max(newCPVals)-1
-      if(!is.na(tmp))
-        newCPVals <- c(newCPVals,tmp)
+      # Get CP
+      if(!is.null(test_statistic_function)){
+        potential_cp <-
+          single_binary_segmentation(data[,(tmp_cps[i-1]+1):tmp_cps[i+1]],
+                        test_statistic_function=test_statistic_function, ... )
+      }else if(!is.null(changepoint_function)){
+        potential_cp <- changepoint_function(data[,(tmp_cps[i-1]+1):tmp_cps[i+1]], ...)
+      }
+
+      if(!is.na(potential_cp))
+        CPsVals <- c(CPsVals,potential_cp+tmp_cps[i-1])
     }
-    CPsVals <- newCPVals[-1]
+
   } else{
-    CPsVals <- .detectChangePoints(data=data,
-                                   test_statistic_function=test_statistic_function,
-                                   cutoff_function=cutoff_function,
-                                   trim_function=trim_function,
-                                   alpha=alpha,
-                                   silent = silent,
-                                   ... )
+    # Get CP
+    if(!is.null(test_statistic_function)){
+      CPsVals <-
+        single_binary_segmentation(data,
+                                   test_statistic_function=test_statistic_function, ... )
+    }else if(!is.null(changepoint_function)){
+      CPsVals <- changepoint_function(data, ...)
+    }
   }
 
   # Order and return

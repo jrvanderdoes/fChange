@@ -70,10 +70,8 @@
 #' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
 #'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 complete_binary_segmentation <- function(data,
-                                         test_statistic_function,
-                                         cutoff_function,
-                                         trim_function,
-                                         alpha = 0.05,
+                                         test_statistic_function = NULL,
+                                         changepoint_function = NULL,
                                          final_verify = T,
                                          silent = F,
                                          ... ){
@@ -81,9 +79,7 @@ complete_binary_segmentation <- function(data,
   # Get change points -- Will not include first or last
   CPsVals <- .detectChangePoints(data=data,
                                 test_statistic_function=test_statistic_function,
-                                cutoff_function=cutoff_function,
-                                trim_function=trim_function,
-                                alpha=alpha,
+                                changepoint_function=changepoint_function,
                                 silent = silent,
                                 ... )
 
@@ -92,9 +88,7 @@ complete_binary_segmentation <- function(data,
 
     CPsVals <- changepoint_verification(CPsVals=CPsVals, data=data,
                       test_statistic_function=test_statistic_function,
-                      cutoff_function=cutoff_function,
-                      trim_function=trim_function,
-                      alpha=alpha,
+                      changepoint_function=changepoint_function,
                       silent=silent,
                       ...)
   }
@@ -271,19 +265,20 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
 }
 
 ## This is multiple single_binary_segmentation for complete_binary_segmentation
-.detectChangePoints <-  function(data, test_statistic_function,
-                                 cutoff_function,
-                                 trim_function,
-                                 alpha,
+.detectChangePoints <-  function(data,
+                                 test_statistic_function=NULL,
+                                 changepoint_function = NULL,
+                                 alpha=NULL,
                                  addAmt = 0,
                                  silent = F,
                                  ...){
-
-  potential_cp <-
-    single_binary_segmentation(data, test_statistic_function,
-                               cutoff_function,
-                               trim_function,
-                               alpha = alpha, ... )
+  if(!is.null(test_statistic_function)){
+    potential_cp <-
+      single_binary_segmentation(data,
+                 test_statistic_function=test_statistic_function, ... )
+  }else if(!is.null(changepoint_function)){
+    potential_cp <- changepoint_function(data, ...)
+  }
 
   # No Change Point Detected
   if(is.na(potential_cp)) return()
@@ -296,18 +291,14 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
   return(c(
     .detectChangePoints(data=data[,1:potential_cp],
                        test_statistic_function=test_statistic_function,
-                       cutoff_function=cutoff_function,
-                       trim_function=trim_function,
-                       alpha=alpha,
+                       changepoint_function = changepoint_function,
                        addAmt=addAmt,
                        silent=silent,
                        ...),
     potential_cp + addAmt,
     .detectChangePoints(data=data[,(potential_cp+1):ncol(data)],
                        test_statistic_function=test_statistic_function,
-                       cutoff_function=cutoff_function,
-                       trim_function=trim_function,
-                       alpha=alpha,
+                       changepoint_function = changepoint_function,
                        addAmt=addAmt+potential_cp,
                        silent=silent,
                        ...)
