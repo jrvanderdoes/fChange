@@ -56,9 +56,9 @@ compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
 
   if(!is.null(k)){
     #return_value <- 1/M * sum(sapply(W, .combZnInt, X1=X, n=n, nx=0:k))
-    return_value <- 1/M * rowSums(sapply(W,.combZn,nx=0:n,X1=X,n=n))[k]
+    return_value <- 1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))[k]
   }else{
-    return_value <- 1/M * sum(sapply(W, .combZnInt, X1=X, n=n, nx=0:n))
+    return_value <- 1/M * sum(as.data.frame(sapply(W, .combZnInt, X1=X, n=n, nx=0:n)))
   }
 
   return_value
@@ -137,9 +137,9 @@ compute_Mn <- function(X, k=NULL, M=100, W=NULL, ...){
 
 
   if(!is.null(k)){
-    return_value <- 1/M * rowSums(sapply(W,.combZn,nx=0:n,X1=X,n=n))[k]
+    return_value <- 1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))[k]
   }else{
-    return_value <- max(1/M * rowSums(sapply(W,.combZn,nx=0:n,X1=X,n=n)))
+    return_value <- max(1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n))))
   }
 
   return_value
