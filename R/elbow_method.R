@@ -1,21 +1,4 @@
 
-elbow_method <- function(data,
-                         test_statistic_function =NULL,
-                         changepoint_function =NULL,
-                         errorType = 'L2', ... ){
-
-  if(!is.null(test_statistic_function)){
-    elbow_result <- .elbow_method_stat(data,
-                test_statistic_function=test_statistic_function,
-                errorType=errorType, ... )
-  }else if(!is.null(changepoint_function)){
-    elbow_result <- .elbow_method_change(data,
-                changepoint_function=changepoint_function,
-                errorType=errorType, ... )
-  }
-
-}
-
 #' Elbow Method
 #'
 #' Method to determine the number of change points using the elbow method. Note,
@@ -62,7 +45,24 @@ elbow_method <- function(data,
 #'                   alpha = 0.05, errorType = 'L2',
 #'                   M=1000)
 #' print(results[[2]])
-#' plot_fd(data_KL, CPs=results[[1]]$CP[1:2])
+#' plot_fd(data_KL, CPs=results[[1]]$CP[2:3])
+elbow_method <- function(data,
+                         test_statistic_function =NULL,
+                         changepoint_function =NULL,
+                         errorType = 'L2', ... ){
+
+  if(!is.null(test_statistic_function)){
+    elbow_result <- .elbow_method_stat(data,
+                                       test_statistic_function=test_statistic_function,
+                                       errorType=errorType, ... )
+  }else if(!is.null(changepoint_function)){
+    elbow_result <- .elbow_method_change(data,
+                                         changepoint_function=changepoint_function,
+                                         errorType=errorType, ... )
+  }
+
+}
+
 .elbow_method_stat <- function(data, test_statistic_function,
                          cutoff_function, trim_function,
                          alpha=0.05, errorType = 'L2', ... ){
@@ -246,31 +246,67 @@ elbow_method <- function(data,
   return(list(return_data, var_plot, per_plot))
 }
 
-.compute_total_var <- function(data, CPs, errorType='L2'){
+.compute_total_var <- function(data, CPs, errorType='L2', M=1000){
   # Setup
   data <- as.data.frame(data)
   data_std <- data
   CPs <- c(0, CPs, ncol(data))
 
-  # Loop
-  for(i in 2:length(CPs)){
-    indices <- (CPs[i-1]+1):CPs[i]
-    CP_mean <- rowMeans(as.data.frame(data[,indices]))
+  if(errorType=='L2' || errorType=='Tr'){
+
     # Standardize Data
-    data_std[,indices] <- data_std[,indices]-CP_mean
-  }
-
-  ## Cannot use cov because it removes the mean from individual FDs, thus
-  #     making each change point near equally effective
-  covMatrix <- matrix(NA,ncol=ncol(data), nrow = ncol(data))
-  sampleCoef <- 1/(nrow(data)-1)
-
-  for(i in 1:ncol(data)){
-    for(j in i:ncol(data)){
-
-      covMatrix[i,j] <- covMatrix[j,i] <-
-        sum(sampleCoef*(data_std[,i] * data_std[,j]))
+    for(i in 2:length(CPs)){
+      indices <- (CPs[i-1]+1):CPs[i]
+      CP_mean <- rowMeans(as.data.frame(data[,indices])) ##TODO:: Verify
+      # Standardize Data
+      data_std[,indices] <- data_std[,indices]-CP_mean
     }
+
+    ## Cannot use cov because it removes the mean from individual FDs, thus
+    #     making each change point near equally effective
+    covMatrix <- matrix(NA,ncol=ncol(data), nrow = ncol(data))
+    sampleCoef <- 1/(nrow(data)-1)
+
+    for(i in 1:ncol(data)){
+      for(j in i:ncol(data)){
+
+        covMatrix[i,j] <- covMatrix[j,i] <-
+          sum(sampleCoef*(data_std[,i] * data_std[,j]))
+      }
+    }
+  } else if(errorType=='CE'){
+
+    W <- as.data.frame(sapply(rep(0,M),sde::BM, N=nrow(data)-1))
+    CE <- data.frame(matrix(ncol=ncol(data), nrow=M))
+
+    ## Compute CEs
+    for(i in 1:ncol(data)){
+      CE[,i] <- apply(W, 2,
+                      FUN = function(v, dat){
+                        exp(complex(real=0,imaginary = 1) * (t(dat) %*% v))
+                      }, dat=data[,i])
+    }
+
+    CE_std <- CE
+
+    # Standardize Data
+    for(i in 2:length(CPs)){
+      indices <- (CPs[i-1]+1):CPs[i]
+      CP_mean <- rowMeans(as.data.frame(CE[,indices])) ##TODO:: Verify
+      # Standardize Data
+      CE_std[,indices] <- CE[,indices]-CP_mean
+    }
+
+    # covMatrix <- matrix(NA,ncol=ncol(data), nrow = ncol(data))
+    # sampleCoef <- 1/(nrow(data)-1)
+    #
+    # ## Compute covMatrix
+    # for(i in 1:ncol(data)){
+    #   for(j in (i):ncol(data)){
+    #     covMatrix[i,j] <- covMatrix[j,i] <-
+    #       sum(sampleCoef*(CE[,i] %*% CE[,j]))
+    #   }
+    # }
   }
 
   # Apply error metric
@@ -278,6 +314,8 @@ elbow_method <- function(data,
     returnValue <- sqrt(sum(covMatrix^2))
   } else if(errorType=='Tr'){
     returnValue <- sum(diag(covMatrix))
+  } else if(errorType=='CE'){
+    returnValue <- sum(colSums(abs(CE_std)^2)/M)#sum(colSums(abs(CE_std)^2)/M)
   } else{
     stop('Only L2 and Tr error functions implemented')
   }

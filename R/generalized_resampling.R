@@ -52,10 +52,10 @@ generalized_resampling <- function(X, blockSize, fn, iters,
   }
 
   n <- length(X[1,])
-  idxGroups <- .getChunks(0:n, n/blockSize)
+  idxGroups <- .getChunks(1:n, n/blockSize)
   idxs <- sapply(1:iters,function(i,m, indxs,replace){
     samps <- sample(1:m, replace = replace)
-    unlist(indxs[samps])
+    unlist(indxs[samps], use.names = F) #as.numeric(names(indxs[samps]))
   },m=length(idxGroups),indxs=idxGroups,replace=replace)
   # If it is a matrix/dataframe this already even rows
   #     (will be with permutation test)

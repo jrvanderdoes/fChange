@@ -155,12 +155,12 @@ single_binary_segmentation <- function(data, test_statistic_function,
   trim_amt <- trim_function(data, ...)
   nStart <- 1+trim_amt
   nEnd <- ncol(as.data.frame(data))-trim_amt
-  if(nStart> nEnd) ifelse(include_value,return(c(NA,NA)),return(NA))
+  if(nStart>= nEnd) ifelse(include_value,return(c(NA,NA)),return(NA))
 
   # Find test statistic at every candidate change point
-  test_stat <- rep(NA, ncol(data))
+  test_stat <- rep(NA, ncol(as.data.frame(data)))
   for(k in nStart:nEnd){
-    test_stat[k] <- test_statistic_function(data, k, ...)
+    test_stat[k] <- test_statistic_function(as.data.frame(data), k, ...)
   }
   test_stat_full <- max(test_stat, na.rm = T)
 
@@ -289,16 +289,16 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
                addAmt+potential_cp,'): Segment Data and Re-Search\n'))
 
   return(c(
-    .detectChangePoints(data=data[,1:potential_cp],
+    .detectChangePoints(data=as.data.frame(data[,1:potential_cp]),
                        test_statistic_function=test_statistic_function,
-                       changepoint_function = changepoint_function,
+                       changepoint_function=changepoint_function,
                        addAmt=addAmt,
                        silent=silent,
                        ...),
     potential_cp + addAmt,
-    .detectChangePoints(data=data[,(potential_cp+1):ncol(data)],
+    .detectChangePoints(data=as.data.frame(data[,(potential_cp+1):ncol(data)]),
                        test_statistic_function=test_statistic_function,
-                       changepoint_function = changepoint_function,
+                       changepoint_function=changepoint_function,
                        addAmt=addAmt+potential_cp,
                        silent=silent,
                        ...)
