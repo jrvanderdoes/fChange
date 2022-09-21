@@ -33,16 +33,23 @@
 #' plot_fd(data=data_KL,eval_points=evalPts, CPs=seq(40,360,20))
 plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
                     val_axis_title = 'Value', eval_axis_title='EvalRange',
-                    FD_axis_title = 'FD Sims',FDReps=1:ncol(data)){
+                    FD_axis_title = 'FD Sims',FDReps=1:ncol(data),
+                    eye = list(x = -1.5, y = -1.5, z = 1.5),
+                    aspectratio=list(x=1,y=1,z=1),
+                    showticklabels=T){
 
   if(!is.null(CPs) && !is.na(CPs)){
     plot <- .plot_evalfd_3dlines_cps(data, eval_points, CPs[order(CPs)], plot_title,
                                      val_axis_title, eval_axis_title,
-                                     FD_axis_title)#,FDReps)
+                                     FD_axis_title,
+                                     eye=eye, aspectratio=aspectratio,
+                                     showticklabels=showticklabels)#,FDReps)
   }else{
     plot <- .plot_evalfd_3dlines(data, eval_points, plot_title,
                                  val_axis_title, eval_axis_title,
-                                 FD_axis_title,FDReps)
+                                 FD_axis_title,FDReps,
+                                 eye=eye, aspectratio=aspectratio,
+                                 showticklabels=showticklabels)
   }
 
   plot
@@ -53,7 +60,10 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
                                  val_axis_title = 'Value',
                                  eval_axis_title='EvalRange',
                                  FD_axis_title = 'FD Sims',
-                                 FDReps = 1:ncol(fd_eval)){
+                                 FDReps = 1:ncol(fd_eval),
+                                 eye = list(x = -1.5, y = -1.5, z = 1.5),
+                                 aspectratio=list(x=1,y=1,z=1),
+                                 showticklabels=T){
 
   number <- length(fd_eval[1,])
   valRange <- c(min(fd_eval),max(fd_eval))
@@ -70,7 +80,9 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
     )
   }
 
-  scene = list(camera = list(eye = list(x = -1.5, y = -1.5, z = 1.5)))
+  scene <- list(camera = list(eye = eye),
+                             aspectmode = "manual",
+                             aspectratio = aspectratio)
 
   tmpColors <- RColorBrewer::brewer.pal(11,"Spectral")
   tmpColors[6] <- 'yellow'
@@ -85,9 +97,12 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
                         colors = tmpColors),
         plotly::layout(
           scene = list(
-            yaxis = list(title = eval_axis_title),
-            xaxis = list(title = FD_axis_title),
-            zaxis = list(title = val_axis_title)
+            yaxis = list(title = eval_axis_title,
+                         showticklabels=showticklabels),
+            xaxis = list(title = FD_axis_title,
+                         showticklabels=showticklabels),
+            zaxis = list(title = val_axis_title,
+                         showticklabels=showticklabels)
           ))),
       plotly::layout(title = titleVal, scene = scene)),
     plotly::layout(showlegend = FALSE))
@@ -115,7 +130,10 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
                                      titleVal=NULL,
                                      val_axis_title = 'Value',
                                      eval_axis_title='EvalRange',
-                                     FD_axis_title = 'FD Sims'){
+                                     FD_axis_title = 'FD Sims',
+                                     eye = list(x = -1.5, y = -1.5, z = 1.5),
+                                     aspectratio=list(x=1,y=1,z=1),
+                                     showticklabels=T){
 
   number <- length(fd_eval[1,])
   valRange <- c(min(fd_eval),max(fd_eval))
@@ -154,7 +172,9 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
     }
   }
 
-  scene = list(camera = list(eye = list(x = -1.5, y = -1.5, z = 1.5)))
+  scene <- list(camera = list(eye = eye),
+                aspectmode = "manual",
+                aspectratio = aspectratio)
 
   # Get Colors
   tmpColors <- RColorBrewer::brewer.pal(min(9,max(3,length(CPs)+1)),"Set1")
@@ -172,9 +192,12 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
                         colors = tmpColors),
         plotly::layout(
           scene = list(
-            yaxis = list(title = eval_axis_title),
-            xaxis = list(title = FD_axis_title),
-            zaxis = list(title = val_axis_title)
+            yaxis = list(title = eval_axis_title,
+                         showticklabels=showticklabels),
+            xaxis = list(title = FD_axis_title,
+                         showticklabels=showticklabels),
+            zaxis = list(title = val_axis_title,
+                         showticklabels=showticklabels)
           ))),
       plotly::layout(title = titleVal, scene = scene)),
     plotly::layout(showlegend = FALSE))
