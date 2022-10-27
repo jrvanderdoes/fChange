@@ -71,7 +71,11 @@ generalized_resampling <- function(X, blockSize, fn, iters,
 }
 
 
-.getChunks <- function(x,chunksN) split(x, cut(x, chunksN, labels = FALSE))
+.getChunks <- function(x,chunksN) {
+  if(chunksN<2)
+    return(x)
+  split(x, cut(x, chunksN, labels = FALSE))
+}
 
 .convertSamplesToDF <- function(data_list){
 
