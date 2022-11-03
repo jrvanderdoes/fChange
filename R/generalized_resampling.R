@@ -70,8 +70,8 @@ generalized_resampling <- function(X, blockSize, fn, iters,
   quantile(bssamples,probs = c(1-alpha))[[1]]
 }
 
-
 .getChunks <- function(x,chunksN) {
+  # This will not scramble
   if(chunksN<2)
     return(x)
   split(x, cut(x, chunksN, labels = FALSE))
