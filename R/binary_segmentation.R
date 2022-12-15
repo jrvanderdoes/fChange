@@ -41,7 +41,9 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0))
 #' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#'     trim_function = function(data){
+#'                       max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#'
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(100,100),
 #'     eigsList = list(c(3,2,1,0.5),
@@ -52,8 +54,15 @@
 #'     distsArray = c('Normal','Normal'),
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
-#' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#' complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
+#'     cutoff_function = welsh_approximation,
+#'     trim_function = function(data){
+#'                       max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#' complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
+#'     cutoff_function = generalized_resampling,
+#'     trim_function = function(data,...){
+#'                       max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)},
+#'     fn=compute_Tn, iters=1000)
 #'
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(100,100,100),
@@ -266,9 +275,9 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
 
 ## This is multiple single_binary_segmentation for complete_binary_segmentation
 .detectChangePoints <-  function(data,
-                                 test_statistic_function=NULL,
+                                 test_statistic_function = NULL,
                                  changepoint_function = NULL,
-                                 alpha=NULL,
+                                 alpha = NULL,
                                  addAmt = 0,
                                  silent = F,
                                  ...){
