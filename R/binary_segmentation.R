@@ -40,7 +40,8 @@
 #'     distsArray = c('Normal'),
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0))
-#' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
+#' complete_binary_segmentation(data=data_KL, test_statistic_function=compute_Tn,
+#'                              cutoff_function=welsh_approximation,
 #'     trim_function = function(data){
 #'                       max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
 #'
@@ -190,6 +191,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
   return_value
 }
 
+
 #' Wild Binary Segmentation
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
@@ -273,7 +275,35 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
   cps
 }
 
-## This is multiple single_binary_segmentation for complete_binary_segmentation
+
+#' Detect Change Points
+#'
+#' This (internal) function is multiple single_binary_segmentation for
+#'     complete_binary_segmentation. It recursively calls itself
+#'
+#' TODO: Remove alpha
+#'
+#' @param data Numeric data.frame with rows for evaluated values and columns
+#'    indicating FD
+
+#' @param test_statistic_function (Optional) Function with the first argument being data.
+#'     Additional arguments passed in via ... . Return values for each candidate
+#'     change point. Give this or changepoint_function.
+#' @param changepoint_function (Optional) Function with the first argument being data.
+#'     Additional arguments passed in via ... . Return the selected change point.
+#'     Give this or changepoint_function.
+#' @param alpha (Optional) Numeric value in [0,1] indicating the significance.
+#' @param addAmt (Optional) Default 0. This adds a number to shift change points.
+#'               Used for recursive calls, likely no need to change.
+#' @param silent (Optional) Boolean indicating if output should be given. Default
+#'               is F (meaning print output).
+#' @param ... (Optional) Additional paramters for the functions.
+#'
+#' @return Vector of detected change point locations
+#'
+#' @examples
+#' # This is an internal function and will not be shown to user. See
+#' #     complete_binary_segmentation
 .detectChangePoints <-  function(data,
                                  test_statistic_function = NULL,
                                  changepoint_function = NULL,

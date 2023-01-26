@@ -64,7 +64,22 @@ compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
   return_value
 }
 
-.combZnInt <- function(v,X1,n,nx){
+
+#' Compute Integrated Zn Squared ($\int |Zn|^2$)
+#'
+#' This (internal) function computes $\int |Zn|^2$.
+#'
+#' @param v Vector of numeric for vector in space, length(v) = nrow(X1)
+#' @param X1 Numeric data.frame with rows for evaluated values and columns
+#'    indicating FD
+#' @param n Integer indicating the number of FD observations
+#' @param nx Vector of integer indicating indices to consider
+#'
+#' @return Vector of numerics for  $\int |Zn|^2$.
+#'
+#' @examples
+#' # This is an internal function, see use in compute_Tn for use.
+.combZnInt <- function(v, X1, n, nx){
   # Rounding occasionally messes up floor(nx). Try floor(116/400*400) to see
 
   nfHat_vals <- exp(complex(real=0,imaginary = 1) * (t(X1) %*% v))
@@ -80,6 +95,7 @@ compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
   # LH Integration
   sum((fVals[-length(fVals)])) * 1/n
 }
+
 
 #' Compute Mn Test Statistic
 #'
@@ -145,6 +161,21 @@ compute_Mn <- function(X, k=NULL, M=100, W=NULL, ...){
   return_value
 }
 
+
+#' Compute Zn Squared, |Zn|^2
+#'
+#' This (internal) function computes |Z_n|^2
+#'
+#' @param v Vector of numeric for vector in space, length(v) = nrow(X1)
+#' @param X1 Numeric data.frame with rows for evaluated values and columns
+#'    indicating FD
+#' @param n Integer indicating the number of FD observations
+#' @param nx Vector of integer indicating indices to consider
+#'
+#' @return Vector of numerics for  $|Zn|^2$.
+#'
+#' @examples
+#' # This is an internal function, see use in compute_Tn for use.
 .combZn <- function(v,X1,n,nx){
   # Rounding occasionally messes up floor(nx). Try floor(116/400*400) to see
 

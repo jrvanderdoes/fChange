@@ -3,6 +3,9 @@
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
+#' @param minVal Integer indicating the minimal trim amount
+#' @param ... Unused to allow for use in other functions
+#'
 #' @return Integer value indicating the amount to trim
 #' @export
 #'
@@ -26,5 +29,5 @@
 #'
 #' trim_function(data_KL)
 trim_function <- function(data, minVal = 10, ...){
-  max(minVal, floor(log(ncol(as.data.frame(data)))),na.rm=T)
+  max(round(minVal), floor(log(ncol(as.data.frame(data)))),na.rm=T)
 }

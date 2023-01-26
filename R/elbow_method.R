@@ -10,6 +10,7 @@
 #' @param test_statistic_function Function with the first argument being data
 #'     and the second argument argument for candidate change points.
 #'     Additional arguments passed in via ... . Return a single numeric value.
+#' @param changepoint_function
 #' @param cutoff_function Function with first argument being data and the second
 #'     argument being alpha. No other arguments given. Return single numeric
 #'     value.
@@ -63,6 +64,31 @@ elbow_method <- function(data,
 
 }
 
+
+#' Elbow Method with Test Statistic Function
+#'
+#' This (internal) function is used when test_statistic_function is supplied.
+#'
+#' @param data Numeric data.frame with rows for evaluated values and columns
+#'    indicating FD
+#' @param test_statistic_function Function with the first argument being data
+#'     and the second argument argument for candidate change points.
+#'     Additional arguments passed in via ... . Return a single numeric value.
+#' @param cutoff_function Function with first argument being data and the second
+#'     argument being alpha. No other arguments given. Return single numeric
+#'     value.
+#' @param trim_function Function taking data as an argument and returning a
+#'     numeric value indicating how much should be trimmed on each end
+#' @param alpha Numeric value in [0,1] indicating the significance for
+#'     cutoff_function.
+#' @param errorType String of 'L2' or 'Tr' indicating the error function to use
+#' @param ... Additional parameters to pass into the respective functions
+#'
+#' @return List with data.frame indicating the change point locations and
+#'             variance explained and two plots giving the variance.
+#'
+#' @examples
+#' # This is an internal function so see elbow_method for usage.
 .elbow_method_stat <- function(data, test_statistic_function,
                          cutoff_function, trim_function,
                          alpha=0.05, errorType = 'L2', ... ){
@@ -156,25 +182,41 @@ elbow_method <- function(data,
   return_data$Percent <- 1-return_data$Var/max(return_data$Var)
 
   var_plot <-
-    ggplot(return_data) +
-    geom_point(aes(x=0:(length(CP)-1), y=Var)) +
-    geom_line(aes(x=0:(length(CP)-1), y=Var)) +
-    xlab("Number of Change Points") +
-    ylab("Total Variance") +
-    theme_bw()
+    ggplot2::ggplot(return_data) +
+    ggplot2::geom_point(ggplot2::aes(x=0:(length(CP)-1), y=Var)) +
+    ggplot2::geom_line(ggplot2::aes(x=0:(length(CP)-1), y=Var)) +
+    ggplot2::xlab("Number of Change Points") +
+    ggplot2::ylab("Total Variance") +
+    ggplot2::theme_bw()
 
   per_plot <-
-    ggplot(return_data) +
-    geom_point(aes(x=0:(length(CP)-1), y=Percent)) +
-    geom_line(aes(x=0:(length(CP)-1), y=Percent)) +
-    xlab("Number of Change Points") +
-    ylab("Percent Explained") +
-    theme_bw()
+    ggplot2::ggplot(return_data) +
+    ggplot2::geom_point(ggplot2::aes(x=0:(length(CP)-1), y=Percent)) +
+    ggplot2::geom_line(ggplot2::aes(x=0:(length(CP)-1), y=Percent)) +
+    ggplot2::xlab("Number of Change Points") +
+    ggplot2::ylab("Percent Explained") +
+    ggplot2::theme_bw()
 
   return(list(return_data, var_plot, per_plot))
 }
 
 
+#' Elbow Method with Change Function
+#'
+#' This (internal) function is used when changepoint_function is supplied.
+#'
+#' @param data Numeric data.frame with rows for evaluated values and columns
+#'    indicating FD
+#' @param changepoint_function Function that returns a change point. The first
+#'    parameter should be data.
+#' @param errorType String of 'L2' or 'Tr' indicating the error function to use
+#' @param ... Additional parameters to pass into the respective functions
+#'
+#' @return List with data.frame indicating the change point locations and
+#'             variance explained and two plots giving the variance.
+#'
+#' @examples
+#' # This is an internal function so see elbow_method for usage.
 .elbow_method_change <- function(data, changepoint_function, errorType = 'L2', ... ){
   # Setup
   n <- ncol(data)
@@ -228,24 +270,43 @@ elbow_method <- function(data,
   return_data$Percent <- 1-return_data$Var/max(return_data$Var)
 
   var_plot <-
-    ggplot(return_data) +
-    geom_point(aes(x=0:(length(CP)-1), y=Var)) +
-    geom_line(aes(x=0:(length(CP)-1), y=Var)) +
-    xlab("Number of Change Points") +
-    ylab("Total Variance") +
-    theme_bw()
+    ggplot2::ggplot(return_data) +
+    ggplot2::geom_point(ggplot2::aes(x=0:(length(CP)-1), y=Var)) +
+    ggplot2::geom_line(ggplot2::aes(x=0:(length(CP)-1), y=Var)) +
+    ggplot2::xlab("Number of Change Points") +
+    ggplot2::ylab("Total Variance") +
+    ggplot2::theme_bw()
 
   per_plot <-
-    ggplot(return_data) +
-    geom_point(aes(x=0:(length(CP)-1), y=Percent)) +
-    geom_line(aes(x=0:(length(CP)-1), y=Percent)) +
-    xlab("Number of Change Points") +
-    ylab("Percent Explained") +
-    theme_bw()
+    ggplot2::ggplot(return_data) +
+    ggplot2::geom_point(ggplot2::aes(x=0:(length(CP)-1), y=Percent)) +
+    ggplot2::geom_line(ggplot2::aes(x=0:(length(CP)-1), y=Percent)) +
+    ggplot2::xlab("Number of Change Points") +
+    ggplot2::ylab("Percent Explained") +
+    ggplot2::theme_bw()
 
   return(list(return_data, var_plot, per_plot))
 }
 
+
+#' Compute Total Variance
+#'
+#' This (internal) function computes the total variance in the data with given
+#'     CPs.
+#'
+#' @param data Numeric data.frame with rows for evaluated values and columns
+#'    indicating FD
+#' @param CPs Vector of numerics indicating the changepoint locations
+#' @param errorType (Optional) String of 'L2' or 'Tr' indicating the error
+#'                  function to use. Default is L2.
+#' @param M (Optional) Numeric indicating the number of Brownian motions needed
+#'          for CE error.
+#'
+#' @return Numeric indicating the variance between all subsegments
+#'
+#' @examples
+#' # This is an internal function so see .elbow_method_change or
+#' #     .elbow_method_stat for usage.
 .compute_total_var <- function(data, CPs, errorType='L2', M=1000){
   # Setup
   data <- as.data.frame(data)
@@ -323,6 +384,17 @@ elbow_method <- function(data,
   returnValue
 }
 
+
+#' Split on NA
+#'
+#' This (internal) function splits a vector based on any NA values.
+#'
+#' @param vec Vector to be split containing numerics and NA values
+#'
+#' @return List with each item being a group separated by NAs
+#'
+#' @examples
+#' # This is an internal function so see .elbow_method_stat for usage.
 .split_on_NA <- function(vec) {
   is.sep <- is.na(vec)
   split(vec[!is.sep], cumsum(is.sep)[!is.sep])

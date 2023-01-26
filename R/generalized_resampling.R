@@ -33,8 +33,9 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0, 0.5))
 #' # Metric
-#' compute_Tn(data_KL)
-#' # Permutation Method for Tn
+#' compute_Tn(data_KL) # Note value
+#' compute_Tn(data_KL) # Note different value
+#' # Permutation Method for Tn (this will get 1-alpha quantile of iters)
 #' generalized_resampling(X=data_KL,
 #'     blockSize=ncol(data_KL)^(1/3),
 #'     fn=compute_Tn, iters=1000, replace=F)
@@ -65,18 +66,46 @@ generalized_resampling <- function(X, blockSize, fn, iters,
 
   bssamples <- sapply(as.data.frame(idxs),
                       function(loop_iter,fn,X1,...){ fn(X1[,na.omit(loop_iter)], ...) },
-                      X1=X,fn=fn,...)
+                      X1=X,fn=fn, ...)
 
-  quantile(bssamples,probs = c(1-alpha))[[1]]
+  quantile(bssamples, probs = c(1-alpha))[[1]]
 }
 
+
+#' Get Chunks
+#'
+#' This (internal) function splits the vector x into a chunksN number of
+#'     subsegments. The values of x are kept in order (i.e. no scrambled).
+#'
+#' @param x Vector of values
+#' @param chunksN Numeric indicating the number of chunks to split X into
+#'
+#' @return A list with chunksN items, each containing an similiar sized subset
+#'     of the original vector
+#'
+#' @examples
+#' .getChunks(1:100,1)
+#' .getChunks(1:100,2)
+#' .getChunks(1:100,5)
 .getChunks <- function(x,chunksN) {
-  # This will not scramble
   if(chunksN<2)
     return(x)
   split(x, cut(x, chunksN, labels = FALSE))
 }
 
+
+#' Convert List of Samples into a Data Frame
+#'
+#' This (internal) function takes a list with differ length data.frames or
+#'     vectors and pads them all to make a clean data.frame.
+#'
+#' @param data_list List of elements to be combined to a data.frame.
+#'
+#' @return Data.frame of the data in data_list
+#'
+#' @examples
+#' # This is an internal function and will not be viewable to user. See
+#' #     generalized_resampling.
 .convertSamplesToDF <- function(data_list){
 
   m <- length(data_list)

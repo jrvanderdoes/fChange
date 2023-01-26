@@ -3,16 +3,30 @@
 #'
 #' \code{plot_fd} plots functional data either in an fd object or evaluated at certain points
 #'
-#' @param data An fd object or a data.frame of evaluated fd objects
-#'     (the columns being lines and the rows the evaluated points)
-#' @param eval_points An vector containing the points at which the
-#'     evaluated data was evaluated at
+#' @param data A data.frame of evaluated fd objects (the columns being lines and
+#'     the rows the evaluated points)
+#' @param eval_points (Optional) An vector containing the points at which the
+#'     data was evaluated. Default is 1:nrow(data)
 #' @param CPs (Optional) Vectors of numeric values indicating the location of
-#'     change points
-#' @param plot_title Optional string to title the plot
+#'     change points. This will color each section differently. Default vallue
+#'     is NULL.
+#' @param plot_title (Optional) String to title the plot. Default value is NULL.
+#' @param val_axis_title (Optional) String to title the axis for values of
+#'     observation. Default value is 'Value'.
+#' @param eval_axis_title (Optional) String to title the axis for the evaluation
+#'     range axis (observations in an FD object). Default value is is 'EvalRange'.
+#' @param FD_axis_title (Optional) String to title the axis for FD observations.
+#'     Default value is 'FD Sims'.
+#' @param FDReps (Optional) Vector of values for FD observation names. Default
+#'     value is 1:ncol(data).
+#' @param eye (Optional) List with certain parameters to determine the view of
+#'     the resulting image. The default value is list(x = -1.5, y = -1.5, z = 1.5).
+#' @param aspectratio (Optional) List with certain parameters to determine the
+#'     image size parameters. The default value is list(x=1, y=1, z=1).
+#' @param showticklabels (Optional) Boolean to indicate if the tick labels should
+#'     be given in the image. Default value is TRUE.
 #'
 #' @return A plotly plot
-#'
 #' @export
 #'
 #' @examples
@@ -39,23 +53,55 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
                     showticklabels=T){
 
   if(!is.null(CPs) && !is.na(CPs)){
-    plot <- .plot_evalfd_3dlines_cps(data, eval_points, CPs[order(CPs)], plot_title,
-                                     val_axis_title, eval_axis_title,
-                                     FD_axis_title,
-                                     eye=eye, aspectratio=aspectratio,
-                                     showticklabels=showticklabels)#,FDReps)
+    fdPlot <- .plot_evalfd_3dlines_cps(fd_eval=data, singleRangeSeq=eval_points,
+                                       CPs=CPs[order(CPs)], titleVal=plot_title,
+                                       val_axis_title=val_axis_title,
+                                       eval_axis_title=eval_axis_title,
+                                       FD_axis_title=FD_axis_title,
+                                       eye=eye, aspectratio=aspectratio,
+                                       showticklabels=showticklabels)#,FDReps)
   }else{
-    plot <- .plot_evalfd_3dlines(data, eval_points, plot_title,
-                                 val_axis_title, eval_axis_title,
-                                 FD_axis_title,FDReps,
-                                 eye=eye, aspectratio=aspectratio,
-                                 showticklabels=showticklabels)
+    fdPlot <- .plot_evalfd_3dlines(fd_eval=data, singleRangeSeq=eval_points,
+                                   titleVal=plot_title,
+                                   val_axis_title=val_axis_title,
+                                   eval_axis_title=eval_axis_title,
+                                   FD_axis_title=FD_axis_title,FDReps=FDReps,
+                                   eye=eye, aspectratio=aspectratio,
+                                   showticklabels=showticklabels)
   }
 
-  plot
+  fdPlot
 }
 
 
+#' Plot Functional Data Without Change Points
+#'
+#' This (internal) function to plot the function data, with no coloring based on
+#'     change points.
+#'
+#' @param fd_eval A data.frame of evaluated fd objects (the columns being lines and
+#'     the rows the evaluated points)
+#' @param singleRangeSeq A vector containing the points at which the data was evaluated.
+#' @param titleVal (Optional) String to title the plot. Default value is NULL.
+#' @param val_axis_title (Optional) String to title the axis for values of
+#'     observation. Default value is 'Value'.
+#' @param eval_axis_title (Optional) String to title the axis for the evaluation
+#'     range axis (observations in an FD object). Default value is is 'EvalRange'.
+#' @param FD_axis_title (Optional) String to title the axis for FD observations.
+#'     Default value is 'FD Sims'.
+#' @param FDReps (Optional) Vector of values for FD observation names. Default
+#'     value is 1:ncol(data).
+#' @param eye (Optional) List with certain parameters to determine the view of
+#'     the resulting image. The default value is list(x = -1.5, y = -1.5, z = 1.5).
+#' @param aspectratio (Optional) List with certain parameters to determine the
+#'     image size parameters. The default value is list(x=1, y=1, z=1).
+#' @param showticklabels (Optional) Boolean to indicate if the tick labels should
+#'     be given in the image. Default value is TRUE.
+#'
+#' @return A plotly plot
+#'
+#' @examples
+#' # This is an internal function, see usage in plot_fd.
 .plot_evalfd_3dlines <- function(fd_eval, singleRangeSeq, titleVal=NULL,
                                  val_axis_title = 'Value',
                                  eval_axis_title='EvalRange',
@@ -126,6 +172,35 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
   ##            colorscale = list(c(0,'#BA52ED'), c(1,'#FCB040'))))
 }
 
+
+#' Plot Functional Data With Change Points
+#'
+#' This (internal) function to plot the function data, with coloring based on
+#'     change points.
+#'
+#' @param fd_eval A data.frame of evaluated fd objects (the columns being lines and
+#'     the rows the evaluated points)
+#' @param singleRangeSeq A vector containing the points at which the data was evaluated.
+#' @param CPs Vectors of numeric values indicating the location of change points.
+#'     This will color each section differently.
+#' @param titleVal (Optional) String to title the plot. Default value is NULL.
+#' @param val_axis_title (Optional) String to title the axis for values of
+#'     observation. Default value is 'Value'.
+#' @param eval_axis_title (Optional) String to title the axis for the evaluation
+#'     range axis (observations in an FD object). Default value is is 'EvalRange'.
+#' @param FD_axis_title (Optional) String to title the axis for FD observations.
+#'     Default value is 'FD Sims'.
+#' @param eye (Optional) List with certain parameters to determine the view of
+#'     the resulting image. The default value is list(x = -1.5, y = -1.5, z = 1.5).
+#' @param aspectratio (Optional) List with certain parameters to determine the
+#'     image size parameters. The default value is list(x=1, y=1, z=1).
+#' @param showticklabels (Optional) Boolean to indicate if the tick labels should
+#'     be given in the image. Default value is TRUE.
+#'
+#' @return A plotly plot
+#'
+#' @examples
+#' # This is an internal function, see usage in plot_fd.
 .plot_evalfd_3dlines_cps <- function(fd_eval, singleRangeSeq, CPs,
                                      titleVal=NULL,
                                      val_axis_title = 'Value',

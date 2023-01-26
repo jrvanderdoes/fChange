@@ -183,6 +183,26 @@ generate_data_fd <- function(ns,
 }
 
 
+#' Generate Data - KL Expansion
+#'
+#' This (internal) function performs the KL expansion to create FD object.
+#'
+#' @param eigs Vector of numeric values indicating the eigenvalues of interest
+#' @param basis FDA basis object
+#' @param means Numeric for mean of FD object
+#' @param dist String indicating the distribution to use. Options include Normal,
+#'             Binomial, Exponential, and t.
+#' @param evals A vector of points indicating the points to evaluate the
+#'     functions on
+#' @param peps Vector of numerics for the previous epsilons
+#' @param psi Numeric for psi value.
+#'
+#' @return List of X, observed points in FD, and eps, the epsilons for next
+#'         observation.
+#'
+#' @examples
+#' # This is an internal function and will not be outwardly visible. See
+#' #     generate_data_fd for usage.
 .generateData_KL_Expansion <- function(eigs, basis, means, dist,
                                       evals, peps, psi){
 
