@@ -99,7 +99,9 @@ welsh_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
   gammaHat <- rep(NA, length((1-TVal):(TVal-1)))
 
   for(l in (1-TVal):(TVal-1)){
-    gammaHat[TVal+l] <- .getAutocov(eps1=eps1, eps2=eps2,l=l, TVal=TVal)
+    gammaHat[TVal+l] <- .getAutocov(eps1=eps1, eps2=eps2,
+                                  #eps1Bar=eps1Bar, eps2Bar=eps2Bar,
+                                  l=l, TVal=TVal)
   }
 
   .computeLRVEstimate(h=h, TVal=TVal, gammaHat=gammaHat, K=K)
