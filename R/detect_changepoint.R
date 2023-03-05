@@ -59,10 +59,6 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
     # Compute Gamma Matrix
     covMat <- .estimCovMat(X,x,M,h,K)
 
-    ## Questions
-    #     rmvnorm, just one?
-    #     rmvnorm, Use this instead of more v?
-    #     Should be 0 or not?
     #mvnorms <- mvtnorm::rmvnorm(1,sigma=covMat,method='svd')
     mvnorms <- suppressWarnings(mvtnorm::rmvnorm(1,sigma=covMat))
 
@@ -180,7 +176,7 @@ detect_changepoint_fast <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 .estimCovMat <- function(X, x=seq(0,1,length.out=nrow(X)),
                          M=25, h=3, K=bartlett_kernel, W=NULL){
 
-  if(!is.null(W)){
+  if(is.null(W)){
     W <- data.frame(matrix(nrow=nrow(X),ncol=M))
     for(i in 1:M){
       W[,i] <- sde::BM(N = nrow(X)-1)
