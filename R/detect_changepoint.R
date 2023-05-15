@@ -48,7 +48,7 @@
 #' tmp1 <- detect_changepoint(X1)
 #' tmp1$pval
 detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
-                        M=25, h=3, K=bartlett_kernel, silent=F){
+                               M=25, h=3, K=bartlett_kernel, silent=F){
   # Setup Vars
   gamProcess <- rep(NA,nSims)
   value <- compute_Tn(X,M=M)
@@ -73,82 +73,105 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
   list('pval'=1-ecdf(gamProcess)(value), 'gamProcess'=gamProcess, 'value'=value)
 }
 
-
-#' Detect Change Point - Fast Method
+#' Estimate null and detect change point based on a single covar matrix
 #'
-#' This function detects change points in functional data. This is done through
-#'     simulating the null distribution. However, rather than finding a new
-#'     covariance structure based on different measures, a single measure is
-#'     used and multiple simulations are built.
+#' @param X
+#' @param nSims
+#' @param x
+#' @param h
+#' @param K
+#' @param silent
+#' @param maxM
+#' @param ratio
 #'
-#' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param nSims (Optional) Integer indicating the number of realizations of
-#'     Gaussian processes to compute. Default is 100
-#' @param x (Optional) Vector of locations of observations. Default is equally
-#'     spaced observations on (0,1) with the same number of observations as FDs
-#' @param M (Optional) Integer indicating the number of vectors used to create
-#'     each value in the covariance matrix. Default is 25.
-#' @param h (Optional) Integer indicating amount of lag to consider. Default is
-#'     3.
-#' @param K (Optional) Function for the kernel function to use. Default is the
-#'     barlett_kernel.
-#' @param silent (Optional) Boolean indicating it the output should be supressed.
-#'     Default is FALSE.
-#'
-#' @return List
-#'     1. pval: pvalue based on the data and estimated Gaussian processes
-#'     2. gamProcess: Vector of estimated test statistics based on data
-#'     3. value: Test statistic for data
+#' @return
 #' @export
 #'
 #' @examples
-#' X <- generate_data_fd(ns = c(100),
-#'            eigsList = list(c(3,2,1,0.5)),
-#'            basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-#'            meansList = c(0),
-#'            distsArray = c('Normal'),
-#'            evals = seq(0,1,0.05),
-#'            kappasArray = c(0))
-#' tmp <- detect_changepoint_fast(X)
-#' tmp$pval
+#' X <- generate_data_fd(ns = c(100,100),
+#'                       eigsList = list(c(3,2,1,0.5),c(3,2,1,0.5)),
+#'                       basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
+#'                                        fda::create.bspline.basis(nbasis=4, norder=4)),
+#'                       meansList = c(0,1),
+#'                       distsArray = c('Normal'),
+#'                       evals = seq(0,1,0.05),
+#'                       kappasArray = c(0.5),silent = T)
+#' cp_res <- detect_changepoint_singleCov(X, nSims=500, x=seq(0,1,length.out=20),
+#'                                        h=3, K=bartlett_kernel, silent=F)
 #'
-#' X1 <- generate_data_fd(ns = c(50,50),
-#'            eigsList = list(c(3,2,1,0.5),
-#'                            c(1.5,1,0.5,0.25)),
-#'            basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                             fda::create.bspline.basis(nbasis=4, norder=4)),
-#'            meansList = c(0,0),
-#'            distsArray = c('Normal','Binomial'),
-#'            evals = seq(0,1,0.05),
-#'            kappasArray = c(0,0))
-#' tmp1 <- detect_changepoint_fast(X1)
-#' tmp1$pval
-detect_changepoint_fast <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
-                            M=25, h=3, K=bartlett_kernel, silent=F){
-  # Setup Vars
-  W <- data.frame(matrix(nrow=nrow(X),ncol=M))
-  for(i in 1:M){
-    W[,i] <- sde::BM(N = nrow(X)-1)
+#' X1 <- generate_data_fd(ns = c(200),
+#'                        eigsList = list(c(3,2,1,0.5)),
+#'                        basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
+#'                        meansList = c(0),
+#'                        distsArray = c('Normal'),
+#'                        evals = seq(0,1,0.05),
+#'                        kappasArray = c(0),silent = T)
+#' nocp_res <- detect_changepoint_singleCov(X1, nSims=500, x=seq(0,1,length.out=20),
+#'                                          h=1, K=bartlett_kernel, silent=F)
+#' X3 <- generate_data_fd(ns = c(50,250),
+#'                        eigsList = list(c(3,2,1,0.5),c(30,1)),
+#'                        basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
+#'                                         fda::create.bspline.basis(nbasis=2, norder=2)),
+#'                        meansList = c(0,0),
+#'                        distsArray = c('Normal'), kappasArray = c(0.5),
+#'                        evals = seq(0,1,0.05), silent = T)
+#' cp_res3 <- detect_changepoint_singleCov(X, nSims=500,
+#'                                         x=seq(0,1,length.out=20),
+#'                                         h=3, K=bartlett_kernel, silent=F,
+#'                                         maxM=250, ratio=0.05)
+detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
+                                         h=3, K=bartlett_kernel, space='BM',
+                                         silent=F,maxM=250, ratio=0.05){
+  # Determine Number of Iterations
+  done <- FALSE
+  M <- 90
+  prevValues <- c(compute_Tn(X,M=M), compute_Tn(X,M=M))
+
+  while(!done && M<maxM){
+    M <- M + 10
+    values <- c(compute_Tn(X,M=M),compute_Tn(X,M=M))
+
+    if(abs(1-values[1]/prevValues[1])<=ratio &&
+       abs(1-values[2]/prevValues[2])<=ratio &&
+       abs(1-values[1]/values[2])<=ratio)
+      done <- TRUE
+    prevValues <- values
   }
 
-  gamProcess <- rep(NA,nSims)
-  value <- compute_Tn(X,M=M,W = W)
+  # Generate Noise
+  W <- computeSpaceMeasuringVectors(M,space,X)
+  #data.frame(matrix(nrow=nrow(X),ncol=M))
+  #for(i in 1:M){
+  #  W[,i] <- sde::BM(N = nrow(X)-1)
+  #}
+
+  # Variables
   MJ <- M * length(x)
 
   # Compute Gamma Matrix
   covMat <- .estimCovMat(X,x,M,h,K,W)
+  covMat_svd <- svd(covMat) # covMat_svd$u %*% diag(covMat_svd$d) %*% t(covMat_svd$v)
+  sqrtD <- sqrt(diag(covMat_svd$d))
+  sqrtD[is.na(sqrtD)] <- 0
+  sqrtMat <- covMat_svd$u %*% sqrtD %*% t(covMat_svd$v)
+  rm(W,covMat,covMat_svd,sqrtD)
 
-  #mvnorms <- mvtnorm::rmvnorm(nSims,sigma=covMat,method='svd')
-  mvnorms <- suppressWarnings(mvtnorm::rmvnorm(nSims,sigma=covMat))
+  gamProcess <- c()
+  nIters <- nSims/100
+  for(i in 1:nIters){
+    # (After trans + mult) Rows are iid MNV
+    mvnorms <- t(sapply(1:100,function(m,x){rnorm(x)},x=2*MJ))
+    mvnorms <- mvnorms %*% sqrtMat
 
-  gamVals <- mvnorms[,1:MJ] + complex(imaginary = 1)*mvnorms[,MJ+1:MJ]
+    gamVals <- mvnorms[,1:MJ] + complex(imaginary = 1)*mvnorms[,MJ+1:MJ]
 
-  # Estimate value
-  gamProcess <- rowSums(abs(gamVals[,-c(MJ-0:(length(x)-1))])^2)/MJ
+    # Estimate value
+    gamProcess <- c(gamProcess,
+                    rowSums(abs(gamVals[,-c(MJ-0:(length(x)-1))])^2)/MJ)
+  }
 
-
-  list('pval'=1-ecdf(gamProcess)(value), 'gamProcess'=gamProcess, 'value'=value)
+  list('pval'=1-ecdf(gamProcess)(values[1]), 'pval2'=1-ecdf(gamProcess)(values[1]),
+       'gamProcess'=gamProcess, 'value'=values[1], 'value2'=values[2])
 }
 
 
