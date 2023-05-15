@@ -52,7 +52,7 @@ plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
                     aspectratio=list(x=1,y=1,z=1),
                     showticklabels=T){
 
-  if(!is.null(CPs) && !is.na(CPs)){
+  if(!is.null(CPs) && length(na.omit(CPs))>0){
     fdPlot <- .plot_evalfd_3dlines_cps(fd_eval=data, singleRangeSeq=eval_points,
                                        CPs=CPs[order(CPs)], titleVal=plot_title,
                                        val_axis_title=val_axis_title,

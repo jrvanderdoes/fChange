@@ -1,5 +1,5 @@
 
-#' Potential trim function
+#' Basic trim function
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD

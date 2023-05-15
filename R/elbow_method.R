@@ -282,7 +282,7 @@ elbow_method <- function(data,
     ggplot2::geom_point(ggplot2::aes(x=0:(length(CP)-1), y=Percent)) +
     ggplot2::geom_line(ggplot2::aes(x=0:(length(CP)-1), y=Percent)) +
     ggplot2::xlab("Number of Change Points") +
-    ggplot2::ylab("Percent Explained") +
+    ggplot2::ylab("Percent Not Explained") +
     ggplot2::theme_bw()
 
   return(list(return_data, var_plot, per_plot))

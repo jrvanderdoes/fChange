@@ -40,15 +40,15 @@
 #' # Create 200 functions with a midway change point. The change point
 #' #     is a change point in the eigenvalues, eigenfunctions, means,
 #' #     distributions, and VAR(1) strength
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.fourier.basis(nbasis=2)),
-#'     meansList = c(0,0.5),
-#'     distsArray = c('Normal','Binomial'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0, 0.5))
+# data_KL <- generate_data_fd(ns = c(100,100),
+#     eigsList = list(c(3,2,1,0.5),
+#                     c(3,2)),
+#     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
+#                      fda::create.fourier.basis(nbasis=2)),
+#     meansList = c(0,0.5),
+#     distsArray = c('Normal','Binomial'),
+#     evals = seq(0,1,0.05),
+#     kappasArray = c(0, 0.5))
 generate_data_fd <- function(ns,
                              eigsList,
                              basesList,
@@ -236,6 +236,14 @@ generate_data_fd <- function(ns,
       bigDF <- 10000 # arbitrary
       xi <- stats::rt(1, bigDF) * sqrt(sd^2 * (bigDF-2)/bigDF)
 
+    }else if(dist=='cauchy'){
+      stop('Sorry Problem with cauchy')
+      xi <- stats::rcauchy(1)
+    }else if(dist=='laplace'){
+      if(!requireNamespace("jmuOutlier", quietly = TRUE)){
+        stop(paste0("Please install 'jmuOutlier'."))
+      }
+      xi <- jmuOutlier::rlaplace(1, mean = 0, sd = sd)
     }else{
       stop(paste('Sorry, dist',dist,'not implemented yet'))
     }
