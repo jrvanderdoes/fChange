@@ -171,7 +171,8 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   }
 
   list('pval'=1-ecdf(gamProcess)(values[1]), 'pval2'=1-ecdf(gamProcess)(values[1]),
-       'gamProcess'=gamProcess, 'value'=values[1], 'value2'=values[2])
+       'gamProcess'=gamProcess, 'value'=values[1], 'value2'=values[2],
+       'M'=M)
 }
 
 
@@ -270,6 +271,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
 
   sumVal <- 0
   KVals <- sapply((1-ncol(X)):(ncol(X)-1), K, h=h)
+
   for(k in (1-ncol(X)):(ncol(X)-1)){
     if(KVals[k+ncol(X)]!=0){
       sumVal <- sumVal + KVals[k+ncol(X)] *
@@ -308,7 +310,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
     mean1 <- mean(.estimf(X,lfun,v))
     mean2 <- mean(.estimf(X,lfunp,vp))
     for(r in 1:(ncol(X)-k)){
-      tmp <- tmp + .estimR(X,r,lfun,v,mean1) * .estimR(X,r+k,lfunp,vp,mean1)
+      tmp <- tmp + .estimR(X,r,lfun,v,mean1) * .estimR(X,r+k,lfunp,vp,mean2)
     }
   }else{
     mean1 <- mean(.estimf(X,lfun,v))
