@@ -15,7 +15,8 @@ Imports:
     plotly,
     RColorBrewer,
     sde,
-    stats
+    stats,
+    tensorA
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Suggests: 
