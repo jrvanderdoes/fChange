@@ -1,6 +1,9 @@
-## Find and apply this
-#require(sde)
-#require(tensorA)
+#' Need to Do:
+#' * Find and apply: sde and tensorA.
+#' * Convert = to <- (styler may handle it..)
+#' * Update documentation
+#' * Remove any functions not needed
+NULL
 
 #' Covariance Change
 #'
@@ -23,8 +26,8 @@
 #' @examples
 cov_change <- function(X, kappa=1/4, len=30){
 
-  stat_d0 <- weight_TNstat(X,kappa = kappa)
-  cv_d0 <- weight_criticalvalueMC(X,len = len,kappa = kappa)
+  stat_d0=weight_TNstat(X,kappa = kappa)
+  cv_d0 = weight_criticalvalueMC(X,len = len,kappa = kappa)
 
   if (stat_d0[[1]]> cv_d0[2]){
     return(stat_d0[[2]])
@@ -39,7 +42,8 @@ cov_change <- function(X, kappa=1/4, len=30){
   return(NA)
 }
 
-##### UNUSED!!
+
+##### estimate size of change (Unused)
 sizechange <- function(xd, kstar){
   N=ncol(xd)
 
@@ -61,8 +65,6 @@ sizechange <- function(xd, kstar){
   var_change = var_before - var_after
   return(var_change)
 }
-
-
 
 #' L2 Norm
 #'
@@ -136,11 +138,10 @@ tau_est <-function(xd, kstar, len){
     }
   }
 
-  int_approx_tensor <- function(x){# x is a 4-dimensional tensor
+  int_approx_tensor<-function(x){# x is a 4-dimensional tensor
     dt=length(dim(x))
     temp_n=nrow(x)
-    return((1/temp_n)^dt * sum(x))
-  }
+    return((1/temp_n)^dt * sum(x))}
 
   longd = long_run_covariance_4tensor(v_dat)
 
@@ -174,22 +175,14 @@ tau_est <-function(xd, kstar, len){
 #'
 #' @examples
 ZNstat <- function(xdm, u){
-  grid_point <- nrow(xdm)
-  N <- ncol(xdm)
-  k <- floor(N*u)
-
-  prek <- matrix(rowSums(apply(as.matrix(xdm[,1:k]),2,
-                               function(x){x%o%x})),
-                 grid_point, grid_point)
-  fullk <- matrix(rowSums(apply(as.matrix(xdm),2,
-                                function(x){x%o%x})),
-                  grid_point,grid_point)
-
-  ZNu <- N^(-1/2) * (prek - (k/N)*fullk)
-
-  ZNu
+  grid_point = nrow(xdm)
+  N = ncol(xdm)
+  k = floor(N*u)
+  prek = matrix(rowSums(apply(as.matrix(xdm[,1:k]),2,function(x){x%o%x})),grid_point,grid_point)
+  fullk = matrix(rowSums(apply(as.matrix(xdm),2,function(x){x%o%x})),grid_point,grid_point)
+  ZNu = N^(-1/2) * (prek - (k/N)*fullk)
+  return(ZNu)
 }
-
 
 #' Title
 #'
@@ -201,20 +194,13 @@ ZNstat <- function(xdm, u){
 #'
 #' @examples
 ZNstat_cp <- function(xdm, u){
-  grid_point <- nrow(xdm)
-  N <- ncol(xdm)
-  k <- floor(N*u)
-
-  prek <- matrix(rowSums(apply(as.matrix(xdm[,1:k]),2,
-                              function(x){x%o%x})),
-                grid_point,grid_point)
-  fullk <- matrix(rowSums(apply(as.matrix(xdm),2,
-                               function(x){x%o%x})),
-                 grid_point,grid_point)
-
-  ZNu <- (prek - (k/N)*fullk)
-
-  ZNu
+  grid_point = nrow(xdm)
+  N = ncol(xdm)
+  k = floor(N*u)
+  prek = matrix(rowSums(apply(as.matrix(xdm[,1:k]),2,function(x){x%o%x})),grid_point,grid_point)
+  fullk = matrix(rowSums(apply(as.matrix(xdm),2,function(x){x%o%x})),grid_point,grid_point)
+  ZNu = (prek - (k/N)*fullk)
+  return(ZNu)
 }
 
 
@@ -231,17 +217,13 @@ ZNstat_cp <- function(xdm, u){
 #'
 #' @examples
 TNstat <- function(xf){
-  int_approx = function(x){
+  int_approx=function(x){
     temp_n=NROW(x)
-    return((1/temp_n)*sum(x))
-  }
-
+    return((1/temp_n)*sum(x))}
   grid_point = nrow(xf)
   N = ncol(xf)
   xdm = apply(xf,2,function(x,xmean){x-xmean}, xmean = rowMeans(xf))
-  uind = seq(0,1,length = N+1)[2:(N+1)]
-
-  zn2=list()
+  uind = seq(0,1,length = N+1)[2:(N+1)]; zn2=list()
   for (i in 1:N){
     zn2[[i]] = (ZNstat(xdm, uind[i]))^2
   }
@@ -262,20 +244,16 @@ TNstat <- function(xf){
 #'
 #' @examples
 weight_TNstat <- function(xf,kappa){
-
   int_approx_tensor<-function(x){# x is a 4-dimensional tensor
     dt=length(dim(x))
     temp_n=nrow(x)
-    return(sum(x)/(temp_n^dt))
-  }
+    return(sum(x)/(temp_n^dt))}
 
   grid_point = nrow(xf)
   N = ncol(xf)
   xdm = apply(xf,2,function(x,xmean){x-xmean}, xmean = rowMeans(xf))
-  uind = seq(0,1,length = N+1)[2:(N+1)]
-
-  zn2 = list()
-  zn_cp = c(rep(0,N))
+  uind = seq(0,1,length = N+1)[2:(N+1)];
+  zn2 = list(); zn_cp = c(rep(0,N))
   for (i in 1:(N-1)){
     zn2[[i]] = (ZNstat(xdm, uind[i]))^2 / ((uind[i]*(1-uind[i]))^(2*kappa))### kappa = 1/4
 
@@ -330,7 +308,6 @@ long_run_covariance_4tensor <- function (dat) {
     }
     return(gamma_lag_sum/(T-lag))
   }
-
   hat_h_opt = T^(1/4)
   lr_covop = cov_l(band = hat_h_opt, nval = T)
 
@@ -355,7 +332,6 @@ kweights <- function (x, kernel = c("Truncated", "Bartlett", "Parzen", "Tukey-Ha
                  `Tukey-Hanning` = 3/4, `Quadratic Spectral` = 1)
   }
   else ca <- 1
-
   switch(kernel, Truncated = {
     ifelse(ca * x > 1, 0, 1)
   }, Bartlett = {
@@ -370,7 +346,6 @@ kweights <- function (x, kernel = c("Truncated", "Bartlett", "Parzen", "Tukey-Ha
     ifelse(x < 1e-04, 1, 3 * (1/y)^2 * (sin(y)/y - cos(y)))
   })
 }
-
 
 #' Compute critical values for TNstat (T_N)
 #'
@@ -402,7 +377,9 @@ criticalvalueMC <-function(xf,len){
   }
   lrcov = long_run_covariance_4tensor(zm) ##23.883 sec elapsed
   lrcov = as.tensor(lrcov/(len+1)^2)
-  eigvals=svd.tensor(lrcov,c(3,4),by="e")
+  ## TODO:: Add rounding if needed with some errors
+  eigvals=tensorA::svd.tensor(lrcov,c(3,4),by="e")
+
   eigmat=as.vector(eigvals$d)
 
   lim_sum = 0
@@ -421,7 +398,6 @@ criticalvalueMC <-function(xf,len){
   cv=stats::quantile(lim_sum,probs=c(0.90,0.95,0.99))
   return(cv)
 }
-
 
 #' Compute critical values for weight_TNstat ( T_N(\kappa) )
 #'
@@ -445,6 +421,7 @@ weight_criticalvalueMC <-function(xf,len,kappa){
       wmat[i-1,j-1]= (min(times[i],times[j])-times[i]*times[j])/( (times[i]*(1-times[i]))^kappa * (times[j]*(1-times[j]))^kappa )
     }
   }
+  ## TODO:: Add rounding if have errors
   weig = as.vector(svd(wmat/grid_point)$d)
 
   ## cov operators
@@ -465,8 +442,9 @@ weight_criticalvalueMC <-function(xf,len,kappa){
   }
 
   lrcov = long_run_covariance_4tensor(zm)
+  lrcov <- round(lrcov, 8) ## Added to stop errors.
   lrcov = as.tensor(lrcov/(len+1)^2)
-  eigvals=svd.tensor(lrcov,c(3,4),by="e")
+  eigvals=tensorA::svd.tensor(lrcov,c(3,4),by="e")
   eigmat=as.vector(eigvals$d)
 
   lim_sum = 0
