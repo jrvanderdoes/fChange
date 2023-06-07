@@ -158,7 +158,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
 
   gamProcess <- c()
   nIters <- nSims/100
-  for(i in 1:nIters){
+  gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ,sqrtMat,lx){
     # (After trans + mult) Rows are iid MNV
     mvnorms <- t(sapply(1:100,function(m,x){rnorm(x)},x=2*MJ))
     mvnorms <- mvnorms %*% sqrtMat
@@ -166,9 +166,22 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
     gamVals <- mvnorms[,1:MJ] + complex(imaginary = 1)*mvnorms[,MJ+1:MJ]
 
     # Estimate value
-    gamProcess <- c(gamProcess,
-                    rowSums(abs(gamVals[,-c(MJ-0:(length(x)-1))])^2)/MJ)
-  }
+    rowSums(abs(gamVals[,-c(MJ-0:(lx-1))])^2)/MJ
+
+  }, MJ=MJ, sqrtMat=sqrtMat, lx=length(x))
+
+  gamProcess <- as.vector(gamProcess)
+  # for(i in 1:nIters){
+  #   # (After trans + mult) Rows are iid MNV
+  #   mvnorms <- t(sapply(1:100,function(m,x){rnorm(x)},x=2*MJ))
+  #   mvnorms <- mvnorms %*% sqrtMat
+  #
+  #   gamVals <- mvnorms[,1:MJ] + complex(imaginary = 1)*mvnorms[,MJ+1:MJ]
+  #
+  #   # Estimate value
+  #   gamProcess <- c(gamProcess,
+  #                   rowSums(abs(gamVals[,-c(MJ-0:(length(x)-1))])^2)/MJ)
+  # }
 
   list('pval'=1-ecdf(gamProcess)(values[1]), 'pval2'=1-ecdf(gamProcess)(values[1]),
        'gamProcess'=gamProcess, 'value'=values[1], 'value2'=values[2],
