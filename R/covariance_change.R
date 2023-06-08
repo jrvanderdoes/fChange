@@ -376,7 +376,7 @@ criticalvalueMC <-function(xf,len){
     zm[,,i] = zi[,,i]-zimean
   }
   lrcov = long_run_covariance_4tensor(zm) ##23.883 sec elapsed
-  lrcov = as.tensor(lrcov/(len+1)^2)
+  lrcov = tensorA::as.tensor(lrcov/(len+1)^2)
   ## TODO:: Add rounding if needed with some errors
   eigvals=tensorA::svd.tensor(lrcov,c(3,4),by="e")
 
@@ -443,7 +443,7 @@ weight_criticalvalueMC <-function(xf,len,kappa){
 
   lrcov = long_run_covariance_4tensor(zm)
   lrcov <- round(lrcov, 8) ## Added to stop errors.
-  lrcov = as.tensor(lrcov/(len+1)^2)
+  lrcov = tensorA::as.tensor(lrcov/(len+1)^2)
   eigvals=tensorA::svd.tensor(lrcov,c(3,4),by="e")
   eigmat=as.vector(eigvals$d)
 
