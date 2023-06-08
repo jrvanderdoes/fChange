@@ -121,35 +121,18 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 #'                                         maxM=250, ratio=0.05)
 detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
                                          h=3, K=bartlett_kernel, space='BM',
-                                         silent=F,maxM=250, ratio=0.05){
+                                         silent=F,TN_M=10000, Cov_M=75){
   # Determine Number of Iterations
-  done <- FALSE
-  M <- 90
-  prevValues <- c(compute_Tn(X,M=M), compute_Tn(X,M=M))
-
-  while(!done && M<maxM){
-    M <- M + 10
-    values <- c(compute_Tn(X,M=M),compute_Tn(X,M=M))
-
-    if(abs(1-values[1]/prevValues[1])<=ratio &&
-       abs(1-values[2]/prevValues[2])<=ratio &&
-       abs(1-values[1]/values[2])<=ratio)
-      done <- TRUE
-    prevValues <- values
-  }
+  val_Tn <- compute_Tn(X,M=TN_M)
 
   # Generate Noise
-  W <- computeSpaceMeasuringVectors(M,space,X)
-  #data.frame(matrix(nrow=nrow(X),ncol=M))
-  #for(i in 1:M){
-  #  W[,i] <- sde::BM(N = nrow(X)-1)
-  #}
+  W <- computeSpaceMeasuringVectors(Cov_M,space,X)
 
   # Variables
-  MJ <- M * length(x)
+  MJ <- Cov_M * length(x)
 
   # Compute Gamma Matrix
-  covMat <- .estimCovMat(X,x,M,h,K,W)
+  covMat <- .estimCovMat(X,x,Cov_M,h,K,W)
   covMat_svd <- svd(covMat) # covMat_svd$u %*% diag(covMat_svd$d) %*% t(covMat_svd$v)
   sqrtD <- sqrt(diag(covMat_svd$d))
   sqrtD[is.na(sqrtD)] <- 0
@@ -158,16 +141,15 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
 
   gamProcess <- c()
   nIters <- nSims/100
-  gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ,sqrtMat,lx){
+  gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ, sqrtMat, lx){
     # (After trans + mult) Rows are iid MNV
     mvnorms <- t(sapply(1:100,function(m,x){rnorm(x)},x=2*MJ))
     mvnorms <- mvnorms %*% sqrtMat
 
     gamVals <- mvnorms[,1:MJ] + complex(imaginary = 1)*mvnorms[,MJ+1:MJ]
 
-    # Estimate value
+    # Estimate value (Verified as equal to pracma::trapz(1:MJ, abs(gamVals[i,])^2))
     rowSums(abs(gamVals[,-c(MJ-0:(lx-1))])^2)/MJ
-
   }, MJ=MJ, sqrtMat=sqrtMat, lx=length(x))
 
   gamProcess <- as.vector(gamProcess)
@@ -214,10 +196,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
                          M=25, h=3, K=bartlett_kernel, W=NULL){
 
   if(is.null(W)){
-    W <- data.frame(matrix(nrow=nrow(X),ncol=M))
-    for(i in 1:M){
-      W[,i] <- sde::BM(N = nrow(X)-1)
-    }
+    W <- computeSpaceMeasuringVectors(M,"BM",X)
   }
   if(ncol(W)!=M) stop('Number of Vectors not M')
 
@@ -242,7 +221,6 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
                 lfun=funs[2][[1]],v=W[,i],lfunp=funs[2][[1]],vp=W[,j])
     }
   }
-
 
   tmp1 <- x %*% t(x)
   tmp2 <- minDF <- matrix(x,nrow=length(x),ncol=length(x))
