@@ -67,7 +67,7 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 
     # Estimate value
     gamProcess[i] <-
-      sum(abs(gamVals[-c(MJ-0:(length(x)-1))])^2)/MJ
+      sum(abs(gamVals)^2)/MJ
   }
 
   list('pval'=1-ecdf(gamProcess)(value), 'gamProcess'=gamProcess, 'value'=value)
@@ -143,13 +143,18 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   nIters <- nSims/100
   gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ, sqrtMat, lx){
     # (After trans + mult) Rows are iid MNV
-    mvnorms <- t(sapply(1:100,function(m,x){rnorm(x)},x=2*MJ))
-    mvnorms <- mvnorms %*% sqrtMat
+    #mvnorms <- t(sapply(1:100,function(m,x){rnorm(x)},x=2*MJ))
+    mvnorms <- sapply(1:100,function(m,x){rnorm(x)},x=2*MJ)
+    #mvnorms <- mvnorms %*% sqrtMat
+    mvnorms <- sqrtMat %*% mvnorms
 
-    gamVals <- mvnorms[,1:MJ] + complex(imaginary = 1)*mvnorms[,MJ+1:MJ]
+    gamVals <- mvnorms[1:MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:MJ,]
 
     # Estimate value (Verified as equal to pracma::trapz(1:MJ, abs(gamVals[i,])^2))
-    rowSums(abs(gamVals[,-c(MJ-0:(lx-1))])^2)/MJ
+    #rowSums(abs(gamVals[,-c(MJ-0:(lx-1))])^2)/MJ
+    rowSums(abs(t(gamVals))^2)/MJ
+    #tmp <- abs(gamVals)^2
+    #rowSums((tmp[,1:lx]+tmp[,c(MJ-0:(lx-1))])/2+tmp[,-c(1:lx,MJ-0:(lx-1))])/MJ
   }, MJ=MJ, sqrtMat=sqrtMat, lx=length(x))
 
   gamProcess <- as.vector(gamProcess)
@@ -165,9 +170,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   #                   rowSums(abs(gamVals[,-c(MJ-0:(length(x)-1))])^2)/MJ)
   # }
 
-  list('pval'=1-ecdf(gamProcess)(values[1]), 'pval2'=1-ecdf(gamProcess)(values[1]),
-       'gamProcess'=gamProcess, 'value'=values[1], 'value2'=values[2],
-       'M'=M)
+  list('pval'=1-ecdf(gamProcess)(val_Tn),'gamProcess'=gamProcess, 'value'=val_Tn)
 }
 
 
@@ -223,17 +226,18 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   }
 
   tmp1 <- x %*% t(x)
-  tmp2 <- minDF <- matrix(x,nrow=length(x),ncol=length(x))
+  minDF <- matrix(1,nrow=length(x),ncol=length(x))
   for(i in 1:length(x)){
     for(j in 1:length(x)){
-      minDF[i,j] <- (min(tmp2[i,j], t(tmp2)[i,j]) - tmp1[i,j])
+      minDF[i,j] <- (min(x[i], x[j]) - tmp1[i,j])
     }
   }
 
-  rbind(cbind(kronecker(as.matrix(minDF),as.matrix(D11)),
-              kronecker(as.matrix(minDF),as.matrix(D12))),
-        cbind(kronecker(as.matrix(minDF),as.matrix(D21)),
-              kronecker(as.matrix(minDF),as.matrix(D22))))
+  # Mults value from minDF to D11, then next value of minDF to D11, ...
+  rbind(cbind(fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D11)),
+              fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D12))),
+        cbind(fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D21)),
+              fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D22))))
 }
 
 
