@@ -4,10 +4,13 @@
 #'     data objects.
 #'
 #' @param M Integer for the number of vectors to generate
-#' @param space String for the space of interest. Options are 'BM', 'OU' and 'PC'
+#' @param space String for the space of interest. Options are Brownian motion
+#' ('BM'), OU process ('OU'), principal components ('PC'), and a vectors in iid
+#' standard, random normals ('RN').
 #' @param X Data of interest. Used to know evaluation amount of vectors
 #'
-#' @return Data.frame with columns of vectors describing the space
+#' @return Data.frame with columns of vectors describing the space. Columns are
+#'  independent vectors.
 #' @export
 #'
 #' @examples
@@ -46,8 +49,11 @@ computeSpaceMeasuringVectors <- function(M, space, X){
                               },covMat=covMat))
 
     # W <- as.data.frame(sapply(rep(nrow(X),M),sde::rsOU,theta=c(0,0,1)))
+  } else if(space=='RN'){
+    W <- data.frame(matrix(1,ncol=M,nrow=nrow(X)-1))
+    W <- as.data.frame(sapply(rep(nrow(X),M),rnorm))
   } else{
-    stop('Error: Sorry only BM, PC, or OU processes allowed')
+    stop('Error: Sorry only BM, OU, PC, or RN processes allowed')
   }
 
   W
