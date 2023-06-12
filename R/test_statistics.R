@@ -45,14 +45,15 @@
 #'     kappasArray = c(0,0))
 #' compute_Tn(data_KL)
 compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
-  n <- length(X[1,])
-  Xn <- length(X[,1])
+  n <- ncol(X)
+  Xn <- nrow(X)
 
-  if(is.null(W)){
-    W <- as.data.frame(sapply(rep(0,M),sde::BM, N=Xn-1))
-  }else{
-    W <- as.data.frame(W)
-  }
+  if(is.null(W)) W <- computeSpaceMeasuringVectors(M,"BM",X)
+  # if(is.null(W)){
+  #   W <- as.data.frame(sapply(rep(0,M),sde::BM, N=Xn-1))
+  # }else{
+  #   W <- as.data.frame(W)
+  # }
 
   if(!is.null(k)){
     #return_value <- 1/M * sum(sapply(W, .combZnInt, X1=X, n=n, nx=0:k))
@@ -92,8 +93,13 @@ compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
   #   sqrt(n)/n = 1/sqrt(n)
   fVals <- abs(1/sqrt(n)*(nfx-nx/n*nfx[length(nfx)]))^2
 
-  # LH Integration
+  # LH Integration(DID I RUIN THIS???)
+  #   TODO:: FIX THIS
+  # with(data.frame('nx'=nx,'val'=fVals),
+  #      (fVals[1:(length(fVals)-1)] + fVals[2:length(fVals)]) / 2 * 1/n)
+  # cumsum(c(0, cell))
   sum((fVals[-length(fVals)])) * 1/n
+  #pracma::trapz(nx/n,fVals)
 }
 
 
@@ -142,7 +148,7 @@ compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' compute_Mn(data_KL)
-compute_Mn <- function(X, k=NULL, M=100, W=NULL, ...){
+compute_Mn <- function(X, k=NULL, M=100, W=NULL, which.Mn=FALSE, ...){
 
   n <- length(X[1,])
   xSeq <- seq(1/n, 1, 1/n)
@@ -157,6 +163,9 @@ compute_Mn <- function(X, k=NULL, M=100, W=NULL, ...){
   }else{
     return_value <- max(1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n))))
   }
+
+  if(which.Mn)
+    return(which.max(1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))))
 
   return_value
 }
