@@ -39,14 +39,16 @@ welsh_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
                                 W = NULL, W1 = NULL, M=100,
                                 h = TVal^(1/3), K = bartlett_kernel, ...){
   if(is.null(W)){
-    W <- as.data.frame(sapply(rep(0,M),sde::BM, N=length(X[,1])-1))
-  }else{
-    W <- as.data.frame(W)
+    W <- computeSpaceMeasuringVectors(M,"BM",X)
   }
+  # if(is.null(W)){
+  #   W <- as.data.frame(sapply(rep(0,M),sde::BM, N=length(X[,1])-1))
+  # }else{
+  #   W <- as.data.frame(W)
+  # }
+
   if(is.null(W1)){
-    W1 <- as.data.frame(sapply(rep(0,M),sde::BM, N=length(X[,1])-1))
-  }else{
-    W1 <- as.data.frame(W1)
+    W1 <- computeSpaceMeasuringVectors(M,"BM",X)
   }
 
   muVals <- rep(0,M)
@@ -56,7 +58,7 @@ welsh_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
     v <- W[,i]
     v1 <- W1[,i]
 
-    CHat <- estimateLRV(X=X,v1=v,v2=v,TVal=TVal,h=h,K=K)
+    CHat <- .estimateLRV(X=X,v1=v,v2=v,TVal=TVal,h=h,K=K)
     CHat1 <- .estimateLRV(X=X,v1=v,v2=v1,TVal=TVal,h=h,K=K)
 
     muVals[i] <- CHat
