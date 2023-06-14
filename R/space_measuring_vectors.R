@@ -29,10 +29,10 @@ computeSpaceMeasuringVectors <- function(M, space, X){
   if(space=='BM'){
     W <- as.data.frame(sapply(rep(0,M),sde::BM, N=nrow(X)-1))
   } else if(space=='PC'){
-    pComps <- prcomp(X, center=F, scale=F)
+    pComps <- stats::prcomp(X, center=F, scale=F)
     W <- as.data.frame(sapply(rep(nrow(X),M),
                               function(x,pcs){
-                                rowSums(rnorm(ncol(pcs))*pcs)
+                                rowSums(stats::rnorm(ncol(pcs))*pcs)
                               },pcs=pComps$x))
   } else if(space=='OU'){
     x <- seq(0,1, length.out=nrow(X))
@@ -45,13 +45,13 @@ computeSpaceMeasuringVectors <- function(M, space, X){
     }
     W <- as.data.frame(sapply(rep(nrow(X),M),
                               function(x,covMat){
-                                covMat %*% rnorm(x)
+                                covMat %*% stats::rnorm(x)
                               },covMat=covMat))
 
     # W <- as.data.frame(sapply(rep(nrow(X),M),sde::rsOU,theta=c(0,0,1)))
   } else if(space=='RN'){
     W <- data.frame(matrix(1,ncol=M,nrow=nrow(X)-1))
-    W <- as.data.frame(sapply(rep(nrow(X),M),rnorm))
+    W <- as.data.frame(sapply(rep(nrow(X),M),stats::rnorm))
   } else{
     stop('Error: Sorry only BM, OU, PC, or RN processes allowed')
   }
