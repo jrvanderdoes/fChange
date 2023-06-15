@@ -259,7 +259,7 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
   }
 
   # Select best and continue if reasonable
-  if(nrow(na.omit(result))){
+  if(nrow(stats::na.omit(result))){
     cp_loc <- result[which.max(result[,2]),1]
 
     cps <- c(wild_binary_segmentation(data[,min_pt:cp_loc],
