@@ -5,11 +5,11 @@
 #'
 #' @param data A data.frame of evaluated fd objects (the columns being lines and
 #'     the rows the evaluated points)
-#' @param eval_points (Optional) An vector containing the points at which the
-#'     data was evaluated. Default is 1:nrow(data)
 #' @param CPs (Optional) Vectors of numeric values indicating the location of
 #'     change points. This will color each section differently. Default vallue
 #'     is NULL.
+#' @param eval_points (Optional) An vector containing the points at which the
+#'     data was evaluated. Default is 1:nrow(data)
 #' @param plot_title (Optional) String to title the plot. Default value is NULL.
 #' @param val_axis_title (Optional) String to title the axis for values of
 #'     observation. Default value is 'Value'.
@@ -43,9 +43,9 @@
 #'                                kappasArray = c(0,0))
 #' plot_fd(data=data_KL,eval_points=evalPts)
 #'
-#' plot_fd(data=data_KL,eval_points=evalPts, CPs=200)
-#' plot_fd(data=data_KL,eval_points=evalPts, CPs=seq(40,360,20))
-plot_fd <- function(data, eval_points = 1:nrow(data), CPs=NULL, plot_title=NULL,
+#' plot_fd(data=data_KL, CPs=200, eval_points=evalPts)
+#' plot_fd(data=data_KL, CPs=seq(40,360,20), eval_points=evalPts)
+plot_fd <- function(data, CPs=NULL, eval_points = 1:nrow(data), plot_title=NULL,
                     val_axis_title = 'Value', eval_axis_title='EvalRange',
                     FD_axis_title = 'FD Sims',FDReps=1:ncol(data),
                     eye = list(x = -1.5, y = -1.5, z = 1.5),
