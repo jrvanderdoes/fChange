@@ -133,6 +133,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
 
   # Compute Gamma Matrix
   covMat <- .estimCovMat(X,x,Cov_M,h,K,W)
+  covMat <- round(covMat,15)
   covMat_svd <- svd(covMat) # covMat_svd$u %*% diag(covMat_svd$d) %*% t(covMat_svd$v)
   sqrtD <- sqrt(diag(covMat_svd$d))
   sqrtD[is.na(sqrtD)] <- 0
