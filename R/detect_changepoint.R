@@ -132,7 +132,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   MJ <- Cov_M * length(x)
 
   # Compute Gamma Matrix
-  covMat <- .estimCovMat(X,x,Cov_M,h,K,W)
+  covMat <- .estimCovMat(X,x,Cov_M,h,K,W) # This is the issue!!
   covMat <- round(covMat,15)
   covMat_svd <- svd(covMat) # covMat_svd$u %*% diag(covMat_svd$d) %*% t(covMat_svd$v)
   sqrtD <- sqrt(diag(covMat_svd$d))
@@ -171,7 +171,9 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   #                   rowSums(abs(gamVals[,-c(MJ-0:(length(x)-1))])^2)/MJ)
   # }
 
-  list('pval'=1-ecdf(gamProcess)(val_Tn),'gamProcess'=gamProcess, 'value'=val_Tn)
+  list('pval'=1-ecdf(gamProcess)(val_Tn),
+       'gamProcess'=gamProcess,
+       'value'=val_Tn)
 }
 
 
@@ -198,7 +200,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
 #' # This is an internal function, see usage in computeMethod
 .estimCovMat <- function(X, x=seq(0,1,length.out=nrow(X)),
                          M=25, h=3, K=bartlett_kernel, W=NULL){
-
+  # Setup random vectors
   if(is.null(W)){
     W <- computeSpaceMeasuringVectors(M,"BM",X)
   }
@@ -309,8 +311,8 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
       tmp <- tmp + .estimR(X,r,lfun,v,mean1) * .estimR(X,r+k,lfunp,vp,mean2)
     }
   }else{
-    mean1 <- mean(.estimf(X,lfun,v))
-    mean2 <- mean(.estimf(X,lfunp,vp))
+    mean1 <- mean(.estimf(X,lfun,v)) ## TODO: Not until k?
+    mean2 <- mean(.estimf(X,lfunp,vp)) ## TODO: Not after k?
     for(r in (1-k):ncol(X)){
       tmp <- tmp + .estimR(X,r,lfun,v,mean1) * .estimR(X,r+k,lfunp,vp,mean2)
     }
