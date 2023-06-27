@@ -25,9 +25,9 @@
 #' welsh_approximation(data_KL,K=bartlett_kernel)
 bartlett_kernel <- function(l, h){
   val <- 0
-  if(h==l && h==0){
+  if(h==l && h==0){ # if both 0
     val <- 1
-  }else if(abs(l) < h){
+  }else if(abs(l) < h){ # <= no diff as 0
     val <- (1 - abs(l) / h)
   }
 
