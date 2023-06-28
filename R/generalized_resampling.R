@@ -42,22 +42,23 @@
 generalized_resampling <- function(X, blockSize, fn, iters,
                                    replace=F, alpha=0.05, silent=F, ...){
 
-  if(!silent){
-    st<-Sys.time()
-    fullVal <- fn(X,...)
-    en<-Sys.time()
 
+  st<-Sys.time()
+  full_val <- fn(X,...)
+  en<-Sys.time()
+
+  if(!silent){
     cat(paste0('Estimated time: ',
                round(difftime(en,st,'units'='mins')[[1]]*iters,2),
                ' mins\n'))
   }
 
-  n <- length(X[1,])
+  n <- ncol(X)
   idxGroups <- .getChunks(1:n, n/blockSize)
   idxs <- sapply(1:iters,function(i,m, indxs,replace){
     samps <- sample(1:m, replace = replace)
     unlist(indxs[samps], use.names = F) #as.numeric(names(indxs[samps]))
-  },m=length(idxGroups),indxs=idxGroups,replace=replace)
+  }, m=length(idxGroups), indxs=idxGroups, replace=replace)
   # If it is a matrix/dataframe this already even rows
   #     (will be with permutation test)
   if(!(is.matrix(idxs)| is.data.frame(idxs)))
@@ -68,7 +69,10 @@ generalized_resampling <- function(X, blockSize, fn, iters,
                       function(loop_iter,fn,X1,...){ fn(X1[,na.omit(loop_iter)], ...) },
                       X1=X,fn=fn, ...)
 
-  quantile(bssamples, probs = c(1-alpha))[[1]]
+  list('TVal'=full_val,
+       'cutoff'=quantile(bssamples, probs = c(1-alpha))[[1]],
+       'pval'=1-ecdf(bssamples)(full_val),
+       'BSSamples'=bssamples)
 }
 
 
