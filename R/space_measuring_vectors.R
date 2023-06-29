@@ -39,7 +39,6 @@ computeSpaceMeasuringVectors <- function(M, space, X){
     covMat <- (matrix(1,ncol=length(x),nrow=length(x)))
     covMat[,1] <- covMat[1,] <- exp(abs(x-x[1]))
     for(i in 2:(length(x)-1)){
-
       covMat[,i] <- covMat[i,] <- c(covMat[i,c(1:(i-1))],
                                     exp(abs(x-x[i]))[-c(1:(i-1))])
     }
