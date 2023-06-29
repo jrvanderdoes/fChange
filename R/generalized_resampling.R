@@ -42,7 +42,6 @@
 generalized_resampling <- function(X, blockSize, fn, iters,
                                    replace=F, alpha=0.05, silent=F, ...){
 
-
   st<-Sys.time()
   full_val <- fn(X,...)
   en<-Sys.time()
@@ -57,7 +56,7 @@ generalized_resampling <- function(X, blockSize, fn, iters,
   idxGroups <- .getChunks(1:n, n/blockSize)
   idxs <- sapply(1:iters,function(i,m, indxs,replace){
     samps <- sample(1:m, replace = replace)
-    unlist(indxs[samps], use.names = F) #as.numeric(names(indxs[samps]))
+    unlist(indxs[samps], use.names = F)
   }, m=length(idxGroups), indxs=idxGroups, replace=replace)
   # If it is a matrix/dataframe this already even rows
   #     (will be with permutation test)
@@ -66,13 +65,14 @@ generalized_resampling <- function(X, blockSize, fn, iters,
 
 
   bssamples <- sapply(as.data.frame(idxs),
-                      function(loop_iter,fn,X1,...){ fn(X1[,na.omit(loop_iter)], ...) },
-                      X1=X,fn=fn, ...)
+                      function(loop_iter,fn,X1,...){
+                        fn(X1[,na.omit(loop_iter)], ...)
+                      }, X1=X,fn=fn, ...)
 
   list('TVal'=full_val,
        'cutoff'=quantile(bssamples, probs = c(1-alpha))[[1]],
        'pval'=1-ecdf(bssamples)(full_val),
-       'BSSamples'=bssamples)
+       'BSSamples'=as.numeric(bssamples))
 }
 
 
