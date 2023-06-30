@@ -46,14 +46,8 @@
 #' compute_Tn(data_KL)
 compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
   n <- ncol(X)
-  Xn <- nrow(X)
 
   if(is.null(W)) W <- computeSpaceMeasuringVectors(M,"BM",X)
-  # if(is.null(W)){
-  #   W <- as.data.frame(sapply(rep(0,M),sde::BM, N=Xn-1))
-  # }else{
-  #   W <- as.data.frame(W)
-  # }
 
   if(!is.null(k)){
     #return_value <- 1/M * sum(sapply(W, .combZnInt, X1=X, n=n, nx=0:k))
@@ -93,7 +87,7 @@ compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
   #   sqrt(n)/n = 1/sqrt(n)
   fVals <- abs(1/sqrt(n)*(nfx-nx/n*nfx[length(nfx)]))^2
 
-  # LH Integration(DID I RUIN THIS???)
+  # LH Integration
   #   TODO:: FIX THIS
   # with(data.frame('nx'=nx,'val'=fVals),
   #      (fVals[1:(length(fVals)-1)] + fVals[2:length(fVals)]) / 2 * 1/n)
