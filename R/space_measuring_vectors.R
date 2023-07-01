@@ -50,7 +50,9 @@ computeSpaceMeasuringVectors <- function(M, space, X){
     # W <- as.data.frame(sapply(rep(nrow(X),M),sde::rsOU,theta=c(0,0,1)))
   } else if(space=='RN'){
     W <- data.frame(matrix(1,ncol=M,nrow=nrow(X)-1))
-    W <- as.data.frame(sapply(rep(nrow(X),M),stats::rnorm))
+    W <- as.data.frame(sapply(rep(nrow(X),M),
+                              function(x){
+                                rep(stats::rnorm(1),x)}))
   } else{
     stop('Error: Sorry only BM, OU, PC, or RN processes allowed')
   }
