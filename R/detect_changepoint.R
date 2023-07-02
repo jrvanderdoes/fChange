@@ -119,9 +119,9 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 #'                                         x=seq(0,1,length.out=20),
 #'                                         h=3, K=bartlett_kernel, silent=F,
 #'                                         maxM=250, ratio=0.05)
-detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
+detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50),
                                          h=3, K=bartlett_kernel, space='BM',
-                                         silent=F,TN_M=10000, Cov_M=75){
+                                         silent=F,TN_M=10000, Cov_M=100){
   # Determine Number of Iterations
   val_Tn <- compute_Tn(X,M=TN_M)
 
@@ -132,7 +132,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   MJ <- Cov_M * length(x)
 
   # Compute Gamma Matrix
-  covMat <- .estimCovMat(X,x,Cov_M,h,K,W) # This is the issue!!
+  covMat <- .estimCovMat(X,x,Cov_M,h,K,W)
   covMat <- round(covMat,15)
   covMat_svd <- svd(covMat) # covMat_svd$u %*% diag(covMat_svd$d) %*% t(covMat_svd$v)
   sqrtD <- sqrt(diag(covMat_svd$d))
@@ -144,9 +144,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   nIters <- nSims/100
   gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ, sqrtMat, lx){
     # (After trans + mult) Rows are iid MNV
-    #mvnorms <- t(sapply(1:100,function(m,x){rnorm(x)},x=2*MJ))
     mvnorms <- sapply(1:100,function(m,x){rnorm(x)},x=2*MJ)
-    #mvnorms <- mvnorms %*% sqrtMat
     mvnorms <- sqrtMat %*% mvnorms
 
     gamVals <- mvnorms[1:MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:MJ,]
@@ -159,17 +157,6 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   }, MJ=MJ, sqrtMat=sqrtMat, lx=length(x))
 
   gamProcess <- as.vector(gamProcess)
-  # for(i in 1:nIters){
-  #   # (After trans + mult) Rows are iid MNV
-  #   mvnorms <- t(sapply(1:100,function(m,x){rnorm(x)},x=2*MJ))
-  #   mvnorms <- mvnorms %*% sqrtMat
-  #
-  #   gamVals <- mvnorms[,1:MJ] + complex(imaginary = 1)*mvnorms[,MJ+1:MJ]
-  #
-  #   # Estimate value
-  #   gamProcess <- c(gamProcess,
-  #                   rowSums(abs(gamVals[,-c(MJ-0:(length(x)-1))])^2)/MJ)
-  # }
 
   list('pval'=1-ecdf(gamProcess)(val_Tn),
        'gamProcess'=gamProcess,
@@ -237,10 +224,15 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   }
 
   # Mults value from minDF to D11, then next value of minDF to D11, ...
-  rbind(cbind(fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D11)),
-              fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D12))),
-        cbind(fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D21)),
-              fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D22))))
+  # rbind(cbind(fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D11)),
+  #             fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D12))),
+  #       cbind(fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D21)),
+  #             fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D22))))
+  fastmatrix::kronecker.prod(
+    as.matrix(minDF),
+    rbind(cbind(as.matrix(D11),as.matrix(D12)),
+          cbind(as.matrix(D21),as.matrix(D22))))
+
 }
 
 
@@ -277,7 +269,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
     }
   }
 
-  sumVal
+  1/ncol(X) * sumVal
 }
 
 
@@ -311,14 +303,14 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
       tmp <- tmp + .estimR(X,r,lfun,v,mean1) * .estimR(X,r+k,lfunp,vp,mean2)
     }
   }else{
-    mean1 <- mean(.estimf(X,lfun,v)) ## TODO: Not until k?
-    mean2 <- mean(.estimf(X,lfunp,vp)) ## TODO: Not after k?
+    mean1 <- mean(.estimf(X,lfun,v))
+    mean2 <- mean(.estimf(X,lfunp,vp))
     for(r in (1-k):ncol(X)){
       tmp <- tmp + .estimR(X,r,lfun,v,mean1) * .estimR(X,r+k,lfunp,vp,mean2)
     }
   }
 
-  1/ncol(X) * tmp
+  tmp
 }
 
 
@@ -342,8 +334,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
 #' @examples
 #' # This is an internal function, see usage in .estimGamma
 .estimR <- function(X,r,lfun,v, meanVal=NA){
-  if(is.na(meanVal))
-    meanVal <- mean(.estimf(X,lfun,v))
+  if(is.na(meanVal)) meanVal <- mean(.estimf(X,lfun,v))
 
   .estimf(X[,r],lfun,v) - meanVal
 }
