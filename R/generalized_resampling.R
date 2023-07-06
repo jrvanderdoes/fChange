@@ -39,7 +39,7 @@
 #' generalized_resampling(X=data_KL,
 #'     blockSize=ncol(data_KL)^(1/3),
 #'     fn=compute_Tn, iters=1000, replace=F)
-generalized_resampling <- function(X, blockSize, fn, iters,
+generalized_resampling <- function(X, blockSize, fn, iters = 1000,
                                    replace=F, alpha=0.05, silent=F, ...){
 
   st<-Sys.time()
