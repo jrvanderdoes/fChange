@@ -1,7 +1,7 @@
 
-#' Welsh Approximation to Tn
+#' Welch Approximation to Tn
 #'
-#' This function approximates the Tn statistic using the Welsh approximation.
+#' This function approximates the Tn statistic using the Welch approximation.
 #'
 #' @param X Numeric data.frame with evaled points on rows and fd objects in columns
 #' @param alpha (Optional) Numeric value in (0,1) for significance. Default is 0.05
@@ -35,7 +35,7 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' welsh_approximation(data_KL)
-welsh_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
+welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
                                 W = NULL, W1 = NULL, M=100,
                                 h = TVal^(1/3), K = bartlett_kernel, ...){
   if(is.null(W)){
