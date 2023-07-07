@@ -121,9 +121,12 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 #'                                         maxM=250, ratio=0.05)
 detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50),
                                          h=3, K=bartlett_kernel, space='BM',
-                                         silent=F,TN_M=10000, Cov_M=100){
+                                         silent=F, TN_M=10000, Cov_M=100){
+  # Source Cpp File to speed up matrix computations
+  # Rcpp::sourceCpp("R/matrixMult.cpp")
+
   # Determine Number of Iterations
-  val_Tn <- compute_Tn(X,M=TN_M)
+  val_Tn <- compute_Tn(X,M=TN_M, space=space)
 
   # Generate Noise
   W <- computeSpaceMeasuringVectors(Cov_M,space,X)
@@ -135,9 +138,13 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
   covMat <- .estimCovMat(X,x,Cov_M,h,K,W)
   covMat <- round(covMat,15)
   covMat_svd <- svd(covMat) # covMat_svd$u %*% diag(covMat_svd$d) %*% t(covMat_svd$v)
-  sqrtD <- sqrt(diag(covMat_svd$d))
+  sqrtD <- diag(sqrt(covMat_svd$d))
   sqrtD[is.na(sqrtD)] <- 0
+  # sqrtMat <- eigenMapMatMult(
+  #   eigenMapMatMult(covMat_svd$u, sqrtD),t(covMat_svd$v))
   sqrtMat <- covMat_svd$u %*% sqrtD %*% t(covMat_svd$v)
+  # sqrtMat <- Rfast::mat.mult(
+  #   Rfast::mat.mult(covMat_svd$u,sqrtD),t(covMat_svd$v))
   rm(W,covMat,covMat_svd,sqrtD)
 
   gamProcess <- c()
@@ -149,11 +156,8 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
 
     gamVals <- mvnorms[1:MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:MJ,]
 
-    # Estimate value (Verified as equal to pracma::trapz(1:MJ, abs(gamVals[i,])^2))
-    #rowSums(abs(gamVals[,-c(MJ-0:(lx-1))])^2)/MJ
-    rowSums(abs(t(gamVals))^2)/MJ
-    #tmp <- abs(gamVals)^2
-    #rowSums((tmp[,1:lx]+tmp[,c(MJ-0:(lx-1))])/2+tmp[,-c(1:lx,MJ-0:(lx-1))])/MJ
+    # Estimate value
+    apply(abs(t(gamVals))^2,MARGIN = 1, .approx_int)
   }, MJ=MJ, sqrtMat=sqrtMat, lx=length(x))
 
   gamProcess <- as.vector(gamProcess)
