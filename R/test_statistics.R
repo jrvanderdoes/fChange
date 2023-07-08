@@ -44,20 +44,70 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' compute_Tn(data_KL)
-compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
+# compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
+#   n <- ncol(X)
+#
+#   if(is.null(W)) W <- computeSpaceMeasuringVectors(M,"BM",X)
+#
+#   if(!is.null(k)){
+#     #return_value <- 1/M * sum(sapply(W, .combZnInt, X1=X, n=n, nx=0:k))
+#     return_value <- 1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))[k]
+#   }else{
+#     return_value <- 1/M * sum(as.data.frame(sapply(W, .combZnInt, X1=X, n=n, nx=0:n)))
+#   }
+#
+#   return_value
+# }
+compute_Tn <- function(X, k=NULL, M=10000, W=NULL, space='BM',...){
   n <- ncol(X)
 
-  if(is.null(W)) W <- computeSpaceMeasuringVectors(M,"BM",X)
+  if(is.null(W)) W <- computeSpaceMeasuringVectors(M = M, X = X, space=space)
 
+  # Not technically correct, more of an Mn but okay for now
   if(!is.null(k)){
-    #return_value <- 1/M * sum(sapply(W, .combZnInt, X1=X, n=n, nx=0:k))
-    return_value <- 1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))[k]
-  }else{
-    return_value <- 1/M * sum(as.data.frame(sapply(W, .combZnInt, X1=X, n=n, nx=0:n)))
+    intVal <- sapply(1:M, function(v,W,X1,n){
+      (abs(.Zn(W[,v],X1)))^2
+    },W=W,X1=X,n=n)
+    return ( 1/M * rowSums(intVal)[k] )
   }
 
-  return_value
+  intVal <- sapply(1:M, function(v,W,X1,n){
+    .approx_int( (abs(.Zn(W[,v],X1)))^2 ) #RH Int
+  },W=W,X1=X,n=n)
+
+  1/M * sum(intVal)
 }
+
+.approx_int <- function(y){
+  # RH Approx
+  # 1/(length(y)+1)*sum(c(0,y))
+  # Trap Approx 1
+  # pracma::trapz(seq(0,1,length.out=length(y)+1), c(0,y))
+  # Trap Approx 2
+  # pracma::trapz(seq(0,1,length.out=length(y)),y)
+  # Trap Approx 3
+  # n <- length(y)
+  # pracma::trapz(seq(1/n,1,length.out=n),y)
+  # Trap Approx 4
+  # n <- length(y)
+  # pracma::trapz(seq(0,1-1/n,length.out=n), y)
+  # RH Approx
+  sum(y) * 1 / length(y)
+}
+
+.Zn <- function(v,X){
+  n <- ncol(X)
+  fhat_vals <- .fhat_all(X,v)
+  fhat_full <- sum(fhat_vals)
+
+  sqrt(n) * (cumsum(fhat_vals)-1:n/n * fhat_full)
+}
+
+.fhat_all <- function(X,v){
+  1/ncol(X) * exp(1/nrow(X)*complex(imaginary = 1)* t(X) %*% v)
+}
+
+
 
 
 #' Compute Integrated Zn Squared ($\int |Zn|^2$)
@@ -142,26 +192,47 @@ compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' compute_Mn(data_KL)
-compute_Mn <- function(X, k=NULL, M=100, W=NULL, which.Mn=FALSE, ...){
+# compute_Mn <- function(X, k=NULL, M=100, W=NULL, which.Mn=FALSE, ...){
+#
+#   n <- length(X[1,])
+#   #xSeq <- seq(1/n, 1, 1/n)
+#   #xN <- length(X[,1])
+#   if(is.null(W)){
+#     W <- as.data.frame(sapply(rep(0,M),sde::BM, N=xN-1))
+#   }
+#
+#
+#   if(!is.null(k)){
+#     return_value <- 1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))[k]
+#   }else{
+#     return_value <- max(1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n))))
+#   }
+#
+#   if(which.Mn)
+#     return(which.max(1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))))
+#
+#   return_value
+# }
+compute_Mn <- function(X, k=NULL, M=10000, W=NULL, space='BM', which.Mn=FALSE, ...){
+  n <- ncol(X)
 
-  n <- length(X[1,])
-  xSeq <- seq(1/n, 1, 1/n)
-  xN <- length(X[,1])
-  if(is.null(W)){
-    W <- as.data.frame(sapply(rep(0,M),sde::BM, N=xN-1))
-  }
-
+  if(is.null(W)) W <- computeSpaceMeasuringVectors(M = M, X = X, space=space)
 
   if(!is.null(k)){
-    return_value <- 1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))[k]
+    intVal <- sapply(1:M, function(v,W,X1,n){
+      (abs(.Zn(W[,v],X1)))^2
+    },W=W,X1=X,n=n)
+    return_value <-  1/M * rowSums(intVal)[k]
   }else{
-    return_value <- max(1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n))))
+    intVal <- sapply(1:M, function(v,W,X1,n){
+      (abs(.Zn(W[,v],X1)))^2 #RH Int
+    },W=W,X1=X,n=n)
+    return_value <- 1/M * rowSums(intVal)
   }
 
-  if(which.Mn)
-    return(which.max(1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))))
+  if(which.Mn) return(which.max(return_value))
 
-  return_value
+  max(return_value)
 }
 
 
