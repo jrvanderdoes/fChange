@@ -84,6 +84,7 @@ complete_binary_segmentation <- function(data,
                                          changepoint_function = NULL,
                                          final_verify = T,
                                          silent = F,
+                                         alpha=0.05,
                                          ... ){
 
   # Get change points -- Will not include first or last
@@ -91,15 +92,16 @@ complete_binary_segmentation <- function(data,
                                 test_statistic_function=test_statistic_function,
                                 changepoint_function=changepoint_function,
                                 silent = silent,
+                                alpha=0.05,
                                 ... )
 
   # Verify as desired
   if(final_verify){
-
     CPsVals <- changepoint_verification(CPsVals=CPsVals, data=data,
                       test_statistic_function=test_statistic_function,
                       changepoint_function=changepoint_function,
                       silent=silent,
+                      alpha=0.05,
                       ...)
   }
 
@@ -314,9 +316,10 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
   if(!is.null(test_statistic_function)){
     potential_cp <-
       single_binary_segmentation(data,
-                 test_statistic_function=test_statistic_function, ... )
+                 test_statistic_function=test_statistic_function,
+                 alpha=alpha, ... )
   }else if(!is.null(changepoint_function)){
-    potential_cp <- changepoint_function(data, ...)
+    potential_cp <- changepoint_function(data, alpha=alpha, ...)
   }
 
   # No Change Point Detected
@@ -333,6 +336,7 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
                        changepoint_function=changepoint_function,
                        addAmt=addAmt,
                        silent=silent,
+                       alpha=alpha,
                        ...),
     potential_cp + addAmt,
     .detectChangePoints(data=as.data.frame(data[,(potential_cp+1):ncol(data)]),
@@ -340,6 +344,7 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
                        changepoint_function=changepoint_function,
                        addAmt=addAmt+potential_cp,
                        silent=silent,
+                       alpha=alpha,
                        ...)
   ))
 }
