@@ -78,6 +78,14 @@ compute_Tn <- function(X, k=NULL, M=10000, W=NULL, space='BM',...){
   1/M * sum(intVal)
 }
 
+#' Title
+#'
+#' @param y
+#'
+#' @return
+#' @export
+#'
+#' @examples
 .approx_int <- function(y){
   # RH Approx
   # 1/(length(y)+1)*sum(c(0,y))
@@ -92,9 +100,18 @@ compute_Tn <- function(X, k=NULL, M=10000, W=NULL, space='BM',...){
   # n <- length(y)
   # pracma::trapz(seq(0,1-1/n,length.out=n), y)
   # RH Approx
-  sum(y) * 1 / length(y)
+  sum(y) / length(y)
 }
 
+#' Title
+#'
+#' @param v
+#' @param X
+#'
+#' @return
+#' @export
+#'
+#' @examples
 .Zn <- function(v,X){
   n <- ncol(X)
   fhat_vals <- .fhat_all(X,v)
@@ -103,8 +120,17 @@ compute_Tn <- function(X, k=NULL, M=10000, W=NULL, space='BM',...){
   sqrt(n) * (cumsum(fhat_vals)-1:n/n * fhat_full)
 }
 
+#' Title
+#'
+#' @param X
+#' @param v
+#'
+#' @return
+#' @export
+#'
+#' @examples
 .fhat_all <- function(X,v){
-  1/ncol(X) * exp(1/nrow(X)*complex(imaginary = 1)* t(X) %*% v)
+  exp(1/nrow(X)*complex(imaginary = 1)* t(X) %*% v) / ncol(X)
 }
 
 
