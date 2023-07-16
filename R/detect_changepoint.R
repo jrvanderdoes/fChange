@@ -63,11 +63,11 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
     mvnorms <- suppressWarnings(mvtnorm::rmvnorm(1,sigma=covMat))
 
     gamVals <- mvnorms[1,1:MJ] +
-      complex(imaginary = 1)*mvnorms[1,MJ+1:MJ]
+      complex(imaginary = 1) * mvnorms[1,MJ+1:MJ]
 
     # Estimate value
-    gamProcess[i] <-
-      sum(abs(gamVals)^2)/MJ
+    # gamProcess[i] <- sum(abs(gamVals)^2)/MJ
+    gamProcess[i] <- .approx_int(abs(gamVals)^2)/nrow(X)
   }
 
   list('pval'=1-ecdf(gamProcess)(value), 'gamProcess'=gamProcess, 'value'=value)
@@ -107,7 +107,7 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 #'                        evals = seq(0,1,0.05),
 #'                        kappasArray = c(0),silent = T)
 #' nocp_res <- detect_changepoint_singleCov(X1, nSims=500, x=seq(0,1,length.out=20),
-#'                                          h=1, K=bartlett_kernel, silent=F)
+#'                                          h=0, K=bartlett_kernel, silent=F)
 #' X3 <- generate_data_fd(ns = c(50,250),
 #'                        eigsList = list(c(3,2,1,0.5),c(30,1)),
 #'                        basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
@@ -116,12 +116,10 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 #'                        distsArray = c('Normal'), kappasArray = c(0.5),
 #'                        evals = seq(0,1,0.05), silent = T)
 #' cp_res3 <- detect_changepoint_singleCov(X, nSims=500,
-#'                                         x=seq(0,1,length.out=20),
-#'                                         h=3, K=bartlett_kernel, silent=F,
-#'                                         maxM=250, ratio=0.05)
-detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50),
+#'                                         x=seq(0,1,length.out=20))
+detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40),
                                          h=3, K=bartlett_kernel, space='BM',
-                                         silent=F, TN_M=10000, Cov_M=100){
+                                         silent=F, TN_M=10000, Cov_M=75){
   # Source Cpp File to speed up matrix computations
   # Rcpp::sourceCpp("R/matrixMult.cpp")
 
@@ -129,6 +127,7 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
   val_Tn <- compute_Tn(X,M=TN_M, space=space)
 
   # Generate Noise
+  set.seed(123)
   W <- computeSpaceMeasuringVectors(Cov_M,space,X)
 
   # Variables
@@ -137,14 +136,13 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
   # Compute Gamma Matrix
   covMat <- .estimCovMat(X,x,Cov_M,h,K,W)
   covMat <- round(covMat,15)
-  covMat_svd <- svd(covMat) # covMat_svd$u %*% diag(covMat_svd$d) %*% t(covMat_svd$v)
+  covMat_svd <- La.svd(covMat)
   sqrtD <- diag(sqrt(covMat_svd$d))
   sqrtD[is.na(sqrtD)] <- 0
   # sqrtMat <- eigenMapMatMult(
   #   eigenMapMatMult(covMat_svd$u, sqrtD),t(covMat_svd$v))
-  sqrtMat <- covMat_svd$u %*% sqrtD %*% t(covMat_svd$v)
-  # sqrtMat <- Rfast::mat.mult(
-  #   Rfast::mat.mult(covMat_svd$u,sqrtD),t(covMat_svd$v))
+  sqrtMat <- Rfast::mat.mult(
+    Rfast::mat.mult(covMat_svd$u,sqrtD),covMat_svd$vt)
   rm(W,covMat,covMat_svd,sqrtD)
 
   gamProcess <- c()
@@ -152,12 +150,12 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
   gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ, sqrtMat, lx){
     # (After trans + mult) Rows are iid MNV
     mvnorms <- sapply(1:100,function(m,x){rnorm(x)},x=2*MJ)
-    mvnorms <- sqrtMat %*% mvnorms
+    mvnorms <- Rfast::mat.mult(sqrtMat, mvnorms)
 
     gamVals <- mvnorms[1:MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:MJ,]
 
     # Estimate value
-    apply(abs(t(gamVals))^2,MARGIN = 1, .approx_int)
+    apply(abs(t(gamVals))^2,MARGIN = 1, .approx_int) / nrow(X)#nrow(X)
   }, MJ=MJ, sqrtMat=sqrtMat, lx=length(x))
 
   gamProcess <- as.vector(gamProcess)
@@ -197,18 +195,19 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
   }
   if(ncol(W)!=M) stop('Number of Vectors not M')
 
-  D11 <- D12 <- D21 <- D22 <- data.frame(matrix(ncol=M,nrow=M))
+  D11 <- D12_tD21 <- D22 <- data.frame(matrix(ncol=M,nrow=M))
   funs <- c(cos,sin)
   for(i in 1:M){
     for(j in i:M){
       D11[i,j] <- D11[j,i] <-
         .estimD(K=K,h=h,X=X,
-                lfun=funs[1][[1]],v=W[,i],lfunp=funs[1][[1]],vp=W[,j])
-      D12[i,j] <- D21[j,i] <-
+                lfun=funs[1][[1]],v=W[,i],
+                lfunp=funs[1][[1]],vp=W[,j])
+      D12_tD21[i,j] <-
         .estimD(K=K,h=h,X=X,
                 lfun=funs[1][[1]],v=W[,i],lfunp=funs[2][[1]],vp=W[,j])
       if(j>i){
-        D12[j,i] <- D21[i,j] <- .estimD(K=K, h=h, X=X,
+        D12_tD21[j,i] <- .estimD(K=K, h=h, X=X,
                                         lfun=funs[1][[1]], v=W[,j],
                                         lfunp=funs[2][[1]], vp=W[,i])
       }
@@ -234,8 +233,8 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
   #             fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D22))))
   fastmatrix::kronecker.prod(
     as.matrix(minDF),
-    rbind(cbind(as.matrix(D11),as.matrix(D12)),
-          cbind(as.matrix(D21),as.matrix(D22))))
+    rbind(cbind(as.matrix(D11),as.matrix(D12_tD21)),
+          cbind(as.matrix(t(D12_tD21)),as.matrix(D22))))
 
 }
 
@@ -263,17 +262,27 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
 #' # This is an internal function, see usage in .estimCovMat
 .estimD <- function(K,h,X,lfun,v,lfunp,vp){
 
-  sumVal <- 0
-  KVals <- sapply((1-ncol(X)):(ncol(X)-1), K, h=h)
+  iters <- (1-ncol(X)):(ncol(X)-1)
 
-  for(k in (1-ncol(X)):(ncol(X)-1)){
-    if(KVals[k+ncol(X)]!=0){
-      sumVal <- sumVal + KVals[k+ncol(X)] *
-        .estimGamma(k=k,X=X,lfun=lfun,v=v,lfunp=lfunp,vp=vp)
-    }
-  }
+  # Move so pass in function values to avoid recomputation later
+  fVals <- as.numeric(.estimf(X,lfun,v))
+  fpVals <- as.numeric(.estimf(X,lfunp,vp))
 
-  1/ncol(X) * sumVal
+  mean1 <- mean(fVals)
+  mean2 <- mean(fpVals)
+
+  values <- sapply(iters, function(k,K,h,X1,fVals,fpVals,mean1,mean2){
+    Kval <- K(k,h)
+
+    ifelse(Kval==0,
+           0,
+           Kval * .estimGamma(k=k,  X=X1,
+                              fVals=fVals, fpVals=fpVals,
+                              mean1=mean1, mean2=mean2))
+  },K=K, h=h, X1=X, fVals=fVals, fpVals=fpVals,
+  mean1=mean(fVals),mean2=mean(fpVals))
+
+  sum(values) / ncol(X)
 }
 
 
@@ -297,24 +306,16 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
 #'
 #' @examples
 #' # This is an internal function, see usage in .estimD
-.estimGamma <- function(k,X,lfun,v,lfunp,vp){
+.estimGamma <- function(k, X, fVals, fpVals, mean1, mean2){
   tmp <- 0
 
   if(k >=0){
-    mean1 <- mean(.estimf(X,lfun,v))
-    mean2 <- mean(.estimf(X,lfunp,vp))
-    for(r in 1:(ncol(X)-k)){
-      tmp <- tmp + .estimR(X,r,lfun,v,mean1) * .estimR(X,r+k,lfunp,vp,mean2)
-    }
+    rs <- 1:(ncol(X)-k)
   }else{
-    mean1 <- mean(.estimf(X,lfun,v))
-    mean2 <- mean(.estimf(X,lfunp,vp))
-    for(r in (1-k):ncol(X)){
-      tmp <- tmp + .estimR(X,r,lfun,v,mean1) * .estimR(X,r+k,lfunp,vp,mean2)
-    }
+    rs <- (1-k):ncol(X)
   }
 
-  tmp
+  sum(.estimR(rs, fVals, mean1)*.estimR(rs+k, fpVals ,mean2))
 }
 
 
@@ -337,10 +338,10 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=50)
 #'
 #' @examples
 #' # This is an internal function, see usage in .estimGamma
-.estimR <- function(X,r,lfun,v, meanVal=NA){
-  if(is.na(meanVal)) meanVal <- mean(.estimf(X,lfun,v))
+.estimR <- function(r, fVals, meanVal=NA){
+  if(is.na(meanVal)) meanVal <- mean(fVals)
 
-  .estimf(X[,r],lfun,v) - meanVal
+  fVals[r] - meanVal
 }
 
 

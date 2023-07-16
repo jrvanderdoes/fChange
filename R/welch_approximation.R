@@ -71,7 +71,7 @@ welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
   betaHat <- Re(sigma2Hat / (2*muHat))
   nuHat <- Re((2*muHat^2) / sigma2Hat)
 
-  betaHat * qchisq(1-alpha, df=nuHat)
+  betaHat * qchisq(1-alpha, df=nuHat) / nrow(X)
 }
 
 
