@@ -120,7 +120,7 @@ compute_Tn <- function(X, k=NULL, M=10000, W=NULL, space='BM',...){
   sqrt(n) * (cumsum(fhat_vals)-1:n/n * fhat_full)
 }
 
-#' Title
+#' Get fhat Time n Estimate
 #'
 #' @param X
 #' @param v
