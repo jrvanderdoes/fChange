@@ -13,6 +13,7 @@ Imports:
     fda,
     ggplot2,
     magrittr,
+    mvtnorm,
     plotly,
     RColorBrewer,
     Rfast,
@@ -20,6 +21,9 @@ Imports:
     stats,
     tensorA
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Suggests: 
     jmuOutlier
+Depends: 
+    R (>= 2.10)
+LazyData: true
