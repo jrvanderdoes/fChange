@@ -48,7 +48,7 @@
 #' tmp1 <- detect_changepoint(X1)
 #' tmp1$pval
 detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
-                               M=25, h=3, K=bartlett_kernel, silent=F){
+                               M=25, h=3, K=bartlett_kernel, silent=FALSE){
   # Setup Vars
   gamProcess <- rep(NA,nSims)
   value <- compute_Tn(X,M=M)
@@ -70,7 +70,9 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
       sum(abs(gamVals[-c(MJ-0:(length(x)-1))])^2)/MJ
   }
 
-  list('pval'=1-ecdf(gamProcess)(value), 'gamProcess'=gamProcess, 'value'=value)
+  list('pval'=1-stats::ecdf(gamProcess)(value),
+       'gamProcess'=gamProcess,
+       'value'=value)
 }
 
 #' Estimate null and detect change point based on a single covar matrix
@@ -95,9 +97,9 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 #'                       meansList = c(0,1),
 #'                       distsArray = c('Normal'),
 #'                       evals = seq(0,1,0.05),
-#'                       kappasArray = c(0.5),silent = T)
+#'                       kappasArray = c(0.5),silent = TRUE)
 #' cp_res <- detect_changepoint_singleCov(X, nSims=500, x=seq(0,1,length.out=20),
-#'                                        h=3, K=bartlett_kernel, silent=F)
+#'                                        h=3, K=bartlett_kernel, silent=FALSE)
 #'
 #' X1 <- generate_data_fd(ns = c(200),
 #'                        eigsList = list(c(3,2,1,0.5)),
@@ -105,23 +107,23 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 #'                        meansList = c(0),
 #'                        distsArray = c('Normal'),
 #'                        evals = seq(0,1,0.05),
-#'                        kappasArray = c(0),silent = T)
+#'                        kappasArray = c(0),silent = TRUE)
 #' nocp_res <- detect_changepoint_singleCov(X1, nSims=500, x=seq(0,1,length.out=20),
-#'                                          h=1, K=bartlett_kernel, silent=F)
+#'                                          h=1, K=bartlett_kernel, silent=FALSE)
 #' X3 <- generate_data_fd(ns = c(50,250),
 #'                        eigsList = list(c(3,2,1,0.5),c(30,1)),
 #'                        basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
 #'                                         fda::create.bspline.basis(nbasis=2, norder=2)),
 #'                        meansList = c(0,0),
 #'                        distsArray = c('Normal'), kappasArray = c(0.5),
-#'                        evals = seq(0,1,0.05), silent = T)
+#'                        evals = seq(0,1,0.05), silent = TRUE)
 #' cp_res3 <- detect_changepoint_singleCov(X, nSims=500,
 #'                                         x=seq(0,1,length.out=20),
-#'                                         h=3, K=bartlett_kernel, silent=F,
+#'                                         h=3, K=bartlett_kernel, silent=FALSE,
 #'                                         maxM=250, ratio=0.05)
 detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
                                          h=3, K=bartlett_kernel, space='BM',
-                                         silent=F,maxM=250, ratio=0.05){
+                                         silent=FALSE, maxM=250, ratio=0.05){
   # Determine Number of Iterations
   done <- FALSE
   M <- 90
@@ -160,7 +162,7 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   nIters <- nSims/100
   gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ,sqrtMat,lx){
     # (After trans + mult) Rows are iid MNV
-    mvnorms <- t(sapply(1:100,function(m,x){rnorm(x)},x=2*MJ))
+    mvnorms <- t(sapply(1:100,function(m,x){stats::rnorm(x)},x=2*MJ))
     mvnorms <- mvnorms %*% sqrtMat
 
     gamVals <- mvnorms[,1:MJ] + complex(imaginary = 1)*mvnorms[,MJ+1:MJ]
@@ -183,8 +185,11 @@ detect_changepoint_singleCov <- function(X, nSims=500, x=seq(0,1,length.out=20),
   #                   rowSums(abs(gamVals[,-c(MJ-0:(length(x)-1))])^2)/MJ)
   # }
 
-  list('pval'=1-ecdf(gamProcess)(values[1]), 'pval2'=1-ecdf(gamProcess)(values[1]),
-       'gamProcess'=gamProcess, 'value'=values[1], 'value2'=values[2],
+  list('pval'=1-stats::ecdf(gamProcess)(values[1]),
+       'pval2'=1-stats::ecdf(gamProcess)(values[1]),
+       'gamProcess'=gamProcess,
+       'value'=values[1],
+       'value2'=values[2],
        'M'=M)
 }
 

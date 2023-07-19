@@ -43,7 +43,7 @@ tmp1$pval
 
 tmp2 <- generalized_resampling(X=linear_imputatation(as.data.frame(oil[-1])),
     blockSize=ncol(linear_imputatation(as.data.frame(oil[-1])))^(1/3),
-    fn=compute_Tn, iters=1000, replace=F)
+    fn=compute_Tn, iters=1000, replace=FALSE)
 tmp2
 compute_Tn(linear_imputatation(as.data.frame(oil[-1])))
 

@@ -68,10 +68,10 @@ compute_Mn(eval_fd_vals, which.Mn=TRUE)
 
 tmp_gs <- generalized_resampling(X=eval_fd_vals, blockSize=1,
                                  fn=compute_Tn, iters=1000,
-                                 replace=F)
+                                 replace=FALSE)
 tmp_gs
 
-tmp_wa <- welsh_approximation(eval_fd_vals, h=0)
+tmp_wa <- welch_approximation(eval_fd_vals, h=0)
 tmp_wa
 
 ## Try Huskova Paper code with integrate data

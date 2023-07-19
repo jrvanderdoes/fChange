@@ -52,8 +52,10 @@ library(doParallel)
 #'            kappasArray = c(0,0))
 #' tmp1 <- detect_changepoint_parallel(X1)
 #' tmp1$pval
-detect_changepoint_parallel <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
-                               M=25, h=3, K=bartlett_kernel, cores=NA, silent=F){
+detect_changepoint_parallel <- function(X, nSims=100,
+                                        x=seq(0,1,length.out=ncol(X)),
+                                        M=25, h=3, K=bartlett_kernel,
+                                        cores=NA, silent=FALSE){
   # Setup Vars
   gamProcess <- rep(NA,nSims)
   value <- compute_Tn(X,M=M)
@@ -275,7 +277,9 @@ detect_changepoint_parallel <- function(X, nSims=100, x=seq(0,1,length.out=ncol(
   #stop cluster
   stopCluster(cl)
 
-  list('pval'=1-ecdf(gamProcess)(value), 'gamProcess'=gamProcess, 'value'=value)
+  list('pval'=1-stats::ecdf(gamProcess)(value),
+       'gamProcess'=gamProcess,
+       'value'=value)
 }
 
 ## TODO:: Add library to parallel

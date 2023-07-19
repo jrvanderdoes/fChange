@@ -38,7 +38,7 @@ aust_tmp <- as.data.frame(aust_tmp)
 evalPts <- seq(0,1,0.001)
 aust_tmp_evaled <- matrix(nrow=length(evalPts), ncol=ncol(aust_tmp)-1)
 for(i in 2:ncol(aust_tmp)){
-  tmp_data <- na.omit(aust_tmp[,c(1,i)])
+  tmp_data <- stats::na.omit(aust_tmp[,c(1,i)])
   tmp <- fda::Data2fd(tmp_data[,1], tmp_data[,2],
                       basisobj = fda::create.bspline.basis(nbasis = 21))
   aust_tmp_evaled[,i-1] <- fda::eval.fd(evalPts,tmp)
