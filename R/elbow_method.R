@@ -10,14 +10,7 @@
 #' @param test_statistic_function Function with the first argument being data
 #'     and the second argument argument for candidate change points.
 #'     Additional arguments passed in via ... . Return a single numeric value.
-#' @param changepoint_function
-#' @param cutoff_function Function with first argument being data and the second
-#'     argument being alpha. No other arguments given. Return single numeric
-#'     value.
-#' @param trim_function Function taking data as an argument and returning a
-#'     numeric value indicating how much should be trimmed on each end
-#' @param alpha Numeric value in [0,1] indicating the significance for
-#'     cutoff_function.
+#' @param changepoint_function XXXXXXX
 #' @param errorType String of 'L2' or 'Tr' indicating the error function to use
 #' @param ... Additional parameters to pass into the respective functions
 #'
@@ -26,6 +19,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' data_KL <- generate_data_fd(ns = c(100,50,100),
 #'                   eigsList = list(c(3,2,1,0.5),
 #'                                   c(3,2,1,0.5),
@@ -47,6 +41,7 @@
 #'                   M=1000)
 #' print(results[[2]])
 #' plot_fd(data_KL, CPs=results[[1]]$CP[2:3])
+#' }
 elbow_method <- function(data,
                          test_statistic_function =NULL,
                          changepoint_function =NULL,
@@ -86,6 +81,8 @@ elbow_method <- function(data,
 #'
 #' @return List with data.frame indicating the change point locations and
 #'             variance explained and two plots giving the variance.
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function so see elbow_method for usage.
@@ -181,6 +178,9 @@ elbow_method <- function(data,
                        return_data)
   return_data$Percent <- 1-return_data$Var/max(return_data$Var)
 
+  # Define vars to remove notes
+  CP <- Var <- Percent <- NULL
+
   var_plot <-
     ggplot2::ggplot(return_data) +
     ggplot2::geom_point(ggplot2::aes(x=0:(length(CP)-1), y=Var)) +
@@ -214,6 +214,8 @@ elbow_method <- function(data,
 #'
 #' @return List with data.frame indicating the change point locations and
 #'             variance explained and two plots giving the variance.
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function so see elbow_method for usage.
@@ -253,7 +255,7 @@ elbow_method <- function(data,
     }
 
     # Stop if no CP detected
-    return_data_tmp <- na.omit(return_data_tmp)
+    return_data_tmp <- stats::na.omit(return_data_tmp)
     if(nrow(return_data_tmp)==0)
       break
 
@@ -268,6 +270,9 @@ elbow_method <- function(data,
   return_data <- rbind(c(NA, .compute_total_var(data, c(), errorType)),
                        return_data)
   return_data$Percent <- 1-return_data$Var/max(return_data$Var)
+
+  # Add this to remove check notes
+  CP <- Var <- Percent <- NULL
 
   var_plot <-
     ggplot2::ggplot(return_data) +
@@ -303,6 +308,8 @@ elbow_method <- function(data,
 #'          for CE error.
 #'
 #' @return Numeric indicating the variance between all subsegments
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function so see .elbow_method_change or
@@ -392,6 +399,8 @@ elbow_method <- function(data,
 #' @param vec Vector to be split containing numerics and NA values
 #'
 #' @return List with each item being a group separated by NAs
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function so see .elbow_method_stat for usage.

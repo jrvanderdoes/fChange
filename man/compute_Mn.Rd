@@ -4,24 +4,45 @@
 \alias{compute_Mn}
 \title{Compute Mn Test Statistic}
 \usage{
-compute_Mn(X, k = NULL, M = 100, W = NULL, ...)
+compute_Mn(
+  X,
+  k = NULL,
+  M = 10000,
+  W = NULL,
+  space = "BM",
+  which.Mn = FALSE,
+  ...
+)
 }
 \arguments{
 \item{X}{Numeric data.frame with rows for evaluated values and columns
-indicating FD}
+indicating FD.}
 
-\item{k}{(Optional) Defaults to NULL, but can be an integer in \link{1,ncol(X)}
+\item{k}{(Optional) Integer indicating if Defaults to NULL, but can be an
+integer in \eqn{[1, ncol(X)]}.
 
-Indicates the candidate change point to investigate. If k=NULL then get the
-test statistic for entire sample}
+Indicates the candidate change point to investigate (uses \code{compute_Mn()}
+for selection). If k=NULL then get the test statistic for entire sample.
+Default is NULL.}
 
-\item{M}{(Optional) Defaults to 100. The number of functions in W}
+\item{M}{(Optional) Numeric indicating the number of vectors used to span W.
+Defaults to 10,000.}
 
-\item{W}{(Optional) Optional numeric matrix with rows for evaluated values
-and columns indicating function
+\item{W}{(Optional) Data.frame of numerics with rows for evaluated values
+and columns indicating function that contains the vectors to span the
+space. Note the number of columns should match that of X. Default is NULL,
+which generates the vectors in function. This overrides space and M if
+not NULL.}
 
-This is the respective functions used to investigate the test statistic. The
-NULL value means Brownian motion is used.}
+\item{space}{(Optional) String indicating the space to integrate against.
+Default is "BM", or Brownian motion. See \code{computeSpaceMeasuringVectors()}
+for more information.}
+
+\item{which.Mn}{(Optional) Boolean which indicates if the location or test
+statistic is of interest.}
+
+\item{...}{Parameters are not passed anywhere. Just added for use in other
+functions.}
 }
 \value{
 A numeric value for the test statistic for entire sample or candidate
@@ -29,28 +50,8 @@ change point.
 }
 \description{
 Function to calculate the change point test statistic for functional data
-\deqn{Mn = sup_{x\in (0,1)} \int |Z_n(v,x)|^2 dQ(v)}
+\deqn{Mn = sup_{x\in (0, 1)} \int |Z_n(v,x)|^2 dQ(v)}
 }
 \examples{
-# Setup Data
-data_KL <- generate_data_fd(ns = c(200),
-    eigsList = list(c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(0),
-    distsArray = c('Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0))
-compute_Mn(data_KL)
-
-# Setup Data
-data_KL <- generate_data_fd(ns = c(100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(-0.5,0.5),
-    distsArray = c('Normal','Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0,0))
-compute_Mn(data_KL)
+compute_Mn(electricity)
 }

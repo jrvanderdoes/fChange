@@ -1,14 +1,15 @@
 #' Scalar Characteristic Function Change Point Analysis
 #'
-#' @param Y
-#' @param gam
-#' @param nSims
-#' @param alpha_val
+#' @param Y XXXXX
+#' @param gam XXXXX
+#' @param nSims XXXXX
+#' @param alpha_val XXXXX
 #'
-#' @return
+#' @return XXXXX
 #' @export
 #'
 #' @examples
+#' # XXXXX
 scalarDetection <- function(Y, gam = 0.5, nSims = 200,
                              alpha_val=0.05){
   n <- length(Y)
@@ -16,8 +17,9 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
   Tn_s <- rep(NA,n-1)
   for(k in 1:(n-1)){
     Tn_s[k] <- ((k*(n-k))/n^2)^gam * ((k*(n-k))/n) *
-      integrate(function(t,Y,k){abs(.phi_k(Y,t,k)-.phi_k0(Y,t,k))^2 * .w(t)},
-                lower=0, upper=1, Y=Y, k=k)[[1]]
+      stats::integrate(
+        function(t,Y,k){abs(.phi_k(Y,t,k)-.phi_k0(Y,t,k))^2 * .w(t)},
+        lower=0, upper=1, Y=Y, k=k)[[1]]
   }
   Tn <- max(Tn_s)
 
@@ -26,7 +28,7 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
 
                          Tn_tmp_s <- sapply(1:(n-1), function(k,n,gam,Y){
                            ((k*(n-k))/n^2)^gam * ((k*(n-k))/n) *
-                             integrate(function(t,Y,k){abs(.phi_k(Y,t,k)-.phi_k0(Y,t,k))^2 * .w(t)},
+                             stats::integrate(function(t,Y,k){abs(.phi_k(Y,t,k)-.phi_k0(Y,t,k))^2 * .w(t)},
                                        lower=0, upper=1, Y=Y[sample(1:length(Y))],k=k)[[1]]
                          },n=n,gam=gam,Y=Y)
 
@@ -36,13 +38,23 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
   list('dat'=Y,
        'Tn'=Tn,
        'Tn_permute'=Tn_permute,
-       'pval'=1 - ecdf(Tn_permute)(Tn),
+       'pval'=1 - stats::ecdf(Tn_permute)(Tn),
        'Loc'=which.max(Tn_s),
-       'loc_if_pval'=ifelse(1 - ecdf(Tn_permute)(Tn) < alpha_val,
+       'loc_if_pval'=ifelse(1 - stats::ecdf(Tn_permute)(Tn) < alpha_val,
                             which.max(Tn_s), NA))
 }
 
 
+#' Title
+#'
+#' @param Y XXXXXX
+#' @param t XXXXXX
+#' @param k XXXXXX
+#'
+#' @return XXXXXX
+#' @export
+#'
+#' @noRd
 .phi_k <- function(Y, t, k){
   sumVal <- 0
   for(j in 1:k){
@@ -53,6 +65,17 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
   1/k * sumVal
 }
 
+
+#' Title
+#'
+#' @param Y XXXXXX
+#' @param t XXXXXX
+#' @param k XXXXXX
+#'
+#' @return XXXXXX
+#' @export
+#'
+#' @noRd
 .phi_k0 <- function(Y, t, k){
   n <- length(Y)
   sumVal <- 0
@@ -65,4 +88,14 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
   1/(n-k) * sumVal
 }
 
+
+#' Title
+#'
+#' @param t XXXXXX
+#' @param a (Optional)
+#'
+#' @return XXXXXX
+#' @export
+#'
+#' @noRd
 .w <- function(t, a=1){exp(-a*abs(t))}

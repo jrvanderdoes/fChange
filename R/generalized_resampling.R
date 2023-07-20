@@ -14,7 +14,7 @@
 #' @param fn Function that returns the test statistic value
 #' @param iters Numeric value indicating number iterations used in bootstrapping
 #' @param replace Boolean value indicating bootstrapping (T) or permutation (F)
-#' @param alpha Numeric value in (0,1) to get the correct percentile
+#' @param alpha Numeric value in (0, 1) to get the correct percentile
 #' @param silent Boolean to silence output helpful to a user
 #' @param ... Optional arguments passed into \code{fn}
 #'
@@ -22,6 +22,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(100,100),
 #'     eigsList = list(c(3,2,1,0.5),
@@ -39,8 +40,9 @@
 #' generalized_resampling(X=data_KL,
 #'     blockSize=ncol(data_KL)^(1/3),
 #'     fn=compute_Tn, iters=1000, replace=F)
+#' }
 generalized_resampling <- function(X, blockSize, fn, iters = 1000,
-                                   replace=F, alpha=0.05, silent=F, ...){
+                                   replace=FALSE, alpha=0.05, silent=FALSE, ...){
 
   st<-Sys.time()
   full_val <- fn(X,...)
@@ -56,7 +58,7 @@ generalized_resampling <- function(X, blockSize, fn, iters = 1000,
   idxGroups <- .getChunks(1:n, n/blockSize)
   idxs <- sapply(1:iters,function(i,m, indxs,replace){
     samps <- sample(1:m, replace = replace)
-    unlist(indxs[samps], use.names = F)
+    unlist(indxs[samps], use.names = FALSE)
   }, m=length(idxGroups), indxs=idxGroups, replace=replace)
   # If it is a matrix/dataframe this already even rows
   #     (will be with permutation test)
@@ -66,12 +68,12 @@ generalized_resampling <- function(X, blockSize, fn, iters = 1000,
 
   bssamples <- sapply(as.data.frame(idxs),
                       function(loop_iter,fn,X1,...){
-                        fn(X1[,na.omit(loop_iter)], ...)
+                        fn(X1[,stats::na.omit(loop_iter)], ...)
                       }, X1=X,fn=fn, ...)
 
   list('TVal'=full_val,
-       'cutoff'=quantile(bssamples, probs = c(1-alpha))[[1]],
-       'pval'=1-ecdf(bssamples)(full_val),
+       'cutoff'=stats::quantile(bssamples, probs = c(1-alpha))[[1]],
+       'pval'=1-stats::ecdf(bssamples)(full_val),
        'BSSamples'=as.numeric(bssamples))
 }
 
@@ -86,6 +88,8 @@ generalized_resampling <- function(X, blockSize, fn, iters = 1000,
 #'
 #' @return A list with chunksN items, each containing an similiar sized subset
 #'     of the original vector
+#'
+#' @noRd
 #'
 #' @examples
 #' .getChunks(1:100,1)
@@ -106,6 +110,8 @@ generalized_resampling <- function(X, blockSize, fn, iters = 1000,
 #' @param data_list List of elements to be combined to a data.frame.
 #'
 #' @return Data.frame of the data in data_list
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function and will not be viewable to user. See

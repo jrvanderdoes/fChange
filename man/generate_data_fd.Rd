@@ -13,20 +13,24 @@ generate_data_fd(
   evals,
   kappasArray = c(0),
   burnin = 100,
-  silent = F
+  silent = FALSE
 )
 }
 \arguments{
-\item{ns}{A numerical vector of length m\preformatted{Indicates the number of functional objects (groups) created using first
+\item{ns}{A numerical vector of length m
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Indicates the number of functional objects (groups) created using first
 set of parameters
-}}
+}\if{html}{\out{</div>}}}
 
 \item{eigsList}{A list of vectors of length $1$ or $m$ with the eigenvalues
 for each group}
 
-\item{basesList}{A list of bases (eigenfunctions), length 1 or m\preformatted{Define the basis using fda on c(0,1) to ensure it works
+\item{basesList}{A list of bases (eigenfunctions), length 1 or m
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Define the basis using fda on c(0, 1) to ensure it works
 (TODO:: Remove this restriction)
-}}
+}\if{html}{\out{</div>}}}
 
 \item{meansList}{A list of means, length 1 or m, for each group}
 
@@ -61,13 +65,4 @@ This creates m 'groups' of functions with similar properties.
 # Create 200 functions with a midway change point. The change point
 #     is a change point in the eigenvalues, eigenfunctions, means,
 #     distributions, and VAR(1) strength
-data_KL <- generate_data_fd(ns = c(100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.fourier.basis(nbasis=2)),
-    meansList = c(0,0.5),
-    distsArray = c('Normal','Binomial'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0, 0.5))
 }

@@ -10,12 +10,8 @@
 #' @param test_statistic_function Function with the first argument being data
 #'     and the second argument argument for candidate change points.
 #'     Additional arguments passed in via ... . Return a single numeric value.
-#' @param cutoff_function Function with first argument being data and the second
-#'     argument being alpha. No other arguments given. Return single numeric
-#'     value.
-#' @param trim_function Function taking data as an argument and returning a
-#'     numeric value indicating how much should be trimmed on each end
-#' @param alpha Numeric value in [0,1] indicating the significance for
+#' @param changepoint_function XXXXXX
+#' @param alpha Numeric value in \eqn{[0, 1]} indicating the significance for
 #'     cutoff_function.
 #' @param final_verify (Optional) Boolean value
 #'
@@ -24,7 +20,7 @@
 #'     locations of change points, potentially to less accurate locations.
 #' @param silent (Optional) Boolean value
 #'
-#' Indicates if useful output should be silenced. Default F shows output.
+#' Indicates if useful output should be silenced. Default FALSE shows output.
 #' @param ... Additional arguments passed into test_statistic_function
 #'
 #' @return A list of numeric values indicating change points  (if exists),
@@ -32,6 +28,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(200),
 #'     eigsList = list(c(3,2,1,0.5)),
@@ -41,9 +38,10 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0))
 #' complete_binary_segmentation(data=data_KL, test_statistic_function=compute_Tn,
-#'                              cutoff_function=welsh_approximation,
+#'                              cutoff_function=welch_approximation,
 #'     trim_function = function(data){
-#'                       max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#'                       max(2, floor(log(ncol(as.data.frame(data)))),
+#'                       na.rm=TRUE)})
 #'
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(100,100),
@@ -56,13 +54,15 @@
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
 #' complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
-#'     cutoff_function = welsh_approximation,
+#'     cutoff_function = welch_approximation,
 #'     trim_function = function(data){
-#'                       max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#'                       max(2, floor(log(ncol(as.data.frame(data)))),
+#'                       na.rm=TRUE)})
 #' complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
 #'     cutoff_function = generalized_resampling,
 #'     trim_function = function(data,...){
-#'                       max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)},
+#'                       max(2, floor(log(ncol(as.data.frame(data)))),
+#'                       na.rm=TRUE)},
 #'     fn=compute_Tn, iters=1000)
 #'
 #' # Setup Data
@@ -77,13 +77,15 @@
 #'     distsArray = c('Normal','Normal','Normal'),
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0,0))
-#' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#' complete_binary_segmentation(data_KL, compute_Tn, welch_approximation,
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+#'     na.rm=TRUE)})
+#' }
 complete_binary_segmentation <- function(data,
                                          test_statistic_function = NULL,
                                          changepoint_function = NULL,
-                                         final_verify = T,
-                                         silent = F,
+                                         final_verify = TRUE,
+                                         silent = FALSE,
                                          alpha=0.05,
                                          ... ){
 
@@ -97,7 +99,7 @@ complete_binary_segmentation <- function(data,
 
   # Verify as desired
   if(final_verify){
-    CPsVals <- changepoint_verification(CPsVals=CPsVals, data=data,
+    CPsVals <- .changepoint_verification(CPsVals=CPsVals, data=data,
                       test_statistic_function=test_statistic_function,
                       changepoint_function=changepoint_function,
                       silent=silent,
@@ -124,8 +126,9 @@ complete_binary_segmentation <- function(data,
 #'     value.
 #' @param trim_function Function taking data as an argument and returning a
 #'     numeric value indicating how much should be trimmed on each end
-#' @param alpha Numeric value in [0,1] indicating the significance for
+#' @param alpha Numeric value in \eqn{[0, 1]} indicating the significance for
 #'     cutoff_function.
+#' @param include_value XXXXX
 #' @param ... Additional arguments passed into test_statistic_function
 #'
 #' @return A numeric value indicating the cutoff location (if exists),
@@ -133,6 +136,7 @@ complete_binary_segmentation <- function(data,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(200),
 #'     eigsList = list(c(3,2,1,0.5)),
@@ -141,8 +145,9 @@ complete_binary_segmentation <- function(data,
 #'     distsArray = c('Normal'),
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0))
-#' single_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#' single_binary_segmentation(data_KL, compute_Tn, welch_approximation,
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+#'     na.rm=TRUE)})
 #'
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(100,100),
@@ -154,14 +159,17 @@ complete_binary_segmentation <- function(data,
 #'     distsArray = c('Normal','Normal'),
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0))
-#' single_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
-#' single_binary_segmentation(data_KL, compute_Mn, welsh_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#' single_binary_segmentation(data_KL, compute_Tn, welch_approximation,
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+#'     na.rm=TRUE)})
+#' single_binary_segmentation(data_KL, compute_Mn, welch_approximation,
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+#'     na.rm=TRUE)})
+#' }
 single_binary_segmentation <- function(data, test_statistic_function,
                                        cutoff_function,
                                        trim_function,
-                                       alpha=0.05, include_value=F,
+                                       alpha=0.05, include_value=FALSE,
                                        ... ){
   # Trim & stopping criteria
   trim_amt <- trim_function(data, ...)
@@ -174,7 +182,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
   for(k in nStart:nEnd){
     test_stat[k] <- test_statistic_function(as.data.frame(data), k, ...)
   }
-  test_stat_full <- max(test_stat, na.rm = T)
+  test_stat_full <- max(test_stat, na.rm = TRUE)
 
   # Return index of max change point if larger than cutoff
   return_value <- ifelse(test_stat_full >= cutoff_function(data, alpha, ...),
@@ -184,7 +192,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
   # Add in value
   if(include_value){
     if(!is.na(return_value)){
-      return_value <- c(return_value, max(test_stat, na.rm = T))
+      return_value <- c(return_value, max(test_stat, na.rm = TRUE))
     } else{
       return_value <- c(return_value, NA)
     }
@@ -217,6 +225,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Setup Data
 #' data_KL <- generate_data_fd(ns = c(12,12,12),
 #'     eigsList = list(c(3,2,1,0.5),
@@ -230,13 +239,16 @@ single_binary_segmentation <- function(data, test_statistic_function,
 #'     evals = seq(0,1,0.05),
 #'     kappasArray = c(0,0,0))
 #'
-#' complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+#' complete_binary_segmentation(data_KL, compute_Tn, welch_approximation,
+#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+#'     na.rm=TRUE)})
 #' wild_binary_segmentation(data=data_KL,
 #'     test_statistic_function=compute_Tn,
-#'     cutoff_function=welsh_approximation,
-#'     trim_function=function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
-wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
+#'     cutoff_function=welch_approximation,
+#'     trim_function=function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+#'     na.rm=TRUE)})
+#' }
+wild_binary_segmentation <- function(data, M=5000, add_full=TRUE, block_size=1,
                                      ...){
   # Setup
   n <- ncol(data)
@@ -248,7 +260,7 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
 
   # Run
   if(add_full){
-    result[1,] <- single_binary_segmentation(data, include_value=T, ...)
+    result[1,] <- single_binary_segmentation(data, include_value=TRUE, ...)
   }
 
   for(i in add_full+1:M){
@@ -257,7 +269,8 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
 
     # Must return location and value
     # This needs to return location and values!
-    result[i,] <- single_binary_segmentation(data[,min_pt:max_pt], include_value=T, ...)
+    result[i,] <- single_binary_segmentation(data[,min_pt:max_pt],
+                                             include_value=TRUE, ...)
   }
 
   # Select best and continue if reasonable
@@ -298,10 +311,12 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
 #' @param addAmt (Optional) Default 0. This adds a number to shift change points.
 #'               Used for recursive calls, likely no need to change.
 #' @param silent (Optional) Boolean indicating if output should be given. Default
-#'               is F (meaning print output).
+#'               is FALSE (meaning print output).
 #' @param ... (Optional) Additional paramters for the functions.
 #'
 #' @return Vector of detected change point locations
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function and will not be shown to user. See
@@ -311,7 +326,7 @@ wild_binary_segmentation <- function(data, M=5000, add_full=T, block_size=1,
                                  changepoint_function = NULL,
                                  alpha = NULL,
                                  addAmt = 0,
-                                 silent = F,
+                                 silent = FALSE,
                                  ...){
   if(!is.null(test_statistic_function)){
     potential_cp <-

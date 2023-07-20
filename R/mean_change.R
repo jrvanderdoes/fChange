@@ -26,33 +26,9 @@
 #' functional data without dimension reduction} (https://arxiv.org/pdf/1511.04020.pdf)
 #'
 #' @examples
-#' # Null Example
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0,0),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
-#'
-#'  mean_change(data_KL)
-#'
-#' # Mean CP Example
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0,0.2),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
-#'
-#' mean_change(data_KL)
+#' mean_change(electricity,M=250)
 mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
-                     inc.pval=F, ...){
+                     inc.pval=FALSE, ...){
   n <- ncol(data)
   Sn2 <- rep(0,n)
 
@@ -98,6 +74,8 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #'
 #' @return Numeric indicating max value of the Brownian bridge
 #'
+#' @noRd
+#'
 #' @examples
 #' .asymp_dist(200,1:5)
 #' .asymp_dist(200,1:5)
@@ -113,8 +91,8 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #' Estimate Long-run Covariance Kernel
 #'
 #' This (internal) function estimates the long-run covariance kernel. That is,
-#'     $C_{\epsilon}(t,t') = \sum_{l=-\inf}^{\inf} \text{Cov}(\epsilon_0(t),\epsilon_l(t'))$
-#'     with error sequence $(\epsilon_i : i \in \mathbb{Z})$.
+#'     \eqn{C_{\epsilon}(t,t') = \sum_{l=-\inf}^{\inf} \text{Cov}(\epsilon_0(t),
+#'     \epsilon_l(t'))} with error sequence \eqn{(\epsilon_i : i \in \mathbb{Z})}.
 #'
 #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
 #' @param  h The window parameter parameter for the estimation of the long run covariance kernel. The default
@@ -123,6 +101,8 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #'
 #' @return Data.frame of numerics with dim of ncol(data) x ncol(data), that is
 #'     symmetric.
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function, see use in mean_change.
@@ -161,6 +141,8 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #'
 #' @return Numeric data.frame of the data, but with centered values at each time point
 #'
+#' @noRd
+#'
 #' @examples
 #' # This is an internal function, see use in .estimateCeps.
 .centerData <- function(data){
@@ -181,6 +163,7 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Null Example
 #' data_KL <- generate_data_fd(ns = c(100,100),
 #'     eigsList = list(c(3,2,1,0.5),
@@ -206,6 +189,7 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #'     kappasArray = c(0,0))
 #'
 #' compute_mean_stat(data_KL, 100)
+#' }
 compute_mean_stat <- function(data, k, ...){
   n <- ncol(data)
 
@@ -231,6 +215,7 @@ compute_mean_stat <- function(data, k, ...){
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Null Example
 #' data_KL <- generate_data_fd(ns = c(100,100),
 #'     eigsList = list(c(3,2,1,0.5),
@@ -256,6 +241,7 @@ compute_mean_stat <- function(data, k, ...){
 #'     kappasArray = c(0,0))
 #'
 #' compute_mean_cutoff(data_KL, 0.05)
+#' }
 compute_mean_cutoff <- function(data, alpha, h=0, K=bartlett_kernel,
                                 M=1000, ...){
   n <- ncol(data)
@@ -267,5 +253,5 @@ compute_mean_cutoff <- function(data, alpha, h=0, K=bartlett_kernel,
   values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist(n, lambda),
                        lambda=lambda,n=n)
 
-  as.numeric(quantile(values_sim,1-alpha))
+  as.numeric(stats::quantile(values_sim,1-alpha))
 }

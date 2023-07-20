@@ -3,27 +3,24 @@
 #' * Convert = to <- (styler may handle it..)
 #' * Update documentation
 #' * Remove any functions not needed
-NULL
+tmp <- function(){}
 
 #' Covariance Change
 #'
 #' This method implements a method for detection of covariance changes in
 #'  funtional data.
 #'
-#' Note! I know this occassionally fails, but I need to find a realiable example
-#'  so I can figure out why/where. Typically if the code is re-run it works,
-#'  so need to set seed and find it...
-#'
 #' @param X Functional data
-#' @param kappa
-#' @param len
+#' @param kappa XXXX
+#' @param len XXXX
 #'
-#' @return
+#' @return XXXXX
 #' @export
 #'
 #' @references Aue, Alexander, et al. “Detecting and Dating Structural Breaks in Functional Data without Dimension Reduction.” Journal of the Royal Statistical Society. Series B, Statistical Methodology, vol. 80, no. 3, 2018, pp. 509–529, https://doi.org/10.1111/rssb.12257.
 #'
 #' @examples
+#' # XXXXX
 cov_change <- function(X, kappa=1/4, len=30){
 
   stat_d0=weight_TNstat(X,kappa = kappa)
@@ -162,45 +159,53 @@ tau_est <-function(xd, kstar, len){
 }
 
 
-#' Title
+#' Compute Zn Statistic for Funtional Covariance Changes
 #'
 #' This (internal) function implements Theorem 2.1 / 2.2.
 #'
 #' @param xdm Data.frame of numerics. It is the finite realization of DEMEANed
 #'  functional time series data, where curves are stored in columns.
-#' @param u Numeric in (0,1). That is, a fraction index over the interval [0, 1].
+#' @param u Numeric in \eqn{(0, 1)}. That is, a fraction index over the interval
+#' \eqn{[0, 1]}.
 #'
-#' @return
+#' @return XXXXX
 #' @export
 #'
 #' @examples
+#' # XXXXX
 ZNstat <- function(xdm, u){
-  grid_point = nrow(xdm)
-  N = ncol(xdm)
-  k = floor(N*u)
-  prek = matrix(rowSums(apply(as.matrix(xdm[,1:k]),2,function(x){x%o%x})),grid_point,grid_point)
-  fullk = matrix(rowSums(apply(as.matrix(xdm),2,function(x){x%o%x})),grid_point,grid_point)
-  ZNu = N^(-1/2) * (prek - (k/N)*fullk)
-  return(ZNu)
+  grid_point <- nrow(xdm)
+  N <- ncol(xdm)
+  k <- floor(N*u)
+
+  prek <- matrix(rowSums(apply(as.matrix(xdm[,1:k]),2,
+                               function(x){x%o%x})),grid_point,grid_point)
+  fullk <- matrix(rowSums(apply(as.matrix(xdm),2,
+                                function(x){x%o%x})),grid_point,grid_point)
+  ZNu <- N^(-1/2) * (prek - (k/N)*fullk)
+
+  ZNu
 }
 
 #' Title
 #'
-#' @param xdm
-#' @param u
+#' @inheritParams ZNstat
 #'
-#' @return
+#' @return XXXXX
 #' @export
 #'
 #' @examples
+#' # XXXXX
 ZNstat_cp <- function(xdm, u){
-  grid_point = nrow(xdm)
-  N = ncol(xdm)
-  k = floor(N*u)
-  prek = matrix(rowSums(apply(as.matrix(xdm[,1:k]),2,function(x){x%o%x})),grid_point,grid_point)
-  fullk = matrix(rowSums(apply(as.matrix(xdm),2,function(x){x%o%x})),grid_point,grid_point)
-  ZNu = (prek - (k/N)*fullk)
-  return(ZNu)
+  grid_point <- nrow(xdm)
+  N <- ncol(xdm)
+  k <- floor(N*u)
+
+  prek <- matrix(rowSums(apply(as.matrix(xdm[,1:k]),2,function(x){x%o%x})),grid_point,grid_point)
+  fullk <- matrix(rowSums(apply(as.matrix(xdm),2,function(x){x%o%x})),grid_point,grid_point)
+  ZNu <- (prek - (k/N)*fullk)
+
+  ZNu
 }
 
 
@@ -212,10 +217,11 @@ ZNstat_cp <- function(xdm, u){
 #' @param xf Data.frame of numerics. Finite realization of functional time
 #'  series data, where curves are stored in columns.
 #'
-#' @return
+#' @return XXXXX
 #' @export
 #'
 #' @examples
+#' # XXXXX
 TNstat <- function(xf){
   int_approx=function(x){
     temp_n=NROW(x)
@@ -228,6 +234,7 @@ TNstat <- function(xf){
     zn2[[i]] = (ZNstat(xdm, uind[i]))^2
   }
   inm = Reduce(`+`, zn2)/N
+
   return((1/grid_point)^2*sum(inm))
 }
 
@@ -236,13 +243,14 @@ TNstat <- function(xf){
 #'
 #' The function computes the weighted Tn statistic, introduced after Theorem 2.3
 #'
-#' @param xf
-#' @param kappa
+#' @param xf XXXXX
+#' @param kappa XXXXX
 #'
-#' @return
+#' @return XXXXX
 #' @export
 #'
 #' @examples
+#' # XXXXX
 weight_TNstat <- function(xf,kappa){
   int_approx_tensor<-function(x){# x is a 4-dimensional tensor
     dt=length(dim(x))
@@ -275,13 +283,14 @@ weight_TNstat <- function(xf,kappa){
 #'
 #' @param dat An array with dimension (grid_point,grid_point,N)
 #'
-#' @return
+#' @return XXXXX
 #' @export
 #'
 #' @examples
+#' # XXXXX
 long_run_covariance_4tensor <- function (dat) {
   grid_point = dim(dat)[1]
-  T = dim(dat)[3]
+  Tval = dim(dat)[3]
   datmean = apply(dat, c(1,2), mean)
   center_dat = sweep(dat, 1:2, datmean)
 
@@ -294,38 +303,41 @@ long_run_covariance_4tensor <- function (dat) {
     return(cov_sum)
   }
 
-  gamma_l <- function(lag, T) {
+  gamma_l <- function(lag, Tval) {
     gamma_lag_sum = 0
     if (lag >= 0) {
-      for (ij in 1:(T - lag)) {
+      for (ij in 1:(Tval - lag)) {
         gamma_lag_sum = gamma_lag_sum + center_dat[,,ij] %o% center_dat[,,(ij + lag)]
       }
     }
     else {
-      for (ij in 1:(T + lag)) {
+      for (ij in 1:(Tval + lag)) {
         gamma_lag_sum = gamma_lag_sum + center_dat[,,(ij - lag)] %o% center_dat[, ij]
       }
     }
-    return(gamma_lag_sum/(T-lag))
+    return(gamma_lag_sum/(Tval-lag))
   }
-  hat_h_opt = T^(1/4)
-  lr_covop = cov_l(band = hat_h_opt, nval = T)
+  hat_h_opt = Tval^(1/4)
+  lr_covop = cov_l(band = hat_h_opt, nval = Tval)
 
   return(lr_covop)
 }
 
 #' Kernels for applying weights
 #'
-#' @param x
-#' @param kernel
-#' @param normalize
+#' @param x XXXXXX
+#' @param kernel XXXXXX
+#' @param normalize XXXXXX
 #'
-#' @return
+#' @return XXXXX
 #' @export
 #'
 #' @examples
-kweights <- function (x, kernel = c("Truncated", "Bartlett", "Parzen", "Tukey-Hanning",
-                                    "Quadratic Spectral"), normalize = FALSE) {
+#' # XXXXX
+kweights <- function (x,
+                      kernel = c("Truncated", "Bartlett", "Parzen", "Tukey-Hanning",
+                                 "Quadratic Spectral"),
+                      normalize = FALSE) {
   kernel <- match.arg(kernel)
   if (normalize) {
     ca <- switch(kernel, Truncated = 2, Bartlett = 2/3, Parzen = 0.539285,
@@ -349,47 +361,48 @@ kweights <- function (x, kernel = c("Truncated", "Bartlett", "Parzen", "Tukey-Ha
 
 #' Compute critical values for TNstat (T_N)
 #'
-#' @param xf
-#' @param len
+#' @param xf XXXX
+#' @param len XXXX
 #'
-#' @return
+#' @return XXXX
 #' @export
 #'
 #' @examples
+#' # XXXXX
 criticalvalueMC <-function(xf,len){
-  grid_point = nrow(xf)
-  N = ncol(xf)
+  grid_point <- nrow(xf)
+  N <- ncol(xf)
 
-  rref = stats::runif(len, 0, 1)
-  rref = c(sort(rref), 1)
-  rrefind = round(rref * dim(xf)[1])
-  rrefind[which(rrefind==0)] = 1
-  xfMC = xf[rrefind,]
+  rref <- stats::runif(len, 0, 1)
+  rref <- c(sort(rref), 1)
+  rrefind <- round(rref * dim(xf)[1])
+  rrefind[which(rrefind==0)] <- 1
+  xfMC <- xf[rrefind,]
 
-  xdm = apply(xfMC,2,function(x,xmean){x-xmean}, xmean = rowMeans(xfMC))
-  zi = zm = array(0, c((len+1), (len+1), N))
+  xdm <- apply(xfMC,2,function(x,xmean){x-xmean}, xmean = rowMeans(xfMC))
+  zi <- zm <- array(0, c((len+1), (len+1), N))
   for (i in 1:N){
-    zi[,,i] = xdm[,i]%o%xdm[,i]
+    zi[,,i] <- xdm[,i]%o%xdm[,i]
   }
-  zimean = apply(zi,c(1,2),mean)
+  zimean <- apply(zi,c(1,2),mean)
   for (i in 1:N){
-    zm[,,i] = zi[,,i]-zimean
+    zm[,,i] <- zi[,,i]-zimean
   }
-  lrcov = long_run_covariance_4tensor(zm) ##23.883 sec elapsed
-  lrcov = tensorA::as.tensor(lrcov/(len+1)^2)
+  lrcov <- long_run_covariance_4tensor(zm) ##23.883 sec elapsed
+  lrcov <- tensorA::as.tensor(lrcov/(len+1)^2)
   ## TODO:: Add rounding if needed with some errors
-  eigvals=tensorA::svd.tensor(lrcov,c(3,4),by="e")
+  eigvals <- tensorA::svd.tensor(lrcov,c(3,4),by="e")
 
-  eigmat=as.vector(eigvals$d)
+  eigmat <- as.vector(eigvals$d)
 
-  lim_sum = 0
+  lim_sum <- 0
   for (ell in 1:length(eigmat)){
-    klim = 0
+    klim <- 0
     for (k in 1:1000){
-      Nm=stats::rnorm(2000,mean=0,sd=1)
-      klim = klim + eigmat[ell]/((pi*k)^2)*Nm^2
+      Nm <- stats::rnorm(2000,mean=0,sd=1)
+      klim <- klim + eigmat[ell]/((pi*k)^2)*Nm^2
     }
-    lim_sum=lim_sum+klim
+    lim_sum <- lim_sum+klim
   }
 
   #lim_sum= rowSums(apply(matrix(seq(1,length(eigmat),1),1),2, function(x){ frac = eigmat[x]/((pi*seq(1,k,1))^2);
@@ -399,16 +412,17 @@ criticalvalueMC <-function(xf,len){
   return(cv)
 }
 
-#' Compute critical values for weight_TNstat ( T_N(\kappa) )
+#' Compute critical values for weight_TNstat ( \eqn{T_N(\kappa)} )
 #'
-#' @param xf
-#' @param len
-#' @param kappa
+#' @param xf XXXX
+#' @param len XXXX
+#' @param kappa XXXX
 #'
-#' @return
+#' @return XXXX
 #' @export
 #'
 #' @examples
+#' # XXXXX
 weight_criticalvalueMC <-function(xf,len,kappa){
   grid_point = nrow(xf)
   N = ncol(xf)

@@ -9,7 +9,7 @@
 #' @param nSims (Optional) Integer indicating the number of realizations of
 #'     Gaussian processes to compute. Default is 100
 #' @param x (Optional) Vector of locations of observations. Default is equally
-#'     spaced observations on (0,1) with the same number of observations as FDs
+#'     spaced observations on (0, 1) with the same number of observations as FDs
 #' @param M (Optional) Integer indicating the number of vectors used to create
 #'     each value in the covariance matrix. Default is 25.
 #' @param h (Optional) Integer indicating amount of lag to consider. Default is
@@ -26,6 +26,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' X <- generate_data_fd(ns = c(100),
 #'            eigsList = list(c(3,2,1,0.5)),
 #'            basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
@@ -47,8 +48,9 @@
 #'            kappasArray = c(0,0))
 #' tmp1 <- detect_changepoint(X1)
 #' tmp1$pval
+#' }
 detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
-                               M=25, h=3, K=bartlett_kernel, silent=F){
+                               M=25, h=3, K=bartlett_kernel, silent=FALSE){
   # Setup Vars
   gamProcess <- rep(NA,nSims)
   value <- compute_Tn(X,M=M)
@@ -70,24 +72,28 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
     gamProcess[i] <- .approx_int(abs(gamVals)^2)/nrow(X)
   }
 
-  list('pval'=1-ecdf(gamProcess)(value), 'gamProcess'=gamProcess, 'value'=value)
+  list('pval'=1-stats::ecdf(gamProcess)(value),
+       'gamProcess'=gamProcess,
+       'value'=value)
 }
 
 #' Estimate null and detect change point based on a single covar matrix
 #'
-#' @param X
-#' @param nSims
-#' @param x
-#' @param h
-#' @param K
-#' @param silent
-#' @param maxM
-#' @param ratio
+#' @param X XXXXXX
+#' @param nSims XXXXXX
+#' @param x XXXXXX
+#' @param h XXXXXX
+#' @param K XXXXXX
+#' @param space XXXXXX
+#' @param silent XXXXXX
+#' @param TN_M XXXXXX
+#' @param Cov_M XXXXXX
 #'
-#' @return
+#' @return XXXXXX
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' X <- generate_data_fd(ns = c(100,100),
 #'                       eigsList = list(c(3,2,1,0.5),c(3,2,1,0.5)),
 #'                       basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
@@ -95,9 +101,9 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 #'                       meansList = c(0,1),
 #'                       distsArray = c('Normal'),
 #'                       evals = seq(0,1,0.05),
-#'                       kappasArray = c(0.5),silent = T)
+#'                       kappasArray = c(0.5),silent = TRUE)
 #' cp_res <- detect_changepoint_singleCov(X, nSims=500, x=seq(0,1,length.out=20),
-#'                                        h=3, K=bartlett_kernel, silent=F)
+#'                                        h=3, K=bartlett_kernel, silent=FALSE)
 #'
 #' X1 <- generate_data_fd(ns = c(200),
 #'                        eigsList = list(c(3,2,1,0.5)),
@@ -105,21 +111,22 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
 #'                        meansList = c(0),
 #'                        distsArray = c('Normal'),
 #'                        evals = seq(0,1,0.05),
-#'                        kappasArray = c(0),silent = T)
+#'                        kappasArray = c(0),silent = TRUE)
 #' nocp_res <- detect_changepoint_singleCov(X1, nSims=500, x=seq(0,1,length.out=20),
-#'                                          h=0, K=bartlett_kernel, silent=F)
+#'                                          h=0, K=bartlett_kernel, silent=FALSE)
 #' X3 <- generate_data_fd(ns = c(50,250),
 #'                        eigsList = list(c(3,2,1,0.5),c(30,1)),
 #'                        basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
 #'                                         fda::create.bspline.basis(nbasis=2, norder=2)),
 #'                        meansList = c(0,0),
 #'                        distsArray = c('Normal'), kappasArray = c(0.5),
-#'                        evals = seq(0,1,0.05), silent = T)
+#'                        evals = seq(0,1,0.05), silent = TRUE)
 #' cp_res3 <- detect_changepoint_singleCov(X, nSims=500,
 #'                                         x=seq(0,1,length.out=20))
+#' }
 detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40),
                                          h=3, K=bartlett_kernel, space='BM',
-                                         silent=F, TN_M=10000, Cov_M=75){
+                                         silent=FALSE, TN_M=10000, Cov_M=75){
   # Source Cpp File to speed up matrix computations
   # Rcpp::sourceCpp("R/matrixMult.cpp")
 
@@ -149,7 +156,7 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
   nIters <- nSims/100
   gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ, sqrtMat, lx){
     # (After trans + mult) Rows are iid MNV
-    mvnorms <- sapply(1:100,function(m,x){rnorm(x)},x=2*MJ)
+    mvnorms <- sapply(1:100,function(m,x){stats::rnorm(x)},x=2*MJ)
     mvnorms <- Rfast::mat.mult(sqrtMat, mvnorms)
 
     gamVals <- mvnorms[1:MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:MJ,]
@@ -160,7 +167,7 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 
   gamProcess <- as.vector(gamProcess)
 
-  list('pval'=1-ecdf(gamProcess)(val_Tn),
+  list('pval'=1-stats::ecdf(gamProcess)(val_Tn),
        'gamProcess'=gamProcess,
        'value'=val_Tn)
 }
@@ -173,7 +180,7 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #' @param X Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
 #' @param x (Optional) Vector of locations of observations. Default is equally
-#'     spaced observations on (0,1) with the same number of observations as FDs
+#'     spaced observations on (0, 1) with the same number of observations as FDs
 #' @param M (Optional) Integer indicating the number of vectors used to create
 #'     each value in the covariance matrix. Default is 25.
 #' @param h (Optional) Integer indicating amount of lag to consider. Default is
@@ -184,6 +191,8 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #'     then a Guassian measure is generated. Default is NULL.
 #'
 #' @return Data.frame for covariance based on Gaussian measure and given data X
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function, see usage in computeMethod
@@ -258,6 +267,8 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #'
 #' @return Data.frame with autocovariance value based on data given
 #'
+#' @noRd
+#'
 #' @examples
 #' # This is an internal function, see usage in .estimCovMat
 .estimD <- function(K,h,X,lfun,v,lfunp,vp){
@@ -304,6 +315,8 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #'
 #' @return Numeric autocovariance value for given data
 #'
+#' @noRd
+#'
 #' @examples
 #' # This is an internal function, see usage in .estimD
 .estimGamma <- function(k, X, fVals, fpVals, mean1, mean2){
@@ -336,6 +349,8 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #'
 #' @return Numeric value of R-hat for fd object of interest
 #'
+#' @noRd
+#'
 #' @examples
 #' # This is an internal function, see usage in .estimGamma
 .estimR <- function(r, fVals, meanVal=NA){
@@ -356,6 +371,8 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #'     FD observation.
 #'
 #' @return Numeric value(s) indicating function value for each FD object given
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function, see usage in .estimR

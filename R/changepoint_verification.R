@@ -23,11 +23,11 @@
 #'     change points are detected)
 #' @export
 #'
-#' @examples
-changepoint_verification <- function(CPsVals, data,
+#' @noRd
+.changepoint_verification <- function(CPsVals, data,
                                      test_statistic_function =NULL,
                                      changepoint_function =NULL,
-                                     silent = F,
+                                     silent = FALSE,
                                      ...){
 
   if(!silent) cat('-- Verify Step --\n')

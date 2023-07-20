@@ -4,7 +4,7 @@
 #' This function approximates the Tn statistic using the Welch approximation.
 #'
 #' @param X Numeric data.frame with evaled points on rows and fd objects in columns
-#' @param alpha (Optional) Numeric value in (0,1) for significance. Default is 0.05
+#' @param alpha (Optional) Numeric value in (0, 1) for significance. Default is 0.05
 #' @param TVal (Optional) Numeric value indicate the number of FDs. Default is the
 #'     number of columns in X.
 #' @param W (Optional) Data.frame for the functions to integrate against
@@ -24,17 +24,8 @@
 #' @export
 #'
 #' @examples
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(-1,1),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
-#' welsh_approximation(data_KL)
+#' # Note, TVal generally bigger than 1.
+#' welch_approximation(electricity, TVal = 1, h=0)
 welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
                                 W = NULL, W1 = NULL, M=100,
                                 h = TVal^(1/3), K = bartlett_kernel, ...){
@@ -71,7 +62,7 @@ welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
   betaHat <- Re(sigma2Hat / (2*muHat))
   nuHat <- Re((2*muHat^2) / sigma2Hat)
 
-  betaHat * qchisq(1-alpha, df=nuHat) / nrow(X)
+  betaHat * stats::qchisq(1-alpha, df=nuHat) / nrow(X)
 }
 
 
@@ -88,8 +79,10 @@ welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
 #'
 #' @return Numeric indicated estimated CHat value
 #'
+#' @noRd
+#'
 #' @examples
-#' # This is an internal function, see welsh_approximation for usage.
+#' # This is an internal function, see welch_approximation for usage.
 .estimateLRV <- function(X, v1, v2, TVal, h, K){
 
   eps1 <- exp(complex(real=0,imaginary = 1) * (t(X) %*% v1))
@@ -120,6 +113,8 @@ welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
 #' @param TVal Numeric value indicate the number of FDs.
 #'
 #' @return Numeric indicating autocovariance value at a particular lag
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function, see .estimateLRV for usage.
@@ -154,6 +149,8 @@ welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
 #' @param K Function for the Kernel.
 #'
 #' @return Numeric estimating LRV value
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function, see .estimateLRV for usage.

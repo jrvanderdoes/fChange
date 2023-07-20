@@ -6,26 +6,51 @@
 \usage{
 plot_fd(
   data,
-  eval_points = 1:nrow(data),
   CPs = NULL,
+  eval_points = 1:nrow(data),
   plot_title = NULL,
   val_axis_title = "Value",
   eval_axis_title = "EvalRange",
   FD_axis_title = "FD Sims",
-  FDReps = 1:ncol(data)
+  FDReps = 1:ncol(data),
+  eye = list(x = -1.5, y = -1.5, z = 1.5),
+  aspectratio = list(x = 1, y = 1, z = 1),
+  showticklabels = TRUE
 )
 }
 \arguments{
-\item{data}{An fd object or a data.frame of evaluated fd objects
-(the columns being lines and the rows the evaluated points)}
-
-\item{eval_points}{An vector containing the points at which the
-evaluated data was evaluated at}
+\item{data}{A data.frame of evaluated fd objects (the columns being lines and
+the rows the evaluated points)}
 
 \item{CPs}{(Optional) Vectors of numeric values indicating the location of
-change points}
+change points. This will color each section differently. Default vallue
+is NULL.}
 
-\item{plot_title}{Optional string to title the plot}
+\item{eval_points}{(Optional) An vector containing the points at which the
+data was evaluated. Default is 1:nrow(data)}
+
+\item{plot_title}{(Optional) String to title the plot. Default value is NULL.}
+
+\item{val_axis_title}{(Optional) String to title the axis for values of
+observation. Default value is 'Value'.}
+
+\item{eval_axis_title}{(Optional) String to title the axis for the evaluation
+range axis (observations in an FD object). Default value is is 'EvalRange'.}
+
+\item{FD_axis_title}{(Optional) String to title the axis for FD observations.
+Default value is 'FD Sims'.}
+
+\item{FDReps}{(Optional) Vector of values for FD observation names. Default
+value is 1:ncol(data).}
+
+\item{eye}{(Optional) List with certain parameters to determine the view of
+the resulting image. The default value is list(x = -1.5, y = -1.5, z = 1.5).}
+
+\item{aspectratio}{(Optional) List with certain parameters to determine the
+image size parameters. The default value is list(x=1, y=1, z=1).}
+
+\item{showticklabels}{(Optional) Boolean to indicate if the tick labels should
+be given in the image. Default value is TRUE.}
 }
 \value{
 A plotly plot
@@ -34,19 +59,5 @@ A plotly plot
 \code{plot_fd} plots functional data either in an fd object or evaluated at certain points
 }
 \examples{
-# Generate Data with a mean change point
-evalPts <- seq(0,1,0.05)
-data_KL <- generate_data_fd(ns = c(200,200),
-                               eigsList = list(c(3,2,1,0.5),
-                                               c(3,2,1,0.5)),
-                               basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                                                fda::create.bspline.basis(nbasis=4, norder=4)),
-                               meansList = c(-1,1),
-                               distsArray = c('Normal','Normal'),
-                               evals = evalPts,
-                               kappasArray = c(0,0))
-plot_fd(data=data_KL,eval_points=evalPts)
-
-plot_fd(data=data_KL,eval_points=evalPts, CPs=200)
-plot_fd(data=data_KL,eval_points=evalPts, CPs=seq(40,360,20))
+plot_fd(data=electricity[,1:100], CPs=c(50))
 }

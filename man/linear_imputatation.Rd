@@ -4,7 +4,7 @@
 \alias{linear_imputatation}
 \title{Impute data using linear function}
 \usage{
-linear_imputatation(data, evalPts = 1:nrow(data))
+linear_imputatation(data, evalPts = 1:nrow(data), use.prev.curve = FALSE)
 }
 \arguments{
 \item{data}{Numeric data.frame with rows for evaluated values and columns
@@ -12,6 +12,8 @@ indicating FD}
 
 \item{evalPts}{Numeric vector indicating the evaluated points for each row
 of data}
+
+\item{use.prev.curve}{XXXX}
 }
 \value{
 Numeric data.frame with rows for evaluated values and columns

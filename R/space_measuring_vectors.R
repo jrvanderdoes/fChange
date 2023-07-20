@@ -14,22 +14,14 @@
 #' @export
 #'
 #' @examples
-#' X <- generate_data_fd(ns = c(50),
-#'                       eigsList = list(c(3,2,1,0.5)),
-#'                       basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-#'                       meansList = 0,
-#'                       distsArray = c('Normal'),
-#'                       evals = seq(0,1,0.05),
-#'                       kappasArray = c(0))
-#'
-#' computeSpaceMeasuringVectors(10,'BM', X)
-#' computeSpaceMeasuringVectors(10,'OU', X)
-#' computeSpaceMeasuringVectors(10,'PC', X)
+#' computeSpaceMeasuringVectors(10,'BM', electricity)
+#' computeSpaceMeasuringVectors(10,'OU', electricity)
+#' computeSpaceMeasuringVectors(10,'PC', electricity)
 computeSpaceMeasuringVectors <- function(M, space, X){
   if(space=='BM'){
     W <- as.data.frame(sapply(rep(0,M),sde::BM, N=nrow(X)-1))
   } else if(space=='PC'){
-    pComps <- stats::prcomp(X, center=F, scale=F)
+    pComps <- stats::prcomp(X, center=FALSE, scale=FALSE)
     W <- as.data.frame(sapply(rep(nrow(X),M),
                               function(x,pcs){
                                 rowSums(stats::rnorm(ncol(pcs))*pcs)

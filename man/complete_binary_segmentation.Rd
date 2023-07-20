@@ -6,12 +6,11 @@
 \usage{
 complete_binary_segmentation(
   data,
-  test_statistic_function,
-  cutoff_function,
-  trim_function,
+  test_statistic_function = NULL,
+  changepoint_function = NULL,
+  final_verify = TRUE,
+  silent = FALSE,
   alpha = 0.05,
-  final_verify = T,
-  silent = F,
   ...
 )
 }
@@ -23,15 +22,7 @@ indicating FD}
 and the second argument argument for candidate change points.
 Additional arguments passed in via ... . Return a single numeric value.}
 
-\item{cutoff_function}{Function with first argument being data and the second
-argument being alpha. No other arguments given. Return single numeric
-value.}
-
-\item{trim_function}{Function taking data as an argument and returning a
-numeric value indicating how much should be trimmed on each end}
-
-\item{alpha}{Numeric value in \link{0,1} indicating the significance for
-cutoff_function.}
+\item{changepoint_function}{XXXXXX}
 
 \item{final_verify}{(Optional) Boolean value
 
@@ -41,7 +32,10 @@ locations of change points, potentially to less accurate locations.}
 
 \item{silent}{(Optional) Boolean value
 
-Indicates if useful output should be silenced. Default F shows output.}
+Indicates if useful output should be silenced. Default FALSE shows output.}
+
+\item{alpha}{Numeric value in \eqn{[0, 1]} indicating the significance for
+cutoff_function.}
 
 \item{...}{Additional arguments passed into test_statistic_function}
 }
@@ -55,6 +49,7 @@ for general functions. Change points are recursively found until no
 more change points are detected.
 }
 \examples{
+\dontrun{
 # Setup Data
 data_KL <- generate_data_fd(ns = c(200),
     eigsList = list(c(3,2,1,0.5)),
@@ -63,8 +58,12 @@ data_KL <- generate_data_fd(ns = c(200),
     distsArray = c('Normal'),
     evals = seq(0,1,0.05),
     kappasArray = c(0))
-complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+complete_binary_segmentation(data=data_KL, test_statistic_function=compute_Tn,
+                             cutoff_function=welch_approximation,
+    trim_function = function(data){
+                      max(2, floor(log(ncol(as.data.frame(data)))),
+                      na.rm=TRUE)})
+
 # Setup Data
 data_KL <- generate_data_fd(ns = c(100,100),
     eigsList = list(c(3,2,1,0.5),
@@ -75,8 +74,17 @@ data_KL <- generate_data_fd(ns = c(100,100),
     distsArray = c('Normal','Normal'),
     evals = seq(0,1,0.05),
     kappasArray = c(0,0))
-complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
+    cutoff_function = welch_approximation,
+    trim_function = function(data){
+                      max(2, floor(log(ncol(as.data.frame(data)))),
+                      na.rm=TRUE)})
+complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
+    cutoff_function = generalized_resampling,
+    trim_function = function(data,...){
+                      max(2, floor(log(ncol(as.data.frame(data)))),
+                      na.rm=TRUE)},
+    fn=compute_Tn, iters=1000)
 
 # Setup Data
 data_KL <- generate_data_fd(ns = c(100,100,100),
@@ -90,6 +98,8 @@ data_KL <- generate_data_fd(ns = c(100,100,100),
     distsArray = c('Normal','Normal','Normal'),
     evals = seq(0,1,0.05),
     kappasArray = c(0,0,0))
-complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+complete_binary_segmentation(data_KL, compute_Tn, welch_approximation,
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+    na.rm=TRUE)})
+}
 }

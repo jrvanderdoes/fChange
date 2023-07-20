@@ -7,18 +7,13 @@
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
-#' @param test_statistic_function Function with the first argument being data
-#'     and the second argument argument for candidate change points.
-#'     Additional arguments passed in via ... . Return a single numeric value.
-#' @param changepoint_function
-#' @param cutoff_function Function with first argument being data and the second
-#'     argument being alpha. No other arguments given. Return single numeric
-#'     value.
+#' @param test_stat_method XXXXX
 #' @param trim_function_method Function taking data as an argument and returning a
 #'     numeric value indicating how much should be trimmed on each end
-#' @param alpha Numeric value in [0,1] indicating the significance for
-#'     cutoff_function.
+#' @param newVarExplain XXXXXXXXX
+#' @param maxCP XXXXXXXXX
 #' @param errorType String of 'L2' or 'Tr' indicating the error function to use
+#' @param demean XXXXXXXXX
 #' @param ... Additional parameters to pass into the respective functions
 #'
 #' @return list with element 1 the data frame with the change point location and
@@ -26,6 +21,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' data_KL <- generate_data_fd(ns = c(100,50,100),
 #'                   eigsList = list(c(3,2,1,0.5),
 #'                                   c(3,2,1,0.5),
@@ -39,12 +35,13 @@
 #'                   evals = seq(0,1,0.05),
 #'                   kappasArray = c(0, 0, 0))
 #'
-#' results <- .autoElbow_method(data=data_KL)
-#' plot_fd(data=data_KL, CPs=results)
+#' results <- .autoElbow_method(data=data_KL,
+#'                               test_stat_method=compute_Tn)
+#' }
 .autoElbow_method <- function(data,
                               test_stat_method=compute_Mn,
                               trim_function_method=trim_function,
-                              newVarExplain = 0.05, maxCP=10,
+                              newVarExplain = 0.05, maxCP = 10,
                               errorType = 'L2', demean=TRUE, ... ){
   # Setup
   n <- ncol(data)
@@ -152,13 +149,13 @@
 
 #' Title
 #'
-#' @param data
-#' @param CPs
+#' @param data XXXXX
+#' @param CPs XXXXX
 #'
-#' @return
-#' @export
+#' @return XXXXX
 #'
 #' @examples
+#' # XXXXX
 .demean <- function(data, CPs){
   CPs <- c(0,CPs[order(CPs)], ncol(data))
   data_demean <- data

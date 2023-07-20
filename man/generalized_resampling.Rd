@@ -8,10 +8,10 @@ generalized_resampling(
   X,
   blockSize,
   fn,
-  iters,
-  replace = F,
+  iters = 1000,
+  replace = FALSE,
   alpha = 0.05,
-  silent = F,
+  silent = FALSE,
   ...
 )
 }
@@ -30,7 +30,7 @@ account for dependence in the data}
 
 \item{replace}{Boolean value indicating bootstrapping (T) or permutation (F)}
 
-\item{alpha}{Numeric value in (0,1) to get the correct percentile}
+\item{alpha}{Numeric value in (0, 1) to get the correct percentile}
 
 \item{silent}{Boolean to silence output helpful to a user}
 
@@ -44,6 +44,7 @@ Use this method for generalized resampling of a test statistic in
 determination of the proper cutoff value
 }
 \examples{
+\dontrun{
 # Setup Data
 data_KL <- generate_data_fd(ns = c(100,100),
     eigsList = list(c(3,2,1,0.5),
@@ -55,9 +56,11 @@ data_KL <- generate_data_fd(ns = c(100,100),
     evals = seq(0,1,0.05),
     kappasArray = c(0, 0.5))
 # Metric
-compute_Tn(data_KL)
-# Permutation Method for Tn
+compute_Tn(data_KL) # Note value
+compute_Tn(data_KL) # Note different value
+# Permutation Method for Tn (this will get 1-alpha quantile of iters)
 generalized_resampling(X=data_KL,
     blockSize=ncol(data_KL)^(1/3),
     fn=compute_Tn, iters=1000, replace=F)
+}
 }

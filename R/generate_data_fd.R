@@ -20,7 +20,7 @@
 #'     for each group
 #' @param basesList A list of bases (eigenfunctions), length 1 or m
 #'
-#'     Define the basis using fda on c(0,1) to ensure it works
+#'     Define the basis using fda on c(0, 1) to ensure it works
 #'     (TODO:: Remove this restriction)
 #' @param meansList A list of means, length 1 or m, for each group
 #' @param distsArray A vector of distributions, length 1 or m, for each group
@@ -40,7 +40,7 @@
 #' # Create 200 functions with a midway change point. The change point
 #' #     is a change point in the eigenvalues, eigenfunctions, means,
 #' #     distributions, and VAR(1) strength
-# data_KL <- generate_data_fd(ns = c(100,100),
+# data_KL <- generate_data_fd(ns = c(25,25),
 #     eigsList = list(c(3,2,1,0.5),
 #                     c(3,2)),
 #     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
@@ -57,14 +57,14 @@ generate_data_fd <- function(ns,
                              evals,
                              kappasArray = c(0),
                              burnin = 100,
-                             silent = F){
+                             silent = FALSE){
   # ns is a vector with length m for the number of data runs until next CP
   # - i.e. c(10,10,10) has 10 length TS then CP followed by 10 and another CP
   # eigsList is a list of vectors giving the eigenvalues for each distribution
   # - Length of list be 1 or m
   # basesList is a list of bases (eigf) for each distribution
   # - Length should be 1 or m
-  # - Define basis on (0,1)
+  # - Define basis on (0, 1)
   # meansList is a list of means for each distribution
   # - Length should be 1 or m
   # distsArray is a vector of distributions to each run
@@ -199,6 +199,8 @@ generate_data_fd <- function(ns,
 #'
 #' @return List of X, observed points in FD, and eps, the epsilons for next
 #'         observation.
+#'
+#' @noRd
 #'
 #' @examples
 #' # This is an internal function and will not be outwardly visible. See

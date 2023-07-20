@@ -5,70 +5,48 @@
 #'     \deqn{Tn = \int_0^1 \int |Z_n(v,x)|^2 dQ(v) dx}
 #'
 #' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param k (Optional) Defaults to NULL, but can be an integer in [1,ncol(X)]
+#'    indicating FD.
+#' @param k (Optional) Integer indicating if Defaults to NULL, but can be an
+#' integer in \eqn{[1, ncol(X)]}.
 #'
-#' Indicates the candidate change point to investigate. If k=NULL then get the
-#'     test statistic for entire sample
+#' Indicates the candidate change point to investigate (uses `compute_Mn()`
+#'  for selection). If k=NULL then get the test statistic for entire sample.
+#'  Default is NULL.
 #'
-#' @param M (Optional) Defaults to 100. The number of functions in W
-#' @param W (Optional) Optional numeric matrix with rows for evaluated values
-#'     and columns indicating function
+#' @param M (Optional) Numeric indicating the number of vectors used to span W.
+#'  Defaults to 10,000.
+#' @param W (Optional) Data.frame of numerics with rows for evaluated values
+#'     and columns indicating function that contains the vectors to span the
+#'     space. Note the number of columns should match that of X. Default is NULL,
+#'     which generates the vectors in function. This overrides space and M if
+#'     not NULL.
+#' @param space (Optional) String indicating the space to integrate against.
+#'  Default is "BM", or Brownian motion. See `computeSpaceMeasuringVectors()`
+#'  for more information.
+#' @param ... Parameters are not passed anywhere. Just added for use in other
+#'  functions.
 #'
-#' This is the respective functions used to investigate the test statistic. The
-#'     NULL value means Brownian motion is used.
-#'
-#' @return A numeric value for the test statistic for entire sample or candidate
+#' @return Numeric value for the test statistic of entire sample or candidate
 #'     change point.
 #' @export
 #'
 #' @examples
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(200),
-#'     eigsList = list(c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0),
-#'     distsArray = c('Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0))
-#' compute_Tn(data_KL)
-#'
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(-0.5,0.5),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
-#' compute_Tn(data_KL)
-# compute_Tn <- function(X, k=NULL, M=100, W=NULL, ...){
-#   n <- ncol(X)
-#
-#   if(is.null(W)) W <- computeSpaceMeasuringVectors(M,"BM",X)
-#
-#   if(!is.null(k)){
-#     #return_value <- 1/M * sum(sapply(W, .combZnInt, X1=X, n=n, nx=0:k))
-#     return_value <- 1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))[k]
-#   }else{
-#     return_value <- 1/M * sum(as.data.frame(sapply(W, .combZnInt, X1=X, n=n, nx=0:n)))
-#   }
-#
-#   return_value
-# }
+#' compute_Tn(electricity)
 compute_Tn <- function(X, k=NULL, M=10000, W=NULL, space='BM',...){
   n <- ncol(X)
 
-  if(is.null(W)) W <- computeSpaceMeasuringVectors(M = M, X = X, space=space)
+  if(is.null(W)){
+    W <- computeSpaceMeasuringVectors(M = M, X = X, space=space)
+  }else{
+    M <- ncol(W)
+  }
 
-  # Not technically correct, more of an Mn but okay for now
   if(!is.null(k)){
-    intVal <- sapply(1:M, function(v,W,X1,n){
-      (abs(.Zn(W[,v],X1)))^2
-    },W=W,X1=X,n=n)
-    return ( 1/M * rowSums(intVal)[k] )
+    # Not technically correct, but okay for now
+    return(
+      compute_Mn(X, k=k, M=M, W=W,
+                 space=space, ...)
+    )
   }
 
   intVal <- sapply(1:M, function(v,W,X1,n){
@@ -78,180 +56,39 @@ compute_Tn <- function(X, k=NULL, M=10000, W=NULL, space='BM',...){
   1/M * sum(intVal)
 }
 
-#' Title
-#'
-#' @param y
-#'
-#' @return
-#' @export
-#'
-#' @examples
-.approx_int <- function(y){
-  # RH Approx
-  # 1/(length(y)+1)*sum(c(0,y))
-  # Trap Approx 1
-  # pracma::trapz(seq(0,1,length.out=length(y)+1), c(0,y))
-  # Trap Approx 2
-  # pracma::trapz(seq(0,1,length.out=length(y)),y)
-  # Trap Approx 3
-  # n <- length(y)
-  # pracma::trapz(seq(1/n,1,length.out=n),y)
-  # Trap Approx 4
-  # n <- length(y)
-  # pracma::trapz(seq(0,1-1/n,length.out=n), y)
-  # RH Approx
-  sum(y) / length(y)
-}
-
-#' Title
-#'
-#' @param v
-#' @param X
-#'
-#' @return
-#' @export
-#'
-#' @examples
-.Zn <- function(v,X){
-  n <- ncol(X)
-  fhat_vals <- .fhat_all(X,v)
-  fhat_full <- sum(fhat_vals)
-
-  sqrt(n) * (cumsum(fhat_vals)-1:n/n * fhat_full)
-}
-
-#' Get fhat Time n Estimate
-#'
-#' @param X
-#' @param v
-#'
-#' @return
-#' @export
-#'
-#' @examples
-.fhat_all <- function(X,v){
-  exp(1/nrow(X)*complex(imaginary = 1)* t(X) %*% v) / ncol(X)
-}
-
-
-
-
-#' Compute Integrated Zn Squared ($\int |Zn|^2$)
-#'
-#' This (internal) function computes $\int |Zn|^2$.
-#'
-#' @param v Vector of numeric for vector in space, length(v) = nrow(X1)
-#' @param X1 Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param n Integer indicating the number of FD observations
-#' @param nx Vector of integer indicating indices to consider
-#'
-#' @return Vector of numerics for  $\int |Zn|^2$.
-#'
-#' @examples
-#' # This is an internal function, see use in compute_Tn for use.
-.combZnInt <- function(v, X1, n, nx){
-  # Rounding occasionally messes up floor(nx). Try floor(116/400*400) to see
-
-  nfHat_vals <- exp(complex(real=0,imaginary = 1) * (t(X1) %*% v))
-
-  # Get nFhat - first value will be 0
-  nfx <- c(0,sapply(nx[-1], function(x, nfHat_vals){sum(nfHat_vals[1:x])},
-                    nfHat_vals=nfHat_vals))
-
-  # Compute abs(Zn^2), Zn= sqrt(n)*(f(v,x)-floor(nx)/n*f(v,1))
-  #   sqrt(n)/n = 1/sqrt(n)
-  fVals <- abs(1/sqrt(n)*(nfx-nx/n*nfx[length(nfx)]))^2
-
-  # LH Integration
-  #   TODO:: FIX THIS
-  # with(data.frame('nx'=nx,'val'=fVals),
-  #      (fVals[1:(length(fVals)-1)] + fVals[2:length(fVals)]) / 2 * 1/n)
-  # cumsum(c(0, cell))
-  sum((fVals[-length(fVals)])) * 1/n
-  #pracma::trapz(nx/n,fVals)
-}
-
 
 #' Compute Mn Test Statistic
 #'
 #' Function to calculate the change point test statistic for functional data
-#'     \deqn{Mn = sup_{x\in (0,1)} \int |Z_n(v,x)|^2 dQ(v)}
+#'     \deqn{Mn = sup_{x\in (0, 1)} \int |Z_n(v,x)|^2 dQ(v)}
 #'
-#' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param k (Optional) Defaults to NULL, but can be an integer in [1,ncol(X)]
-#'
-#' Indicates the candidate change point to investigate. If k=NULL then get the
-#'     test statistic for entire sample
-#'
-#' @param M (Optional) Defaults to 100. The number of functions in W
-#' @param W (Optional) Optional numeric matrix with rows for evaluated values
-#'     and columns indicating function
-#'
-#' This is the respective functions used to investigate the test statistic. The
-#'     NULL value means Brownian motion is used.
+#' @inheritParams compute_Tn
+#' @param which.Mn (Optional) Boolean which indicates if the location or test
+#'  statistic is of interest.
 #'
 #' @return A numeric value for the test statistic for entire sample or candidate
 #'     change point.
 #' @export
 #'
 #' @examples
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(200),
-#'     eigsList = list(c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0),
-#'     distsArray = c('Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0))
-#' compute_Mn(data_KL)
-#'
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(-0.5,0.5),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
-#' compute_Mn(data_KL)
-# compute_Mn <- function(X, k=NULL, M=100, W=NULL, which.Mn=FALSE, ...){
-#
-#   n <- length(X[1,])
-#   #xSeq <- seq(1/n, 1, 1/n)
-#   #xN <- length(X[,1])
-#   if(is.null(W)){
-#     W <- as.data.frame(sapply(rep(0,M),sde::BM, N=xN-1))
-#   }
-#
-#
-#   if(!is.null(k)){
-#     return_value <- 1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))[k]
-#   }else{
-#     return_value <- max(1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n))))
-#   }
-#
-#   if(which.Mn)
-#     return(which.max(1/M * rowSums(as.data.frame(sapply(W,.combZn,nx=0:n,X1=X,n=n)))))
-#
-#   return_value
-# }
+#' compute_Mn(electricity)
 compute_Mn <- function(X, k=NULL, M=10000, W=NULL, space='BM', which.Mn=FALSE, ...){
   n <- ncol(X)
 
-  if(is.null(W)) W <- computeSpaceMeasuringVectors(M = M, X = X, space=space)
+  if(is.null(W)){
+    W <- computeSpaceMeasuringVectors(M = M, X = X, space=space)
+  }else{
+    M <- ncol(W)
+  }
 
   if(!is.null(k)){
     intVal <- sapply(1:M, function(v,W,X1,n){
       (abs(.Zn(W[,v],X1)))^2
-    },W=W,X1=X,n=n)
+    },W=W, X1=X, n=n)
     return_value <-  1/M * rowSums(intVal)[k]
   }else{
     intVal <- sapply(1:M, function(v,W,X1,n){
-      (abs(.Zn(W[,v],X1)))^2 #RH Int
+      (abs(.Zn(W[,v],X1)))^2
     },W=W,X1=X,n=n)
     return_value <- 1/M * rowSums(intVal)
   }
@@ -262,32 +99,38 @@ compute_Mn <- function(X, k=NULL, M=10000, W=NULL, space='BM', which.Mn=FALSE, .
 }
 
 
-#' Compute Zn Squared, |Zn|^2
+#' Compute Zn Statistic
 #'
-#' This (internal) function computes |Z_n|^2
+#' This computes Zn. See usage in compute_Tn.
 #'
-#' @param v Vector of numeric for vector in space, length(v) = nrow(X1)
-#' @param X1 Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param n Integer indicating the number of FD observations
-#' @param nx Vector of integer indicating indices to consider
+#' @param v Vector of numerics with length of each curve in X, nrow(X).
+#' @param X Data.frame of functional data. Observations are columns, resolution
+#'  is the rows.
 #'
-#' @return Vector of numerics for  $|Zn|^2$.
+#' @return Numeric value for Zn, where \eqn{Zn(v,x)=\sqrt{n} (\hat{f}_n(v,x) -
+#' \frac{\lfloor n x \rfloor}{n} \hat{f}_n(v,1))}.
 #'
-#' @examples
-#' # This is an internal function, see use in compute_Tn for use.
-.combZn <- function(v,X1,n,nx){
-  # Rounding occasionally messes up floor(nx). Try floor(116/400*400) to see
+#' @noRd
+.Zn <- function(v,X){
+  n <- ncol(X)
+  fhat_vals <- .fhat_all(X,v)
+  fhat_full <- sum(fhat_vals)
 
-  nfHat_vals <- exp(complex(real=0,imaginary = 1) * (t(X1) %*% v))
-
-  # Get nFhat - first value will be 0
-  nfx <- c(0,sapply(nx[-1], function(x, nfHat_vals){sum(nfHat_vals[1:x])},
-                    nfHat_vals=nfHat_vals))
-
-  # Compute abs(Zn^2), Zn= sqrt(n)*(f(v,x)-floor(nx)/n*f(v,1))
-  #   sqrt(n)/n = 1/sqrt(n)
-
-  (abs(1/sqrt(n)*(nfx-nx/n*nfx[length(nfx)]))^2)[-1]
+  sqrt(n) * ( cumsum(fhat_vals) -
+               1:n/n * fhat_vals[length(fhat_vals)] )
 }
 
+
+#' Get fhat Estimates
+#'
+#' This computes the values in fHat, i.e. cutoff for each possible value.
+#'  Note, a starting 0 is omitted. See usage in .Zn.
+#'
+#' @inheritParams .Zn
+#'
+#' @return Vector of numerics for \eqn{\hat{f}(v,x)}
+#'
+#' @noRd
+.fhat_all <- function(X,v){
+  cumsum(exp(1/nrow(X)*complex(imaginary = 1)* t(X) %*% v)) / ncol(X)
+}

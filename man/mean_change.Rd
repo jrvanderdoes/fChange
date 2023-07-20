@@ -10,23 +10,27 @@ mean_change(
   h = 0,
   K = bartlett_kernel,
   alpha = 0.05,
-  inc.pval = F,
+  inc.pval = FALSE,
   ...
 )
 }
 \arguments{
 \item{data}{Numeric data.frame with evaled points on rows and fd objects in columns}
 
-\item{M}{Number of monte carlo simulations used to get the critical values. The default value is \code{M=1000}}
+\item{M}{(Optional) Number of Monte Carlo simulations used to get the critical
+values. The default value is \code{M=1000}}
 
-\item{h}{The window parameter parameter for the estimation of the long run covariance kernel. The default
-value is \code{h=0}, i.e., it assumes iid data}
+\item{h}{(Optional) The window parameter parameter for the estimation of the
+long run covariance kernel. The default value is \code{h=0}, i.e., it
+assumes iid data}
 
 \item{K}{(Optional) Function indicating the Kernel to use if h>0}
 
 \item{alpha}{(Optional) Numeric value indicating significance. Defaults to 0.05}
 
 \item{inc.pval}{(Optional) Boolean to indicate if pval should also be returned}
+
+\item{...}{Unused, just for use in other functions}
 }
 \value{
 If inc.pval is false, Numeric of CP location or NA, otherwise
@@ -40,31 +44,7 @@ and hence does not depend on any dimension reduction technique such as
 fPCA.
 }
 \examples{
-# Null Example
-data_KL <- generate_data_fd(ns = c(100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(0,0),
-    distsArray = c('Normal','Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0,0))
-
- mean_change(data_KL)
-
-# Mean CP Example
-data_KL <- generate_data_fd(ns = c(100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(0,0.2),
-    distsArray = c('Normal','Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0,0))
-
-mean_change(data_KL)
+mean_change(electricity,M=250)
 }
 \references{
 Aue A., Rice G., Sonmez O. (2017+), \emph{Detecting and dating structural breaks in

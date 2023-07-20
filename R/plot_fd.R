@@ -30,29 +30,15 @@
 #' @export
 #'
 #' @examples
-#' # Generate Data with a mean change point
-#' evalPts <- seq(0,1,0.05)
-#' data_KL <- generate_data_fd(ns = c(200,200),
-#'                                eigsList = list(c(3,2,1,0.5),
-#'                                                c(3,2,1,0.5)),
-#'                                basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                                                 fda::create.bspline.basis(nbasis=4, norder=4)),
-#'                                meansList = c(-1,1),
-#'                                distsArray = c('Normal','Normal'),
-#'                                evals = evalPts,
-#'                                kappasArray = c(0,0))
-#' plot_fd(data=data_KL,eval_points=evalPts)
-#'
-#' plot_fd(data=data_KL, CPs=200, eval_points=evalPts)
-#' plot_fd(data=data_KL, CPs=seq(40,360,20), eval_points=evalPts)
+#' plot_fd(data=electricity[,1:100], CPs=c(50))
 plot_fd <- function(data, CPs=NULL, eval_points = 1:nrow(data), plot_title=NULL,
                     val_axis_title = 'Value', eval_axis_title='EvalRange',
                     FD_axis_title = 'FD Sims',FDReps=1:ncol(data),
                     eye = list(x = -1.5, y = -1.5, z = 1.5),
                     aspectratio=list(x=1,y=1,z=1),
-                    showticklabels=T){
+                    showticklabels=TRUE){
 
-  if(!is.null(CPs) && length(na.omit(CPs))>0){
+  if(!is.null(CPs) && length(stats::na.omit(CPs))>0){
     fdPlot <- .plot_evalfd_3dlines_cps(fd_eval=data, singleRangeSeq=eval_points,
                                        CPs=CPs[order(CPs)], titleVal=plot_title,
                                        val_axis_title=val_axis_title,
@@ -100,6 +86,8 @@ plot_fd <- function(data, CPs=NULL, eval_points = 1:nrow(data), plot_title=NULL,
 #'
 #' @return A plotly plot
 #'
+#' @noRd
+#'
 #' @examples
 #' # This is an internal function, see usage in plot_fd.
 .plot_evalfd_3dlines <- function(fd_eval, singleRangeSeq, titleVal=NULL,
@@ -109,7 +97,7 @@ plot_fd <- function(data, CPs=NULL, eval_points = 1:nrow(data), plot_title=NULL,
                                  FDReps = 1:ncol(fd_eval),
                                  eye = list(x = -1.5, y = -1.5, z = 1.5),
                                  aspectratio=list(x=1,y=1,z=1),
-                                 showticklabels=T){
+                                 showticklabels=TRUE){
 
   number <- length(fd_eval[1,])
   valRange <- c(min(fd_eval),max(fd_eval))
@@ -199,6 +187,8 @@ plot_fd <- function(data, CPs=NULL, eval_points = 1:nrow(data), plot_title=NULL,
 #'
 #' @return A plotly plot
 #'
+#' @noRd
+#'
 #' @examples
 #' # This is an internal function, see usage in plot_fd.
 .plot_evalfd_3dlines_cps <- function(fd_eval, singleRangeSeq, CPs,
@@ -208,7 +198,7 @@ plot_fd <- function(data, CPs=NULL, eval_points = 1:nrow(data), plot_title=NULL,
                                      FD_axis_title = 'FD Sims',
                                      eye = list(x = -1.5, y = -1.5, z = 1.5),
                                      aspectratio=list(x=1,y=1,z=1),
-                                     showticklabels=T){
+                                     showticklabels=TRUE){
 
   number <- length(fd_eval[1,])
   valRange <- c(min(fd_eval),max(fd_eval))

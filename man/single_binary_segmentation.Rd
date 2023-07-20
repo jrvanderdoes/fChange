@@ -10,7 +10,7 @@ single_binary_segmentation(
   cutoff_function,
   trim_function,
   alpha = 0.05,
-  include_value = F,
+  include_value = FALSE,
   ...
 )
 }
@@ -29,8 +29,10 @@ value.}
 \item{trim_function}{Function taking data as an argument and returning a
 numeric value indicating how much should be trimmed on each end}
 
-\item{alpha}{Numeric value in \link{0,1} indicating the significance for
+\item{alpha}{Numeric value in \eqn{[0, 1]} indicating the significance for
 cutoff_function.}
+
+\item{include_value}{XXXXX}
 
 \item{...}{Additional arguments passed into test_statistic_function}
 }
@@ -43,6 +45,7 @@ This function implements traditional binary segmentation on functional data
 for general functions. At most one change point is detected.
 }
 \examples{
+\dontrun{
 # Setup Data
 data_KL <- generate_data_fd(ns = c(200),
     eigsList = list(c(3,2,1,0.5)),
@@ -51,10 +54,9 @@ data_KL <- generate_data_fd(ns = c(200),
     distsArray = c('Normal'),
     evals = seq(0,1,0.05),
     kappasArray = c(0))
-single_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
-single_binary_segmentation(data_KL, compute_Mn, welsh_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+single_binary_segmentation(data_KL, compute_Tn, welch_approximation,
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+    na.rm=TRUE)})
 
 # Setup Data
 data_KL <- generate_data_fd(ns = c(100,100),
@@ -66,8 +68,11 @@ data_KL <- generate_data_fd(ns = c(100,100),
     distsArray = c('Normal','Normal'),
     evals = seq(0,1,0.05),
     kappasArray = c(0,0))
-single_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
-single_binary_segmentation(data_KL, compute_Mn, welsh_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+single_binary_segmentation(data_KL, compute_Tn, welch_approximation,
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+    na.rm=TRUE)})
+single_binary_segmentation(data_KL, compute_Mn, welch_approximation,
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+    na.rm=TRUE)})
+}
 }

@@ -4,7 +4,7 @@
 \alias{wild_binary_segmentation}
 \title{Wild Binary Segmentation}
 \usage{
-wild_binary_segmentation(data, M = 5000, add_full = T, block_size = 1, ...)
+wild_binary_segmentation(data, M = 5000, add_full = TRUE, block_size = 1, ...)
 }
 \arguments{
 \item{data}{Numeric data.frame with rows for evaluated values and columns
@@ -32,6 +32,7 @@ Numeric values indicating the change points detected
 Wild Binary Segmentation
 }
 \examples{
+\dontrun{
 # Setup Data
 data_KL <- generate_data_fd(ns = c(12,12,12),
     eigsList = list(c(3,2,1,0.5),
@@ -45,10 +46,13 @@ data_KL <- generate_data_fd(ns = c(12,12,12),
     evals = seq(0,1,0.05),
     kappasArray = c(0,0,0))
 
-complete_binary_segmentation(data_KL, compute_Tn, welsh_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+complete_binary_segmentation(data_KL, compute_Tn, welch_approximation,
+    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+    na.rm=TRUE)})
 wild_binary_segmentation(data=data_KL,
     test_statistic_function=compute_Tn,
-    cutoff_function=welsh_approximation,
-    trim_function=function(data){max(2, floor(log(ncol(as.data.frame(data)))),na.rm=T)})
+    cutoff_function=welch_approximation,
+    trim_function=function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+    na.rm=TRUE)})
+}
 }
