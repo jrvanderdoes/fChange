@@ -134,7 +134,6 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
   val_Tn <- compute_Tn(X,M=TN_M, space=space)
 
   # Generate Noise
-  set.seed(123)
   W <- computeSpaceMeasuringVectors(Cov_M,space,X)
 
   # Variables
@@ -162,7 +161,7 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
     gamVals <- mvnorms[1:MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:MJ,]
 
     # Estimate value
-    apply(abs(t(gamVals))^2,MARGIN = 1, .approx_int) / nrow(X)#nrow(X)
+    apply(abs(t(gamVals))^2,MARGIN = 1, .approx_int) / nrow(X)
   }, MJ=MJ, sqrtMat=sqrtMat, lx=length(x))
 
   gamProcess <- as.vector(gamProcess)
