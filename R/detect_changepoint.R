@@ -1,74 +1,64 @@
 
 #' Detect Change Point
 #'
-#' This function detects change points in functional data. This is done through
-#'     simulating the null distribution
+#' This method detects changes in the data through simulating the null
+#'  distribution. To do so, the covariance matrix is estimated based on the
+#'  data, against some noise vectors. After estimation, a sample from the null
+#'  distribution can be simulated. The creation of the covariance matrix and
+#'  simulating of the null sample is completed many times, estimating the
+#'  null distribution. The test statistic is compared to this. This method is
+#'  computationally intensive and we found no reason to prefer it over
+#'  `detect_changepoint_singleCov()`.
 #'
 #' @param X Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
 #' @param nSims (Optional) Integer indicating the number of realizations of
 #'     Gaussian processes to compute. Default is 100
 #' @param x (Optional) Vector of locations of observations. Default is equally
-#'     spaced observations on (0, 1) with the same number of observations as FDs
-#' @param M (Optional) Integer indicating the number of vectors used to create
-#'     each value in the covariance matrix. Default is 25.
+#'     spaced observations on (0, 1) with the same number of observations as FDs.
 #' @param h (Optional) Integer indicating amount of lag to consider. Default is
 #'     3.
 #' @param K (Optional) Function for the kernel function to use. Default is the
 #'     barlett_kernel.
+#' @param space XXXXX
+#' @param TN_M (Optional) XXXXX
+#' @param Cov_M (Optional) Integer indicating the number of vectors used to create
+#'     each value in the covariance matrix. Default is 25.
 #' @param silent (Optional) Boolean indicating it the output should be supressed.
 #'     Default is FALSE.
 #'
-#' @return List
-#'     1. pval: pvalue based on the data and estimated Gaussian processes
-#'     2. gamProcess: Vector of estimated test statistics based on data
-#'     3. value: Test statistic for data
+#' @return List with three entries:
+#'  \enumerate{
+#'    \item pval: pvalue based on the data and estimated Gaussian processes
+#'    \item gamProcess: Vector of estimated test statistics based on data
+#'    \item value: Test statistic for data
+#'  }
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' X <- generate_data_fd(ns = c(100),
-#'            eigsList = list(c(3,2,1,0.5)),
-#'            basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-#'            meansList = c(0),
-#'            distsArray = c('Normal'),
-#'            evals = seq(0,1,0.05),
-#'            kappasArray = c(0))
-#' tmp <- detect_changepoint(X)
-#' tmp$pval
-#'
-#' X1 <- generate_data_fd(ns = c(50,50),
-#'            eigsList = list(c(3,2,1,0.5),
-#'                            c(1.5,1,0.5,0.25)),
-#'            basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                             fda::create.bspline.basis(nbasis=4, norder=4)),
-#'            meansList = c(0,0),
-#'            distsArray = c('Normal','Binomial'),
-#'            evals = seq(0,1,0.05),
-#'            kappasArray = c(0,0))
-#' tmp1 <- detect_changepoint(X1)
-#' tmp1$pval
-#' }
-detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
-                               M=25, h=3, K=bartlett_kernel, silent=FALSE){
+#' cp_res <- detect_changepoint(
+#'  electricity[,1:8], nSims=1, x=seq(0,1,length.out=5),
+#'  h=0, K=bartlett_kernel)
+detect_changepoint <- function(X, nSims=500, x=seq(0,1,length.out=40),
+                               h=3, K=bartlett_kernel, space='BM',
+                               TN_M=10000, Cov_M=75, silent=FALSE){
   # Setup Vars
   gamProcess <- rep(NA,nSims)
-  value <- compute_Tn(X,M=M)
-  MJ <- M * length(x)
+  value <- compute_Tn(X,M=TN_M,space=space)
+
+  MJ <- Cov_M * length(x)
 
   for(i in 1:nSims){
     if(!silent) cat(paste0(i,', '))
     # Compute Gamma Matrix
-    covMat <- .estimCovMat(X,x,M,h,K)
+    W <- computeSpaceMeasuringVectors(Cov_M, space, X)
+    covMat <- .estimCovMat(X = X,x = x,M = Cov_M,h = h,K = K,W = W)
 
-    #mvnorms <- mvtnorm::rmvnorm(1,sigma=covMat,method='svd')
     mvnorms <- suppressWarnings(mvtnorm::rmvnorm(1,sigma=covMat))
 
-    gamVals <- mvnorms[1,1:MJ] +
-      complex(imaginary = 1) * mvnorms[1,MJ+1:MJ]
+    gamVals <- mvnorms[1,1:MJ] + complex(imaginary = 1) * mvnorms[1,MJ+1:MJ]
 
     # Estimate value
-    # gamProcess[i] <- sum(abs(gamVals)^2)/MJ
     gamProcess[i] <- .approx_int(abs(gamVals)^2)/nrow(X)
   }
 
@@ -77,53 +67,30 @@ detect_changepoint <- function(X, nSims=100, x=seq(0,1,length.out=ncol(X)),
        'value'=value)
 }
 
-#' Estimate null and detect change point based on a single covar matrix
+#' Estimate null and detect change point based on a single covariance matrix
 #'
-#' @param X XXXXXX
-#' @param nSims XXXXXX
-#' @param x XXXXXX
-#' @param h XXXXXX
-#' @param K XXXXXX
-#' @param space XXXXXX
-#' @param silent XXXXXX
-#' @param TN_M XXXXXX
-#' @param Cov_M XXXXXX
+#' This method detects changes in the data through simulating the null
+#'  distribution. To do so, the covariance matrix is estimated based on the
+#'  data, against some noise vectors. After estimation, samples from the null
+#'  distribution can be simulated. These samples can be combine to estimate the
+#'  null distribution. The test statistic is then compared to this. This method
+#'  has been shown to be effective and is far faster than
+#'  `detect_changepoint()`.
 #'
-#' @return XXXXXX
+#' @inheritParams detect_changepoint
+#'
+#' @return List with three entries:
+#'  \enumerate{
+#'    \item pval: pvalue based on the data and estimated Gaussian processes
+#'    \item gamProcess: Vector of estimated test statistics based on data
+#'    \item value: Test statistic for data
+#'  }
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' X <- generate_data_fd(ns = c(100,100),
-#'                       eigsList = list(c(3,2,1,0.5),c(3,2,1,0.5)),
-#'                       basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                                        fda::create.bspline.basis(nbasis=4, norder=4)),
-#'                       meansList = c(0,1),
-#'                       distsArray = c('Normal'),
-#'                       evals = seq(0,1,0.05),
-#'                       kappasArray = c(0.5),silent = TRUE)
-#' cp_res <- detect_changepoint_singleCov(X, nSims=500, x=seq(0,1,length.out=20),
-#'                                        h=3, K=bartlett_kernel, silent=FALSE)
-#'
-#' X1 <- generate_data_fd(ns = c(200),
-#'                        eigsList = list(c(3,2,1,0.5)),
-#'                        basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-#'                        meansList = c(0),
-#'                        distsArray = c('Normal'),
-#'                        evals = seq(0,1,0.05),
-#'                        kappasArray = c(0),silent = TRUE)
-#' nocp_res <- detect_changepoint_singleCov(X1, nSims=500, x=seq(0,1,length.out=20),
-#'                                          h=0, K=bartlett_kernel, silent=FALSE)
-#' X3 <- generate_data_fd(ns = c(50,250),
-#'                        eigsList = list(c(3,2,1,0.5),c(30,1)),
-#'                        basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                                         fda::create.bspline.basis(nbasis=2, norder=2)),
-#'                        meansList = c(0,0),
-#'                        distsArray = c('Normal'), kappasArray = c(0.5),
-#'                        evals = seq(0,1,0.05), silent = TRUE)
-#' cp_res3 <- detect_changepoint_singleCov(X, nSims=500,
-#'                                         x=seq(0,1,length.out=20))
-#' }
+#' cp_res <- detect_changepoint_singleCov(
+#'  electricity[,1:20], nSims=100, x=seq(0,1,length.out=5),
+#'  h=0, K=bartlett_kernel, silent=FALSE)
 detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40),
                                          h=3, K=bartlett_kernel, space='BM',
                                          silent=FALSE, TN_M=10000, Cov_M=75){
@@ -131,10 +98,10 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
   # Rcpp::sourceCpp("R/matrixMult.cpp")
 
   # Determine Number of Iterations
-  val_Tn <- compute_Tn(X,M=TN_M, space=space)
+  val_Tn <- compute_Tn(X, M=TN_M, space=space)
 
   # Generate Noise
-  W <- computeSpaceMeasuringVectors(Cov_M,space,X)
+  W <- computeSpaceMeasuringVectors(Cov_M, space, X)
 
   # Variables
   MJ <- Cov_M * length(x)
@@ -192,9 +159,6 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #' @return Data.frame for covariance based on Gaussian measure and given data X
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function, see usage in computeMethod
 .estimCovMat <- function(X, x=seq(0,1,length.out=nrow(X)),
                          M=25, h=3, K=bartlett_kernel, W=NULL){
   # Setup random vectors
@@ -267,14 +231,11 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #' @return Data.frame with autocovariance value based on data given
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function, see usage in .estimCovMat
 .estimD <- function(K,h,X,lfun,v,lfunp,vp){
 
   iters <- (1-ncol(X)):(ncol(X)-1)
 
-  # Move so pass in function values to avoid recomputation later
+  # Move so pass in function values to avoid re-computation later
   fVals <- as.numeric(.estimf(X,lfun,v))
   fpVals <- as.numeric(.estimf(X,lfunp,vp))
 
@@ -315,9 +276,6 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #' @return Numeric autocovariance value for given data
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function, see usage in .estimD
 .estimGamma <- function(k, X, fVals, fpVals, mean1, mean2){
   tmp <- 0
 
@@ -349,9 +307,6 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #' @return Numeric value of R-hat for fd object of interest
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function, see usage in .estimGamma
 .estimR <- function(r, fVals, meanVal=NA){
   if(is.na(meanVal)) meanVal <- mean(fVals)
 
@@ -372,9 +327,6 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
 #' @return Numeric value(s) indicating function value for each FD object given
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function, see usage in .estimR
 .estimf <- function(Xr,lfun,v){
   lfun(t(Xr) %*% v)
 }
