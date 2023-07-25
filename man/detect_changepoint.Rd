@@ -6,11 +6,13 @@
 \usage{
 detect_changepoint(
   X,
-  nSims = 100,
-  x = seq(0, 1, length.out = ncol(X)),
-  M = 25,
+  nSims = 500,
+  x = seq(0, 1, length.out = 40),
   h = 3,
   K = bartlett_kernel,
+  space = "BM",
+  TN_M = 10000,
+  Cov_M = 75,
   silent = FALSE
 )
 }
@@ -22,10 +24,7 @@ indicating FD}
 Gaussian processes to compute. Default is 100}
 
 \item{x}{(Optional) Vector of locations of observations. Default is equally
-spaced observations on (0, 1) with the same number of observations as FDs}
-
-\item{M}{(Optional) Integer indicating the number of vectors used to create
-each value in the covariance matrix. Default is 25.}
+spaced observations on (0, 1) with the same number of observations as FDs.}
 
 \item{h}{(Optional) Integer indicating amount of lag to consider. Default is
 3.}
@@ -33,41 +32,36 @@ each value in the covariance matrix. Default is 25.}
 \item{K}{(Optional) Function for the kernel function to use. Default is the
 barlett_kernel.}
 
+\item{space}{XXXXX}
+
+\item{TN_M}{(Optional) XXXXX}
+
+\item{Cov_M}{(Optional) Integer indicating the number of vectors used to create
+each value in the covariance matrix. Default is 25.}
+
 \item{silent}{(Optional) Boolean indicating it the output should be supressed.
 Default is FALSE.}
 }
 \value{
-List
-1. pval: pvalue based on the data and estimated Gaussian processes
-2. gamProcess: Vector of estimated test statistics based on data
-3. value: Test statistic for data
+List with three entries:
+\enumerate{
+\item pval: pvalue based on the data and estimated Gaussian processes
+\item gamProcess: Vector of estimated test statistics based on data
+\item value: Test statistic for data
+}
 }
 \description{
-This function detects change points in functional data. This is done through
-simulating the null distribution
+This method detects changes in the data through simulating the null
+distribution. To do so, the covariance matrix is estimated based on the
+data, against some noise vectors. After estimation, a sample from the null
+distribution can be simulated. The creation of the covariance matrix and
+simulating of the null sample is completed many times, estimating the
+null distribution. The test statistic is compared to this. This method is
+computationally intensive and we found no reason to prefer it over
+\code{detect_changepoint_singleCov()}.
 }
 \examples{
-\dontrun{
-X <- generate_data_fd(ns = c(100),
-           eigsList = list(c(3,2,1,0.5)),
-           basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-           meansList = c(0),
-           distsArray = c('Normal'),
-           evals = seq(0,1,0.05),
-           kappasArray = c(0))
-tmp <- detect_changepoint(X)
-tmp$pval
-
-X1 <- generate_data_fd(ns = c(50,50),
-           eigsList = list(c(3,2,1,0.5),
-                           c(1.5,1,0.5,0.25)),
-           basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                            fda::create.bspline.basis(nbasis=4, norder=4)),
-           meansList = c(0,0),
-           distsArray = c('Normal','Binomial'),
-           evals = seq(0,1,0.05),
-           kappasArray = c(0,0))
-tmp1 <- detect_changepoint(X1)
-tmp1$pval
-}
+cp_res <- detect_changepoint(
+ electricity[,1:8], nSims=1, x=seq(0,1,length.out=5),
+ h=0, K=bartlett_kernel)
 }
