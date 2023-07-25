@@ -2,7 +2,7 @@
 % Please edit documentation in R/detect_changepoint.R
 \name{detect_changepoint_singleCov}
 \alias{detect_changepoint_singleCov}
-\title{Estimate null and detect change point based on a single covar matrix}
+\title{Estimate null and detect change point based on a single covariance matrix}
 \usage{
 detect_changepoint_singleCov(
   X,
@@ -17,60 +17,50 @@ detect_changepoint_singleCov(
 )
 }
 \arguments{
-\item{X}{XXXXXX}
+\item{X}{Numeric data.frame with rows for evaluated values and columns
+indicating FD}
 
-\item{nSims}{XXXXXX}
+\item{nSims}{(Optional) Integer indicating the number of realizations of
+Gaussian processes to compute. Default is 100}
 
-\item{x}{XXXXXX}
+\item{x}{(Optional) Vector of locations of observations. Default is equally
+spaced observations on (0, 1) with the same number of observations as FDs.}
 
-\item{h}{XXXXXX}
+\item{h}{(Optional) Integer indicating amount of lag to consider. Default is
+3.}
 
-\item{K}{XXXXXX}
+\item{K}{(Optional) Function for the kernel function to use. Default is the
+barlett_kernel.}
 
-\item{space}{XXXXXX}
+\item{space}{XXXXX}
 
-\item{silent}{XXXXXX}
+\item{silent}{(Optional) Boolean indicating it the output should be supressed.
+Default is FALSE.}
 
-\item{TN_M}{XXXXXX}
+\item{TN_M}{(Optional) XXXXX}
 
-\item{Cov_M}{XXXXXX}
+\item{Cov_M}{(Optional) Integer indicating the number of vectors used to create
+each value in the covariance matrix. Default is 25.}
 }
 \value{
-XXXXXX
+List with three entries:
+\enumerate{
+\item pval: pvalue based on the data and estimated Gaussian processes
+\item gamProcess: Vector of estimated test statistics based on data
+\item value: Test statistic for data
+}
 }
 \description{
-Estimate null and detect change point based on a single covar matrix
+This method detects changes in the data through simulating the null
+distribution. To do so, the covariance matrix is estimated based on the
+data, against some noise vectors. After estimation, samples from the null
+distribution can be simulated. These samples can be combine to estimate the
+null distribution. The test statistic is then compared to this. This method
+has been shown to be effective and is far faster than
+\code{detect_changepoint()}.
 }
 \examples{
-\dontrun{
-X <- generate_data_fd(ns = c(100,100),
-                      eigsList = list(c(3,2,1,0.5),c(3,2,1,0.5)),
-                      basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                                       fda::create.bspline.basis(nbasis=4, norder=4)),
-                      meansList = c(0,1),
-                      distsArray = c('Normal'),
-                      evals = seq(0,1,0.05),
-                      kappasArray = c(0.5),silent = TRUE)
-cp_res <- detect_changepoint_singleCov(X, nSims=500, x=seq(0,1,length.out=20),
-                                       h=3, K=bartlett_kernel, silent=FALSE)
-
-X1 <- generate_data_fd(ns = c(200),
-                       eigsList = list(c(3,2,1,0.5)),
-                       basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-                       meansList = c(0),
-                       distsArray = c('Normal'),
-                       evals = seq(0,1,0.05),
-                       kappasArray = c(0),silent = TRUE)
-nocp_res <- detect_changepoint_singleCov(X1, nSims=500, x=seq(0,1,length.out=20),
-                                         h=0, K=bartlett_kernel, silent=FALSE)
-X3 <- generate_data_fd(ns = c(50,250),
-                       eigsList = list(c(3,2,1,0.5),c(30,1)),
-                       basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                                        fda::create.bspline.basis(nbasis=2, norder=2)),
-                       meansList = c(0,0),
-                       distsArray = c('Normal'), kappasArray = c(0.5),
-                       evals = seq(0,1,0.05), silent = TRUE)
-cp_res3 <- detect_changepoint_singleCov(X, nSims=500,
-                                        x=seq(0,1,length.out=20))
-}
+cp_res <- detect_changepoint_singleCov(
+ electricity[,1:20], nSims=100, x=seq(0,1,length.out=5),
+ h=0, K=bartlett_kernel, silent=FALSE)
 }
