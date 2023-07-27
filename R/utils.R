@@ -3,10 +3,12 @@
 #' This (internal) function computes the estimates the integral for
 #'  evenly spaced observations.
 #'
+#' TODO:: Setup the rest of the integration options (key being trapezoidal)
+#'
 #' @param y Numeric vector of data
 #' @param type (Optional) String indicating type of integration. Currently only
 #'  the only option is "Rectangle" for rectangular integration done using
-#'  Reimann Sum. Default is "Rectangle".
+#'  Riemann Sum. Default is "Rectangle".
 #'
 #' @return Numeric indicating the estimated integral of the curve
 #'
@@ -39,4 +41,22 @@
   }
 
   value
+}
+
+
+#' Specify Decimal
+#'
+#' This (internal) function returns a string of the numbers with the specified
+#'  level of decimals (i.e. will add trailing zeroes as needed).
+#'
+#' @param x Numeric(s) to specify the decimal for
+#' @param k Numeric integer indicating the number of decimals to return for each
+#'  numeric in x.
+#'
+#' @return A vector of strings relating the the values in x, but with the
+#'  specified number of decimals.
+#'
+#' @noRd
+.specify_decimal <- function(x, k) {
+  trimws(format(round(x, k), nsmall = k))
 }
