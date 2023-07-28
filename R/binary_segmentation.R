@@ -6,11 +6,11 @@
 #'     more change points are detected.
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param test_statistic_function Function with the first argument being data
-#'     and the second argument argument for candidate change points.
-#'     Additional arguments passed in via ... . Return a single numeric value.
-#' @param changepoint_function XXXXXX
+#'    indicating functional observations
+#' @param changepoint_function Function that takes the data (X), significance
+#'  (alpha), and any other parameters defined in ... , and returns the change
+#'  point location (if detected) or NA (if not). Default is `cpf()`.
+#' @param cutoff_function XXXXXX
 #' @param alpha Numeric value in \eqn{[0, 1]} indicating the significance for
 #'     cutoff_function.
 #' @param final_verify (Optional) Boolean value
@@ -21,69 +21,23 @@
 #' @param silent (Optional) Boolean value
 #'
 #' Indicates if useful output should be silenced. Default FALSE shows output.
-#' @param ... Additional arguments passed into test_statistic_function
+#' @param ... Additional arguments passed into changepoint_function
 #'
 #' @return A list of numeric values indicating change points  (if exists),
 #'     NA otherwise
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(200),
-#'     eigsList = list(c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0),
-#'     distsArray = c('Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0))
-#' complete_binary_segmentation(data=data_KL, test_statistic_function=compute_Tn,
-#'                              cutoff_function=welch_approximation,
-#'     trim_function = function(data){
-#'                       max(2, floor(log(ncol(as.data.frame(data)))),
-#'                       na.rm=TRUE)})
-#'
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(-1,1),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
-#' complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
-#'     cutoff_function = welch_approximation,
-#'     trim_function = function(data){
-#'                       max(2, floor(log(ncol(as.data.frame(data)))),
-#'                       na.rm=TRUE)})
-#' complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
-#'     cutoff_function = generalized_resampling,
-#'     trim_function = function(data,...){
-#'                       max(2, floor(log(ncol(as.data.frame(data)))),
-#'                       na.rm=TRUE)},
-#'     fn=compute_Tn, iters=1000)
-#'
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(100,100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5),
-#'                     c(3,2)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=2, norder=2)),
-#'     meansList = c(-1,1,1),
-#'     distsArray = c('Normal','Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0,0))
-#' complete_binary_segmentation(data_KL, compute_Tn, welch_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),
-#'     na.rm=TRUE)})
-#' }
+#' complete_binary_segmentation(data = electricity[,1:145],
+#'   test_statistic_function = compute_Mn,
+#'   cutoff_function = welch_approximation,
+#'   trim_function = function(data){
+#'     max(50, floor(log(ncol(as.data.frame(data)))),
+#'         na.rm=TRUE)},
+#'   final_verify=FALSE)
 complete_binary_segmentation <- function(data,
-                                         test_statistic_function = NULL,
-                                         changepoint_function = NULL,
+                                         changepoint_function,
+                                         cutoff_function,
                                          final_verify = TRUE,
                                          silent = FALSE,
                                          alpha=0.05,
@@ -92,18 +46,18 @@ complete_binary_segmentation <- function(data,
   # Get change points -- Will not include first or last
   CPsVals <- .detectChangePoints(data=data,
                                 test_statistic_function=test_statistic_function,
-                                changepoint_function=changepoint_function,
+                                cutoff_function=cutoff_function,
                                 silent = silent,
-                                alpha=0.05,
+                                alpha=alpha,
                                 ... )
 
   # Verify as desired
   if(final_verify){
     CPsVals <- .changepoint_verification(CPsVals=CPsVals, data=data,
                       test_statistic_function=test_statistic_function,
-                      changepoint_function=changepoint_function,
+                      cutoff_function=cutoff_function,
                       silent=silent,
-                      alpha=0.05,
+                      alpha=alpha,
                       ...)
   }
 
@@ -178,16 +132,12 @@ single_binary_segmentation <- function(data, test_statistic_function,
   if(nStart>= nEnd) ifelse(include_value,return(c(NA,NA)),return(NA))
 
   # Find test statistic at every candidate change point
-  test_stat <- rep(NA, ncol(as.data.frame(data)))
-  for(k in nStart:nEnd){
-    test_stat[k] <- test_statistic_function(as.data.frame(data), k, ...)
-  }
-  test_stat_full <- max(test_stat, na.rm = TRUE)
+  test_stats <- test_statistic_function(as.data.frame(data))
 
   # Return index of max change point if larger than cutoff
-  return_value <- ifelse(test_stat_full >= cutoff_function(data, alpha, ...),
-                which.max(test_stat),
-                NA)
+  return_value <- ifelse(test_stats$value >= cutoff_function(data, alpha, ...),
+                         test_stats$location,
+                         NA)
 
   # Add in value
   if(include_value){
@@ -300,11 +250,8 @@ wild_binary_segmentation <- function(data, M=5000, add_full=TRUE, block_size=1,
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
-
-#' @param test_statistic_function (Optional) Function with the first argument being data.
-#'     Additional arguments passed in via ... . Return values for each candidate
-#'     change point. Give this or changepoint_function.
-#' @param changepoint_function (Optional) Function with the first argument being data.
+#'
+#' @param changepoint_function Function with the first argument being data.
 #'     Additional arguments passed in via ... . Return the selected change point.
 #'     Give this or changepoint_function.
 #' @param alpha (Optional) Numeric value in [0,1] indicating the significance.
@@ -322,20 +269,14 @@ wild_binary_segmentation <- function(data, M=5000, add_full=TRUE, block_size=1,
 #' # This is an internal function and will not be shown to user. See
 #' #     complete_binary_segmentation
 .detectChangePoints <-  function(data,
-                                 test_statistic_function = NULL,
-                                 changepoint_function = NULL,
+                                 changepoint_function,
                                  alpha = NULL,
                                  addAmt = 0,
                                  silent = FALSE,
                                  ...){
-  if(!is.null(test_statistic_function)){
-    potential_cp <-
-      single_binary_segmentation(data,
-                 test_statistic_function=test_statistic_function,
-                 alpha=alpha, ... )
-  }else if(!is.null(changepoint_function)){
-    potential_cp <- changepoint_function(data, alpha=alpha, ...)
-  }
+
+  potential_cp <- single_binary_segmentation(data,
+   changepoint_function=changepoint_function, alpha=alpha, ... )
 
   # No Change Point Detected
   if(is.na(potential_cp)) return()
@@ -347,7 +288,6 @@ wild_binary_segmentation <- function(data, M=5000, add_full=TRUE, block_size=1,
 
   return(c(
     .detectChangePoints(data=as.data.frame(data[,1:potential_cp]),
-                       test_statistic_function=test_statistic_function,
                        changepoint_function=changepoint_function,
                        addAmt=addAmt,
                        silent=silent,
@@ -355,11 +295,25 @@ wild_binary_segmentation <- function(data, M=5000, add_full=TRUE, block_size=1,
                        ...),
     potential_cp + addAmt,
     .detectChangePoints(data=as.data.frame(data[,(potential_cp+1):ncol(data)]),
-                       test_statistic_function=test_statistic_function,
                        changepoint_function=changepoint_function,
                        addAmt=addAmt+potential_cp,
                        silent=silent,
                        alpha=alpha,
                        ...)
   ))
+}
+
+
+cpf <- function(X,cutoff_function, alpha=0.05, type='Mn', ...){
+  if(type=='Mn'){
+    result <- compute_Mn(X, ...)
+    cutoff <- cutoff_function(X, alpha, ...)
+  }else if(type=='Tn'){
+    result <- compute_Tn(X, ...)
+    cutoff <- cutoff_function(X, alpha, ...)
+  }else{
+    stop('Error: type must be Mn or Tn')
+  }
+
+  ifelse(result$value>=cutoff, result$location, NA)
 }
