@@ -34,9 +34,9 @@
     value <- sum(y) / length(y)
     # 1/(length(y)+1)*sum(c(0,y))
   } else if(type=="Trapezoidal"){ # Trap Approx
-    value <- sum(y[-1] + y[length(y)]) / ( 2 * length(y) )
-    stop('Error: Trapezoidal rule not yet setup.')
-    # pracma::trapz(seq(0,1,length.out=length(y)),y)
+    #value <- sum(y[-1] + y[length(y)]) / ( 2 * length(y) )
+    value <- pracma::trapz(seq(0,1,length.out=length(y)),y)
+    # stop('Error: Trapezoidal rule not yet setup.')
     # pracma::trapz(seq(0,1,length.out=length(y)),y)
   }
 
