@@ -272,9 +272,10 @@ generate_data_fd <- function(ns,
 
   # Generate
   for(t in 1:n){
+    eval_basis <- fda::eval.basis(evals[t], basis)
     for(j in 1:D){
       xi <- generateXi(dist=dist, sd=sqrt(eigs[j]))
-      Zeta[j,t] <- xi * fda::eval.basis(evals[t], basis)[j]
+      Zeta[j,t] <- xi * eval_basis[j]
     }
 
     eps[,t] <- Zeta[,t] + psi %*% peps[,t]
