@@ -93,7 +93,7 @@ detect_changepoint <- function(X, nSims=500, x=seq(0,1,length.out=40),
 #'  h=0, K=bartlett_kernel, silent=FALSE)
 detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40),
                                          h=3, K=bartlett_kernel, space='BM',
-                                         silent=FALSE, TN_M=10000, Cov_M=75){
+                                         silent=FALSE, TN_M=100000, Cov_M=75){
   # Source Cpp File to speed up matrix computations
   # Rcpp::sourceCpp("R/matrixMult.cpp")
 
@@ -126,6 +126,7 @@ detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40)
     mvnorms <- Rfast::mat.mult(sqrtMat, mvnorms)
 
     gamVals <- mvnorms[1:MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:MJ,]
+    # gamVals <- mvnorms[(M+1):MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:(MJ-M),]
 
     # Estimate value
     apply(abs(t(gamVals))^2,MARGIN = 1, .approx_int) / nrow(X)

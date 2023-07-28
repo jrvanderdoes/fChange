@@ -32,21 +32,13 @@
 #'
 #' @examples
 #' compute_Tn(electricity)
-compute_Tn <- function(X, k=NULL, M=10000, W=NULL, space='BM',...){
+compute_Tn <- function(X, M=100000, W=NULL, space='BM', ...){
   n <- ncol(X)
 
   if(is.null(W)){
     W <- computeSpaceMeasuringVectors(M = M, X = X, space=space)
   }else{
     M <- ncol(W)
-  }
-
-  if(!is.null(k)){
-    # Not technically correct, but okay for now
-    return(
-      compute_Mn(X, k=k, M=M, W=W,
-                 space=space, ...)
-    )
   }
 
   intVal <- sapply(1:M, function(v,W,X1,n){
@@ -72,7 +64,7 @@ compute_Tn <- function(X, k=NULL, M=10000, W=NULL, space='BM',...){
 #'
 #' @examples
 #' compute_Mn(electricity)
-compute_Mn <- function(X, k=NULL, M=10000, W=NULL, space='BM', which.Mn=FALSE, ...){
+compute_Mn <- function(X, M=10000, W=NULL, space='BM', ...){
   n <- ncol(X)
 
   if(is.null(W)){
@@ -81,21 +73,14 @@ compute_Mn <- function(X, k=NULL, M=10000, W=NULL, space='BM', which.Mn=FALSE, .
     M <- ncol(W)
   }
 
-  if(!is.null(k)){
-    intVal <- sapply(1:M, function(v,W,X1,n){
-      (abs(.Zn(W[,v],X1)))^2
-    },W=W, X1=X, n=n)
-    return_value <-  1/M * rowSums(intVal)[k]
-  }else{
-    intVal <- sapply(1:M, function(v,W,X1,n){
-      (abs(.Zn(W[,v],X1)))^2
-    },W=W,X1=X,n=n)
-    return_value <- 1/M * rowSums(intVal)
-  }
+  intVal <- sapply(1:M, function(v,W,X1,n){
+    (abs(.Zn(W[,v],X1)))^2
+  },W=W,X1=X,n=n)
+  return_value <- 1/M * rowSums(intVal)
 
-  if(which.Mn) return(which.max(return_value))
-
-  max(return_value)
+  list('value'=max(return_value),
+       'location'=which.max(return_value),
+       'allValues'=return_value)
 }
 
 
