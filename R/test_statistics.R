@@ -99,7 +99,6 @@ compute_Mn <- function(X, M=10000, W=NULL, space='BM', ...){
 .Zn <- function(v,X){
   n <- ncol(X)
   fhat_vals <- .fhat_all(X,v)
-  #fhat_full <- sum(fhat_vals)
 
   sqrt(n) * ( fhat_vals -
                1:n/n * fhat_vals[length(fhat_vals)] )
