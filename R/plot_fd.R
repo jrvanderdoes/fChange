@@ -340,6 +340,7 @@ plot_fd <- function(data, CPs=NULL, curve_points = 1:nrow(data), plot_title=NULL
         labels=NULL) )
   }
 
+  color <- NULL # Check note removal
   #lattice:::wireframe
   lattice::cloud(x=Value ~ (resolution)*(-FDRep),
                      data= plotData,
