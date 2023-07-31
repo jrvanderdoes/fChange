@@ -209,43 +209,40 @@ generate_data_fd <- function(ns,
                                       evals, peps, psi){
 
   ## Functions
-  generateXi <- function(dist, sd){
+  generateXi <- function(dist, sd,n=1){
     ## This function give centered distributions with eig^2 var
-
-    xi <- 0
 
     if(dist == 'Normal'){
 
-      xi <- stats::rnorm(1,mean=0, sd=sd)
+      xi <- stats::rnorm(n,mean=0, sd=sd)
 
     }else if(dist == 'Binomial'){
 
-      if(sd==0)
-        return(0)
+      if(sd==0) return(rep(0,n))
 
       mean <- 10 * sd^2 # arbitrary, must exceed var
       p <- 1 - sd^2/mean
       size <- round(mean/p)
 
-      xi <- stats::rbinom(n=1,size=size,p=p) - mean
+      xi <- stats::rbinom(n=n,size=size,p=p) - mean
 
     }else if(dist == 'Exponential'){
 
-      xi <- stats::rexp(1,rate = 1/sd) - sd
+      xi <- stats::rexp(n,rate = 1/sd) - sd
 
     }else if(dist == 't'){
 
       bigDF <- 10000 # arbitrary
-      xi <- stats::rt(1, bigDF) * sqrt(sd^2 * (bigDF-2)/bigDF)
+      xi <- stats::rt(n, bigDF) * sqrt(sd^2 * (bigDF-2)/bigDF)
 
     }else if(dist=='cauchy'){
       stop('Sorry Problem with cauchy')
-      xi <- stats::rcauchy(1)
+      xi <- stats::rcauchy(n)
     }else if(dist=='laplace'){
       if(!requireNamespace("jmuOutlier", quietly = TRUE)){
         stop(paste0("Please install 'jmuOutlier'."))
       }
-      xi <- jmuOutlier::rlaplace(1, mean = 0, sd = sd)
+      xi <- jmuOutlier::rlaplace(n, mean = 0, sd = sd)
     }else{
       stop(paste('Sorry, dist',dist,'not implemented yet'))
     }
@@ -259,9 +256,9 @@ generate_data_fd <- function(ns,
   n <- length(evals)
   D <- length(eigs)
 
-  X <- rep(0, n)
-  Zeta <- data.frame(matrix(NA,ncol=n,nrow=D)) # Matrix with col as time, row as dimension
-  eps <- Zeta
+  # X <- rep(0, n)
+  # Zeta <- eps <-
+  #   data.frame(matrix(NA,ncol=n,nrow=D)) # Matrix with col as time, row as dimension
 
   # Verify
   if(length(means)==1){
@@ -270,17 +267,33 @@ generate_data_fd <- function(ns,
     stop(paste('Length of means is',length(means),'not 1 or',n))
   }
 
+  # Generate - No Loop
+  eval_basis <- fda::eval.basis(evals, basis)
+  # Row for each time, columns for eigen
+  xi <- sapply(eigs,function(e,dist,D){
+    generateXi(dist=dist, sd=sqrt(e),n=D)},
+    dist=dist,D=n)
+
+  Zeta <- tryCatch(xi * eval_basis,
+           error=function(e){
+             stop(call.=F,paste0('Check number of eigenvalues given. ',
+                         'It does not match number of basis functions.'))})
+
+  eps <- Zeta + t(psi %*% as.matrix(peps))
+  X <- means + rowSums(eps)
+
   # Generate
-  for(t in 1:n){
-    eval_basis <- fda::eval.basis(evals[t], basis)
-    for(j in 1:D){
-      xi <- generateXi(dist=dist, sd=sqrt(eigs[j]))
-      Zeta[j,t] <- xi * eval_basis[j]
-    }
+  # for(t in 1:n){
+  #   eval_basis <- fda::eval.basis(evals[t], basis)
+  #   for(j in 1:D){
+  #     xi <- generateXi(dist=dist, sd=sqrt(eigs[j]))
+  #     xi2[t,j] <- xi
+  #     Zeta[j,t] <- xi * eval_basis[j]
+  #   }
+  #
+  #   eps[,t] <- Zeta[,t] + psi %*% peps[,t]
+  #   X[t] <- means[t] + sum(eps[,t])
+  # }
 
-    eps[,t] <- Zeta[,t] + psi %*% peps[,t]
-    X[t] <- means[t] + sum(eps[,t])
-  }
-
-  list(X, eps)
+  list(X, t(eps))
 }
