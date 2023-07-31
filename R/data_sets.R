@@ -5,7 +5,7 @@
 #'
 #' @format ## `electricity`
 #' A data frame with 24 rows and 365 columns, representing the hourly (row)
-#'  electrity spot values for each day (column) of the year in 2014.
+#'  electricity spot values for each day (column) of the year in 2014.
 #'
 #'@source <www.omie.es>
 "electricity"
