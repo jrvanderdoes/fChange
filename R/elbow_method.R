@@ -7,107 +7,50 @@
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
-#' @param test_statistic_function Function with the first argument being data
-#'     and the second argument argument for candidate change points.
-#'     Additional arguments passed in via ... . Return a single numeric value.
-#' @param changepoint_function XXXXXXX
+#' @param test_function Function with the first argument being data. Additional
+#'  arguments as passed in as ... . This function should compute a statistic for
+#'  each candidate change point (i.e. each curve or column of data), returned as
+#'  a named value: allValues.
 #' @param errorType String of 'L2' or 'Tr' indicating the error function to use
 #' @param ... Additional parameters to pass into the respective functions
 #'
-#' @return list with element 1 the data frame with the change point location and
-#'     element a ggplot of variance as a function of CPs
+#' @return list with three elements.
+#'  \itemize{
+#'    \textbf{CPInfo}: Data.frame of candidate changes, ordered by impact. The
+#'      columns are: CP, Var, and Percent. CP indicates change location, Var is
+#'      total variance, Percent is the percentage of variance removed compared
+#'      to the previous step. The first row has CP=NA, indicating the no change
+#'      scenario.
+#'    \textbf{VarPlot}: A ggplot object showing the variance for increasing
+#'      number of changes.
+#'    \textbf{PerPlot}: A ggplot object showing the percent of variance removed
+#'      compared to the previous step.
+#'  }
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' data_KL <- generate_data_fd(ns = c(100,50,100),
-#'                   eigsList = list(c(3,2,1,0.5),
-#'                                   c(3,2,1,0.5),
-#'                                   c(3,2,1,0.5)),
-#'                   basesList = list(
-#'                      fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'                   meansList = c(-1,1,-1),
-#'                   distsArray = c('Normal','Normal','Normal'),
-#'                   evals = seq(0,1,0.05),
-#'                   kappasArray = c(0, 0, 0))
-#'
-#' results <- elbow_method(data=data_KL,
-#'                   test_statistic_function=compute_Mn, fn=compute_Mn,
-#'                   cutoff_function = generalized_resampling,
-#'                   trim_function = trim_function,
-#'                   alpha = 0.05, errorType = 'L2',
-#'                   M=1000)
-#' print(results[[2]])
-#' plot_fd(data_KL, CPs=results[[1]]$CP[2:3])
-#' }
+#' results <- elbow_method(data = electricity[,1:50],
+#'                         trim_function = function(...){10})
 elbow_method <- function(data,
-                         test_statistic_function =NULL,
-                         changepoint_function =NULL,
+                         test_function = compute_Mn,
+                         trim_function = function(...){0},
                          errorType = 'L2', ... ){
-
-  if(!is.null(test_statistic_function)){
-    elbow_result <- .elbow_method_stat(data,
-                                       test_statistic_function=test_statistic_function,
-                                       errorType=errorType, ... )
-  }else if(!is.null(changepoint_function)){
-    elbow_result <- .elbow_method_change(data,
-                                         changepoint_function=changepoint_function,
-                                         errorType=errorType, ... )
-  }
-
-}
-
-
-#' Elbow Method with Test Statistic Function
-#'
-#' This (internal) function is used when test_statistic_function is supplied.
-#'
-#' @param data Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param test_statistic_function Function with the first argument being data
-#'     and the second argument argument for candidate change points.
-#'     Additional arguments passed in via ... . Return a single numeric value.
-#' @param cutoff_function Function with first argument being data and the second
-#'     argument being alpha. No other arguments given. Return single numeric
-#'     value.
-#' @param trim_function Function taking data as an argument and returning a
-#'     numeric value indicating how much should be trimmed on each end
-#' @param alpha Numeric value in [0,1] indicating the significance for
-#'     cutoff_function.
-#' @param errorType String of 'L2' or 'Tr' indicating the error function to use
-#' @param ... Additional parameters to pass into the respective functions
-#'
-#' @return List with data.frame indicating the change point locations and
-#'             variance explained and two plots giving the variance.
-#'
-#' @noRd
-#'
-#' @examples
-#' # This is an internal function so see elbow_method for usage.
-.elbow_method_stat <- function(data, test_statistic_function,
-                         cutoff_function, trim_function,
-                         alpha=0.05, errorType = 'L2', ... ){
   # Setup
   n <- ncol(data)
   return_data <- data.frame('CP'=NA,
                             'Var'=NA)
 
   # Trim & stopping criteria
-  trim_amt <- trim_function(data)#, ...)
+  trim_amt <- trim_function(data, ...)
   nStart <- 1+trim_amt
   nEnd <- ncol(as.data.frame(data))-trim_amt
   if(nStart> nEnd) return()
 
   # Run First
-  test_stat <- rep(NA, n)
-  for(k in nStart:nEnd){
-    test_stat[k] <- test_statistic_function(data, k, ...)
-  }
-  return_data[1,] <- c(which.max(test_stat),
-                       .compute_total_var(data, which.max(test_stat),
-                                          errorType))
+  stats_tmp <- test_function(data, ...)
+  test_stat <- stats_tmp$allValues
+  return_data[1,] <-c(which.max(stats_tmp$allValues),
+                      .compute_total_var(data, which.max(stats_tmp$allValues), errorType))
 
   # Iteratively Search
   i <- 1
@@ -119,35 +62,28 @@ elbow_method <- function(data,
     prev_CP <- return_data[nrow(return_data),'CP']
     prev_CP_loc <- which(CPs==prev_CP)
 
-    # Previous
-    prev2currCP <- (CPs[prev_CP_loc-1]+1):(CPs[prev_CP_loc])
-    for(k in prev2currCP){
-      if(k < min(prev2currCP)+trim_amt ||
-         k > max(prev2currCP)-trim_amt){
-        test_stat[k] <- NA
-      }
-      else{
-        test_stat[k] <- test_statistic_function(
-                                as.data.frame(data[, prev2currCP]),
-                                k-min(prev2currCP)+1, ...)
-      }
+    ## We only need to recompute for the interval changed by last CP!
+    # Before
+    beforePrevCP <- (CPs[prev_CP_loc-1]+1):(CPs[prev_CP_loc])
+    test_stat[beforePrevCP] <- NA
+    if(1+trim_amt < length(beforePrevCP)-trim_amt){
+      fill_idx <- (1+trim_amt):(length(beforePrevCP)-trim_amt)
+      stats_tmp <- test_function( data[,beforePrevCP[fill_idx]], ...)
+      test_stat[beforePrevCP[fill_idx]] <- stats_tmp$allValues
     }
-    # Next
-    curr2nextCP <- (CPs[prev_CP_loc]+1):CPs[prev_CP_loc+1]
-    for(k in curr2nextCP){
-      if(k < min(curr2nextCP)+trim_amt ||
-         k > max(curr2nextCP)-trim_amt){
-        test_stat[k] <- NA
-      }
-      else{
-        test_stat[k] <- test_statistic_function(
-                                as.data.frame(data[, curr2nextCP]),
-                                k-min(curr2nextCP)+1, ...)
-      }
+    # After
+    afterPrevCP <- (CPs[prev_CP_loc]+1):CPs[prev_CP_loc+1]
+    test_stat[afterPrevCP] <- NA
+    if(1+trim_amt < length(afterPrevCP)-trim_amt){
+      fill_idx <- (1+trim_amt):(length(afterPrevCP)-trim_amt)
+      stats_tmp <- test_function( data[,afterPrevCP[fill_idx]], ...)
+      test_stat[afterPrevCP[fill_idx]] <- stats_tmp$allValues
     }
 
-    if(sum(is.na(test_stat))==n)
-      break
+    # Temp fix in case of no trim. Will update the check / var calc later
+    test_stat <- ifelse(test_stat==0,NA,test_stat)
+
+    if(sum(is.na(test_stat))==n) break
 
     ## Get total variance for each potential CP
     data_segments <- .split_on_NA(test_stat)
@@ -170,10 +106,10 @@ elbow_method <- function(data,
     return_data[i,] <- return_data_tmp[which.min(return_data_tmp$Var),]
 
 
-    if(nrow(return_data)==(n-1))
-      break
+    if(nrow(return_data)==(n-1)) break
   }
 
+  # Add No Change option and compute percent change
   return_data <- rbind(c(NA, .compute_total_var(data, c(), errorType)),
                        return_data)
   return_data$Percent <- 1-return_data$Var/max(return_data$Var)
@@ -197,102 +133,8 @@ elbow_method <- function(data,
     ggplot2::ylab("Percent Explained") +
     ggplot2::theme_bw()
 
-  return(list(return_data, var_plot, per_plot))
+  list('CPInfo'=return_data, 'VarPlot'=var_plot, 'PerPlot'=per_plot)
 }
-
-
-#' Elbow Method with Change Function
-#'
-#' This (internal) function is used when changepoint_function is supplied.
-#'
-#' @param data Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param changepoint_function Function that returns a change point. The first
-#'    parameter should be data.
-#' @param errorType String of 'L2' or 'Tr' indicating the error function to use
-#' @param ... Additional parameters to pass into the respective functions
-#'
-#' @return List with data.frame indicating the change point locations and
-#'             variance explained and two plots giving the variance.
-#'
-#' @noRd
-#'
-#' @examples
-#' # This is an internal function so see elbow_method for usage.
-.elbow_method_change <- function(data, changepoint_function, errorType = 'L2', ... ){
-  # Setup
-  n <- ncol(data)
-  return_data <- data.frame('CP'=NA,
-                            'Var'=NA)
-
-  # Trim & stopping criteria
-  elbow_res <- changepoint_function(data, ...)
-  return_data[1,] <- c(elbow_res,
-                       .compute_total_var(data, elbow_res, errorType))
-
-  # Iteratively Search
-  i <- 1
-  while(TRUE){
-    # Setup
-    i <- i + 1
-    CPs <- c(0,return_data$CP, n)
-    CPs <- CPs[order(CPs)]
-
-    # Potential CPs
-    return_data_tmp <- data.frame('CP'=rep(NA, length(CPs)-1),'Var'=NA)
-    for(j in 1:(length(CPs)-1)){
-      if(((CPs[j+1]-1)-CPs[j])<=1)
-        next
-      tmp <- changepoint_function(as.data.frame(data[,(CPs[j]+1):CPs[j+1]]), ...) +
-        CPs[j]
-      if(is.na(tmp) || (tmp == CPs[j]) || (tmp == CPs[j+1]))
-        next
-      tmp1 <- c(CPs,tmp)
-      tmp1 <- tmp1[order(tmp1)]
-
-      return_data_tmp[j,] <-
-              c(tmp, .compute_total_var(data, tmp1[-c(1,length(tmp1))], errorType))
-    }
-
-    # Stop if no CP detected
-    return_data_tmp <- stats::na.omit(return_data_tmp)
-    if(nrow(return_data_tmp)==0)
-      break
-
-    ## With max test-statistic on each section, take one leading to min variance
-    return_data[i,] <- return_data_tmp[which.min(return_data_tmp$Var),]
-
-    # Stop if all CPs detected
-    if(nrow(return_data)==(n-1))
-      break
-  }
-
-  return_data <- rbind(c(NA, .compute_total_var(data, c(), errorType)),
-                       return_data)
-  return_data$Percent <- 1-return_data$Var/max(return_data$Var)
-
-  # Add this to remove check notes
-  CP <- Var <- Percent <- NULL
-
-  var_plot <-
-    ggplot2::ggplot(return_data) +
-    ggplot2::geom_point(ggplot2::aes(x=0:(length(CP)-1), y=Var)) +
-    ggplot2::geom_line(ggplot2::aes(x=0:(length(CP)-1), y=Var)) +
-    ggplot2::xlab("Number of Change Points") +
-    ggplot2::ylab("Total Variance") +
-    ggplot2::theme_bw()
-
-  per_plot <-
-    ggplot2::ggplot(return_data) +
-    ggplot2::geom_point(ggplot2::aes(x=0:(length(CP)-1), y=Percent)) +
-    ggplot2::geom_line(ggplot2::aes(x=0:(length(CP)-1), y=Percent)) +
-    ggplot2::xlab("Number of Change Points") +
-    ggplot2::ylab("Percent Not Explained") +
-    ggplot2::theme_bw()
-
-  return(list(return_data, var_plot, per_plot))
-}
-
 
 #' Compute Total Variance
 #'
@@ -310,10 +152,6 @@ elbow_method <- function(data,
 #' @return Numeric indicating the variance between all subsegments
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function so see .elbow_method_change or
-#' #     .elbow_method_stat for usage.
 .compute_total_var <- function(data, CPs, errorType='L2', M=1000){
   # Setup
   data <- as.data.frame(data)
@@ -385,7 +223,7 @@ elbow_method <- function(data,
   } else if(errorType=='CE'){
     returnValue <- sum(colSums(abs(CE_std)^2)/M)#sum(colSums(abs(CE_std)^2)/M)
   } else{
-    stop('Only L2 and Tr error functions implemented')
+    stop('Only L2, Tr, and CE error functions implemented')
   }
 
   returnValue
@@ -401,9 +239,6 @@ elbow_method <- function(data,
 #' @return List with each item being a group separated by NAs
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function so see .elbow_method_stat for usage.
 .split_on_NA <- function(vec) {
   is.sep <- is.na(vec)
   split(vec[!is.sep], cumsum(is.sep)[!is.sep])
