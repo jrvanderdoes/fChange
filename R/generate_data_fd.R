@@ -9,7 +9,8 @@
 #'   \item Eigenvalue(s)
 #'   \item Eigenvector(s)
 #' }
-#' This creates m 'groups' of functions with similar properties.
+#' In this sense, the function creates m 'groups' of discretely observed
+#'  functions with similar properties.
 #'
 #' @param ns A numerical vector of length m
 #'
@@ -40,15 +41,15 @@
 #' # Create 200 functions with a midway change point. The change point
 #' #     is a change point in the eigenvalues, eigenfunctions, means,
 #' #     distributions, and VAR(1) strength
-# data_KL <- generate_data_fd(ns = c(25,25),
-#     eigsList = list(c(3,2,1,0.5),
-#                     c(3,2)),
-#     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#                      fda::create.fourier.basis(nbasis=2)),
-#     meansList = c(0,0.5),
-#     distsArray = c('Normal','Binomial'),
-#     evals = seq(0,1,0.05),
-#     kappasArray = c(0, 0.5))
+#' data_KL <- generate_data_fd(ns = c(25,25),
+#'     eigsList = list(c(3,2,1,0.5),
+#'                     c(2,3,2)),
+#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
+#'                      fda::create.fourier.basis(nbasis=2)),
+#'     meansList = c(0,0.5),
+#'     distsArray = c('Normal','Binomial'),
+#'     evals = seq(0,1,0.05),
+#'     kappasArray = c(0, 0.5))
 generate_data_fd <- function(ns,
                              eigsList,
                              basesList,
@@ -73,47 +74,14 @@ generate_data_fd <- function(ns,
   # kappasArray is a vector of Kappas for VAR
   # - Length should be 1 or m
 
-  ## Functions
-  checkLength <- function(dataList, name, m){
-    if(length(dataList) == 1){
-      if(fda::is.basis(dataList[[1]])){
-        retList <- list()
-        for(i in 1:m){
-          retList <- append(retList,dataList)
-        }
-        dataList <- retList
-      }else{
-        dataList <- list(rep(dataList[[1]], m))
-      }
-    } else if(length(dataList) != m){
-      stop(paste(name,'is length',length(dataList),'not 1 or',m,'\n'))
-    }
-
-    dataList
-  }
-
-  getPsiList <- function(D, m,eigsList,kappasArray){
-    psi <- list()
-    normsSD <- stats::rnorm(max(D), mean=0, sd=1)
-
-    for(i in 1:m){
-      groupSD <- normsSD[1:D[i]] * sqrt(eigsList[[i]])
-      psi0 <- groupSD %*% t(groupSD)
-      psi0 <- psi0 / sqrt(sum(psi0^2)) ## TODO:: Check this
-      psi[[i]] <- kappasArray[i] * psi0
-    }
-
-    psi
-  }
-
   ## Verification
   m <- length(ns)
 
-  eigsList <- checkLength(eigsList, 'eigsList', m)
-  basesList <- checkLength(basesList, 'basesList', m)
-  meansList <- checkLength(meansList, 'meansList', m)
-  distsArray <- unlist(checkLength(distsArray, 'distsArray', m))
-  kappasArray <- unlist(checkLength(kappasArray, 'kappaArray', m))
+  eigsList <- .checkLength(eigsList, 'eigsList', m)
+  basesList <- .checkLength(basesList, 'basesList', m)
+  meansList <- .checkLength(meansList, 'meansList', m)
+  distsArray <- unlist(.checkLength(distsArray, 'distsArray', m))
+  kappasArray <- unlist(.checkLength(kappasArray, 'kappaArray', m))
 
   # Run Code
   data <- data.frame(matrix(NA, ncol = sum(ns), nrow = length(evals)))
@@ -124,7 +92,7 @@ generate_data_fd <- function(ns,
   for(i in 1:m){
     Ds[i] <- length(eigsList[[i]])
   }
-  psi <- getPsiList(Ds, m,eigsList,kappasArray)
+  psi <- .getPsiList(Ds, eigsList, kappasArray)
 
   # Burnin for VAR
   peps <- data.frame(matrix(0,ncol=length(evals),nrow=Ds[1]))
@@ -142,27 +110,26 @@ generate_data_fd <- function(ns,
   }
 
   for(i in 1:m){
-    if(!silent)
-      cat(paste0('Running setup ', i, '/',m,'\n'))
+    if(!silent) cat(paste0('Running setup ', i, '/',m,'\n'))
 
-    for(j in 1:ns[i]){
-
-      # If Num of Eigs increases or decreases (only at CPs)
-      psiDim1 <- dim(psi[[i]])[1]
-      pepDim1 <- dim(peps)[1]
-      if(psiDim1 != pepDim1){
-        if(psiDim1>pepDim1){
-          # Bind row of 0s to the bottom if didn't have a value previously
-          for(k in 1:(psiDim1-pepDim1)){
-            peps <- rbind(peps,0)
-          }
-        }else if(psiDim1<pepDim1){
-          # Drop Rows if not needed
-          for(k in 1:(pepDim1-psiDim1)){
-            peps <- peps[-nrow(peps),]
-          }
+    # If Num of Eigs increases or decreases (only at CPs)
+    psiDim1 <- dim(psi[[i]])[1]
+    pepDim1 <- dim(peps)[1]
+    if(psiDim1 != pepDim1){
+      if(psiDim1>pepDim1){
+        # Bind row of 0s to the bottom if didn't have a value previously
+        for(k in 1:(psiDim1-pepDim1)){
+          peps <- rbind(peps,0)
+        }
+      }else if(psiDim1<pepDim1){
+        # Drop Rows if not needed
+        for(k in 1:(pepDim1-psiDim1)){
+          peps <- peps[-nrow(peps),]
         }
       }
+    }
+
+    for(j in 1:ns[i]){
 
       result <- .generateData_KL_Expansion(
         eigs = eigsList[[i]],
@@ -176,10 +143,67 @@ generate_data_fd <- function(ns,
       data[,addIdx + j] <- result[[1]]
       peps <- result[[2]]
     }
-    addIdx <- addIdx + j
+    addIdx <- addIdx + ns[i]#j
   }
 
   data
+}
+
+
+#' Check Length
+#'
+#' This (internal) function checks the length of inputs to verify all is well
+#'  before spending computational time.
+#'
+#' @param dataList List (or vector at times) containing the data.
+#' @param name String of variable being checked so error can be informative.
+#' @param m Numeric integer indicating the number of segments that will be
+#'  built, i.e. the data should generally be this length or 1 (if all the same).
+#'
+#' @return dataList, perhaps extending it as needed (making repeats).
+#'
+#' @noRd
+.checkLength <- function(dataList, name, m){
+  if(length(dataList) == 1){
+    if(fda::is.basis(dataList[[1]])){
+      retList <- list()
+      for(i in 1:m){
+        retList <- append(retList,dataList)
+      }
+      dataList <- retList
+    }else{
+      dataList <- list(rep(dataList[[1]], m))
+    }
+  } else if(length(dataList) != m){
+    stop(paste(name,'is length',length(dataList),'not 1 or',m,'\n'))
+  }
+
+  dataList
+}
+
+
+#' Setup psi
+#'
+#' This (internal) function sets up the psi for dependence of each segment.
+#'
+#' @param D Vector of numerics for the number of eigenvalues in each segment
+#' @inheritParams generate_data_fd
+#'
+#' @return List with the dependence for each segment
+#'
+#' @noRd
+.getPsiList <- function(D, eigsList, kappasArray){
+  psi <- list()
+  normsSD <- stats::rnorm(max(D), mean=0, sd=1)
+
+  for(i in 1:length(D)){
+    groupSD <- normsSD[1:D[i]] * sqrt(eigsList[[i]])
+    psi0 <- groupSD %*% t(groupSD)
+    psi0 <- psi0 / sqrt(sum(psi0^2)) ## TODO:: Check this
+    psi[[i]] <- kappasArray[i] * psi0
+  }
+
+  psi
 }
 
 
@@ -201,57 +225,8 @@ generate_data_fd <- function(ns,
 #'         observation.
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function and will not be outwardly visible. See
-#' #     generate_data_fd for usage.
 .generateData_KL_Expansion <- function(eigs, basis, means, dist,
-                                      evals, peps, psi){
-
-  ## Functions
-  generateXi <- function(dist, sd,n=1){
-    ## This function give centered distributions with eig^2 var
-
-    if(dist == 'Normal'){
-
-      xi <- stats::rnorm(n,mean=0, sd=sd)
-
-    }else if(dist == 'Binomial'){
-
-      if(sd==0) return(rep(0,n))
-
-      mean <- 10 * sd^2 # arbitrary, must exceed var
-      p <- 1 - sd^2/mean
-      size <- round(mean/p)
-
-      xi <- stats::rbinom(n=n,size=size,p=p) - mean
-
-    }else if(dist == 'Exponential'){
-
-      xi <- stats::rexp(n,rate = 1/sd) - sd
-
-    }else if(dist == 't'){
-
-      bigDF <- 10000 # arbitrary
-      xi <- stats::rt(n, bigDF) * sqrt(sd^2 * (bigDF-2)/bigDF)
-
-    }else if(dist=='cauchy'){
-      stop('Sorry Problem with cauchy')
-      xi <- stats::rcauchy(n)
-    }else if(dist=='laplace'){
-      if(!requireNamespace("jmuOutlier", quietly = TRUE)){
-        stop(paste0("Please install 'jmuOutlier'."))
-      }
-      xi <- jmuOutlier::rlaplace(n, mean = 0, sd = sd)
-    }else{
-      stop(paste('Sorry, dist',dist,'not implemented yet'))
-    }
-
-    xi
-  }
-
-  ## Code
-
+                                       evals, peps, psi){
   # Setup
   n <- length(evals)
   D <- length(eigs)
@@ -270,9 +245,9 @@ generate_data_fd <- function(ns,
   # Generate - No Loop
   eval_basis <- fda::eval.basis(evals, basis)
   # Row for each time, columns for eigen
-  xi <- sapply(eigs,function(e,dist,D){
-    generateXi(dist=dist, sd=sqrt(e),n=D)},
-    dist=dist,D=n)
+  xi <- sapply(eigs,function(e,dist,n){
+    .generateXi(dist=dist, sd=sqrt(e),n=n)},
+    dist=dist,n=n)
 
   Zeta <- tryCatch(xi * eval_basis,
            error=function(e){
@@ -286,7 +261,7 @@ generate_data_fd <- function(ns,
   # for(t in 1:n){
   #   eval_basis <- fda::eval.basis(evals[t], basis)
   #   for(j in 1:D){
-  #     xi <- generateXi(dist=dist, sd=sqrt(eigs[j]))
+  #     xi <- .generateXi(dist=dist, sd=sqrt(eigs[j]))
   #     xi2[t,j] <- xi
   #     Zeta[j,t] <- xi * eval_basis[j]
   #   }
@@ -296,4 +271,58 @@ generate_data_fd <- function(ns,
   # }
 
   list(X, t(eps))
+}
+
+
+#' Generate Xi
+#'
+#' This (internal) function generates the noise for KL expansion terms
+#'
+#' @param dist String for distribution of interest. Options are: Binomial,
+#'  Exponential, laplace, Normal, and t. Upcoming is cauchy.
+#' @param sd Numeric for the standard deviation of the variable
+#' @param n (Optional) Numeric for the number of observations. Default is 1.
+#'
+#' @return Vector of numerics for observations of the variable.
+#'
+#' @noRd
+.generateXi <- function(dist, sd,n=1){
+  ## This function give centered distributions with eig^2 var
+
+  if(dist == 'Normal'){
+
+    xi <- stats::rnorm(n,mean=0, sd=sd)
+
+  }else if(dist == 'Binomial'){
+
+    if(sd==0) return(rep(0,n))
+
+    mean <- 10 * sd^2 # arbitrary, must exceed var
+    p <- 1 - sd^2/mean
+    size <- round(mean/p)
+
+    xi <- stats::rbinom(n=n,size=size,p=p) - mean
+
+  }else if(dist == 'Exponential'){
+
+    xi <- stats::rexp(n,rate = 1/sd) - sd
+
+  }else if(dist == 't'){
+
+    bigDF <- 10000 # arbitrary
+    xi <- stats::rt(n, bigDF) * sqrt(sd^2 * (bigDF-2)/bigDF)
+
+  }else if(dist=='cauchy'){
+    stop('Sorry Problem with cauchy')
+    xi <- stats::rcauchy(n)
+  }else if(dist=='laplace'){
+    if(!requireNamespace("jmuOutlier", quietly = TRUE)){
+      stop(paste0("Please install 'jmuOutlier'."))
+    }
+    xi <- jmuOutlier::rlaplace(n, mean = 0, sd = sd)
+  }else{
+    stop(paste('Sorry, dist',dist,'not implemented yet'))
+  }
+
+  xi
 }
