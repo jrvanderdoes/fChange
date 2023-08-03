@@ -12,7 +12,7 @@ detect_changepoint_singleCov(
   K = bartlett_kernel,
   space = "BM",
   silent = FALSE,
-  TN_M = 10000,
+  TN_M = 1e+05,
   Cov_M = 75
 )
 }
@@ -61,6 +61,6 @@ has been shown to be effective and is far faster than
 }
 \examples{
 cp_res <- detect_changepoint_singleCov(
- electricity[,1:20], nSims=100, x=seq(0,1,length.out=5),
+ electricity[,1:10], nSims=100, x=seq(0,1,length.out=3),
  h=0, K=bartlett_kernel, silent=FALSE)
 }

@@ -6,8 +6,8 @@
 \usage{
 complete_binary_segmentation(
   data,
-  test_statistic_function = NULL,
-  changepoint_function = NULL,
+  changepoint_function = compute_Mn(),
+  cutoff_function = welch_approximation(),
   final_verify = TRUE,
   silent = FALSE,
   alpha = 0.05,
@@ -16,15 +16,13 @@ complete_binary_segmentation(
 }
 \arguments{
 \item{data}{Numeric data.frame with rows for evaluated values and columns
-indicating FD}
+indicating functional observations}
 
-\item{test_statistic_function}{Function with the first argument being data
-and the second argument argument for candidate change points.
-Additional arguments passed in via ... . Return a single numeric value.}
+\item{changepoint_function}{XXXXXXXXXXXXXXXXX.}
 
-\item{changepoint_function}{XXXXXX}
+\item{cutoff_function}{XXXXXX}
 
-\item{final_verify}{(Optional) Boolean value
+\item{final_verify}{(Optional) Boolean value XXXXXXXXXXXXX
 
 Indicates if a final pass looking at sequences with only one change point
 should be conducted to verify results. Note, this may modify existing
@@ -37,7 +35,7 @@ Indicates if useful output should be silenced. Default FALSE shows output.}
 \item{alpha}{Numeric value in \eqn{[0, 1]} indicating the significance for
 cutoff_function.}
 
-\item{...}{Additional arguments passed into test_statistic_function}
+\item{...}{Additional arguments passed into changepoint_function}
 }
 \value{
 A list of numeric values indicating change points  (if exists),
@@ -49,57 +47,11 @@ for general functions. Change points are recursively found until no
 more change points are detected.
 }
 \examples{
-\dontrun{
-# Setup Data
-data_KL <- generate_data_fd(ns = c(200),
-    eigsList = list(c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(0),
-    distsArray = c('Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0))
-complete_binary_segmentation(data=data_KL, test_statistic_function=compute_Tn,
-                             cutoff_function=welch_approximation,
-    trim_function = function(data){
-                      max(2, floor(log(ncol(as.data.frame(data)))),
-                      na.rm=TRUE)})
-
-# Setup Data
-data_KL <- generate_data_fd(ns = c(100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(-1,1),
-    distsArray = c('Normal','Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0,0))
-complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
-    cutoff_function = welch_approximation,
-    trim_function = function(data){
-                      max(2, floor(log(ncol(as.data.frame(data)))),
-                      na.rm=TRUE)})
-complete_binary_segmentation(data_KL, test_statistic_function = compute_Tn,
-    cutoff_function = generalized_resampling,
-    trim_function = function(data,...){
-                      max(2, floor(log(ncol(as.data.frame(data)))),
-                      na.rm=TRUE)},
-    fn=compute_Tn, iters=1000)
-
-# Setup Data
-data_KL <- generate_data_fd(ns = c(100,100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2,1,0.5),
-                    c(3,2)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=2, norder=2)),
-    meansList = c(-1,1,1),
-    distsArray = c('Normal','Normal','Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0,0,0))
-complete_binary_segmentation(data_KL, compute_Tn, welch_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
-    na.rm=TRUE)})
-}
+complete_binary_segmentation(data = electricity[,1:80],
+  changepoint_function = compute_Mn,
+  cutoff_function = welch_approximation,
+  trim_function = function(data){
+    max(50, floor(log(ncol(as.data.frame(data)))),
+        na.rm=TRUE)},
+  final_verify=FALSE)
 }

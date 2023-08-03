@@ -89,7 +89,7 @@ detect_changepoint <- function(X, nSims=500, x=seq(0,1,length.out=40),
 #'
 #' @examples
 #' cp_res <- detect_changepoint_singleCov(
-#'  electricity[,1:20], nSims=100, x=seq(0,1,length.out=5),
+#'  electricity[,1:10], nSims=100, x=seq(0,1,length.out=3),
 #'  h=0, K=bartlett_kernel, silent=FALSE)
 detect_changepoint_singleCov <- function(X, nSims=2000, x=seq(0,1,length.out=40),
                                          h=3, K=bartlett_kernel, space='BM',

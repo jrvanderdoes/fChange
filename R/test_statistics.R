@@ -6,13 +6,6 @@
 #'
 #' @param X Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD.
-#' @param k (Optional) Integer indicating if Defaults to NULL, but can be an
-#' integer in \eqn{[1, ncol(X)]}.
-#'
-#' Indicates the candidate change point to investigate (uses `compute_Mn()`
-#'  for selection). If k=NULL then get the test statistic for entire sample.
-#'  Default is NULL.
-#'
 #' @param M (Optional) Numeric indicating the number of vectors used to span W.
 #'  Defaults to 10,000.
 #' @param W (Optional) Data.frame of numerics with rows for evaluated values
@@ -31,7 +24,7 @@
 #' @export
 #'
 #' @examples
-#' compute_Tn(electricity)
+#' compute_Tn(electricity,M=1000)
 compute_Tn <- function(X, M=100000, W=NULL, space='BM', ...){
   n <- ncol(X)
 
@@ -42,7 +35,7 @@ compute_Tn <- function(X, M=100000, W=NULL, space='BM', ...){
   }
 
   intVal <- sapply(1:M, function(v,W,X1,n){
-    .approx_int( (abs(.Zn(W[,v],X1)))^2 ) #RH Int
+    .approx_int( (abs(.Zn(W[,v],X1)))^2 )
   },W=W,X1=X,n=n)
 
   1/M * sum(intVal)
@@ -55,11 +48,13 @@ compute_Tn <- function(X, M=100000, W=NULL, space='BM', ...){
 #'     \deqn{Mn = sup_{x\in (0, 1)} \int |Z_n(v,x)|^2 dQ(v)}
 #'
 #' @inheritParams compute_Tn
-#' @param which.Mn (Optional) Boolean which indicates if the location or test
-#'  statistic is of interest.
 #'
-#' @return A numeric value for the test statistic for entire sample or candidate
-#'     change point.
+#' @return A list with three elements:
+#'  \itemize{
+#'    \item **value**: Numeric for maximum Mn value in data.
+#'    \item **location**: Numeric for location of maximum in data.
+#'    \item **allValues**: Vector of numerics for Mn values at each point.
+#'  }
 #' @export
 #'
 #' @examples
@@ -100,8 +95,7 @@ compute_Mn <- function(X, M=10000, W=NULL, space='BM', ...){
   n <- ncol(X)
   fhat_vals <- .fhat_all(X,v)
 
-  sqrt(n) * ( fhat_vals -
-               1:n/n * fhat_vals[length(fhat_vals)] )
+  sqrt(n) * ( fhat_vals - 1:n/n * fhat_vals[length(fhat_vals)] )
 }
 
 

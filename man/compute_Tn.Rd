@@ -4,18 +4,11 @@
 \alias{compute_Tn}
 \title{Compute Tn Test Statistic}
 \usage{
-compute_Tn(X, k = NULL, M = 10000, W = NULL, space = "BM", ...)
+compute_Tn(X, M = 1e+05, W = NULL, space = "BM", ...)
 }
 \arguments{
 \item{X}{Numeric data.frame with rows for evaluated values and columns
 indicating FD.}
-
-\item{k}{(Optional) Integer indicating if Defaults to NULL, but can be an
-integer in \eqn{[1, ncol(X)]}.
-
-Indicates the candidate change point to investigate (uses \code{compute_Mn()}
-for selection). If k=NULL then get the test statistic for entire sample.
-Default is NULL.}
 
 \item{M}{(Optional) Numeric indicating the number of vectors used to span W.
 Defaults to 10,000.}
@@ -42,5 +35,5 @@ Function to calculate the change point test statistic for functional data
 \deqn{Tn = \int_0^1 \int |Z_n(v,x)|^2 dQ(v) dx}
 }
 \examples{
-compute_Tn(electricity)
+compute_Tn(electricity,M=1000)
 }

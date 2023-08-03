@@ -6,7 +6,7 @@
 \usage{
 single_binary_segmentation(
   data,
-  test_statistic_function,
+  changepoint_function,
   cutoff_function,
   trim_function,
   alpha = 0.05,
@@ -16,25 +16,20 @@ single_binary_segmentation(
 }
 \arguments{
 \item{data}{Numeric data.frame with rows for evaluated values and columns
-indicating FD}
+indicating functional observations}
 
-\item{test_statistic_function}{Function with the first argument being data
-and the second argument optional argument for candidate change points.
-Additional arguments passed in via ... . Return a single numeric value.}
+\item{changepoint_function}{XXXXXXXXXXXXXXXXX.}
 
-\item{cutoff_function}{Function with first argument being data and the second
-argument being alpha. No other arguments given. Return single numeric
-value.}
+\item{cutoff_function}{XXXXXX}
 
-\item{trim_function}{Function taking data as an argument and returning a
-numeric value indicating how much should be trimmed on each end}
+\item{trim_function}{XXXXX}
 
 \item{alpha}{Numeric value in \eqn{[0, 1]} indicating the significance for
 cutoff_function.}
 
 \item{include_value}{XXXXX}
 
-\item{...}{Additional arguments passed into test_statistic_function}
+\item{...}{Additional arguments passed into changepoint_function}
 }
 \value{
 A numeric value indicating the cutoff location (if exists),
@@ -45,34 +40,11 @@ This function implements traditional binary segmentation on functional data
 for general functions. At most one change point is detected.
 }
 \examples{
-\dontrun{
-# Setup Data
-data_KL <- generate_data_fd(ns = c(200),
-    eigsList = list(c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(0),
-    distsArray = c('Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0))
-single_binary_segmentation(data_KL, compute_Tn, welch_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+single_binary_segmentation(
+  data = electricity[,1:60],
+  changepoint_function = compute_Mn,
+  cutoff_function = welch_approximation,
+  trim_function = function(data){
+    max(10, floor(log(ncol(as.data.frame(data)))),
     na.rm=TRUE)})
-
-# Setup Data
-data_KL <- generate_data_fd(ns = c(100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(-1,1),
-    distsArray = c('Normal','Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0,0))
-single_binary_segmentation(data_KL, compute_Tn, welch_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
-    na.rm=TRUE)})
-single_binary_segmentation(data_KL, compute_Mn, welch_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
-    na.rm=TRUE)})
-}
 }

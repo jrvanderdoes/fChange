@@ -4,26 +4,11 @@
 \alias{compute_Mn}
 \title{Compute Mn Test Statistic}
 \usage{
-compute_Mn(
-  X,
-  k = NULL,
-  M = 10000,
-  W = NULL,
-  space = "BM",
-  which.Mn = FALSE,
-  ...
-)
+compute_Mn(X, M = 10000, W = NULL, space = "BM", ...)
 }
 \arguments{
 \item{X}{Numeric data.frame with rows for evaluated values and columns
 indicating FD.}
-
-\item{k}{(Optional) Integer indicating if Defaults to NULL, but can be an
-integer in \eqn{[1, ncol(X)]}.
-
-Indicates the candidate change point to investigate (uses \code{compute_Mn()}
-for selection). If k=NULL then get the test statistic for entire sample.
-Default is NULL.}
 
 \item{M}{(Optional) Numeric indicating the number of vectors used to span W.
 Defaults to 10,000.}
@@ -38,15 +23,16 @@ not NULL.}
 Default is "BM", or Brownian motion. See \code{computeSpaceMeasuringVectors()}
 for more information.}
 
-\item{which.Mn}{(Optional) Boolean which indicates if the location or test
-statistic is of interest.}
-
 \item{...}{Parameters are not passed anywhere. Just added for use in other
 functions.}
 }
 \value{
-A numeric value for the test statistic for entire sample or candidate
-change point.
+A list with three elements:
+\itemize{
+\item \strong{value}: Numeric for maximum Mn value in data.
+\item \strong{location}: Numeric for location of maximum in data.
+\item \strong{allValues}: Vector of numerics for Mn values at each point.
+}
 }
 \description{
 Function to calculate the change point test statistic for functional data

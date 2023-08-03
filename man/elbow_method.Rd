@@ -6,8 +6,10 @@
 \usage{
 elbow_method(
   data,
-  test_statistic_function = NULL,
-  changepoint_function = NULL,
+  test_function = compute_Mn,
+  trim_function = function(...) {
+     0
+ },
   errorType = "L2",
   ...
 )
@@ -16,19 +18,30 @@ elbow_method(
 \item{data}{Numeric data.frame with rows for evaluated values and columns
 indicating FD}
 
-\item{test_statistic_function}{Function with the first argument being data
-and the second argument argument for candidate change points.
-Additional arguments passed in via ... . Return a single numeric value.}
+\item{test_function}{Function with the first argument being data. Additional
+arguments as passed in as ... . This function should compute a statistic for
+each candidate change point (i.e. each curve or column of data), returned as
+a named value: allValues.}
 
-\item{changepoint_function}{XXXXXXX}
+\item{trim_function}{XXXXXXX}
 
 \item{errorType}{String of 'L2' or 'Tr' indicating the error function to use}
 
 \item{...}{Additional parameters to pass into the respective functions}
 }
 \value{
-list with element 1 the data frame with the change point location and
-element a ggplot of variance as a function of CPs
+list with three elements.
+\itemize{
+\item \strong{CPInfo}: Data.frame of candidate changes, ordered by impact. The
+columns are: CP, Var, and Percent. CP indicates change location, Var is
+total variance, Percent is the percentage of variance removed compared
+to the previous step. The first row has CP=NA, indicating the no change
+scenario.
+\item \strong{VarPlot}: A ggplot object showing the variance for increasing
+number of changes.
+\item \strong{PerPlot}: A ggplot object showing the percent of variance removed
+compared to the previous step.
+}
 }
 \description{
 Method to determine the number of change points using the elbow method. Note,
@@ -36,27 +49,6 @@ cascading change points are not considered to allow for every possible
 number of change points to be selectable.
 }
 \examples{
-\dontrun{
-data_KL <- generate_data_fd(ns = c(100,50,100),
-                  eigsList = list(c(3,2,1,0.5),
-                                  c(3,2,1,0.5),
-                                  c(3,2,1,0.5)),
-                  basesList = list(
-                     fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4)),
-                  meansList = c(-1,1,-1),
-                  distsArray = c('Normal','Normal','Normal'),
-                  evals = seq(0,1,0.05),
-                  kappasArray = c(0, 0, 0))
-
-results <- elbow_method(data=data_KL,
-                  test_statistic_function=compute_Mn, fn=compute_Mn,
-                  cutoff_function = generalized_resampling,
-                  trim_function = trim_function,
-                  alpha = 0.05, errorType = 'L2',
-                  M=1000)
-print(results[[2]])
-plot_fd(data_KL, CPs=results[[1]]$CP[2:3])
-}
+results <- elbow_method(data = electricity[,1:50],
+                        trim_function = function(...){10})
 }

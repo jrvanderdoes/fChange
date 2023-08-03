@@ -7,15 +7,16 @@
 plot_fd(
   data,
   CPs = NULL,
-  eval_points = 1:nrow(data),
+  curve_points = 1:nrow(data),
   plot_title = NULL,
   val_axis_title = "Value",
-  eval_axis_title = "EvalRange",
-  FD_axis_title = "FD Sims",
+  res_axis_title = "resolution",
+  FD_axis_title = "Observations",
   FDReps = 1:ncol(data),
   eye = list(x = -1.5, y = -1.5, z = 1.5),
   aspectratio = list(x = 1, y = 1, z = 1),
-  showticklabels = TRUE
+  showticklabels = TRUE,
+  interactive = TRUE
 )
 }
 \arguments{
@@ -26,7 +27,7 @@ the rows the evaluated points)}
 change points. This will color each section differently. Default vallue
 is NULL.}
 
-\item{eval_points}{(Optional) An vector containing the points at which the
+\item{curve_points}{(Optional) An vector containing the points at which the
 data was evaluated. Default is 1:nrow(data)}
 
 \item{plot_title}{(Optional) String to title the plot. Default value is NULL.}
@@ -34,11 +35,11 @@ data was evaluated. Default is 1:nrow(data)}
 \item{val_axis_title}{(Optional) String to title the axis for values of
 observation. Default value is 'Value'.}
 
-\item{eval_axis_title}{(Optional) String to title the axis for the evaluation
-range axis (observations in an FD object). Default value is is 'EvalRange'.}
+\item{res_axis_title}{(Optional) String to title the axis for the resolution
+range axis (observations in an FD object). Default value is 'resolution'.}
 
 \item{FD_axis_title}{(Optional) String to title the axis for FD observations.
-Default value is 'FD Sims'.}
+Default value is 'Observation'.}
 
 \item{FDReps}{(Optional) Vector of values for FD observation names. Default
 value is 1:ncol(data).}
@@ -47,17 +48,28 @@ value is 1:ncol(data).}
 the resulting image. The default value is list(x = -1.5, y = -1.5, z = 1.5).}
 
 \item{aspectratio}{(Optional) List with certain parameters to determine the
-image size parameters. The default value is list(x=1, y=1, z=1).}
+image size / viewing parameters. The default value is
+list(x=1, y=1, z=1), which is used in the non-interactive case. If
+interactive is TRUE, then the default is c(2.5,.75,1) and all lists are
+converted to this value so enter a vector if you wish to modify it for
+the non-interactive case.}
 
 \item{showticklabels}{(Optional) Boolean to indicate if the tick labels should
 be given in the image. Default value is TRUE.}
+
+\item{interactive}{(Optional) Boolean value to indicate if the plot should
+be interactive or not. Recommended to be TRUE when the number of observations
+is high. Default is FALSE}
 }
 \value{
-A plotly plot
+A plot for the data. It is an interactive plotly plot if
+interactive is FALSE (default) and a lattice plot if TRUE.
 }
 \description{
 \code{plot_fd} plots functional data either in an fd object or evaluated at certain points
 }
 \examples{
 plot_fd(data=electricity[,1:100], CPs=c(50))
+plot_fd(data=electricity, CPs=c(50,150,220,300),
+        interactive=FALSE, showticklabels=FALSE)
 }
