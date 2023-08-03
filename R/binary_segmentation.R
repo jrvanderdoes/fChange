@@ -7,13 +7,11 @@
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating functional observations
-#' @param changepoint_function Function that takes the data (X), significance
-#'  (alpha), and any other parameters defined in ... , and returns the change
-#'  point location (if detected) or NA (if not). Default is `cpf()`.
+#' @param changepoint_function XXXXXXXXXXXXXXXXX.
 #' @param cutoff_function XXXXXX
 #' @param alpha Numeric value in \eqn{[0, 1]} indicating the significance for
 #'     cutoff_function.
-#' @param final_verify (Optional) Boolean value
+#' @param final_verify (Optional) Boolean value XXXXXXXXXXXXX
 #'
 #' Indicates if a final pass looking at sequences with only one change point
 #'     should be conducted to verify results. Note, this may modify existing
@@ -28,37 +26,32 @@
 #' @export
 #'
 #' @examples
-#' complete_binary_segmentation(data = electricity[,1:145],
-#'   test_statistic_function = compute_Mn,
+#' complete_binary_segmentation(data = electricity[,1:80],
+#'   changepoint_function = compute_Mn,
 #'   cutoff_function = welch_approximation,
 #'   trim_function = function(data){
 #'     max(50, floor(log(ncol(as.data.frame(data)))),
 #'         na.rm=TRUE)},
 #'   final_verify=FALSE)
 complete_binary_segmentation <- function(data,
-                                         changepoint_function,
-                                         cutoff_function,
+                                         changepoint_function = compute_Mn(),
+                                         cutoff_function = welch_approximation(),
                                          final_verify = TRUE,
                                          silent = FALSE,
                                          alpha=0.05,
                                          ... ){
 
-  # Get change points -- Will not include first or last
+  # Get change points
   CPsVals <- .detectChangePoints(data=data,
-                                test_statistic_function=test_statistic_function,
-                                cutoff_function=cutoff_function,
-                                silent = silent,
-                                alpha=alpha,
-                                ... )
+                                 changepoint_function=changepoint_function,
+                                 cutoff_function=cutoff_function,
+                                 silent = silent, alpha=alpha, ... )
 
   # Verify as desired
   if(final_verify){
-    CPsVals <- .changepoint_verification(CPsVals=CPsVals, data=data,
-                      test_statistic_function=test_statistic_function,
-                      cutoff_function=cutoff_function,
-                      silent=silent,
-                      alpha=alpha,
-                      ...)
+    CPsVals <- .changepoint_verification(
+      CPsVals=CPsVals, data=data, changepoint_function=changepoint_function,
+      cutoff_function=cutoff_function, silent=silent, alpha=alpha, ...)
   }
 
   return(CPsVals)
@@ -70,57 +63,23 @@ complete_binary_segmentation <- function(data,
 #' This function implements traditional binary segmentation on functional data
 #'     for general functions. At most one change point is detected.
 #'
-#' @param data Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param test_statistic_function Function with the first argument being data
-#'     and the second argument optional argument for candidate change points.
-#'     Additional arguments passed in via ... . Return a single numeric value.
-#' @param cutoff_function Function with first argument being data and the second
-#'     argument being alpha. No other arguments given. Return single numeric
-#'     value.
-#' @param trim_function Function taking data as an argument and returning a
-#'     numeric value indicating how much should be trimmed on each end
-#' @param alpha Numeric value in \eqn{[0, 1]} indicating the significance for
-#'     cutoff_function.
+#' @inheritParams complete_binary_segmentation
+#' @param trim_function XXXXX
 #' @param include_value XXXXX
-#' @param ... Additional arguments passed into test_statistic_function
 #'
 #' @return A numeric value indicating the cutoff location (if exists),
 #'     NA otherwise
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(200),
-#'     eigsList = list(c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0),
-#'     distsArray = c('Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0))
-#' single_binary_segmentation(data_KL, compute_Tn, welch_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),
+#' single_binary_segmentation(
+#'   data = electricity[,1:60],
+#'   changepoint_function = compute_Mn,
+#'   cutoff_function = welch_approximation,
+#'   trim_function = function(data){
+#'     max(10, floor(log(ncol(as.data.frame(data)))),
 #'     na.rm=TRUE)})
-#'
-#' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(-1,1),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
-#' single_binary_segmentation(data_KL, compute_Tn, welch_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),
-#'     na.rm=TRUE)})
-#' single_binary_segmentation(data_KL, compute_Mn, welch_approximation,
-#'     function(data){max(2, floor(log(ncol(as.data.frame(data)))),
-#'     na.rm=TRUE)})
-#' }
-single_binary_segmentation <- function(data, test_statistic_function,
+single_binary_segmentation <- function(data, changepoint_function,
                                        cutoff_function,
                                        trim_function,
                                        alpha=0.05, include_value=FALSE,
@@ -132,7 +91,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
   if(nStart>= nEnd) ifelse(include_value,return(c(NA,NA)),return(NA))
 
   # Find test statistic at every candidate change point
-  test_stats <- test_statistic_function(as.data.frame(data))
+  test_stats <- changepoint_function(as.data.frame(data))
 
   # Return index of max change point if larger than cutoff
   return_value <- ifelse(test_stats$value >= cutoff_function(data, alpha, ...),
@@ -142,7 +101,7 @@ single_binary_segmentation <- function(data, test_statistic_function,
   # Add in value
   if(include_value){
     if(!is.na(return_value)){
-      return_value <- c(return_value, max(test_stat, na.rm = TRUE))
+      return_value <- c(return_value, max(test_stats, na.rm = TRUE))
     } else{
       return_value <- c(return_value, NA)
     }
@@ -259,15 +218,11 @@ wild_binary_segmentation <- function(data, M=5000, add_full=TRUE, block_size=1,
 #'               Used for recursive calls, likely no need to change.
 #' @param silent (Optional) Boolean indicating if output should be given. Default
 #'               is FALSE (meaning print output).
-#' @param ... (Optional) Additional paramters for the functions.
+#' @param ... (Optional) Additional parameters for the functions.
 #'
 #' @return Vector of detected change point locations
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function and will not be shown to user. See
-#' #     complete_binary_segmentation
 .detectChangePoints <-  function(data,
                                  changepoint_function,
                                  alpha = NULL,
@@ -275,6 +230,7 @@ wild_binary_segmentation <- function(data, M=5000, add_full=TRUE, block_size=1,
                                  silent = FALSE,
                                  ...){
 
+  # Look for a single change
   potential_cp <- single_binary_segmentation(data,
    changepoint_function=changepoint_function, alpha=alpha, ... )
 
@@ -286,6 +242,7 @@ wild_binary_segmentation <- function(data, M=5000, add_full=TRUE, block_size=1,
     cat(paste0('ChangePoint Detected (',1+addAmt,'-' ,addAmt+ncol(data),' at ',
                addAmt+potential_cp,'): Segment Data and Re-Search\n'))
 
+  # Search Recursively
   return(c(
     .detectChangePoints(data=as.data.frame(data[,1:potential_cp]),
                        changepoint_function=changepoint_function,
@@ -301,19 +258,4 @@ wild_binary_segmentation <- function(data, M=5000, add_full=TRUE, block_size=1,
                        alpha=alpha,
                        ...)
   ))
-}
-
-
-cpf <- function(X,cutoff_function, alpha=0.05, type='Mn', ...){
-  if(type=='Mn'){
-    result <- compute_Mn(X, ...)
-    cutoff <- cutoff_function(X, alpha, ...)
-  }else if(type=='Tn'){
-    result <- compute_Tn(X, ...)
-    cutoff <- cutoff_function(X, alpha, ...)
-  }else{
-    stop('Error: type must be Mn or Tn')
-  }
-
-  ifelse(result$value>=cutoff, result$location, NA)
 }
