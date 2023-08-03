@@ -11,6 +11,7 @@ Imports:
     fastmatrix,
     fda,
     ggplot2,
+    grDevices,
     magrittr,
     mvtnorm,
     plotly,

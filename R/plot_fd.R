@@ -308,7 +308,7 @@ plot_fd <- function(data, CPs=NULL, curve_points = 1:nrow(data), plot_title=NULL
   } else{
     colors_plot <- RColorBrewer::brewer.pal(11,"Spectral")
     colors_plot[6] <- 'yellow'
-    colors_plot <- colorRampPalette(colors_plot)(ncol(data))
+    colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(data))
     plotData[['color']] <- rep(colors_plot,
                                each=nrow(data))
   }
