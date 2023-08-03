@@ -1,4 +1,3 @@
-
 #' Fully Functional Mean Change Point Analysis
 #'
 #' This function tests whether there is a significant change in the mean
@@ -26,37 +25,38 @@
 #' functional data without dimension reduction} (https://arxiv.org/pdf/1511.04020.pdf)
 #'
 #' @examples
-#' mean_change(electricity,M=250)
-mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
-                     inc.pval=FALSE, ...){
+#' mean_change(electricity, M = 250)
+mean_change <- function(data, M = 1000, h = 0, K = bartlett_kernel, alpha = 0.05,
+                        inc.pval = FALSE, ...) {
   n <- ncol(data)
-  Sn2 <- rep(0,n)
+  Sn2 <- rep(0, n)
 
   # CUSUM
-  for(k in 2:n){
-    Sn2[k]= sum((rowSums(data[,1:k]) - (k/n)*rowSums(data))^2)
+  for (k in 2:n) {
+    Sn2[k] <- sum((rowSums(data[, 1:k]) - (k / n) * rowSums(data))^2)
   }
-  Sn2 <- Sn2/n
+  Sn2 <- Sn2 / n
 
   Tn <- max(Sn2)
-  k.star <- min(which(Sn2==max(Sn2)))
+  k.star <- min(which(Sn2 == max(Sn2)))
 
   ## Estimate eigenvalues (lambda_i, 1<=i<=d)
   Ceps <- .estimateCeps(data, h, K)
-  lambda <- eigen(Ceps/n)$values
+  lambda <- eigen(Ceps / n)$values
 
   values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist(n, lambda),
-                       lambda=lambda, n=n)
-  p <- sum(Tn <= values_sim)/M # Compute p-value
+    lambda = lambda, n = n
+  )
+  p <- sum(Tn <= values_sim) / M # Compute p-value
 
   # Just return CP for now
-  if(p<=alpha){
+  if (p <= alpha) {
     return_val <- k.star
-  }else{
+  } else {
     return_val <- NA
   }
 
-  if(inc.pval){
+  if (inc.pval) {
     return_val <- c(return_val, p)
   }
 
@@ -77,12 +77,12 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #' @noRd
 #'
 #' @examples
-#' .asymp_dist(200,1:5)
-#' .asymp_dist(200,1:5)
-.asymp_dist <- function(n, lambda){
-  BridgeLam <- matrix(0,length(lambda),n)
-  for(j in (1:length(lambda))){
-    BridgeLam[j,] <- lambda[j]*(sde::BBridge(x=0,y=0,t0=0,T=1,N=n-1)^2)
+#' .asymp_dist(200, 1:5)
+#' .asymp_dist(200, 1:5)
+.asymp_dist <- function(n, lambda) {
+  BridgeLam <- matrix(0, length(lambda), n)
+  for (j in (1:length(lambda))) {
+    BridgeLam[j, ] <- lambda[j] * (sde::BBridge(x = 0, y = 0, t0 = 0, T = 1, N = n - 1)^2)
   }
   max(colSums(BridgeLam))
 }
@@ -106,17 +106,17 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #'
 #' @examples
 #' # This is an internal function, see use in mean_change.
-.estimateCeps <- function(data, h, K){
+.estimateCeps <- function(data, h, K) {
   N <- ncol(data)
   D <- nrow(data)
-  Ceps <- matrix(NA,nrow=D, ncol=D)
+  Ceps <- matrix(NA, nrow = D, ncol = D)
 
   data <- .centerData(data)
 
   for (k in 1:D) {
     for (r in k:D) {
       # Multiple all observations taken at the same point in time across FDs
-      s <- as.numeric(data[k,]) %*% as.numeric(data[r,])
+      s <- as.numeric(data[k, ]) %*% as.numeric(data[r, ])
       if (h > 0) {
         for (i in 1:h) {
           # Don't fully understand
@@ -145,7 +145,7 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #'
 #' @examples
 #' # This is an internal function, see use in .estimateCeps.
-.centerData <- function(data){
+.centerData <- function(data) {
   data - rowMeans(data)
 }
 
@@ -165,35 +165,47 @@ mean_change <- function(data, M=1000, h=0, K = bartlett_kernel, alpha=0.05,
 #' @examples
 #' \dontrun{
 #' # Null Example
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0,0),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
+#' data_KL <- generate_data_fd(
+#'   ns = c(100, 100),
+#'   eigsList = list(
+#'     c(3, 2, 1, 0.5),
+#'     c(3, 2, 1, 0.5)
+#'   ),
+#'   basesList = list(
+#'     fda::create.bspline.basis(nbasis = 4, norder = 4),
+#'     fda::create.bspline.basis(nbasis = 4, norder = 4)
+#'   ),
+#'   meansList = c(0, 0),
+#'   distsArray = c("Normal", "Normal"),
+#'   evals = seq(0, 1, 0.05),
+#'   kappasArray = c(0, 0)
+#' )
 #'
 #' compute_mean_stat(data_KL, 100)
 #'
 #' # Mean CP Example
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0,0.2),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
+#' data_KL <- generate_data_fd(
+#'   ns = c(100, 100),
+#'   eigsList = list(
+#'     c(3, 2, 1, 0.5),
+#'     c(3, 2, 1, 0.5)
+#'   ),
+#'   basesList = list(
+#'     fda::create.bspline.basis(nbasis = 4, norder = 4),
+#'     fda::create.bspline.basis(nbasis = 4, norder = 4)
+#'   ),
+#'   meansList = c(0, 0.2),
+#'   distsArray = c("Normal", "Normal"),
+#'   evals = seq(0, 1, 0.05),
+#'   kappasArray = c(0, 0)
+#' )
 #'
 #' compute_mean_stat(data_KL, 100)
 #' }
-compute_mean_stat <- function(data, k, ...){
+compute_mean_stat <- function(data, k, ...) {
   n <- ncol(data)
 
-  sum((rowSums(as.data.frame(data[,1:k])) - (k/n)*rowSums(as.data.frame(data)))^2)/n
+  sum((rowSums(as.data.frame(data[, 1:k])) - (k / n) * rowSums(as.data.frame(data)))^2) / n
 }
 
 
@@ -217,41 +229,54 @@ compute_mean_stat <- function(data, k, ...){
 #' @examples
 #' \dontrun{
 #' # Null Example
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0,0),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
+#' data_KL <- generate_data_fd(
+#'   ns = c(100, 100),
+#'   eigsList = list(
+#'     c(3, 2, 1, 0.5),
+#'     c(3, 2, 1, 0.5)
+#'   ),
+#'   basesList = list(
+#'     fda::create.bspline.basis(nbasis = 4, norder = 4),
+#'     fda::create.bspline.basis(nbasis = 4, norder = 4)
+#'   ),
+#'   meansList = c(0, 0),
+#'   distsArray = c("Normal", "Normal"),
+#'   evals = seq(0, 1, 0.05),
+#'   kappasArray = c(0, 0)
+#' )
 #'
 #' compute_mean_cutoff(data_KL, 0.05)
 #'
 #' # Mean CP Example
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2,1,0.5)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.bspline.basis(nbasis=4, norder=4)),
-#'     meansList = c(0,0.2),
-#'     distsArray = c('Normal','Normal'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0,0))
+#' data_KL <- generate_data_fd(
+#'   ns = c(100, 100),
+#'   eigsList = list(
+#'     c(3, 2, 1, 0.5),
+#'     c(3, 2, 1, 0.5)
+#'   ),
+#'   basesList = list(
+#'     fda::create.bspline.basis(nbasis = 4, norder = 4),
+#'     fda::create.bspline.basis(nbasis = 4, norder = 4)
+#'   ),
+#'   meansList = c(0, 0.2),
+#'   distsArray = c("Normal", "Normal"),
+#'   evals = seq(0, 1, 0.05),
+#'   kappasArray = c(0, 0)
+#' )
 #'
 #' compute_mean_cutoff(data_KL, 0.05)
 #' }
-compute_mean_cutoff <- function(data, alpha, h=0, K=bartlett_kernel,
-                                M=1000, ...){
+compute_mean_cutoff <- function(data, alpha, h = 0, K = bartlett_kernel,
+                                M = 1000, ...) {
   n <- ncol(data)
 
   ## Estimate eigenvalues (lambda_i, 1<=i<=d)
   Ceps <- .estimateCeps(data, h, K)
-  lambda <- eigen(Ceps/n)$values
+  lambda <- eigen(Ceps / n)$values
 
   values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist(n, lambda),
-                       lambda=lambda,n=n)
+    lambda = lambda, n = n
+  )
 
-  as.numeric(stats::quantile(values_sim,1-alpha))
+  as.numeric(stats::quantile(values_sim, 1 - alpha))
 }

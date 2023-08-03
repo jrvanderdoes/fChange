@@ -1,4 +1,3 @@
-
 #' Welch Approximation to Tn
 #'
 #' This function approximates the Tn statistic using the Welch approximation.
@@ -25,12 +24,12 @@
 #'
 #' @examples
 #' # Note, TVal generally bigger than 1.
-#' welch_approximation(electricity, TVal = 1, h=0)
-welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
-                                W = NULL, W1 = NULL, M=100,
-                                h = TVal^(1/3), K = bartlett_kernel, ...){
-  if(is.null(W)){
-    W <- computeSpaceMeasuringVectors(M,"BM",X)
+#' welch_approximation(electricity, TVal = 1, h = 0)
+welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1, ]),
+                                W = NULL, W1 = NULL, M = 100,
+                                h = TVal^(1 / 3), K = bartlett_kernel, ...) {
+  if (is.null(W)) {
+    W <- computeSpaceMeasuringVectors(M, "BM", X)
   }
   # if(is.null(W)){
   #   W <- as.data.frame(sapply(rep(0,M),sde::BM, N=length(X[,1])-1))
@@ -38,31 +37,31 @@ welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
   #   W <- as.data.frame(W)
   # }
 
-  if(is.null(W1)){
-    W1 <- computeSpaceMeasuringVectors(M,"BM",X)
+  if (is.null(W1)) {
+    W1 <- computeSpaceMeasuringVectors(M, "BM", X)
   }
 
-  muVals <- rep(0,M)
-  sigma2Vals <- rep(0,M)
+  muVals <- rep(0, M)
+  sigma2Vals <- rep(0, M)
 
-  for(i in 1:M){
-    v <- W[,i]
-    v1 <- W1[,i]
+  for (i in 1:M) {
+    v <- W[, i]
+    v1 <- W1[, i]
 
-    CHat <- .estimateLRV(X=X,v1=v,v2=v,TVal=TVal,h=h,K=K)
-    CHat1 <- .estimateLRV(X=X,v1=v,v2=v1,TVal=TVal,h=h,K=K)
+    CHat <- .estimateLRV(X = X, v1 = v, v2 = v, TVal = TVal, h = h, K = K)
+    CHat1 <- .estimateLRV(X = X, v1 = v, v2 = v1, TVal = TVal, h = h, K = K)
 
     muVals[i] <- CHat
     sigma2Vals[i] <- CHat1 * Conj(CHat1) # pairs
   }
 
-  muHat <-  1/6 * mean(muVals)
-  sigma2Hat <- (1/90) * 2 * mean(sigma2Vals)
+  muHat <- 1 / 6 * mean(muVals)
+  sigma2Hat <- (1 / 90) * 2 * mean(sigma2Vals)
 
-  betaHat <- Re(sigma2Hat / (2*muHat))
-  nuHat <- Re((2*muHat^2) / sigma2Hat)
+  betaHat <- Re(sigma2Hat / (2 * muHat))
+  nuHat <- Re((2 * muHat^2) / sigma2Hat)
 
-  betaHat * stats::qchisq(1-alpha, df=nuHat) / nrow(X)
+  betaHat * stats::qchisq(1 - alpha, df = nuHat) / nrow(X)
 }
 
 
@@ -83,23 +82,24 @@ welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
 #'
 #' @examples
 #' # This is an internal function, see welch_approximation for usage.
-.estimateLRV <- function(X, v1, v2, TVal, h, K){
+.estimateLRV <- function(X, v1, v2, TVal, h, K) {
+  eps1 <- exp(complex(real = 0, imaginary = 1) * (t(X) %*% v1))
+  # eps1Bar <- mean(eps1)#1/TVal * sum(eps1)
 
-  eps1 <- exp(complex(real=0,imaginary = 1) * (t(X) %*% v1))
-  #eps1Bar <- mean(eps1)#1/TVal * sum(eps1)
+  eps2 <- exp(complex(real = 0, imaginary = 1) * (t(X) %*% v2))
+  # eps2Bar <- mean(eps2)#1/TVal * sum(eps2)
 
-  eps2 <- exp(complex(real=0,imaginary = 1) * (t(X) %*% v2))
-  #eps2Bar <- mean(eps2)#1/TVal * sum(eps2)
+  gammaHat <- rep(NA, length((1 - TVal):(TVal - 1)))
 
-  gammaHat <- rep(NA, length((1-TVal):(TVal-1)))
-
-  for(l in (1-TVal):(TVal-1)){
-    gammaHat[TVal+l] <- .getAutocov(eps1=eps1, eps2=eps2,
-                                  #eps1Bar=eps1Bar, eps2Bar=eps2Bar,
-                                  l=l, TVal=TVal)
+  for (l in (1 - TVal):(TVal - 1)) {
+    gammaHat[TVal + l] <- .getAutocov(
+      eps1 = eps1, eps2 = eps2,
+      # eps1Bar=eps1Bar, eps2Bar=eps2Bar,
+      l = l, TVal = TVal
+    )
   }
 
-  .computeLRVEstimate(h=h, TVal=TVal, gammaHat=gammaHat, K=K)
+  .computeLRVEstimate(h = h, TVal = TVal, gammaHat = gammaHat, K = K)
 }
 
 
@@ -118,24 +118,24 @@ welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
 #'
 #' @examples
 #' # This is an internal function, see .estimateLRV for usage.
-.getAutocov <- function(eps1, eps2, l, TVal){#eps1Bar, eps2Bar, l, TVal){
+.getAutocov <- function(eps1, eps2, l, TVal) { # eps1Bar, eps2Bar, l, TVal){
   gammaVal <- 0
   eps1Bar <- mean(eps1)
   eps2Bar <- mean(eps2)
 
-  if(l >= 0){
-    for(j in (1+l):TVal){
+  if (l >= 0) {
+    for (j in (1 + l):TVal) {
       gammaVal <- gammaVal +
-        (eps1[j-l]-eps1Bar) * Conj(eps2[j]-eps2Bar)
+        (eps1[j - l] - eps1Bar) * Conj(eps2[j] - eps2Bar)
     }
-  } else{
-    for(j in (1-l):TVal){
+  } else {
+    for (j in (1 - l):TVal) {
       gammaVal <- gammaVal +
-        (eps1[j+l] - eps1Bar) * Conj(eps2[j]-eps2Bar) # Confirm this j+l swap
+        (eps1[j + l] - eps1Bar) * Conj(eps2[j] - eps2Bar) # Confirm this j+l swap
     }
   }
 
-  1/TVal * gammaVal
+  1 / TVal * gammaVal
 }
 
 
@@ -154,11 +154,11 @@ welch_approximation <- function(X, alpha = 0.05, TVal = length(X[1,]),
 #'
 #' @examples
 #' # This is an internal function, see .estimateLRV for usage.
-.computeLRVEstimate <- function(h, TVal, gammaHat, K){
+.computeLRVEstimate <- function(h, TVal, gammaHat, K) {
   CVal <- 0
 
-  for(l in (1-TVal):(TVal-1)){
-    CVal <- CVal + K(l, h) * gammaHat[TVal+l]
+  for (l in (1 - TVal):(TVal - 1)) {
+    CVal <- CVal + K(l, h) * gammaHat[TVal + l]
   }
 
   CVal

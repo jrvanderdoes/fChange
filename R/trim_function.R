@@ -1,4 +1,3 @@
-
 #' Basic trim function
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
@@ -15,6 +14,6 @@
 #'
 #' @examples
 #' trim_function(electricity)
-trim_function <- function(data, minVal = 10, ...){
-  max(round(minVal), floor(log(ncol(as.data.frame(data)))), na.rm=TRUE)
+trim_function <- function(data, minVal = 10, ...) {
+  max(round(minVal), floor(log(ncol(as.data.frame(data)))), na.rm = TRUE)
 }

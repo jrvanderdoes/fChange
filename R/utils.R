@@ -13,16 +13,16 @@
 #' @noRd
 #'
 #' @examples
-#' .approx_int(rep(1,10), type='Rectangle')
-#' .approx_int(seq(0,1,length.out=20))
-#' .approx_int(seq(0,1,length.out=20)^2)
-.approx_int <- function(y, type="Trapezoidal"){
-  if(type=="Rectangle"){ # Rect Approx
+#' .approx_int(rep(1, 10), type = "Rectangle")
+#' .approx_int(seq(0, 1, length.out = 20))
+#' .approx_int(seq(0, 1, length.out = 20)^2)
+.approx_int <- function(y, type = "Trapezoidal") {
+  if (type == "Rectangle") { # Rect Approx
     value <- sum(y) / length(y)
-  } else if(type=="Trapezoidal"){ # Trap Approx
-    value <- sum(y[-1] + y[-length(y)]) / ( 2 * (length(y)-1) )
-  } else{
-    stop('Error: This type is not yet implemented. See documentation.')
+  } else if (type == "Trapezoidal") { # Trap Approx
+    value <- sum(y[-1] + y[-length(y)]) / (2 * (length(y) - 1))
+  } else {
+    stop("Error: This type is not yet implemented. See documentation.")
   }
 
   value

@@ -1,3 +1,3 @@
-load(file='./data-raw/electricity.RData')
+load(file = "./data-raw/electricity.RData")
 
 use_data(electricity)

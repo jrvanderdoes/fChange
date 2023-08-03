@@ -1,4 +1,3 @@
-
 #' Generalized Bootstrap and Permutation Methods Including Blocking
 #'
 #' Use this method for generalized resampling of a test statistic in
@@ -24,57 +23,71 @@
 #' @examples
 #' \dontrun{
 #' # Setup Data
-#' data_KL <- generate_data_fd(ns = c(100,100),
-#'     eigsList = list(c(3,2,1,0.5),
-#'                     c(3,2)),
-#'     basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-#'                      fda::create.fourier.basis(nbasis=2)),
-#'     meansList = c(0,0.5),
-#'     distsArray = c('Normal','Binomial'),
-#'     evals = seq(0,1,0.05),
-#'     kappasArray = c(0, 0.5))
+#' data_KL <- generate_data_fd(
+#'   ns = c(100, 100),
+#'   eigsList = list(
+#'     c(3, 2, 1, 0.5),
+#'     c(3, 2)
+#'   ),
+#'   basesList = list(
+#'     fda::create.bspline.basis(nbasis = 4, norder = 4),
+#'     fda::create.fourier.basis(nbasis = 2)
+#'   ),
+#'   meansList = c(0, 0.5),
+#'   distsArray = c("Normal", "Binomial"),
+#'   evals = seq(0, 1, 0.05),
+#'   kappasArray = c(0, 0.5)
+#' )
 #' # Metric
 #' compute_Tn(data_KL) # Note value
 #' compute_Tn(data_KL) # Note different value
 #' # Permutation Method for Tn (this will get 1-alpha quantile of iters)
-#' generalized_resampling(X=data_KL,
-#'     blockSize=ncol(data_KL)^(1/3),
-#'     fn=compute_Tn, iters=1000, replace=F)
+#' generalized_resampling(
+#'   X = data_KL,
+#'   blockSize = ncol(data_KL)^(1 / 3),
+#'   fn = compute_Tn, iters = 1000, replace = F
+#' )
 #' }
 generalized_resampling <- function(X, blockSize, fn, iters = 1000,
-                                   replace=FALSE, alpha=0.05, silent=FALSE, ...){
+                                   replace = FALSE, alpha = 0.05, silent = FALSE, ...) {
+  st <- Sys.time()
+  full_val <- fn(X, ...)
+  en <- Sys.time()
 
-  st<-Sys.time()
-  full_val <- fn(X,...)
-  en<-Sys.time()
-
-  if(!silent){
-    cat(paste0('Estimated time: ',
-               round(difftime(en,st,'units'='mins')[[1]]*iters,2),
-               ' mins\n'))
+  if (!silent) {
+    cat(paste0(
+      "Estimated time: ",
+      round(difftime(en, st, "units" = "mins")[[1]] * iters, 2),
+      " mins\n"
+    ))
   }
 
   n <- ncol(X)
-  idxGroups <- .getChunks(1:n, n/blockSize)
-  idxs <- sapply(1:iters,function(i,m, indxs,replace){
+  idxGroups <- .getChunks(1:n, n / blockSize)
+  idxs <- sapply(1:iters, function(i, m, indxs, replace) {
     samps <- sample(1:m, replace = replace)
     unlist(indxs[samps], use.names = FALSE)
-  }, m=length(idxGroups), indxs=idxGroups, replace=replace)
+  }, m = length(idxGroups), indxs = idxGroups, replace = replace)
   # If it is a matrix/dataframe this already even rows
   #     (will be with permutation test)
-  if(!(is.matrix(idxs)| is.data.frame(idxs)))
+  if (!(is.matrix(idxs) | is.data.frame(idxs))) {
     idxs <- .convertSamplesToDF(idxs)
+  }
 
 
   bssamples <- sapply(as.data.frame(idxs),
-                      function(loop_iter,fn,X1,...){
-                        fn(X1[,stats::na.omit(loop_iter)], ...)
-                      }, X1=X,fn=fn, ...)
+    function(loop_iter, fn, X1, ...) {
+      fn(X1[, stats::na.omit(loop_iter)], ...)
+    },
+    X1 = X, fn = fn, ...
+  )
 
-  list('TVal'=full_val,
-       'cutoff'=stats::quantile(bssamples, probs = c(1-alpha))[[1]],
-       'pval'=1-stats::ecdf(bssamples)(full_val),
-       'BSSamples'=as.numeric(bssamples))
+  list(
+    "TVal" = full_val,
+    "cutoff" = stats::quantile(bssamples, probs = c(1 - alpha))[[1]],
+    "pval" = 1 - stats::ecdf(bssamples)(full_val),
+    "BSSamples" = as.numeric(bssamples)
+  )
 }
 
 
@@ -92,12 +105,13 @@ generalized_resampling <- function(X, blockSize, fn, iters = 1000,
 #' @noRd
 #'
 #' @examples
-#' .getChunks(1:100,1)
-#' .getChunks(1:100,2)
-#' .getChunks(1:100,5)
-.getChunks <- function(x,chunksN) {
-  if(chunksN<2)
+#' .getChunks(1:100, 1)
+#' .getChunks(1:100, 2)
+#' .getChunks(1:100, 5)
+.getChunks <- function(x, chunksN) {
+  if (chunksN < 2) {
     return(x)
+  }
   split(x, cut(x, chunksN, labels = FALSE))
 }
 
@@ -116,19 +130,20 @@ generalized_resampling <- function(X, blockSize, fn, iters = 1000,
 #' @examples
 #' # This is an internal function and will not be viewable to user. See
 #' #     generalized_resampling.
-.convertSamplesToDF <- function(data_list){
-
+.convertSamplesToDF <- function(data_list) {
   m <- length(data_list)
   maxLen <- 0
-  for(ii in 1:m){
-    maxLen <- max(maxLen,length(data_list[[ii]]))
+  for (ii in 1:m) {
+    maxLen <- max(maxLen, length(data_list[[ii]]))
   }
 
-  data_df <- data.frame(matrix(nrow=maxLen,ncol=m))
+  data_df <- data.frame(matrix(nrow = maxLen, ncol = m))
 
-  for(ii in 1:length(data_list)){
-    data_df[,ii] <- c(data_list[[ii]],
-                      rep(NA,maxLen-length(data_list[[ii]])))
+  for (ii in 1:length(data_list)) {
+    data_df[, ii] <- c(
+      data_list[[ii]],
+      rep(NA, maxLen - length(data_list[[ii]]))
+    )
   }
 
   data_df

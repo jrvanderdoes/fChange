@@ -7,7 +7,7 @@
 #' A data frame with 24 rows and 365 columns, representing the hourly (row)
 #'  electricity spot values for each day (column) of the year in 2014.
 #'
-#'@source <www.omie.es>
+#' @source <www.omie.es>
 "electricity"
 
 #' Australian Temperature Data
@@ -22,5 +22,5 @@
 #' 365 rows (one per day), and a variable number of columns related to years of
 #' collected data.
 #'
-#'@source <www.bom.gov.au>
+#' @source <www.bom.gov.au>
 "temperature"

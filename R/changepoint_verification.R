@@ -25,44 +25,46 @@
 #'
 #' @noRd
 .changepoint_verification <- function(CPsVals, data,
-                                     test_statistic_function =NULL,
-                                     changepoint_function =NULL,
-                                     silent = FALSE,
-                                     ...){
+                                      test_statistic_function = NULL,
+                                      changepoint_function = NULL,
+                                      silent = FALSE,
+                                      ...) {
+  if (!silent) cat("-- Verify Step --\n")
 
-  if(!silent) cat('-- Verify Step --\n')
-
-  if(length(CPsVals)>=1){ # If there was a CP detected
-    tmp_cps <- c(0,CPsVals, ncol(data))
+  if (length(CPsVals) >= 1) { # If there was a CP detected
+    tmp_cps <- c(0, CPsVals, ncol(data))
     tmp_cps <- tmp_cps[order(tmp_cps)]
     CPsVals <- c()
-    for(i in 2:(length(tmp_cps)-1)){
+    for (i in 2:(length(tmp_cps) - 1)) {
       # Get CP
-      if(!is.null(test_statistic_function)){
+      if (!is.null(test_statistic_function)) {
         potential_cp <-
-          single_binary_segmentation(data[,(tmp_cps[i-1]+1):tmp_cps[i+1]],
-                        test_statistic_function=test_statistic_function, ... )
-      }else if(!is.null(changepoint_function)){
-        potential_cp <- changepoint_function(data[,(tmp_cps[i-1]+1):tmp_cps[i+1]], ...)
+          single_binary_segmentation(data[, (tmp_cps[i - 1] + 1):tmp_cps[i + 1]],
+            test_statistic_function = test_statistic_function, ...
+          )
+      } else if (!is.null(changepoint_function)) {
+        potential_cp <- changepoint_function(data[, (tmp_cps[i - 1] + 1):tmp_cps[i + 1]], ...)
       }
 
-      if(!is.na(potential_cp))
-        CPsVals <- c(CPsVals,potential_cp+tmp_cps[i-1])
+      if (!is.na(potential_cp)) {
+        CPsVals <- c(CPsVals, potential_cp + tmp_cps[i - 1])
+      }
     }
-
-  } else{
+  } else {
     # Get CP
-    if(!is.null(test_statistic_function)){
+    if (!is.null(test_statistic_function)) {
       CPsVals <-
         single_binary_segmentation(data,
-                                   test_statistic_function=test_statistic_function, ... )
-    }else if(!is.null(changepoint_function)){
+          test_statistic_function = test_statistic_function, ...
+        )
+    } else if (!is.null(changepoint_function)) {
       CPsVals <- changepoint_function(data, ...)
     }
   }
 
   # Order and return
-  if(sum(is.na(CPsVals))==length(CPsVals))
+  if (sum(is.na(CPsVals)) == length(CPsVals)) {
     return(NA)
+  }
   CPsVals[order(CPsVals)]
 }

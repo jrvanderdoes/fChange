@@ -1,4 +1,3 @@
-
 #' Compute Tn Test Statistic
 #'
 #' Function to calculate the change point test statistic for functional data
@@ -24,21 +23,21 @@
 #' @export
 #'
 #' @examples
-#' compute_Tn(electricity,M=1000)
-compute_Tn <- function(X, M=100000, W=NULL, space='BM', ...){
+#' compute_Tn(electricity, M = 1000)
+compute_Tn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
   n <- ncol(X)
 
-  if(is.null(W)){
-    W <- computeSpaceMeasuringVectors(M = M, X = X, space=space)
-  }else{
+  if (is.null(W)) {
+    W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
+  } else {
     M <- ncol(W)
   }
 
-  intVal <- sapply(1:M, function(v,W,X1,n){
-    .approx_int( (abs(.Zn(W[,v],X1)))^2 )
-  },W=W,X1=X,n=n)
+  intVal <- sapply(1:M, function(v, W, X1, n) {
+    .approx_int((abs(.Zn(W[, v], X1)))^2)
+  }, W = W, X1 = X, n = n)
 
-  1/M * sum(intVal)
+  1 / M * sum(intVal)
 }
 
 
@@ -59,23 +58,25 @@ compute_Tn <- function(X, M=100000, W=NULL, space='BM', ...){
 #'
 #' @examples
 #' compute_Mn(electricity)
-compute_Mn <- function(X, M=10000, W=NULL, space='BM', ...){
+compute_Mn <- function(X, M = 10000, W = NULL, space = "BM", ...) {
   n <- ncol(X)
 
-  if(is.null(W)){
-    W <- computeSpaceMeasuringVectors(M = M, X = X, space=space)
-  }else{
+  if (is.null(W)) {
+    W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
+  } else {
     M <- ncol(W)
   }
 
-  intVal <- sapply(1:M, function(v,W,X1,n){
-    (abs(.Zn(W[,v],X1)))^2
-  },W=W,X1=X,n=n)
-  return_value <- 1/M * rowSums(intVal)
+  intVal <- sapply(1:M, function(v, W, X1, n) {
+    (abs(.Zn(W[, v], X1)))^2
+  }, W = W, X1 = X, n = n)
+  return_value <- 1 / M * rowSums(intVal)
 
-  list('value'=max(return_value),
-       'location'=which.max(return_value),
-       'allValues'=return_value)
+  list(
+    "value" = max(return_value),
+    "location" = which.max(return_value),
+    "allValues" = return_value
+  )
 }
 
 
@@ -91,11 +92,11 @@ compute_Mn <- function(X, M=10000, W=NULL, space='BM', ...){
 #' \frac{\lfloor n x \rfloor}{n} \hat{f}_n(v,1))}.
 #'
 #' @noRd
-.Zn <- function(v,X){
+.Zn <- function(v, X) {
   n <- ncol(X)
-  fhat_vals <- .fhat_all(X,v)
+  fhat_vals <- .fhat_all(X, v)
 
-  sqrt(n) * ( fhat_vals - 1:n/n * fhat_vals[length(fhat_vals)] )
+  sqrt(n) * (fhat_vals - 1:n / n * fhat_vals[length(fhat_vals)])
 }
 
 
@@ -109,6 +110,6 @@ compute_Mn <- function(X, M=10000, W=NULL, space='BM', ...){
 #' @return Vector of numerics for \eqn{\hat{f}(v,x)}
 #'
 #' @noRd
-.fhat_all <- function(X,v){
-  cumsum(exp(1/nrow(X)*complex(imaginary = 1)* t(X) %*% v)) / ncol(X)
+.fhat_all <- function(X, v) {
+  cumsum(exp(1 / nrow(X) * complex(imaginary = 1) * t(X) %*% v)) / ncol(X)
 }
