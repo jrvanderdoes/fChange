@@ -11,19 +11,20 @@
 #'  arguments as passed in as ... . This function should compute a statistic for
 #'  each candidate change point (i.e. each curve or column of data), returned as
 #'  a named value: allValues.
+#' @param trim_function XXXXXXX
 #' @param errorType String of 'L2' or 'Tr' indicating the error function to use
 #' @param ... Additional parameters to pass into the respective functions
 #'
 #' @return list with three elements.
 #'  \itemize{
-#'    \textbf{CPInfo}: Data.frame of candidate changes, ordered by impact. The
+#'    \item **CPInfo**: Data.frame of candidate changes, ordered by impact. The
 #'      columns are: CP, Var, and Percent. CP indicates change location, Var is
 #'      total variance, Percent is the percentage of variance removed compared
 #'      to the previous step. The first row has CP=NA, indicating the no change
 #'      scenario.
-#'    \textbf{VarPlot}: A ggplot object showing the variance for increasing
+#'    \item **VarPlot**: A ggplot object showing the variance for increasing
 #'      number of changes.
-#'    \textbf{PerPlot}: A ggplot object showing the percent of variance removed
+#'    \item **PerPlot**: A ggplot object showing the percent of variance removed
 #'      compared to the previous step.
 #'  }
 #' @export
@@ -42,15 +43,13 @@ elbow_method <- function(data,
 
   # Trim & stopping criteria
   trim_amt <- trim_function(data, ...)
-  nStart <- 1+trim_amt
-  nEnd <- ncol(as.data.frame(data))-trim_amt
-  if(nStart> nEnd) return()
+  if(1 + trim_amt > n - trim_amt) return()
 
   # Run First
-  stats_tmp <- test_function(data, ...)
-  test_stat <- stats_tmp$allValues
-  return_data[1,] <-c(which.max(stats_tmp$allValues),
-                      .compute_total_var(data, which.max(stats_tmp$allValues), errorType))
+  stats_tmp <- test_function(data[,(1+trim_amt):(n-trim_amt)], ...)
+  test_stat <- c(rep(NA,trim_amt), stats_tmp$allValues, rep(NA,trim_amt))
+  tmp_loc <- which.max(stats_tmp$allValues) + trim_amt
+  return_data[1,] <-c(tmp_loc, .compute_total_var(data, tmp_loc, errorType))
 
   # Iteratively Search
   i <- 1
@@ -65,15 +64,20 @@ elbow_method <- function(data,
     ## We only need to recompute for the interval changed by last CP!
     # Before
     beforePrevCP <- (CPs[prev_CP_loc-1]+1):(CPs[prev_CP_loc])
+    trim_amt <- trim_function(data[,beforePrevCP], ...)
     test_stat[beforePrevCP] <- NA
+
     if(1+trim_amt < length(beforePrevCP)-trim_amt){
       fill_idx <- (1+trim_amt):(length(beforePrevCP)-trim_amt)
       stats_tmp <- test_function( data[,beforePrevCP[fill_idx]], ...)
       test_stat[beforePrevCP[fill_idx]] <- stats_tmp$allValues
     }
+
     # After
     afterPrevCP <- (CPs[prev_CP_loc]+1):CPs[prev_CP_loc+1]
+    trim_amt <- trim_function(data[,afterPrevCP], ...)
     test_stat[afterPrevCP] <- NA
+
     if(1+trim_amt < length(afterPrevCP)-trim_amt){
       fill_idx <- (1+trim_amt):(length(afterPrevCP)-trim_amt)
       stats_tmp <- test_function( data[,afterPrevCP[fill_idx]], ...)
@@ -86,6 +90,7 @@ elbow_method <- function(data,
     if(sum(is.na(test_stat))==n) break
 
     ## Get total variance for each potential CP
+    #     TODO: Save previous
     data_segments <- .split_on_NA(test_stat)
 
     return_data_tmp <- data.frame('CP'=NA,'Var'=NA)
@@ -139,10 +144,10 @@ elbow_method <- function(data,
 #' Compute Total Variance
 #'
 #' This (internal) function computes the total variance in the data with given
-#'     CPs.
+#'  CPs.
 #'
 #' @param data Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
+#'    indicating FD.
 #' @param CPs Vector of numerics indicating the changepoint locations
 #' @param errorType (Optional) String of 'L2' or 'Tr' indicating the error
 #'                  function to use. Default is L2.
@@ -234,9 +239,9 @@ elbow_method <- function(data,
 #'
 #' This (internal) function splits a vector based on any NA values.
 #'
-#' @param vec Vector to be split containing numerics and NA values
+#' @param vec Vector to be split containing numerics and NA values.
 #'
-#' @return List with each item being a group separated by NAs
+#' @return List with each item being a group separated by NAs.
 #'
 #' @noRd
 .split_on_NA <- function(vec) {
