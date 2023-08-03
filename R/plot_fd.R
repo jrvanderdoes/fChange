@@ -40,15 +40,15 @@
 #' @examples
 #' plot_fd(data=electricity[,1:100], CPs=c(50))
 #' plot_fd(data=electricity, CPs=c(50,150,220,300),
-#'         interactive=TRUE, showticklabels=FALSE)
+#'         interactive=FALSE, showticklabels=FALSE)
 plot_fd <- function(data, CPs=NULL, curve_points = 1:nrow(data), plot_title=NULL,
                     val_axis_title = 'Value', res_axis_title='resolution',
                     FD_axis_title = 'Observations',FDReps=1:ncol(data),
                     eye = list(x = -1.5, y = -1.5, z = 1.5),
                     aspectratio=list(x=1,y=1,z=1),
-                    showticklabels=TRUE, interactive=FALSE){
+                    showticklabels=TRUE, interactive=TRUE){
 
-  if(interactive){
+  if(!interactive){
     fdPlot <- .plot_evalfd_highdim(data=data, curve_points=curve_points,
                                   CPs=CPs, plot_title=plot_title,
                                   val_axis_title=val_axis_title,
@@ -292,18 +292,30 @@ plot_fd <- function(data, CPs=NULL, curve_points = 1:nrow(data), plot_title=NULL
     )
   }
 
-  plotData[['color']] <- I(list(NULL))
+  ## Setup up Colors
+  #   Rainbow for no CPs, colored for CPs
+  plotData[['color']] <- rep(1:ncol(data), each=nrow(data))
   if(!is.null(CPs)){
-    plotData$color <- 0
-    for(i in 1:length(CPs)){
-      plotData$color <- ifelse(plotData$FDRep>CPs[i],
-                               CPs[i],plotData$color)
+    tmp_colors <- RColorBrewer::brewer.pal(min(9,max(3,length(CPs)+1)),"Set1")
+    if(length(CPs)>9)
+      tmp_colors <- rep(tmp_colors, ceiling(c(length(CPs)+1)/9))[1:(length(CPs)+1)]
+
+    CPs <- unique(c(1,CPs,ncol(data)))
+    colors_plot <- rep(tmp_colors[1], ncol(data))
+    for(i in 2:(length(CPs)-1)){
+      colors_plot[CPs[i]:CPs[i+1]] <- tmp_colors[i]
     }
+  } else{
+    colors_plot <- RColorBrewer::brewer.pal(11,"Spectral")
+    colors_plot[6] <- 'yellow'
+    colors_plot <- colorRampPalette(colors_plot)(ncol(data))
+    plotData[['color']] <- rep(colors_plot,
+                               each=nrow(data))
   }
 
   ## Set up Tick Labels
+  z_range <- round(range(plotData$Value),-2)
   if(showticklabels){
-    z_range <- round(range(plotData$Value),-2)
     scale_info <- list(
       col='black',arrows=FALSE, cex= 0.75, cex.title=1.5,
       x = list(
@@ -347,7 +359,8 @@ plot_fd <- function(data, CPs=NULL, curve_points = 1:nrow(data), plot_title=NULL
                      type="l",groups=color,
                      par.box = c(col = "transparent"),
                      par.settings =
-                      list(axis.line=list(col="transparent")),
+                      list(axis.line=list(col="transparent"),
+                           superpose.line = list(col=colors_plot)),
                      #screen=list(z = 90, x = -75,y=-45),
                      #trellis.par.set(list(axis.text=list(cex=2)),
                      #                "axis.line",list(col=NA)),
@@ -355,8 +368,8 @@ plot_fd <- function(data, CPs=NULL, curve_points = 1:nrow(data), plot_title=NULL
                      aspect=aspectratio,
                      drape=TRUE,colorkey = FALSE,
                      scales = scale_info,
-                     xlab=list("Eval Range", rot = 30),
-                     ylab=list("\nFD Reps", rot = -30),
-                     zlab=list("Value", rot = 90,just=0.75),
+                     xlab=list(res_axis_title, rot = 30),
+                     ylab=list(paste0("\n",FD_axis_title), rot = -30),
+                     zlab=list(val_axis_title, rot = 90,just=0.75),
                      main=plot_title)
 }
