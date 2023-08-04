@@ -1,0 +1,78 @@
+---
+title: "electricity"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{electricity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette examines the hourly Spanish electricity spot price from 2014. This
+data is loaded into ${\tt fChange}$, and can be retrieved by calling `electricity`.
+```{r setup}
+library(fChange)
+library(fda)
+
+electricity <- electricity
+```
+
+This data may be viewed using the following command:
+```{r plot_elec}
+plot_fd(electricity)
+```
+
+<!-- Build Model -->
+<!-- ```{r} -->
+<!-- electricity <- electricity -->
+<!-- electricity_fd <- fda::Data2fd(1:24,electricity) -->
+<!-- # sum(fda::eval.fd(1:24,electricity_fd)-electricity) -->
+<!-- #   eval.fd: eval.basis(1:24,electricity_fd$basis) %*% electricity_fd$coefs -->
+
+<!-- # Play with more components -->
+<!-- nPCs <- 5 -->
+<!-- electricity_fpca <- fda::pca.fd(electricity_fd,nharm = nPCs) -->
+<!-- electricity_fpca_comp <- electricity_fpca$scores -->
+
+<!-- ## Forecast Each -->
+<!-- ts_dat <- list() -->
+<!-- comps <- list() -->
+<!-- comps_resids <- list() -->
+<!-- for(i in 1:nPCs){ -->
+<!--   ts_dat[[i]] <- ts(electricity_fpca_comp[,i], freq=7) -->
+<!--   #comps[[i]] <- forecast::ets(ts_dat[[i]]) -->
+<!--   #comps_resids[[i]] <- resid(comps[[i]]) -->
+<!--   comps[[i]] <- forecast::auto.arima(ts_dat[[i]]) -->
+<!--   comps_resids[[i]] <- resid(comps[[i]]) -->
+<!-- } -->
+
+<!-- electricity_fpca_forecast <- do.call(cbind, comps_resids) -->
+
+<!-- # Revert Back to fd -->
+<!-- #   Want: 24 x 365 -->
+<!-- #     forecast: 365 x 3 -->
+<!-- #    coefs: 26  x 3 -->
+<!-- #      coefs %*% comps: 26 x 365 -->
+<!-- #    Eval: 24 x 26 -->
+<!-- #       eval %*% orig: 24 x 365 -->
+<!-- orig_coefs <- electricity_fpca$harmonics$coefs %*% t(electricity_fpca_forecast) -->
+<!-- eval_fd_vals <- eval.basis(1:24,electricity_fd$basis) %*% orig_coefs -->
+<!-- ``` -->
+
+
+
+
+<!-- ```{r} -->
+<!-- ## Not used, but considere finite PCs -->
+<!-- data_pca <- prcomp(electricity) -->
+<!-- screeplot(data_pca, type="lines") -->
+<!-- data_pca <- data_pca$rotation[,1:3] -->
+
+<!-- tmp_dat_c <- detect_changepoint_singleCov( X=data_pca, space = 'RN') -->
+<!-- ``` -->
