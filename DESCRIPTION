@@ -3,7 +3,7 @@ Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
     person("Jeremy", "VanderDoes", , "jeremy.vanderdoes@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           comment = c(ORCID = "0009-0001-9885-3073"))
 Description: What the package does (one paragraph).
 License: GPL (>= 3)
 Encoding: UTF-8
