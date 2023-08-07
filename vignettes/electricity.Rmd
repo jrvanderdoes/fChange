@@ -31,7 +31,7 @@ plot_fd(electricity)
 Now it is likely this data has some trends, so we will use principal component 
 analysis to convert it to finite dimesions, fit a model, and return this to 
 functional data to implement.
-```{r}
+```{r model_electricity}
 electricity_fd <- fda::Data2fd(1:24,electricity)
 # sum(fda::eval.fd(1:24,electricity_fd)-electricity)
 #   eval.fd: eval.basis(1:24,electricity_fd$basis) %*% electricity_fd$coefs
@@ -66,7 +66,20 @@ orig_coefs <- electricity_fpca$harmonics$coefs %*% t(electricity_fpca_forecast)
 eval_fd_vals <- eval.basis(1:24,electricity_fd$basis) %*% orig_coefs
 ```
 
+Now we can try several models
+```{r}
+tmp_mc <- mean_change(eval_fd_vals,inc.pval = T)
+tmp_cc <- cov_change(eval_fd_vals)
 
+tmp_sc <- detect_changepoint_singleCov(X=eval_fd_vals, h=0)
+
+tmp_gs <- generalized_resampling(X=eval_fd_vals, blockSize=1,
+                                 fn=compute_Tn, iters=1000,
+                                 replace=FALSE)
+
+tmp_wa <- welch_approximation(eval_fd_vals, h=0)
+tmp_mn <- compute_Mn(eval_fd_vals)
+```
 
 
 <!-- ```{r} -->
