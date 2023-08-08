@@ -66,7 +66,7 @@ orig_coefs <- electricity_fpca$harmonics$coefs %*% t(electricity_fpca_forecast)
 eval_fd_vals <- eval.basis(1:24,electricity_fd$basis) %*% orig_coefs
 ```
 
-Now we can try several models
+Now we can try several models:
 ```{r}
 tmp_mc <- mean_change(eval_fd_vals,inc.pval = T)
 tmp_cc <- cov_change(eval_fd_vals)
@@ -81,6 +81,10 @@ tmp_wa <- welch_approximation(eval_fd_vals, h=0)
 tmp_mn <- compute_Mn(eval_fd_vals)
 ```
 
+The above detect a change point, and occasionally the placement; however, if we have multiple change points then another method is necessary. We use binary segmentation in this case.
+```{r}
+
+```
 
 <!-- ```{r} -->
 <!-- ## Not used, but considere finite PCs -->
