@@ -1,9 +1,10 @@
 Package: fChange
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
-Authors@R: 
+Authors@R: c(
     person("Jeremy", "VanderDoes", , "jeremy.vanderdoes@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "0009-0001-9885-3073"))
+           comment = c(ORCID = "0009-0001-9885-3073")),
+    person("Gregory", "Rice", role = "aut") )
 Description: What the package does (one paragraph).
 License: GPL (>= 3)
 Encoding: UTF-8
