@@ -83,7 +83,7 @@ tmp_mn <- compute_Mn(eval_fd_vals)
 
 The above detect a change point, and occasionally the placement; however, if we have multiple change points then another method is necessary. We use binary segmentation in this case.
 ```{r}
-complete_binary_segmentation(eval_fd_vals,
+complete_binary_segmentation(data = eval_fd_vals,
                              cutoff_function = generalized_resampling,
                              trim_function=function(...){0},
                              blockSize=1,

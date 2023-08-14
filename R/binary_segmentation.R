@@ -37,8 +37,8 @@
 #'   final_verify = FALSE
 #' )
 complete_binary_segmentation <- function(data,
-                                         changepoint_function = compute_Mn(),
-                                         cutoff_function = welch_approximation(),
+                                         changepoint_function = compute_Mn,
+                                         cutoff_function = welch_approximation,
                                          final_verify = TRUE,
                                          silent = FALSE,
                                          alpha = 0.05,
