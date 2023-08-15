@@ -258,8 +258,8 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
   fVals <- as.numeric(.estimf(X, lfun, v))
   fpVals <- as.numeric(.estimf(X, lfunp, vp))
 
-  mean1 <- mean(fVals)
-  mean2 <- mean(fpVals)
+  # mean1 <- mean(fVals)
+  # mean2 <- mean(fpVals)
 
   values <- sapply(iters, function(k, K, h, X1, fVals, fpVals, mean1, mean2) {
     Kval <- K(k, h)
@@ -301,7 +301,7 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #'
 #' @noRd
 .estimGamma <- function(k, X, fVals, fpVals, mean1, mean2) {
-  tmp <- 0
+  # tmp <- 0
 
   if (k >= 0) {
     rs <- 1:(ncol(X) - k)
