@@ -34,7 +34,7 @@ compute_Tn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
   }
 
   intVal <- sapply(1:M, function(v, W, X1, n) {
-    .approx_int((abs(.Zn(W[, v], X1)))^2)
+    .approx_int(abs(.Zn(W[, v], X1))^2)
   }, W = W, X1 = X, n = n)
 
   1 / M * sum(intVal)
