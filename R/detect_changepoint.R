@@ -60,7 +60,7 @@ detect_changepoint <- function(X, nSims = 500, x = seq(0, 1, length.out = 40),
     gamVals <- mvnorms[1, 1:MJ] + complex(imaginary = 1) * mvnorms[1, MJ + 1:MJ]
 
     # Estimate value
-    gamProcess[i] <- .approx_int(abs(gamVals)^2) / nrow(X)
+    gamProcess[i] <- .approx_int(abs(gamVals)^2)
   }
 
   list(
@@ -137,9 +137,8 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
     # gamVals <- mvnorms[(M+1):MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:(MJ-M),]
 
     # Estimate value
-    apply(abs(t(gamVals))^2, MARGIN = 1, .approx_int) / nrow(X)
+    apply(abs(t(gamVals))^2, MARGIN = 1, .approx_int)
   }, MJ = MJ, sqrtMat = sqrtMat, lx = length(x))
-
   gamProcess <- as.vector(gamProcess)
 
   list(
@@ -353,5 +352,5 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #'
 #' @noRd
 .estimf <- function(Xr, lfun, v) {
-  lfun(t(Xr) %*% v)
+  lfun((t(Xr) %*% v)/nrow(Xr))
 }
