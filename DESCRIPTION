@@ -5,7 +5,7 @@ Authors@R: c(
     person("Jeremy", "VanderDoes", , "jeremy.vanderdoes@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-9885-3073")),
     person("Gregory", "Rice", role = "aut") )
-Description: Change point detection for discretely observed functional data. Includes optional smoothing and several different change point detections methods as given in (FILL OUT).
+Description: Change point detection for discretely observed, yet innately functional data. Includes optional smoothing and several different change point detections methods as given in (FILL OUT).
 License: GPL (>= 3)
 Encoding: UTF-8
 Imports: 
