@@ -41,10 +41,13 @@ for general functions. At most one change point is detected.
 }
 \examples{
 single_binary_segmentation(
-  data = electricity[,1:60],
+  data = electricity[, 1:60],
   changepoint_function = compute_Mn,
   cutoff_function = welch_approximation,
-  trim_function = function(data){
+  trim_function = function(data) {
     max(10, floor(log(ncol(as.data.frame(data)))),
-    na.rm=TRUE)})
+      na.rm = TRUE
+    )
+  }
+)
 }

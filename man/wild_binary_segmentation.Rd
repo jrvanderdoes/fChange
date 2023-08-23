@@ -34,25 +34,41 @@ Wild Binary Segmentation
 \examples{
 \dontrun{
 # Setup Data
-data_KL <- generate_data_fd(ns = c(12,12,12),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2,1,0.5),
-                    c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(-1,0,1),
-    distsArray = c('Normal','Normal','Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0,0,0))
+data_KL <- generate_data_fd(
+  ns = c(12, 12, 12),
+  eigsList = list(
+    c(3, 2, 1, 0.5),
+    c(3, 2, 1, 0.5),
+    c(3, 2, 1, 0.5)
+  ),
+  basesList = list(
+    fda::create.bspline.basis(nbasis = 4, norder = 4),
+    fda::create.bspline.basis(nbasis = 4, norder = 4),
+    fda::create.bspline.basis(nbasis = 4, norder = 4)
+  ),
+  meansList = c(-1, 0, 1),
+  distsArray = c("Normal", "Normal", "Normal"),
+  evals = seq(0, 1, 0.05),
+  kappasArray = c(0, 0, 0)
+)
 
-complete_binary_segmentation(data_KL, compute_Tn, welch_approximation,
-    function(data){max(2, floor(log(ncol(as.data.frame(data)))),
-    na.rm=TRUE)})
-wild_binary_segmentation(data=data_KL,
-    test_statistic_function=compute_Tn,
-    cutoff_function=welch_approximation,
-    trim_function=function(data){max(2, floor(log(ncol(as.data.frame(data)))),
-    na.rm=TRUE)})
+complete_binary_segmentation(
+  data_KL, compute_Tn, welch_approximation,
+  function(data) {
+    max(2, floor(log(ncol(as.data.frame(data)))),
+      na.rm = TRUE
+    )
+  }
+)
+wild_binary_segmentation(
+  data = data_KL,
+  test_statistic_function = compute_Tn,
+  cutoff_function = welch_approximation,
+  trim_function = function(data) {
+    max(2, floor(log(ncol(as.data.frame(data)))),
+      na.rm = TRUE
+    )
+  }
+)
 }
 }

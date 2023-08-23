@@ -46,21 +46,29 @@ determination of the proper cutoff value
 \examples{
 \dontrun{
 # Setup Data
-data_KL <- generate_data_fd(ns = c(100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.fourier.basis(nbasis=2)),
-    meansList = c(0,0.5),
-    distsArray = c('Normal','Binomial'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0, 0.5))
+data_KL <- generate_data_fd(
+  ns = c(100, 100),
+  eigsList = list(
+    c(3, 2, 1, 0.5),
+    c(3, 2)
+  ),
+  basesList = list(
+    fda::create.bspline.basis(nbasis = 4, norder = 4),
+    fda::create.fourier.basis(nbasis = 2)
+  ),
+  meansList = c(0, 0.5),
+  distsArray = c("Normal", "Binomial"),
+  evals = seq(0, 1, 0.05),
+  kappasArray = c(0, 0.5)
+)
 # Metric
 compute_Tn(data_KL) # Note value
 compute_Tn(data_KL) # Note different value
 # Permutation Method for Tn (this will get 1-alpha quantile of iters)
-generalized_resampling(X=data_KL,
-    blockSize=ncol(data_KL)^(1/3),
-    fn=compute_Tn, iters=1000, replace=F)
+generalized_resampling(
+  X = data_KL,
+  blockSize = ncol(data_KL)^(1 / 3),
+  fn = compute_Tn, iters = 1000, replace = F
+)
 }
 }

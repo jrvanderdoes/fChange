@@ -69,7 +69,9 @@ interactive is FALSE (default) and a lattice plot if TRUE.
 \code{plot_fd} plots functional data either in an fd object or evaluated at certain points
 }
 \examples{
-plot_fd(data=electricity[,1:100], CPs=c(50))
-plot_fd(data=electricity, CPs=c(50,150,220,300),
-        interactive=FALSE, showticklabels=FALSE)
+plot_fd(data = electricity[, 1:100], CPs = c(50))
+plot_fd(
+  data = electricity, CPs = c(50, 150, 220, 300),
+  interactive = FALSE, showticklabels = FALSE
+)
 }

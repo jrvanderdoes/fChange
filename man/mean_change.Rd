@@ -44,7 +44,7 @@ and hence does not depend on any dimension reduction technique such as
 fPCA.
 }
 \examples{
-mean_change(electricity,M=250)
+mean_change(electricity, M = 250)
 }
 \references{
 Aue A., Rice G., Sonmez O. (2017+), \emph{Detecting and dating structural breaks in
