@@ -71,7 +71,7 @@ plot_fd(electricity,elec_bs, showticklabels = F,
         eye = list(x = -.25, y = -1.5, z = 0.5),
         aspectratio=list(x=1.5,y=0.5,z=0.75))
 
-## CHEAT
+## Load saved
 cps=c(94,202,275)
 pdf("electricity_resids.pdf")
 plot_fd(eval_fd_vals,CPs = cps,interactive = FALSE,
