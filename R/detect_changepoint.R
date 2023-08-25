@@ -352,5 +352,5 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #'
 #' @noRd
 .estimf <- function(Xr, lfun, v) {
-  lfun((t(Xr) %*% v)/nrow(Xr))
+  lfun((t(Xr) %*% v) / nrow(Xr))
 }
