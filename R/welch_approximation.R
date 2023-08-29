@@ -118,13 +118,5 @@ welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
     rs <- (1 - k):TVal
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   1/(TVal) * sum( (eps1[rs - abs(k)] - mean1) * Conj(eps2[rs]-mean2) )
-=======
-  1 / (TVal) * sum((eps1[rs - k] - mean1) * Conj(eps2[rs] - mean2))
->>>>>>> refs/remotes/origin/main
-=======
-  1 / (TVal) * sum((eps1[rs - k] - mean1) * Conj(eps2[rs] - mean2))
->>>>>>> e162034f19376285da32275613d15ad220bef7c4
 }
