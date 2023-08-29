@@ -49,6 +49,10 @@ cascading change points are not considered to allow for every possible
 number of change points to be selectable.
 }
 \examples{
-results <- elbow_method(data = electricity[,1:50],
-                        trim_function = function(...){10})
+results <- elbow_method(
+  data = electricity[, 1:50],
+  trim_function = function(...) {
+    10
+  }
+)
 }

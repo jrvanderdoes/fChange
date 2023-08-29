@@ -7,7 +7,7 @@
 welch_approximation(
   X,
   alpha = 0.05,
-  TVal = length(X[1, ]),
+  TVal = ncol(X),
   W = NULL,
   W1 = NULL,
   M = 100,
@@ -50,5 +50,5 @@ This function approximates the Tn statistic using the Welch approximation.
 }
 \examples{
 # Note, TVal generally bigger than 1.
-welch_approximation(electricity, TVal = 1, h=0)
+welch_approximation(electricity, TVal = 1, h = 0)
 }

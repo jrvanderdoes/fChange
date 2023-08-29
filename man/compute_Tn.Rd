@@ -35,5 +35,5 @@ Function to calculate the change point test statistic for functional data
 \deqn{Tn = \int_0^1 \int |Z_n(v,x)|^2 dQ(v) dx}
 }
 \examples{
-compute_Tn(electricity,M=1000)
+compute_Tn(electricity, M = 1000)
 }

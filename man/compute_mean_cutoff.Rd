@@ -31,28 +31,40 @@ This function computes the cutoff for CUSUM statistic of a mean change
 \examples{
 \dontrun{
 # Null Example
-data_KL <- generate_data_fd(ns = c(100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(0,0),
-    distsArray = c('Normal','Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0,0))
+data_KL <- generate_data_fd(
+  ns = c(100, 100),
+  eigsList = list(
+    c(3, 2, 1, 0.5),
+    c(3, 2, 1, 0.5)
+  ),
+  basesList = list(
+    fda::create.bspline.basis(nbasis = 4, norder = 4),
+    fda::create.bspline.basis(nbasis = 4, norder = 4)
+  ),
+  meansList = c(0, 0),
+  distsArray = c("Normal", "Normal"),
+  evals = seq(0, 1, 0.05),
+  kappasArray = c(0, 0)
+)
 
 compute_mean_cutoff(data_KL, 0.05)
 
 # Mean CP Example
-data_KL <- generate_data_fd(ns = c(100,100),
-    eigsList = list(c(3,2,1,0.5),
-                    c(3,2,1,0.5)),
-    basesList = list(fda::create.bspline.basis(nbasis=4, norder=4),
-                     fda::create.bspline.basis(nbasis=4, norder=4)),
-    meansList = c(0,0.2),
-    distsArray = c('Normal','Normal'),
-    evals = seq(0,1,0.05),
-    kappasArray = c(0,0))
+data_KL <- generate_data_fd(
+  ns = c(100, 100),
+  eigsList = list(
+    c(3, 2, 1, 0.5),
+    c(3, 2, 1, 0.5)
+  ),
+  basesList = list(
+    fda::create.bspline.basis(nbasis = 4, norder = 4),
+    fda::create.bspline.basis(nbasis = 4, norder = 4)
+  ),
+  meansList = c(0, 0.2),
+  distsArray = c("Normal", "Normal"),
+  evals = seq(0, 1, 0.05),
+  kappasArray = c(0, 0)
+)
 
 compute_mean_cutoff(data_KL, 0.05)
 }

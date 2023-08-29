@@ -6,8 +6,8 @@
 \usage{
 complete_binary_segmentation(
   data,
-  changepoint_function = compute_Mn(),
-  cutoff_function = welch_approximation(),
+  changepoint_function = compute_Mn,
+  cutoff_function = welch_approximation,
   final_verify = TRUE,
   silent = FALSE,
   alpha = 0.05,
@@ -47,11 +47,15 @@ for general functions. Change points are recursively found until no
 more change points are detected.
 }
 \examples{
-complete_binary_segmentation(data = electricity[,1:80],
+complete_binary_segmentation(
+  data = electricity[, 1:80],
   changepoint_function = compute_Mn,
   cutoff_function = welch_approximation,
-  trim_function = function(data){
+  trim_function = function(data) {
     max(50, floor(log(ncol(as.data.frame(data)))),
-        na.rm=TRUE)},
-  final_verify=FALSE)
+      na.rm = TRUE
+    )
+  },
+  final_verify = FALSE
+)
 }

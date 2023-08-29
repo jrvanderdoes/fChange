@@ -18,6 +18,6 @@ A numeric value indicating value of Kernel at that point
 A very common Kernel. This is an obvious option in the Welsh-approximation.
 }
 \examples{
-bartlett_kernel(1,2)
-bartlett_kernel(0,0)
+bartlett_kernel(1, 2)
+bartlett_kernel(0, 0)
 }

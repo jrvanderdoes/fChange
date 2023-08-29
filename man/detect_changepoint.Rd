@@ -62,6 +62,8 @@ computationally intensive and we found no reason to prefer it over
 }
 \examples{
 cp_res <- detect_changepoint(
- electricity[,1:8], nSims=1, x=seq(0,1,length.out=5),
- h=0, K=bartlett_kernel)
+  electricity[, 1:8],
+  nSims = 1, x = seq(0, 1, length.out = 5),
+  h = 0, K = bartlett_kernel
+)
 }

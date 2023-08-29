@@ -51,12 +51,12 @@ welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
   }
 
   muHat <- 1 / 6 * mean(muVals)
-  sigma2Hat <- (1 / 90) * 2 * mean(sigma2Vals)/length(sigma2Vals)
+  sigma2Hat <- (1 / 90) * 2 * mean(sigma2Vals) / length(sigma2Vals)
 
   betaHat <- Re(sigma2Hat / (2 * muHat))
   nuHat <- Re((2 * muHat^2) / sigma2Hat)
 
-  betaHat * stats::qchisq(1 - alpha, df = nuHat) #/ nrow(X)
+  betaHat * stats::qchisq(1 - alpha, df = nuHat) # / nrow(X)
 }
 
 
@@ -72,26 +72,26 @@ welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
 #' @return Numeric estimating LRV value
 #'
 #' @noRd
-.computeLRVEstimate <- function(X, v1, v2, TVal, h, K){
+.computeLRVEstimate <- function(X, v1, v2, TVal, h, K) {
   iters <- (1 - TVal):(TVal - 1)
 
   # Move so pass in function values to avoid re-computation later
-  eps1 <- exp(1/nrow(X) * complex(imaginary = 1) * (t(X) %*% v1) )
-  eps2 <- exp(1/nrow(X) * complex(imaginary = 1) * (t(X) %*% v2) )
+  eps1 <- exp(1 / nrow(X) * complex(imaginary = 1) * (t(X) %*% v1))
+  eps2 <- exp(1 / nrow(X) * complex(imaginary = 1) * (t(X) %*% v2))
 
   values <- sapply(iters, function(k, K, h, X1, TVal, eps1, eps2, mean1, mean2) {
     Kval <- K(k, h)
 
     ifelse(Kval == 0,
-           0,
-           Kval * .estimWelchGamma(
-             k = k, X = X1, TVal=TVal,
-             eps1 = eps1, eps2 = eps2,
-             mean1 = mean1, mean2 = mean2
-           )
+      0,
+      Kval * .estimWelchGamma(
+        k = k, X = X1, TVal = TVal,
+        eps1 = eps1, eps2 = eps2,
+        mean1 = mean1, mean2 = mean2
+      )
     )
   },
-  K = K, h = h, X1 = X, TVal=TVal, eps1 = eps1, eps2 = eps2,
+  K = K, h = h, X1 = X, TVal = TVal, eps1 = eps1, eps2 = eps2,
   mean1 = mean(eps1), mean2 = mean(eps2)
   )
 
@@ -111,12 +111,16 @@ welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
 #' @return Numeric indicating autocovariance value at a particular lag
 #'
 #' @noRd
-.estimWelchGamma <- function(k, X, TVal,  eps1, eps2, mean1, mean2) {
+.estimWelchGamma <- function(k, X, TVal, eps1, eps2, mean1, mean2) {
   if (k >= 0) {
-    rs <- (k+1):TVal
+    rs <- (k + 1):TVal
   } else {
-    rs <- (1-k):TVal
+    rs <- (1 - k):TVal
   }
 
+<<<<<<< HEAD
   1/(TVal) * sum( (eps1[rs - abs(k)] - mean1) * Conj(eps2[rs]-mean2) )
+=======
+  1 / (TVal) * sum((eps1[rs - k] - mean1) * Conj(eps2[rs] - mean2))
+>>>>>>> refs/remotes/origin/main
 }

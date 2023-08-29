@@ -23,9 +23,11 @@ indicating FD and no missing values
 Impute data using linear function
 }
 \examples{
-data_missing <- data.frame('FD1'=c(1:8,NA,10)+rnorm(10),
-                           'FD2'=21:30+rnorm(10),
-                           'FD3'=c(1:3,NA,rep(6,3),8,rep(NA,2))+rnorm(10))
+data_missing <- data.frame(
+  "FD1" = c(1:8, NA, 10) + rnorm(10),
+  "FD2" = 21:30 + rnorm(10),
+  "FD3" = c(1:3, NA, rep(6, 3), 8, rep(NA, 2)) + rnorm(10)
+)
 evalPts <- c(1:10)
 linear_imputatation(data_missing, evalPts)
 }

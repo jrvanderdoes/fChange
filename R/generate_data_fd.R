@@ -88,7 +88,7 @@ generate_data_fd <- function(ns,
   distsArray <- unlist(.checkLength(distsArray, "distsArray", m))
   kappasArray <- unlist(.checkLength(kappasArray, "kappaArray", m))
 
-  # Run Code
+  # Prepare to generate
   data <- data.frame(matrix(NA, ncol = sum(ns), nrow = length(evals)))
   addIdx <- 0
 
