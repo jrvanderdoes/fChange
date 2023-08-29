@@ -43,7 +43,7 @@ elec_bs <- complete_binary_segmentation(
   changepoint_function=function(data, alpha, ...){
     func_val <- generalized_resampling(X=data,
         blockSize=1,
-        fn=compute_Tn, iters=1000, replace=F, ...)
+        fn=compute_Mn, iters=1000, replace=F, ...)
 
     ifelse(func_val$pval < alpha,
            compute_Mn(data, which.Mn=TRUE, ...),
@@ -70,3 +70,15 @@ plot_fd(electricity,elec_bs, showticklabels = F,
         eval_axis_title = '',
         eye = list(x = -.25, y = -1.5, z = 0.5),
         aspectratio=list(x=1.5,y=0.5,z=0.75))
+
+## Load saved
+cps=c(94,202,275)
+pdf("electricity_resids.pdf")
+plot_fd(eval_fd_vals,CPs = cps,interactive = FALSE,
+        val_axis_title = '',res_axis_title = '',FD_axis_title = '',showticklabels = F)
+dev.off()
+
+pdf("electricity.pdf")
+plot_fd(electricity,CPs = cps,interactive = FALSE,
+        val_axis_title = '',res_axis_title = '',FD_axis_title = '',showticklabels = F)
+dev.off()

@@ -32,23 +32,23 @@ Now it is likely this data has some trends, so we will use principal component
 analysis to convert it to finite dimesions, fit a model, and return this to 
 functional data to implement.
 ```{r model_electricity}
-electricity_fd <- fda::Data2fd(1:24,electricity)
+electricity_fd <- fda::Data2fd(1:24, electricity)
 # sum(fda::eval.fd(1:24,electricity_fd)-electricity)
 #   eval.fd: eval.basis(1:24,electricity_fd$basis) %*% electricity_fd$coefs
 
 # Play with more components
 nPCs <- 5
-electricity_fpca <- fda::pca.fd(electricity_fd,nharm = nPCs)
+electricity_fpca <- fda::pca.fd(electricity_fd, nharm = nPCs)
 electricity_fpca_comp <- electricity_fpca$scores
 
 ## Forecast Each
 ts_dat <- list()
 comps <- list()
 comps_resids <- list()
-for(i in 1:nPCs){
-  ts_dat[[i]] <- ts(electricity_fpca_comp[,i], freq=7)
-  #comps[[i]] <- forecast::ets(ts_dat[[i]])
-  #comps_resids[[i]] <- resid(comps[[i]])
+for (i in 1:nPCs) {
+  ts_dat[[i]] <- ts(electricity_fpca_comp[, i], freq = 7)
+  # comps[[i]] <- forecast::ets(ts_dat[[i]])
+  # comps_resids[[i]] <- resid(comps[[i]])
   comps[[i]] <- forecast::auto.arima(ts_dat[[i]])
   comps_resids[[i]] <- resid(comps[[i]])
 }
@@ -63,32 +63,38 @@ electricity_fpca_forecast <- do.call(cbind, comps_resids)
 #    Eval: 24 x 26
 #       eval %*% orig: 24 x 365
 orig_coefs <- electricity_fpca$harmonics$coefs %*% t(electricity_fpca_forecast)
-eval_fd_vals <- eval.basis(1:24,electricity_fd$basis) %*% orig_coefs
+eval_fd_vals <- eval.basis(1:24, electricity_fd$basis) %*% orig_coefs
 ```
 
 Now we can try several models:
 ```{r}
-tmp_mc <- mean_change(eval_fd_vals,inc.pval = T)
+tmp_mc <- mean_change(eval_fd_vals, inc.pval = T)
 tmp_cc <- cov_change(eval_fd_vals)
 
-tmp_sc <- detect_changepoint_singleCov(X=eval_fd_vals, h=0)
+tmp_sc <- detect_changepoint_singleCov(X = eval_fd_vals, h = 0)
 
-tmp_gs <- generalized_resampling(X=eval_fd_vals, blockSize=1,
-                                 fn=compute_Tn, iters=1000,
-                                 replace=FALSE)
+tmp_gs <- generalized_resampling(
+  X = eval_fd_vals, blockSize = 1,
+  fn = compute_Tn, iters = 1000,
+  replace = FALSE
+)
 
-tmp_wa <- welch_approximation(eval_fd_vals, h=0)
+tmp_wa <- welch_approximation(eval_fd_vals, h = 0)
 tmp_mn <- compute_Mn(eval_fd_vals)
 ```
 
 The above detect a change point, and occasionally the placement; however, if we have multiple change points then another method is necessary. We use binary segmentation in this case.
 ```{r}
-complete_binary_segmentation(data = eval_fd_vals,
-                             cutoff_function = generalized_resampling,
-                             trim_function=function(...){0},
-                             blockSize=1,
-                             fn=compute_Tn, iters=1000,
-                             replace=FALSE)
+complete_binary_segmentation(
+  data = eval_fd_vals,
+  cutoff_function = generalized_resampling,
+  trim_function = function(...) {
+    0
+  },
+  blockSize = 1,
+  fn = compute_Tn, iters = 1000,
+  replace = FALSE
+)
 ```
 
 <!-- ```{r} -->
