@@ -27,7 +27,7 @@
 #' welch_approximation(electricity, TVal = 1, h = 0)
 welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
                                 W = NULL, W1 = NULL, M = 100,
-                                h = TVal^(1 / 3), K = bartlett_kernel, ...) {
+                                h = floor(TVal^(1 / 3)), K = bartlett_kernel, ...) {
   if (is.null(W)) {
     W <- computeSpaceMeasuringVectors(M, "BM", X)
   }
@@ -118,5 +118,5 @@ welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
     rs <- (1-k):TVal
   }
 
-  1/(TVal) * sum( (eps1[rs - k] - mean1) * Conj(eps2[rs]-mean2) )
+  1/(TVal) * sum( (eps1[rs - abs(k)] - mean1) * Conj(eps2[rs]-mean2) )
 }
