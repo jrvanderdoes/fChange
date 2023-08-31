@@ -41,8 +41,6 @@ welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
     v <- W[, i]
     v1 <- W1[, i]
 
-    # CHat <- .estimateLRV(X = X, v1 = v, v2 = v, TVal = TVal, h = h, K = K)
-    # CHat1 <- .estimateLRV(X = X, v1 = v, v2 = v1, TVal = TVal, h = h, K = K)
     CHat <- .computeLRVEstimate(X = X, v1 = v, v2 = v, TVal = TVal, h = h, K = K)
     CHat1 <- .computeLRVEstimate(X = X, v1 = v, v2 = v1, TVal = TVal, h = h, K = K)
 
