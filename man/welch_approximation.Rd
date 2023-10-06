@@ -11,7 +11,7 @@ welch_approximation(
   W = NULL,
   W1 = NULL,
   M = 100,
-  h = TVal^(1/3),
+  h = floor(TVal^(1/3)),
   K = bartlett_kernel,
   ...
 )
