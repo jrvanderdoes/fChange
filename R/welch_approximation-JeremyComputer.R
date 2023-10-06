@@ -27,7 +27,8 @@
 #' welch_approximation(electricity, TVal = 1, h = 0)
 welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
                                 W = NULL, W1 = NULL, M = 100,
-                                h = TVal^(1 / 3), K = bartlett_kernel, ...) {
+                                h = floor(TVal^(1 / 3)), K = bartlett_kernel,
+                                ...) {
   if (is.null(W)) {
     W <- computeSpaceMeasuringVectors(M, "BM", X)
   }
@@ -41,8 +42,6 @@ welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
     v <- W[, i]
     v1 <- W1[, i]
 
-    # CHat <- .estimateLRV(X = X, v1 = v, v2 = v, TVal = TVal, h = h, K = K)
-    # CHat1 <- .estimateLRV(X = X, v1 = v, v2 = v1, TVal = TVal, h = h, K = K)
     CHat <- .computeLRVEstimate(X = X, v1 = v, v2 = v, TVal = TVal, h = h, K = K)
     CHat1 <- .computeLRVEstimate(X = X, v1 = v, v2 = v1, TVal = TVal, h = h, K = K)
 
@@ -51,12 +50,12 @@ welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
   }
 
   muHat <- 1 / 6 * mean(muVals)
-  sigma2Hat <- (1 / 90) * 2 * mean(sigma2Vals) / length(sigma2Vals)
+  sigma2Hat <- (1 / 90) * 2 * mean(sigma2Vals) #/ length(sigma2Vals)
 
   betaHat <- Re(sigma2Hat / (2 * muHat))
   nuHat <- Re((2 * muHat^2) / sigma2Hat)
 
-  betaHat * stats::qchisq(1 - alpha, df = nuHat) # / nrow(X)
+  betaHat * stats::qchisq(1 - alpha, df = nuHat)
 }
 
 
@@ -118,5 +117,6 @@ welch_approximation <- function(X, alpha = 0.05, TVal = ncol(X),
     rs <- (1 - k):TVal
   }
 
-  1 / (TVal) * sum((eps1[rs - k] - mean1) * Conj(eps2[rs] - mean2))
+  # TODO:: TVal or rs check
+  1/(TVal) * sum( (eps1[rs - abs(k)] - mean1) * Conj(eps2[rs]-mean2) )
 }
