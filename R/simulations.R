@@ -86,19 +86,19 @@ simulate_size <- function(data_length=100,dep=0,nSims=500,
       fn = compute_Tn, space='BM', M=1000,silent = T)
 
     Approx_iid <- welch_approximation(
-      X=data[[i]], alpha = 0.05, TVal = ncol(null_case),
+      X=data[[i]], alpha = 0.05, TVal = ncol(data[[i]]),
       W = NULL, W1 = NULL, M=1000, h = 0,
       K = bartlett_kernel)
     Approx_n3 <- welch_approximation(
-      X=data[[i]], alpha = 0.05, TVal = ncol(null_case),
+      X=data[[i]], alpha = 0.05, TVal = ncol(data[[i]]),
       W = NULL, W1 = NULL, M=1000, h = data_length^(1/3),
       K = bartlett_kernel)
     Approx_2n3 <- welch_approximation(
-      X=data[[i]], alpha = 0.05, TVal = ncol(null_case),
+      X=data[[i]], alpha = 0.05, TVal = ncol(data[[i]]),
       W = NULL, W1 = NULL, M=1000, h = 2*data_length^(1/3),
       K = bartlett_kernel)
     Approx_3n3 <- welch_approximation(
-      X=data[[i]], alpha = 0.05, TVal = ncol(null_case),
+      X=data[[i]], alpha = 0.05, TVal = ncol(data[[i]]),
       W = NULL, W1 = NULL, M=1000, h = 3*data_length^(1/3),
       K = bartlett_kernel)
 
