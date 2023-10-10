@@ -119,8 +119,7 @@ simulate_size <- function(data_length=100,dep=0,nSims=500,
                      Approx_2n3 <= Tn,
                      Approx_3n3 <= Tn)
     saveRDS(result,
-            paste0('C:/Users/j53vande/Downloads/fChange/',
-                   'sims/','results',
+            paste0(path,'results',
                    '_dl',data_length,'_d',dep,'.rds'))
   }
 
