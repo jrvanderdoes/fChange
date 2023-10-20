@@ -9,7 +9,7 @@
 #'
 #' @examples
 simulate_data_size <- function(data_length = 100, dep = 0, nSims = 500,
-                               path = "C:/Users/j53vande/Downloads/fChange/sims/") {
+                               path = tempdir()) {
   data <- list()
   for (i in 1:nSims) {
     cat(paste0(i, ", "))
@@ -42,7 +42,7 @@ simulate_data_size <- function(data_length = 100, dep = 0, nSims = 500,
 #'
 #' @examples
 simulate_size <- function(data_length = 100, dep = 0, nSims = 500,
-                          path = "C:/Users/j53vande/Downloads/fChange/sims/") {
+                          path = tempdir()) {
   result <- data.frame(
     "Cov_iid" = rep(NA, nSims),
     "Cov_fn3" = NA,
