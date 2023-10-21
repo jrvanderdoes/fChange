@@ -1,17 +1,23 @@
-#' Title
+#' Simulate Data Sets for Size tests
 #'
-#' @param data_length
-#' @param dep
-#' @param nSims
-#' @param path
+#' This function simulations data to be used in size analyses
 #'
-#' @return
+#' @param data_length (Optional) Positive integer indicating the length of data.
+#'  Default is 100
+#' @param dep (Optional) Numeric in [0,1] indicating the dependence strength between
+#'  successive functional observations Default is 0.
+#' @param nSims (Optional) Positive integer indicating the number of simulations.
+#'  Default in 500.
+#' @param path (Optional) String indicating the path at which to save output.
+#'  Default is NULL.
+#'
+#' @return Data.frame of functional data observations. Columns are observations
 #'
 #' @examples
-#' simulate_data_size(100,0)
+#' simulate_data_size()
 #' simulate_data_size(100,0.5)
 simulate_data_size <- function(data_length = 100, dep = 0, nSims = 500,
-                               path = tempdir()) {
+                               path = NULL) {
   data <- list()
   for (i in 1:nSims) {
     cat(paste0(i, ", "))
@@ -28,8 +34,10 @@ simulate_data_size <- function(data_length = 100, dep = 0, nSims = 500,
     )
   }
 
+  if(!is.null(path))
+    saveRDS(data, paste0(path, "data", "_dl", data_length, "_d", dep, ".rds"))
 
-  saveRDS(data, paste0(path, "data", "_dl", data_length, "_d", dep, ".rds"))
+  data
 }
 
 
