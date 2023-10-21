@@ -8,6 +8,8 @@
 #' @return
 #'
 #' @examples
+#' simulate_data_size(100,0)
+#' simulate_data_size(100,0.5)
 simulate_data_size <- function(data_length = 100, dep = 0, nSims = 500,
                                path = tempdir()) {
   data <- list()
@@ -41,6 +43,8 @@ simulate_data_size <- function(data_length = 100, dep = 0, nSims = 500,
 #' @return
 #'
 #' @examples
+#' simulate_size(100,0)
+#' simulate_size(100,0.5)
 simulate_size <- function(data_length = 100, dep = 0, nSims = 500,
                           path = tempdir()) {
   result <- data.frame(
@@ -144,17 +148,3 @@ simulate_size <- function(data_length = 100, dep = 0, nSims = 500,
   result
 }
 
-# simulate_data_size(100,0)
-# simulate_data_size(100,0.5)
-# simulate_size(100,0)
-# simulate_size(100,0.5)
-#
-# simulate_data_size(250,0)
-# simulate_data_size(250,0.5)
-# simulate_size(250,0)
-# simulate_size(250,0.5)
-#
-# simulate_data_size(500,0)
-# simulate_data_size(500,0.5)
-# simulate_size(500,0)
-# simulate_size(500,0.5)
