@@ -1,6 +1,6 @@
 #' Simulate Data Sets for Size tests
 #'
-#' This function simulations data to be used in size analyses
+#' This function simulates data to be used in size analyses
 #'
 #' @param data_length (Optional) Positive integer indicating the length of data.
 #'  Default is 100
@@ -41,14 +41,15 @@ simulate_data_size <- function(data_length = 100, dep = 0, nSims = 500,
 }
 
 
-#' Title
+#' Simulate Size tests
 #'
-#' @param data_length
-#' @param dep
-#' @param nSims
-#' @param path
+#' This function uses simulated data to determine size for several methods
 #'
-#' @return
+#' @inheritParams simulate_data_size
+#' @param path String indicates the place of .rds data file, saved in
+#'  simulate_data_size
+#'
+#' @return Data.frame with p-values for several change point methods.
 #'
 #' @examples
 #' simulate_size(100,0)
