@@ -31,6 +31,7 @@
 #' @param burnin A numeric value indicating the number of burnin trials
 #'    This is only necessary when kappa>0
 #' @param silent A Boolean that toggles running output
+#' @inheritDotParams .generateX dof
 #'
 #' @return A data.frame of m columns length(evals) rows (TODO:: Verify)
 #'
@@ -109,7 +110,8 @@ generate_data_fd <- function(ns,
       dist = distsArray[1],
       evals = evals,
       peps = peps,
-      psi = psi[[1]]
+      psi = psi[[1]],
+      ...
     )
 
     peps <- waste[[2]]
@@ -143,7 +145,8 @@ generate_data_fd <- function(ns,
         dist = distsArray[i],
         evals = evals,
         peps = peps,
-        psi = psi[[i]]
+        psi = psi[[i]],
+        ...
       )
 
       data[, addIdx + j] <- result[[1]]
@@ -232,7 +235,7 @@ generate_data_fd <- function(ns,
 #'
 #' @noRd
 .generateData_KL_Expansion <- function(eigs, basis, means, dist,
-                                       evals, peps, psi) {
+                                       evals, peps, psi, ...) {
   # Setup
   n <- length(evals)
   D <- length(eigs)
@@ -252,7 +255,7 @@ generate_data_fd <- function(ns,
   eval_basis <- fda::eval.basis(evals, basis)
   # Row for each time, columns for eigen
   xi <- sapply(eigs, function(e, dist, n) {
-    .generateXi(dist = dist, sd = sqrt(e), n = n)
+    .generateXi(dist = dist, sd = sqrt(e), n = n, ..)
   },
   dist = dist, n = n
   )
@@ -294,11 +297,14 @@ generate_data_fd <- function(ns,
 #'  Exponential, laplace, Normal, and t. Upcoming is cauchy.
 #' @param sd Numeric for the standard deviation of the variable
 #' @param n (Optional) Numeric for the number of observations. Default is 1.
+#' @param dof (Optional) Numeric value indicating the degrees of freedom used
+#'  in the t-distribution. Default is 3. Note, if value is less than 3, the sd
+#'  parameter cannot be followed.
 #'
 #' @return Vector of numerics for observations of the variable.
 #'
 #' @noRd
-.generateXi <- function(dist, sd, n = 1) {
+.generateXi <- function(dist, sd, n = 1, dof=NULL) {
   ## This function give centered distributions with eig^2 var
 
   if (dist == "Normal") {
@@ -316,10 +322,11 @@ generate_data_fd <- function(ns,
   } else if (dist == "Exponential") {
     xi <- stats::rexp(n, rate = 1 / sd) - sd
   } else if (dist == "t") {
-    bigDF <- 10000 # arbitrary
-    xi <- stats::rt(n, bigDF) * sqrt(sd^2 * (bigDF - 2) / bigDF)
+    xi <- stats::rt(n, dof)
+    if(dof>2)
+      xi <- xi * sqrt(sd^2 * (dof - 2) / dof)
   } else if (dist == "cauchy") {
-    stop("Sorry Problem with cauchy")
+    stop("Sorry Problem with cauchy directly. Try t-distribution")
     xi <- stats::rcauchy(n)
   } else if (dist == "laplace") {
     if (!requireNamespace("jmuOutlier", quietly = TRUE)) {
