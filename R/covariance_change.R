@@ -1,6 +1,4 @@
 #' Need to Do:
-#' * Find and apply: sde and tensorA.
-#' * Convert = to <- (styler may handle it..)
 #' * Update documentation
 #' * Remove any functions not needed
 tmp <- function() {}
