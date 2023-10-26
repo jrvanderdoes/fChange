@@ -9,8 +9,8 @@
 #'  computationally intensive and we found no reason to prefer it over
 #'  `detect_changepoint_singleCov()`.
 #'
-#' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
+#' @param X Numeric data.frame of functional data observations--rows for
+#'    evaluated values and columns indicating FD
 #' @param nSims (Optional) Integer indicating the number of realizations of
 #'     Gaussian processes to compute. Default is 100
 #' @param x (Optional) Vector of locations of observations. Default is equally
@@ -153,16 +153,9 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #'
 #' This (internal) function computes the covariance matrix of some FD data.
 #'
-#' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param x (Optional) Vector of locations of observations. Default is equally
-#'     spaced observations on (0, 1) with the same number of observations as FDs
+#' @inheritParams detect_changepoint
 #' @param M (Optional) Integer indicating the number of vectors used to create
 #'     each value in the covariance matrix. Default is 25.
-#' @param h (Optional) Integer indicating amount of lag to consider. Default is
-#'     3.
-#' @param K (Optional) Function for the kernel function to use. Default is the
-#'     barlett_kernel.
 #' @param W (Optional) Data.frame of vectors for measuring space. If NULL then
 #'     then a Guassian measure is generated. Default is NULL.
 #'
@@ -235,10 +228,9 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #'
 #' This (internal) function
 #'
+#' @inheritParams detect_changepoint
 #' @param K Function for the kernel function to use.
 #' @param h Integer indicating amount of lag to consider.
-#' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
 #' @param lfun Function, typically cos or sin. This is important when considering
 #'     real or imaginary part.
 #' @param v Numeric vector from L2 space with same number of observations as
@@ -257,9 +249,6 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
   # Move so pass in function values to avoid re-computation later
   fVals <- as.numeric(.estimf(X, lfun, v))
   fpVals <- as.numeric(.estimf(X, lfunp, vp))
-
-  # mean1 <- mean(fVals)
-  # mean2 <- mean(fpVals)
 
   values <- sapply(iters, function(k, K, h, X1, fVals, fpVals, mean1, mean2) {
     Kval <- K(k, h)
@@ -285,17 +274,8 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #'
 #' This (internal) function computes the autocovariance (gamma) function.
 #'
+#' @inheritParams .estimD
 #' @param k Integer indicating FD object to consider
-#' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param lfun Function, typically cos or sin. This is important when considering
-#'     real or imaginary part.
-#' @param v Numeric vector from L2 space with same number of observations as
-#'     FD observation.
-#' @param lfunp Function, typically cos or sin. This is important when considering
-#'     real or imaginary part.
-#' @param vp Numeric vector from L2 space with same number of observations as
-#'     FD observation.
 #'
 #' @return Numeric autocovariance value for given data
 #'
