@@ -7,18 +7,22 @@ tmp <- function() {}
 #' This method implements a method for detection of covariance changes in
 #'  functional data.
 #'
+#' Upcoming: Size estimates may be included (already coded).
+#'
 #' @param X Numeric data.frame of functional data observations--rows for
 #'    evaluated values and columns indicating FD
-#' @param kappa XXXX
-#' @param len XXXX
+#' @param kappa (Optional) Numeric used for weighting and such. Default is 1/4.
+#' @param len (Optional) Numeric for window/repetitions for covariance change.
+#'    Default is 30.
 #'
-#' @return XXXXX
+#' @return Location of change. NA for no change and numeric if there is a change.
 #' @export
 #'
 #' @references Aue, Alexander, et al. “Detecting and Dating Structural Breaks in Functional Data without Dimension Reduction.” Journal of the Royal Statistical Society. Series B, Statistical Methodology, vol. 80, no. 3, 2018, pp. 509–529, https://doi.org/10.1111/rssb.12257.
 #'
 #' @examples
-#' # XXXXX
+#' cov_change(electricity[,1:18])
+#' cov_change(electricity[,1:16])
 cov_change <- function(X, kappa = 1 / 4, len = 30) {
   stat_d0 <- weight_TNstat(X, kappa = kappa)
   cv_d0 <- weight_criticalvalueMC(X, len = len, kappa = kappa)
@@ -45,26 +49,26 @@ cov_change <- function(X, kappa = 1 / 4, len = 30) {
 #' @param vec Vector of numerics to compute L2 norm
 #'
 #' @return Numeric L2 norm value
+#'
+#' @noRd
 .l2norm <- function(vec) {
   return(sqrt(sum(vec^2)))
 }
 
 
-#' Compute Zn Statistic for Funtional Covariance Changes
+#' Compute Zn Statistic for Functional Covariance Changes Under Null
 #'
 #' This (internal) function implements Theorem 2.1 / 2.2.
 #'
-#' @param xdm Data.frame of numerics. It is the finite realization of DEMEANed
+#' @param xdm Data.frame of numerics. It is the finite realization of DEMEAN-ed
 #'  functional time series data, where curves are stored in columns.
 #' @param u Numeric in \eqn{(0, 1)}. That is, a fraction index over the interval
 #' \eqn{[0, 1]}.
 #'
-#' @return XXXXX
-#' @export
+#' @return Numeric Zn statistic
 #'
-#' @examples
-#' # XXXXX
-ZNstat <- function(xdm, u) {
+#' @noRd
+.ZNstat <- function(xdm, u) {
   grid_point <- nrow(xdm)
   N <- ncol(xdm)
   k <- floor(N * u)
@@ -86,16 +90,15 @@ ZNstat <- function(xdm, u) {
   ZNu
 }
 
-#' Title
+
+#' Compute Zn Statistic for Functional Covariance Changes Under Change
 #'
-#' @inheritParams ZNstat
+#' @inheritParams .ZNstat
 #'
-#' @return XXXXX
-#' @export
+#' @return Numeric Zn statistic
 #'
-#' @examples
-#' # XXXXX
-ZNstat_cp <- function(xdm, u) {
+#' @noRd
+.ZNstat_cp <- function(xdm, u) {
   grid_point <- nrow(xdm)
   N <- ncol(xdm)
   k <- floor(N * u)
@@ -114,22 +117,20 @@ ZNstat_cp <- function(xdm, u) {
 
 #' Compute Covariance Tn Statistic
 #'
-#' This function computes the Tn statistic in the paper, introducde after
-#'  theorem 2.1
+#' This function computes the Tn statistic in the paper, introduced after
+#'  theorem 2.1.
 #'
 #' @param xf Data.frame of numerics. Finite realization of functional time
 #'  series data, where curves are stored in columns.
 #'
-#' @return XXXXX
-#' @export
+#' @return Numeric Tn statistic
 #'
-#' @examples
-#' # XXXXX
+#' @noRd
 TNstat <- function(xf) {
-  int_approx <- function(x) {
-    temp_n <- NROW(x)
-    return((1 / temp_n) * sum(x))
-  }
+  # int_approx <- function(x) {
+  #   temp_n <- NROW(x)
+  #   return((1 / temp_n) * sum(x))
+  # }
   grid_point <- nrow(xf)
   N <- ncol(xf)
   xdm <- apply(xf, 2, function(x, xmean) {
@@ -138,7 +139,7 @@ TNstat <- function(xf) {
   uind <- seq(0, 1, length = N + 1)[2:(N + 1)]
   zn2 <- list()
   for (i in 1:N) {
-    zn2[[i]] <- (ZNstat(xdm, uind[i]))^2
+    zn2[[i]] <- (.ZNstat(xdm, uind[i]))^2
   }
   inm <- Reduce(`+`, zn2) / N
 
@@ -146,24 +147,23 @@ TNstat <- function(xf) {
 }
 
 
-#' Compute the Weight Tn Statistic
+#' Compute the Weighted Tn Statistic
 #'
 #' The function computes the weighted Tn statistic, introduced after Theorem 2.3
 #'
-#' @param xf XXXXX
-#' @param kappa XXXXX
+#' @inheritParams TNstat
+#' @param kappa Numeric used for weighting and such
 #'
-#' @return XXXXX
-#' @export
+#' @return List of two values: (stat) giving the weighted Tn statistic and
+#'    (changepoint) numeric for change location
 #'
-#' @examples
-#' # XXXXX
+#' @noRd
 weight_TNstat <- function(xf, kappa) {
-  int_approx_tensor <- function(x) { # x is a 4-dimensional tensor
-    dt <- length(dim(x))
-    temp_n <- nrow(x)
-    return(sum(x) / (temp_n^dt))
-  }
+  # .int_approx_tensor <- function(x) { # x is a 4-dimensional tensor
+  #   dt <- length(dim(x))
+  #   temp_n <- nrow(x)
+  #   return(sum(x) / (temp_n^dt))
+  # }
 
   grid_point <- nrow(xf)
   N <- ncol(xf)
@@ -174,9 +174,11 @@ weight_TNstat <- function(xf, kappa) {
   zn2 <- list()
   zn_cp <- c(rep(0, N))
   for (i in 1:(N - 1)) {
-    zn2[[i]] <- (ZNstat(xdm, uind[i]))^2 / ((uind[i] * (1 - uind[i]))^(2 * kappa)) ### kappa = 1/4
+    zn2[[i]] <- (.ZNstat(xdm, uind[i]))^2 /
+      ((uind[i] * (1 - uind[i]))^(2 * kappa)) ### kappa = 1/4
 
-    zn_cp[i] <- (N / (i * (N - i)))^(kappa) * int_approx_tensor((ZNstat_cp(xdm, uind[i]))^2)
+    zn_cp[i] <- (N / (i * (N - i)))^(kappa) *
+      .int_approx_tensor((.ZNstat_cp(xdm, uind[i]))^2)
   }
   inm <- Reduce(`+`, zn2) / N
   stat <- (1 / grid_point)^2 * sum(inm)
@@ -194,27 +196,25 @@ weight_TNstat <- function(xf, kappa) {
 #'
 #' @param dat An array with dimension (grid_point,grid_point,N)
 #'
-#' @return XXXXX
-#' @export
+#' @return Numeric matrix for long-run covariance
 #'
-#' @examples
-#' # XXXXX
+#' @noRd
 long_run_covariance_4tensor <- function(dat) {
   grid_point <- dim(dat)[1]
   Tval <- dim(dat)[3]
   datmean <- apply(dat, c(1, 2), mean)
   center_dat <- sweep(dat, 1:2, datmean)
 
-  cov_l <- function(band, nval) {
-    cov_sum <- gamma_l(0, nval)
+  .cov_l <- function(band, nval) {
+    cov_sum <- .gamma_l(0, nval)
 
     for (ik in 1:(nval - 1)) {
-      cov_sum <- cov_sum + kweights(ik / band, kernel = "Bartlett") * (2 * gamma_l(ik, nval)) # + gamma_l(ik,nval))    ##aperm(gamma_l(ik,nval),c(2,1,3,4)))
+      cov_sum <- cov_sum + .kweights(ik / band, kernel = "Bartlett") * (2 * .gamma_l(ik, nval)) # + .gamma_l(ik,nval))    ##aperm(.gamma_l(ik,nval),c(2,1,3,4)))
     }
     return(cov_sum)
   }
 
-  gamma_l <- function(lag, Tval) {
+  .gamma_l <- function(lag, Tval) {
     gamma_lag_sum <- 0
     if (lag >= 0) {
       for (ij in 1:(Tval - lag)) {
@@ -227,24 +227,26 @@ long_run_covariance_4tensor <- function(dat) {
     }
     return(gamma_lag_sum / (Tval - lag))
   }
+
   hat_h_opt <- Tval^(1 / 4)
-  lr_covop <- cov_l(band = hat_h_opt, nval = Tval)
+  lr_covop <- .cov_l(band = hat_h_opt, nval = Tval)
 
   return(lr_covop)
 }
 
 #' Kernels for applying weights
 #'
-#' @param x XXXXXX
-#' @param kernel XXXXXX
-#' @param normalize XXXXXX
+#' This (internal) function computes the kernels and related weights
 #'
-#' @return XXXXX
-#' @export
+#' @param x <Add Information>
+#' @param kernel String indicating kernel to use.
+#' @param normalize (Optional) Boolean indicating if x should be normalized.
+#'    Default is FALSE.
 #'
-#' @examples
-#' # XXXXX
-kweights <- function(x,
+#' @return Numeric for k weight
+#'
+#' @noRd
+.kweights <- function(x,
                      kernel = c(
                        "Truncated", "Bartlett", "Parzen", "Tukey-Hanning",
                        "Quadratic Spectral"
@@ -289,10 +291,8 @@ kweights <- function(x,
 #' @param len XXXX
 #'
 #' @return XXXX
-#' @export
 #'
-#' @examples
-#' # XXXXX
+#' @noRd
 criticalvalueMC <- function(xf, len) {
   grid_point <- nrow(xf)
   N <- ncol(xf)
@@ -346,10 +346,8 @@ criticalvalueMC <- function(xf, len) {
 #' @param kappa XXXX
 #'
 #' @return XXXX
-#' @export
 #'
-#' @examples
-#' # XXXXX
+#' @noRd
 weight_criticalvalueMC <- function(xf, len, kappa) {
   grid_point <- nrow(xf)
   N <- ncol(xf)
@@ -359,7 +357,8 @@ weight_criticalvalueMC <- function(xf, len, kappa) {
   wmat <- matrix(NA, grid_point - 2, grid_point - 2)
   for (i in 2:(grid_point - 1)) {
     for (j in 2:(grid_point - 1)) {
-      wmat[i - 1, j - 1] <- (min(times[i], times[j]) - times[i] * times[j]) / ((times[i] * (1 - times[i]))^kappa * (times[j] * (1 - times[j]))^kappa)
+      wmat[i - 1, j - 1] <- (min(times[i], times[j]) - times[i] * times[j]) /
+        ((times[i] * (1 - times[i]))^kappa * (times[j] * (1 - times[j]))^kappa)
     }
   }
   ## TODO:: Add rounding if have errors
@@ -385,8 +384,7 @@ weight_criticalvalueMC <- function(xf, len, kappa) {
   }
 
   lrcov <- long_run_covariance_4tensor(zm)
-  lrcov <- round(lrcov, 6) ## Added to stop errors.
-  lrcov <- tensorA::as.tensor(lrcov / (len + 1)^2)
+  lrcov <- tensorA::as.tensor(round(lrcov / (len + 1)^2, 6) )
   eigvals <- tensorA::svd.tensor(lrcov, c(3, 4), by = "e")
   eigmat <- as.vector(eigvals$d)
 
@@ -401,10 +399,16 @@ weight_criticalvalueMC <- function(xf, len, kappa) {
   }
 
   cv <- stats::quantile(lim_sum, probs = c(0.90, 0.95, 0.99))
+
   return(cv)
 }
 
 
+.int_approx_tensor <- function(x) { # x is a 4-dimensional tensor
+  dt <- length(dim(x))
+  temp_n <- nrow(x)
+  return(sum(x) / (temp_n^dt))
+}
 ###############################################
 ##
 ###   TODO:: UNUSED
@@ -499,11 +503,11 @@ tau_est <- function(xd, kstar, len) {
     }
   }
 
-  int_approx_tensor <- function(x) { # x is a 4-dimensional tensor
-    dt <- length(dim(x))
-    temp_n <- nrow(x)
-    return((1 / temp_n)^dt * sum(x))
-  }
+  # .int_approx_tensor <- function(x) { # x is a 4-dimensional tensor
+  #   dt <- length(dim(x))
+  #   temp_n <- nrow(x)
+  #   return((1 / temp_n)^dt * sum(x))
+  # }
 
   longd <- long_run_covariance_4tensor(v_dat)
 
@@ -518,7 +522,7 @@ tau_est <- function(xd, kstar, len) {
       rearvs <- rearvs + frontvs[, i, , j] %o% var_star
     }
   }
-  tau <- int_approx_tensor(rearvs)
+  tau <- .int_approx_tensor(rearvs)
 
   return(list(var_change, tau))
 }
