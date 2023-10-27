@@ -19,8 +19,10 @@
 #'     3.
 #' @param K (Optional) Function for the kernel function to use. Default is the
 #'     barlett_kernel.
-#' @param space XXXXX
-#' @param TN_M (Optional) XXXXX
+#' @param space (Optional) String indicating the space used in the spanning vectors.
+#'     Default is 'BM'.
+#' @param TN_M (Optional) Integer indicating the number of iteractions used to compute
+#'     T_N for the real data. Default is 10000.
 #' @param Cov_M (Optional) Integer indicating the number of vectors used to create
 #'     each value in the covariance matrix. Default is 25.
 #' @param silent (Optional) Boolean indicating it the output should be supressed.
@@ -298,8 +300,7 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #' This (internal) function estimates R-hat, that is lfun(<X_r,v>) - Y where Y
 #'     demeans the data, typically mean(lfun(<X,v>)).
 #'
-#' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
+#' @inheritParams .estimGamma
 #' @param r Integer indicating the FD object of interest in the data X
 #' @param lfun Function, typically cos or sin. This is important when considering
 #'     real or imaginary part.
