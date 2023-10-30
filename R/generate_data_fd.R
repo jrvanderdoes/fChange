@@ -31,7 +31,7 @@
 #' @param burnin A numeric value indicating the number of burnin trials
 #'    This is only necessary when kappa>0
 #' @param silent A Boolean that toggles running output
-#' @inheritDotParams .generateX dof
+#' @param ... Examples such as dof which is used for t-distribution
 #'
 #' @return A data.frame of m columns length(evals) rows (TODO:: Verify)
 #'
