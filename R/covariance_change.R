@@ -1,7 +1,3 @@
-#' Need to Do:
-#' * Update documentation
-tmp <- function() {}
-
 #' Covariance Change
 #'
 #' This method implements a method for detection of covariance changes in
