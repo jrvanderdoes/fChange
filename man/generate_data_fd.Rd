@@ -46,6 +46,8 @@ VAR(1) process}
 This is only necessary when kappa>0}
 
 \item{silent}{A Boolean that toggles running output}
+
+\item{...}{Examples such as dof which is used for t-distribution}
 }
 \value{
 A data.frame of m columns length(evals) rows (TODO:: Verify)

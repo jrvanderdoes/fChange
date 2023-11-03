@@ -7,21 +7,27 @@
 cov_change(X, kappa = 1/4, len = 30)
 }
 \arguments{
-\item{X}{Functional data}
+\item{X}{Numeric data.frame of functional data observations--rows for
+evaluated values and columns indicating FD}
 
-\item{kappa}{XXXX}
+\item{kappa}{(Optional) Numeric used for weighting and such. Default is 1/4.}
 
-\item{len}{XXXX}
+\item{len}{(Optional) Numeric for window/repetitions for covariance change.
+Default is 30.}
 }
 \value{
-XXXXX
+Location of change. NA for no change and numeric if there is a change.
 }
 \description{
 This method implements a method for detection of covariance changes in
-funtional data.
+functional data.
+}
+\details{
+Upcoming: Size estimates may be included (already coded).
 }
 \examples{
-# XXXXX
+cov_change(electricity[,1:18])
+cov_change(electricity[,1:16])
 }
 \references{
 Aue, Alexander, et al. “Detecting and Dating Structural Breaks in Functional Data without Dimension Reduction.” Journal of the Royal Statistical Society. Series B, Statistical Methodology, vol. 80, no. 3, 2018, pp. 509–529, https://doi.org/10.1111/rssb.12257.

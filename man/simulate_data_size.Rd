@@ -2,18 +2,30 @@
 % Please edit documentation in R/simulations.R
 \name{simulate_data_size}
 \alias{simulate_data_size}
-\title{Title}
+\title{Simulate Data Sets for Size tests}
 \usage{
-simulate_data_size(
-  data_length = 100,
-  dep = 0,
-  nSims = 500,
-  path = "C:/Users/j53vande/Downloads/fChange/sims/"
-)
+simulate_data_size(data_length = 100, dep = 0, nSims = 500, path = NULL)
 }
 \arguments{
-\item{path}{}
+\item{data_length}{(Optional) Positive integer indicating the length of data.
+Default is 100}
+
+\item{dep}{(Optional) Numeric in \link{0,1} indicating the dependence strength between
+successive functional observations Default is 0.}
+
+\item{nSims}{(Optional) Positive integer indicating the number of simulations.
+Default in 500.}
+
+\item{path}{(Optional) String indicating the path at which to save output.
+Default is NULL.}
+}
+\value{
+Data.frame of functional data observations. Columns are observations
 }
 \description{
-Title
+This function simulates data to be used in size analyses
+}
+\examples{
+simulate_data_size()
+simulate_data_size(100,0.5)
 }

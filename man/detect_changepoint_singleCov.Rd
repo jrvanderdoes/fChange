@@ -17,8 +17,8 @@ detect_changepoint_singleCov(
 )
 }
 \arguments{
-\item{X}{Numeric data.frame with rows for evaluated values and columns
-indicating FD}
+\item{X}{Numeric data.frame of functional data observations--rows for
+evaluated values and columns indicating FD}
 
 \item{nSims}{(Optional) Integer indicating the number of realizations of
 Gaussian processes to compute. Default is 100}
@@ -32,12 +32,14 @@ spaced observations on (0, 1) with the same number of observations as FDs.}
 \item{K}{(Optional) Function for the kernel function to use. Default is the
 barlett_kernel.}
 
-\item{space}{XXXXX}
+\item{space}{(Optional) String indicating the space used in the spanning vectors.
+Default is 'BM'.}
 
 \item{silent}{(Optional) Boolean indicating it the output should be supressed.
 Default is FALSE.}
 
-\item{TN_M}{(Optional) XXXXX}
+\item{TN_M}{(Optional) Integer indicating the number of iteractions used to compute
+T_N for the real data. Default is 10000.}
 
 \item{Cov_M}{(Optional) Integer indicating the number of vectors used to create
 each value in the covariance matrix. Default is 25.}
