@@ -25,6 +25,8 @@
 #' @export
 #'
 #' @examples
+#' # Below will give NA as the trim cuts too much.
+#' #   change 50 to 20 in trim function to get other results
 #' complete_binary_segmentation(
 #'   data = electricity[, 1:80],
 #'   changepoint_function = compute_Mn,
