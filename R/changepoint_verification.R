@@ -1,6 +1,6 @@
 #' Change Point Verification
 #'
-#' Function used to verify change points.
+#' This (internal) function is used to verify change points.
 #'
 #' @param CPsVals Numeric vector indicating change point locations (empty vector
 #'     used if no change point detected)
