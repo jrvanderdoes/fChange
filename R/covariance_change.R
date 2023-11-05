@@ -111,43 +111,12 @@ cov_change <- function(X, kappa = 1 / 4, len = 30) {
 }
 
 
-#' Compute Covariance Tn Statistic
-#'
-#' This function computes the Tn statistic in the paper, introduced after
-#'  theorem 2.1.
-#'
-#' @param xf Data.frame of numerics. Finite realization of functional time
-#'  series data, where curves are stored in columns.
-#'
-#' @return Numeric Tn statistic
-#'
-#' @noRd
-TNstat <- function(xf) {
-  # int_approx <- function(x) {
-  #   temp_n <- NROW(x)
-  #   return((1 / temp_n) * sum(x))
-  # }
-  grid_point <- nrow(xf)
-  N <- ncol(xf)
-  xdm <- apply(xf, 2, function(x, xmean) {
-    x - xmean
-  }, xmean = rowMeans(xf))
-  uind <- seq(0, 1, length = N + 1)[2:(N + 1)]
-  zn2 <- list()
-  for (i in 1:N) {
-    zn2[[i]] <- (.ZNstat(xdm, uind[i]))^2
-  }
-  inm <- Reduce(`+`, zn2) / N
-
-  return((1 / grid_point)^2 * sum(inm))
-}
-
-
 #' Compute the Weighted Tn Statistic
 #'
 #' The function computes the weighted Tn statistic, introduced after Theorem 2.3
 #'
-#' @inheritParams TNstat
+#' @param xf Data.frame of numerics. Finite realization of functional time
+#'    series data, where curves are stored in columns.
 #' @param kappa Numeric used for weighting and such
 #'
 #' @return List of two values: (stat) giving the weighted Tn statistic and
@@ -286,7 +255,6 @@ long_run_covariance_4tensor <- function(dat) {
 #'
 #' This (internal) function computes the critical values for weighted Tn statistic
 #'
-#' @inheritParams TNStat
 #' @inheritParams .weight_TNstat
 #' @param len Numeric for window/repetitions for covariance change.
 #'
@@ -372,13 +340,44 @@ long_run_covariance_4tensor <- function(dat) {
 ###   TODO:: UNUSED
 ##
 ###############################################
+
+#' #' Compute Covariance Tn Statistic
+#' #'
+#' #' This function computes the Tn statistic in the paper, introduced after
+#' #'  theorem 2.1.
+#' #'
+#' #' @param xf Data.frame of numerics. Finite realization of functional time
+#' #'  series data, where curves are stored in columns.
+#' #'
+#' #' @return Numeric Tn statistic
+#' #'
+#' #' @noRd
+#' .TNstat <- function(xf) {
+#'   # int_approx <- function(x) {
+#'   #   temp_n <- NROW(x)
+#'   #   return((1 / temp_n) * sum(x))
+#'   # }
+#'   grid_point <- nrow(xf)
+#'   N <- ncol(xf)
+#'   xdm <- apply(xf, 2, function(x, xmean) {
+#'     x - xmean
+#'   }, xmean = rowMeans(xf))
+#'   uind <- seq(0, 1, length = N + 1)[2:(N + 1)]
+#'   zn2 <- list()
+#'   for (i in 1:N) {
+#'     zn2[[i]] <- (.ZNstat(xdm, uind[i]))^2
+#'   }
+#'   inm <- Reduce(`+`, zn2) / N
+#'
+#'   return((1 / grid_point)^2 * sum(inm))
+#' }
 #'
 #'
 #' #' Compute critical values for TNstat (T_N)
 #' #'
 #' #' This (internal) function computes the critical values using MC
 #' #'
-#' #' @inheritParams TNStat
+#' #' @inheritParams .TNstat
 #' #' @inheritParams .weight_criticalvalueMC
 #' #'
 #' #' @return Numeric critical values (0.9, 0.95, 0.99)
