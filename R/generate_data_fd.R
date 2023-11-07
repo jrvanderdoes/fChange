@@ -21,7 +21,7 @@
 #' @param basesList A list of bases (eigenfunctions), length 1 or m
 #'
 #'     Define the basis using fda on c(0, 1) to ensure it works
-#'     (TODO:: Remove this restriction)
+#'     (TODO:: Test to see removal of this restriction)
 #' @param meansList A list of means, length 1 or m, for each group
 #' @param distsArray A vector of distributions, length 1 or m, for each group
 #' @param evals A vector of points indicating the points to evaluate the
@@ -64,7 +64,8 @@ generate_data_fd <- function(ns,
                              evals,
                              kappasArray = c(0),
                              burnin = 100,
-                             silent = FALSE) {
+                             silent = FALSE,
+                             ...) {
   # ns is a vector with length m for the number of data runs until next CP
   # - i.e. c(10,10,10) has 10 length TS then CP followed by 10 and another CP
   # eigsList is a list of vectors giving the eigenvalues for each distribution
@@ -255,18 +256,21 @@ generate_data_fd <- function(ns,
   eval_basis <- fda::eval.basis(evals, basis)
   # Row for each time, columns for eigen
   xi <- sapply(eigs, function(e, dist, n) {
-    .generateXi(dist = dist, sd = sqrt(e), n = n, ..)
+    .generateXi(dist = dist, sd = sqrt(e), n = n, ...)
   },
   dist = dist, n = n
   )
 
+  ## TODO:: See if bug exists
   Zeta <- tryCatch(xi * eval_basis,
-    error = function(e) {
-      stop(call. = F, paste0(
-        "Check number of eigenvalues given. ",
-        "It does not match number of basis functions."
-      ))
-    }
+                   error = function(e) {
+                     stop(call. = F, paste0(
+                       "Check number of eigenvalues given. ",
+                       "It does not match number of basis functions. ",
+                       "Note, did you account for the constant function if ",
+                       "it is in the basis?"
+                     ))
+                   }
   )
 
   eps <- Zeta + t(psi %*% as.matrix(peps))
