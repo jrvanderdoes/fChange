@@ -1,5 +1,7 @@
 #' Impute data using functional data
 #'
+#' This function imputes missing data by fitting a basis.
+#'
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
 #' @param evalPts Numeric vector indicating the evaluated points for each row
@@ -45,11 +47,15 @@ functional_imputation <- function(data, evalPts = 1:nrow(data),
 
 #' Impute data using linear function
 #'
+#' This function imputing missing data using a line.
+#'
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
 #' @param evalPts Numeric vector indicating the evaluated points for each row
 #'    of data
-#' @param use.prev.curve XXXX
+#' @param use.prev.curve (Optional) Boolean indicating if the last functional
+#'    observation should be used to impute the first value if needed. Default is
+#'    FALSE.
 #'
 #' @return Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD and no missing values
