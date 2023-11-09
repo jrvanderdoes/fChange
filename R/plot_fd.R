@@ -37,7 +37,8 @@
 #' @export
 #'
 #' @examples
-#' plot_fd(data = electricity[, 1:100], CPs = c(50))
+#' plot_fd(data = electricity[, 1:10])
+#' plot_fd(data = electricity[, 1:50], CPs = c(25))
 #' plot_fd(
 #'   data = electricity, CPs = c(50, 150, 220, 300),
 #'   interactive = FALSE, showticklabels = FALSE
