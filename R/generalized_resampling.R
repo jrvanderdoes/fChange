@@ -27,7 +27,7 @@
 #'   ns = c(20, 20),
 #'   eigsList = list(
 #'     c(3, 2, 1, 0.5),
-#'     c(3, 2)
+#'     c(3, 3, 2)
 #'   ),
 #'   basesList = list(
 #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
