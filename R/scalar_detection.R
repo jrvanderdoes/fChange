@@ -1,5 +1,7 @@
 #' Scalar Characteristic Function Change Point Analysis
 #'
+#' This implements a scalar characteristic change method
+#'
 #' @param Y XXXXX
 #' @param gam XXXXX
 #' @param nSims XXXXX
