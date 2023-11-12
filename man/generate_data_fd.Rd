@@ -13,7 +13,8 @@ generate_data_fd(
   evals,
   kappasArray = c(0),
   burnin = 100,
-  silent = FALSE
+  silent = FALSE,
+  ...
 )
 }
 \arguments{
@@ -29,7 +30,7 @@ for each group}
 \item{basesList}{A list of bases (eigenfunctions), length 1 or m
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{Define the basis using fda on c(0, 1) to ensure it works
-(TODO:: Remove this restriction)
+(TODO:: Test to see removal of this restriction)
 }\if{html}{\out{</div>}}}
 
 \item{meansList}{A list of means, length 1 or m, for each group}

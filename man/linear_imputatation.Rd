@@ -13,14 +13,16 @@ indicating FD}
 \item{evalPts}{Numeric vector indicating the evaluated points for each row
 of data}
 
-\item{use.prev.curve}{XXXX}
+\item{use.prev.curve}{(Optional) Boolean indicating if the last functional
+observation should be used to impute the first value if needed. Default is
+FALSE.}
 }
 \value{
 Numeric data.frame with rows for evaluated values and columns
 indicating FD and no missing values
 }
 \description{
-Impute data using linear function
+This function imputing missing data using a line.
 }
 \examples{
 data_missing <- data.frame(

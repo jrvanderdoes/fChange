@@ -47,6 +47,8 @@ for general functions. Change points are recursively found until no
 more change points are detected.
 }
 \examples{
+# Below will give NA as the trim cuts too much.
+#   change 50 to 20 in trim function to get other results
 complete_binary_segmentation(
   data = electricity[, 1:80],
   changepoint_function = compute_Mn,

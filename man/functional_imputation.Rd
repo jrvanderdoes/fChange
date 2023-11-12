@@ -28,7 +28,7 @@ Numeric data.frame with rows for evaluated values and columns
 indicating FD and no missing values
 }
 \description{
-Impute data using functional data
+This function imputes missing data by fitting a basis.
 }
 \examples{
 data_missing <- data.frame(

@@ -19,7 +19,7 @@ scalarDetection(Y, gam = 0.5, nSims = 200, alpha_val = 0.05)
 XXXXX
 }
 \description{
-Scalar Characteristic Function Change Point Analysis
+This implements a scalar characteristic change method
 }
 \examples{
 # XXXXX
