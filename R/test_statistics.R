@@ -35,12 +35,9 @@ compute_Tn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
 
 
   Zn <- .Zn(W,X, n)
-  # intVal <- sapply(1:ncol(Zn), function(z, Zn) {
-  #   .approx_int(abs(Zn[,z])^2)
-  # }, Zn = Zn)
   intVal <- dot_integrate_col(abs(Zn)^2)
 
-  1 / M * sum(intVal)
+  sum(intVal)/M
 }
 
 #' Compute Mn Test Statistic
@@ -92,12 +89,9 @@ compute_Mn <- function(X, M = 10000, W = NULL, space = "BM", ...) {
 #'
 #' @noRd
 .Zn <- function(W, X, n) {
-  n <- ncol(X)
   fhat_vals <- as.matrix(.fhat_all(X, W))
 
-  #unname(unlist(fhat_vals[nrow(fhat_vals),]))
-  #(fhat_vals - (1:n / n) %o% fhat_vals[nrow(fhat_vals),])
-  sqrt(n) * (fhat_vals - (1:n / n) %o% fhat_vals[nrow(fhat_vals),])
+  sqrt(n) * (fhat_vals - (seq_len(n)/n) %o% fhat_vals[nrow(fhat_vals),])
 }
 
 
@@ -112,5 +106,5 @@ compute_Mn <- function(X, M = 10000, W = NULL, space = "BM", ...) {
 #'
 #' @noRd
 .fhat_all <- function(X, W) {
-  dot_col_cumsum(exp(1 / nrow(X) * complex(imaginary = 1) * t(X) %*% as.matrix(W))) / ncol(X)
+  dot_col_cumsum(exp(1 / nrow(X) * complex(imaginary = 1) * t(X) %*% as.matrix(W)) / ncol(X))
 }
