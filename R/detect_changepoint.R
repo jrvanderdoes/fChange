@@ -100,10 +100,7 @@ detect_changepoint <- function(X, nSims = 500, x = seq(0, 1, length.out = 40),
 #' )
 detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.out = 40),
                                          h = 3, K = bartlett_kernel, space = "BM",
-                                         silent = FALSE, TN_M = 100000, Cov_M = 75) {
-  # Source Cpp File to speed up matrix computations
-  # Rcpp::sourceCpp("R/matrixMult.cpp")
-
+                                         silent = FALSE, TN_M = 100000, Cov_M = 40) {
   # Determine Number of Iterations
   val_Tn <- compute_Tn(X, M = TN_M, space = space)
 
@@ -119,8 +116,8 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
   covMat_svd <- La.svd(covMat)
   sqrtD <- diag(sqrt(covMat_svd$d))
   sqrtD[is.na(sqrtD)] <- 0
-  # sqrtMat <- eigenMapMatMult(
-  #   eigenMapMatMult(covMat_svd$u, sqrtD),t(covMat_svd$v))
+  #sqrtMat <- eigenMapMatMult(
+  #  eigenMapMatMult(covMat_svd$u, sqrtD),t(covMat_svd$v))
   sqrtMat <- Rfast::mat.mult(
     Rfast::mat.mult(covMat_svd$u, sqrtD), covMat_svd$vt
   )

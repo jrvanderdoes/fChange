@@ -1,3 +1,5 @@
+// [[Rcpp::depends(RcppEigen)]]
+#include <RcppEigen.h>
 #include <Rcpp.h>
 
 using namespace Rcpp;
@@ -36,3 +38,8 @@ ComplexMatrix dot_col_cumsum(ComplexMatrix m) {
   }
   return m;
 }
+
+// // [[Rcpp::export]]
+// Eigen::MatrixXd eigenMapMatMult(const Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::MatrixXd> B){
+//   return A * B;
+// }
