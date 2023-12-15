@@ -99,45 +99,53 @@ detect_changepoint <- function(X, nSims = 500, x = seq(0, 1, length.out = 40),
 #'   h = 0, K = bartlett_kernel, silent = FALSE
 #' )
 detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.out = 40),
-                                         h = 3, K = bartlett_kernel, space = "BM",
-                                         silent = FALSE, TN_M = 100000, Cov_M = 40) {
+                                         h = 3,
+                                         K = bartlett_kernel,
+                                         space = "BM",
+                                         silent = FALSE, TN_M = 100000, Cov_M = 40,
+                                         sqrtMat=NULL) {
   # Determine Number of Iterations
   val_Tn <- compute_Tn(X, M = TN_M, space = space)
 
-  # Generate Noise
-  W <- computeSpaceMeasuringVectors(Cov_M, space, X)
+  if(is.null(sqrtMat)){
+    # Generate Noise
+    W <- computeSpaceMeasuringVectors(Cov_M, space, X)
 
-  # Variables
-  MJ <- Cov_M * length(x)
+    # Variables
+    MJ <- Cov_M * length(x)
 
-  # Compute Gamma Matrix
-  covMat <- .estimCovMat(X, x, Cov_M, h, K, W)
-  covMat <- round(covMat, 15)
-  covMat_svd <- La.svd(covMat)
-  sqrtD <- diag(sqrt(covMat_svd$d))
-  sqrtD[is.na(sqrtD)] <- 0
-  #sqrtMat <- eigenMapMatMult(
-  #  eigenMapMatMult(covMat_svd$u, sqrtD),t(covMat_svd$v))
-  sqrtMat <- Rfast::mat.mult(
-    Rfast::mat.mult(covMat_svd$u, sqrtD), covMat_svd$vt
-  )
-  rm(W, covMat, covMat_svd, sqrtD)
+    # Compute Gamma Matrix
+      # Make sure x is resolution of data
+      # TODO:: Try resolution for n or clump tn to map same
+    covMat <- .estimCovMat(X, x, Cov_M, h, K, W)
+    covMat <- round(covMat, 15)
+    covMat_svd <- La.svd(covMat)
+    sqrtD <- diag(sqrt(covMat_svd$d))
+    sqrtD[is.na(sqrtD)] <- 0
+    #sqrtMat <- eigenMapMatMult(
+    #  eigenMapMatMult(covMat_svd$u, sqrtD),t(covMat_svd$v))
+    sqrtMat <- Rfast::mat.mult(
+      Rfast::mat.mult(covMat_svd$u, sqrtD), covMat_svd$vt
+    )
+    rm(W, covMat, covMat_svd, sqrtD)
+  }
 
   gamProcess <- c()
   nIters <- nSims / 100
-  gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ, sqrtMat, lx) {
+  gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ, sqrtMat) {
     # (After trans + mult) Rows are iid MNV
-    mvnorms <- sapply(1:100, function(m, x) {
-      stats::rnorm(x)
-    }, x = 2 * MJ)
+    # mvnorms <- sapply(1:100, function(m, x) {
+    #   stats::rnorm(x)
+    # }, x = 2 * MJ)
+    mvnorms <- matrix(stats::rnorm(100*2*MJ),ncol=100,nrow=2*MJ)
     mvnorms <- Rfast::mat.mult(sqrtMat, mvnorms)
 
     gamVals <- mvnorms[1:MJ, ] + complex(imaginary = 1) * mvnorms[MJ + 1:MJ, ]
     # gamVals <- mvnorms[(M+1):MJ,] + complex(imaginary = 1)*mvnorms[MJ+1:(MJ-M),]
 
     # Estimate value
-    apply(abs(t(gamVals))^2, MARGIN = 1, .approx_int)
-  }, MJ = MJ, sqrtMat = sqrtMat, lx = length(x))
+    apply(abs(t(gamVals))^2, MARGIN = 1, dot_integrate)
+  }, MJ = MJ, sqrtMat = sqrtMat)
   gamProcess <- as.vector(gamProcess)
 
   list(
@@ -162,7 +170,7 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #'
 #' @noRd
 .estimCovMat <- function(X, x = seq(0, 1, length.out = nrow(X)),
-                         M = 25, h = 3, K = bartlett_kernel, W = NULL) {
+                          M = 25, h = 3, K = bartlett_kernel, W = NULL) {
   # Setup random vectors
   if (is.null(W)) {
     W <- computeSpaceMeasuringVectors(M, "BM", X)
@@ -249,19 +257,18 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
   fVals <- as.numeric(.estimf(X, lfun, v))
   fpVals <- as.numeric(.estimf(X, lfunp, vp))
 
-  values <- sapply(iters, function(k, K, h, X1, fVals, fpVals, mean1, mean2) {
-    Kval <- K(k, h)
-
-    ifelse(Kval == 0,
-      0,
-      Kval * .estimGamma(
-        k = k, X = X1,
-        fVals = fVals, fpVals = fpVals,
-        mean1 = mean1, mean2 = mean2
-      )
+  Kvals <- K(iters,h)
+  data_tmp <- data.frame('K'=Kvals[Kvals>0],
+                         'k'=iters[which(Kvals>0)])
+  values <- apply(data_tmp, MARGIN = 1,
+                  function(kInfo, X1, fVals, fpVals, mean1, mean2) {
+    kInfo[1] * .estimGamma(
+      k = kInfo[2], X = X1,
+      fVals = fVals, fpVals = fpVals,
+      mean1 = mean1, mean2 = mean2
     )
   },
-  K = K, h = h, X1 = X, fVals = fVals, fpVals = fpVals,
+  X1 = X, fVals = fVals, fpVals = fpVals,
   mean1 = mean(fVals), mean2 = mean(fpVals)
   )
 
@@ -332,3 +339,4 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 .estimf <- function(Xr, lfun, v) {
   lfun((t(Xr) %*% v) / nrow(Xr))
 }
+
