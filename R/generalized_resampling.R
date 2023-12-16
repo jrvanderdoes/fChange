@@ -3,6 +3,8 @@
 #' Use this method for generalized resampling of a test statistic in
 #'     determination of the proper cutoff value
 #'
+#' TODO:: Consider compiler::cmpfun(generalized_resampling)
+#'
 #' @param X A data frame of the evaluated fd data
 #'     (rows are evaled points and columns are fd)
 #' @param blockSize Numeric value indicating blocking sizes
