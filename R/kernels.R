@@ -12,12 +12,5 @@
 #' bartlett_kernel(1, 2)
 #' bartlett_kernel(0, 0)
 bartlett_kernel <- function(l, h) {
-  val <- 0
-  if (h == l && h == 0) { # if both 0
-    val <- 1
-  } else if (abs(l) < h) { # <= no diff as 0
-    val <- (1 - abs(l) / h)
-  }
-
-  val
+  pmax(0,ifelse(is.nan(1 - abs(l) / h),1,1 - abs(l) / h))
 }
