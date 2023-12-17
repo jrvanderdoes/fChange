@@ -107,27 +107,11 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
   # Determine Number of Iterations
   val_Tn <- compute_Tn(X, M = TN_M, space = space)
 
+  # Variables
+  MJ <- Cov_M * length(x)
+
   if(is.null(sqrtMat)){
-    # Generate Noise
-    W <- computeSpaceMeasuringVectors(Cov_M, space, X)
-
-    # Variables
-    MJ <- Cov_M * length(x)
-
-    # Compute Gamma Matrix
-      # Make sure x is resolution of data
-      # TODO:: Try resolution for n or clump tn to map same
-    covMat <- .estimCovMat(X, x, Cov_M, h, K, W)
-    covMat <- round(covMat, 15)
-    covMat_svd <- La.svd(covMat)
-    sqrtD <- diag(sqrt(covMat_svd$d))
-    sqrtD[is.na(sqrtD)] <- 0
-    #sqrtMat <- eigenMapMatMult(
-    #  eigenMapMatMult(covMat_svd$u, sqrtD),t(covMat_svd$v))
-    sqrtMat <- Rfast::mat.mult(
-      Rfast::mat.mult(covMat_svd$u, sqrtD), covMat_svd$vt
-    )
-    rm(W, covMat, covMat_svd, sqrtD)
+    sqrtMat <- .compute_sqrtMat(Cov_M, space, X,x,h,K)
   }
 
   gamProcess <- c()
@@ -155,6 +139,42 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
   )
 }
 
+
+#' Title
+#'
+#' @param Cov_M
+#' @param space
+#' @param X
+#' @param x
+#' @param h
+#' @param K
+#'
+#' @return
+#' @export
+#'
+#' @examples
+.compute_sqrtMat <- function(Cov_M, space, X,x,h,K){
+  # Generate Noise
+  W <- computeSpaceMeasuringVectors(Cov_M, space, X)
+
+  # Compute Gamma Matrix
+  # Make sure x is resolution of data
+  # TODO:: Try resolution for n or clump tn to map same
+  covMat <- .estimCovMat(X, x, Cov_M, h, K, W)
+  covMat <- round(covMat, 15)
+  covMat_svd <- La.svd(covMat)
+  sqrtD <- diag(sqrt(covMat_svd$d))
+  # sqrtD[is.na(sqrtD)] <- 0
+  #sqrtMat <- eigenMapMatMult(
+  #  eigenMapMatMult(covMat_svd$u, sqrtD),t(covMat_svd$v))
+  sqrtMat <- Rfast::mat.mult(
+    Rfast::mat.mult(covMat_svd$u, sqrtD), covMat_svd$vt
+  )
+  #rm(W, covMat, covMat_svd, sqrtD)
+
+  # dot_sqrt_mat(covMat)
+  sqrtMat
+}
 
 #' Estimate the Covariance Matrix
 #'
@@ -218,8 +238,8 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 
   # Mults value from minDF to D11, then next value of minDF to D11, ...
   # rbind(cbind(fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D11)),
-  #             fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D12))),
-  #       cbind(fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D21)),
+  #             fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D12_tD21))),
+  #       cbind(fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(t(D12_tD21))),
   #             fastmatrix::kronecker.prod(as.matrix(minDF),as.matrix(D22))))
   fastmatrix::kronecker.prod(
     as.matrix(minDF),
@@ -287,7 +307,6 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #'
 #' @noRd
 .estimGamma <- function(k, X, fVals, fpVals, mean1, mean2) {
-  # tmp <- 0
 
   if (k >= 0) {
     rs <- 1:(ncol(X) - k)
@@ -317,7 +336,7 @@ detect_changepoint_singleCov <- function(X, nSims = 2000, x = seq(0, 1, length.o
 #'
 #' @noRd
 .estimR <- function(r, fVals, meanVal = NA) {
-  if (is.na(meanVal)) meanVal <- mean(fVals)
+  if (is.na(meanVal)) meanVal <- rowMeans(fVals)
 
   fVals[r] - meanVal
 }
