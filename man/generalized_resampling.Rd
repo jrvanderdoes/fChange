@@ -43,6 +43,9 @@ Numeric value indicating the cutoff value
 Use this method for generalized resampling of a test statistic in
 determination of the proper cutoff value
 }
+\details{
+TODO:: Consider compiler::cmpfun(generalized_resampling)
+}
 \examples{
 \dontrun{
 # Setup Data

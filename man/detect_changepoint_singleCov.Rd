@@ -13,7 +13,8 @@ detect_changepoint_singleCov(
   space = "BM",
   silent = FALSE,
   TN_M = 1e+05,
-  Cov_M = 75
+  Cov_M = 40,
+  sqrtMat = NULL
 )
 }
 \arguments{
