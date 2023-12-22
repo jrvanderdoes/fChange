@@ -1,4 +1,5 @@
-#include <Rcpp.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+#include "RcppArmadillo.h"
 
 using namespace Rcpp;
 
@@ -36,3 +37,12 @@ ComplexMatrix dot_col_cumsum(ComplexMatrix m) {
   }
   return m;
 }
+
+// [[Rcpp::export]]
+arma::mat dot_sqrt_mat(arma::mat A){
+//arma::cx_mat dot_sqrt_mat(arma::mat A){
+
+  return arma::sqrtmat_sympd(A);
+  //return arma::sqrtmat(A);
+}
+

@@ -13,3 +13,7 @@ dot_col_cumsum <- function(m) {
     .Call(`_fChange_dot_col_cumsum`, m)
 }
 
+dot_sqrt_mat <- function(A) {
+    .Call(`_fChange_dot_sqrt_mat`, A)
+}
+
