@@ -45,3 +45,17 @@
 .specify_decimal <- function(x, k) {
   trimws(format(round(x, k), nsmall = k))
 }
+
+
+#' Title
+#'
+#' @param vals
+#' @param n
+#'
+#' @return
+#' @export
+#'
+#' @examples
+.select_n <- function(vals,n){
+  vals[round(seq(1,length(vals),length.out=n))]
+}
