@@ -8,7 +8,7 @@
 #' @export
 #'
 #' @examples
-generateFunctionalIID <- function(resolution, N){
+generateOU <- function(resolution, N){
 
   times <- 1:resolution/resolution
 
