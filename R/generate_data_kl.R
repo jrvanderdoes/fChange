@@ -255,14 +255,28 @@ generate_data_fd <- function(ns,
   # Generate - No Loop
   eval_basis <- fda::eval.basis(evals, basis)
   # Row for each time, columns for eigen
-  xi <- sapply(eigs, function(e, dist, n) {
-    .generateXi(dist = dist, sd = sqrt(e), n = n, ...)
-  },
-  dist = dist, n = n
+  # xi <- sapply(eigs, function(e, dist, n) {
+  #     .generateXi(dist = dist, sd = sqrt(e), n = n, ...)
+  #   },
+  #   dist = dist, n = n
+  # )
+  xi <- sapply(eigs, function(e, dist) {
+      .generateXi(dist = dist, sd = sqrt(e), n = 1, ...)
+    },
+    dist = dist
   )
 
-  ## TODO:: See if bug exists
-  Zeta <- tryCatch(xi * eval_basis,
+  # Zeta <- tryCatch(xi * eval_basis,
+  #                  error = function(e) {
+  #                    stop(call. = F, paste0(
+  #                      "Check number of eigenvalues given. ",
+  #                      "It does not match number of basis functions. ",
+  #                      "Note, did you account for the constant function if ",
+  #                      "it is in the basis?"
+  #                    ))
+  #                  }
+  # )
+  Zeta <- tryCatch(eval_basis * xi[col(eval_basis)],
                    error = function(e) {
                      stop(call. = F, paste0(
                        "Check number of eigenvalues given. ",
@@ -330,8 +344,7 @@ generate_data_fd <- function(ns,
     if(dof>2)
       xi <- xi * sqrt(sd^2 * (dof - 2) / dof)
   } else if (dist == "cauchy") {
-    stop("Sorry Problem with cauchy directly. Try t-distribution")
-    xi <- stats::rcauchy(n)
+    xi <- stats::rt(n, 1)
   } else if (dist == "laplace") {
     if (!requireNamespace("jmuOutlier", quietly = TRUE)) {
       stop(paste0("Please install 'jmuOutlier'."))
