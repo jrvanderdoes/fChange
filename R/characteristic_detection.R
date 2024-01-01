@@ -16,7 +16,7 @@
 #' @examples
 detect_changepoint_final_Tn <- function(X,
                                      M = 20, J=50,
-                                     nSims = 2000,
+                                     nSims = 1000,
                                      h = 3,
                                      K = bartlett_kernel,
                                      space = "BM",
@@ -25,13 +25,13 @@ detect_changepoint_final_Tn <- function(X,
   W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
   # Determine Number of Iterations
-  val_Tn <- compute_Tn_final(X, W)
+  val_Tn <- compute_Tn_final(X, W, J)
   #val_Tn <- compute_Tn_final1(X, W)
   #val_Tn <- compute_Tn_final2(X, W)
 
   MJ <- M * J
 
-  sqrtMat <- .compute_sqrtMat_final(X,W,h,K)
+  sqrtMat <- .compute_sqrtMat_final(X,W,J,h,K)
 
   gamProcess <- c()
   nIters <- nSims / 100
@@ -79,7 +79,8 @@ detect_changepoint_final_Tn <- function(X,
 #'
 #' @examples
 detect_changepoint_final_Mn <- function(X,
-                                        M = 40, nSims = 2000,
+                                        M = 20, J=50,
+                                        nSims = 1000,
                                         h = 3,
                                         K = bartlett_kernel,
                                         space = "BM",
@@ -89,12 +90,12 @@ detect_changepoint_final_Mn <- function(X,
 
   # Determine Number of Iterations
   val_Mn <- compute_Mn_final(X, W)
-  val_Mn1 <- compute_Mn_final1(X, W)
-  val_Mn2 <- compute_Mn_final2(X, W)
+  #val_Mn <- compute_Mn_final1(X, W)
+  #val_Mn <- compute_Mn_final2(X, W)
 
-  MJ <- M * nrow(X)
+  MJ <- M * J
 
-  sqrtMat <- .compute_sqrtMat_final(X,W,h,K)
+  sqrtMat <- .compute_sqrtMat_final(X,W,J,h,K)
 
   gamProcess <- c()
   nIters <- nSims / 100
@@ -115,24 +116,20 @@ detect_changepoint_final_Mn <- function(X,
 
     # Estimate value
     apply(results, MARGIN = 1, max)
-  }, MJ = MJ, sqrtMat = sqrtMat, M=M, J=nrow(X))
+  }, MJ = MJ, sqrtMat = sqrtMat, M=M, J=J)
   gamProcess <- as.vector(gamProcess)
 
   list(
     "pval" = 1 - stats::ecdf(gamProcess)(val_Mn$value),
-    "pval1" = 1 - stats::ecdf(gamProcess)(val_Mn1$value),
-    "pval2" = 1 - stats::ecdf(gamProcess)(val_Mn2$value),
     "gamProcess" = gamProcess,
-    "value" = val_Mn$value,
-    "value1" = val_Mn1$value,
-    "value2" = val_Mn2$value
+    "value" = val_Mn$value
   )
 }
 
 
 #############################################
 
-compute_Tn_final <- function(X, W, J = NULL) {
+compute_Tn_final <- function(X, W, J) {
   n <- ncol(X)
   if(is.null(J)){
     warning('J (noise resolution) assumed to be n (data resolution)')
@@ -192,7 +189,7 @@ compute_Tn_final <- function(X, W, J = NULL) {
 # }
 
 
-compute_Mn_final <- function(X, W, J=NULL) {
+compute_Mn_final <- function(X, W, J) {
   n <- ncol(X)
   if(is.null(J)){
     warning('J (noise resolution) assumed to be n (data resolution)')
