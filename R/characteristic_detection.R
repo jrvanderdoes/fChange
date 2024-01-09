@@ -89,7 +89,7 @@ detect_changepoint_final_Mn <- function(X,
   W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
   # Determine Number of Iterations
-  val_Mn <- compute_Mn_final(X, W)
+  val_Mn <- compute_Mn_final(X, W, J)
   #val_Mn <- compute_Mn_final1(X, W)
   #val_Mn <- compute_Mn_final2(X, W)
 
@@ -204,7 +204,7 @@ compute_Mn_final <- function(X, W, J) {
 
   list(
     "value" = max(return_value),
-    "location" = which.max(return_value),
+    "location" = ns[which.max(return_value)],
     "allValues" = return_value
   )
 }
