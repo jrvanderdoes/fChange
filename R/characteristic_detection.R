@@ -129,12 +129,10 @@ detect_changepoint_final_Mn <- function(X,
 
 #############################################
 
-compute_Tn_final <- function(X, W, J) {
+compute_Tn_final <- function(X,
+                             W=computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'),
+                             J=50) {
   n <- ncol(X)
-  if(is.null(J)){
-    warning('J (noise resolution) assumed to be n (data resolution)')
-    J = n
-  }
 
   Zn <- .Zn_final(W, X)
   ns <- .select_n(1:n, J)
@@ -189,12 +187,10 @@ compute_Tn_final <- function(X, W, J) {
 # }
 
 
-compute_Mn_final <- function(X, W, J) {
+compute_Mn_final <- function(X,
+                             W=computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'),
+                             J=50) {
   n <- ncol(X)
-  if(is.null(J)){
-    warning('J (noise resolution) assumed to be n (data resolution)')
-    J = n
-  }
 
   Zn <- .Zn_final(W,X)
   ns <- .select_n(1:n,J)
@@ -326,4 +322,112 @@ compute_Mn_final <- function(X, W, J) {
       cbind(as.matrix(t(D12_tD21)), as.matrix(D22))
     )
   )
+}
+
+#' Estimate Long-run Covariance (D) matrix
+#'
+#' This (internal) function
+#'
+#' @inheritParams detect_changepoint
+#' @param K Function for the kernel function to use.
+#' @param h Integer indicating amount of lag to consider.
+#' @param lfun Function, typically cos or sin. This is important when considering
+#'     real or imaginary part.
+#' @param v Numeric vector from L2 space with same number of observations as
+#'     FD observation.
+#' @param lfunp Function, typically cos or sin. This is important when considering
+#'     real or imaginary part.
+#' @param vp Numeric vector from L2 space with same number of observations as
+#'     FD observation.
+#'
+#' @return Data.frame with autocovariance value based on data given
+#'
+#' @noRd
+.estimD <- function(K, h, X, lfun, v, lfunp, vp) {
+  iters <- (1 - ncol(X)):(ncol(X) - 1)
+
+  # Move so pass in function values to avoid re-computation later
+  fVals <- as.numeric(.estimf(X, lfun, v))
+  fpVals <- as.numeric(.estimf(X, lfunp, vp))
+
+  Kvals <- K(iters,h)
+  data_tmp <- data.frame('K'=Kvals[Kvals>0],
+                         'k'=iters[which(Kvals>0)])
+  values <- apply(data_tmp, MARGIN = 1,
+                  function(kInfo, X1, fVals, fpVals, mean1, mean2) {
+    kInfo[1] * .estimGamma(
+      k = kInfo[2], X = X1,
+      fVals = fVals, fpVals = fpVals,
+      mean1 = mean1, mean2 = mean2
+    )
+  },
+  X1 = X, fVals = fVals, fpVals = fpVals,
+  mean1 = mean(fVals), mean2 = mean(fpVals)
+  )
+
+  sum(values) / ncol(X)
+}
+
+
+#' Estimate Autocovariance (gamma) Function
+#'
+#' This (internal) function computes the autocovariance (gamma) function.
+#'
+#' @inheritParams .estimD
+#' @param k Integer indicating FD object to consider
+#'
+#' @return Numeric autocovariance value for given data
+#'
+#' @noRd
+.estimGamma <- function(k, X, fVals, fpVals, mean1, mean2) {
+
+  if (k >= 0) {
+    rs <- 1:(ncol(X) - k)
+  } else {
+    rs <- (1 - k):ncol(X)
+  }
+
+  sum(.estimR(rs, fVals, mean1) * .estimR(rs + k, fpVals, mean2))
+}
+
+
+#' Estimate R-hat
+#'
+#' This (internal) function estimates R-hat, that is lfun(<X_r,v>) - Y where Y
+#'     demeans the data, typically mean(lfun(<X,v>)).
+#'
+#' @inheritParams .estimGamma
+#' @param r Integer indicating the FD object of interest in the data X
+#' @param lfun Function, typically cos or sin. This is important when considering
+#'     real or imaginary part.
+#' @param v Numeric vector from L2 space with same number of observations as
+#'     FD observation.
+#' @param meanVal (Optional) Value indicating the meanVal. This can be is
+#'     computed beforehand for speed. Default of NA computes mean(f-hat)
+#'
+#' @return Numeric value of R-hat for fd object of interest
+#'
+#' @noRd
+.estimR <- function(r, fVals, meanVal = NA) {
+  if (is.na(meanVal)) meanVal <- rowMeans(fVals)
+
+  fVals[r] - meanVal
+}
+
+
+#' Estimate f-hat
+#'
+#' This (internal) function computes estimate of f-hat, that is function(<X,v>).
+#'
+#' @param Xr Numeric vector/data.frame indicating FD observation(s).
+#' @param lfun Function, typically cos or sin. This is important when considering
+#'     real or imaginary part.
+#' @param v Numeric vector from L2 space with same number of observations as
+#'     FD observation.
+#'
+#' @return Numeric value(s) indicating function value for each FD object given
+#'
+#' @noRd
+.estimf <- function(Xr, lfun, v) {
+  lfun((t(Xr) %*% v) / nrow(Xr))
 }
