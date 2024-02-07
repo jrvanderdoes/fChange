@@ -50,8 +50,10 @@
 #'   fn = compute_Tn, iters = 10, replace = F
 #' )
 #' }
-generalized_resampling <- function(X, blockSize, fn, iters = 1000,
-                                   replace = FALSE, alpha = 0.05, silent = FALSE, ...) {
+generalized_resampling <- function(X, fn, blockSize=1, iters = 1000,
+                                   replace = FALSE, alpha = 0.05,
+                                   silent = FALSE, ...) {
+  ## Get Function Value and estimate time
   st <- Sys.time()
   full_val <- fn(X, ...)
   en <- Sys.time()
@@ -64,6 +66,7 @@ generalized_resampling <- function(X, blockSize, fn, iters = 1000,
     ))
   }
 
+  ## Create Permuted Samples
   n <- ncol(X)
   idxGroups <- .getChunks(1:n, n / blockSize)
   idxs <- sapply(1:iters, function(i, m, indxs, replace) {
@@ -76,7 +79,7 @@ generalized_resampling <- function(X, blockSize, fn, iters = 1000,
     idxs <- .convertSamplesToDF(idxs)
   }
 
-
+  ## Sample via bootstrap
   bssamples <- sapply(as.data.frame(idxs),
     function(loop_iter, fn, X1, ...) {
       fn(X1[, stats::na.omit(loop_iter)], ...)
@@ -85,7 +88,7 @@ generalized_resampling <- function(X, blockSize, fn, iters = 1000,
   )
 
   list(
-    "TVal" = full_val,
+    "value" = full_val,
     "cutoff" = stats::quantile(bssamples, probs = c(1 - alpha))[[1]],
     "pval" = 1 - stats::ecdf(bssamples)(full_val),
     "BSSamples" = as.numeric(bssamples)
