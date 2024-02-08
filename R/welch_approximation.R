@@ -1,3 +1,40 @@
+#' Title
+#'
+#' @param X
+#' @param M
+#' @param J
+#' @param h
+#' @param K
+#' @param space
+#' @param alpha
+#'
+#' @return
+#' @export
+#'
+#' @examples
+detect_changepoint_Welch <- function(X,
+                                     M = 20, J=50,
+                                     h = ncol(X)^(1 / 3),
+                                     K = bartlett_kernel,
+                                     space = "BM",
+                                     alpha = 0.05){
+  # Generate Noise
+  W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
+  W1 <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
+
+  # Determine Number of Iterations
+  val_cutoff <- compute_Welch(X, alpha = alpha, W = W, W1 = W1,
+                          M = M, h = h, K = K )
+  val_Tn <- compute_Tn_final(X, W, J)
+
+  list(
+    "cutoff" = val_cutoff,
+    "value" = val_Tn,
+    'detected' = val_Tn > val_cutoff,
+    'alpha'=alpha
+  )
+}
+
 #' Welch Approximation to Tn
 #'
 #' This function approximates the Tn statistic using the Welch approximation.
