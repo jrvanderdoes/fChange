@@ -21,12 +21,14 @@ detect_changepoint_bootstrap <- function(X, statistic=c('Tn','Mn'),
                                          replace = FALSE, alpha = 0.05,
                                          silent = FALSE) {
   # Test Statistics
-  if(statistic=='Tn'){
-    fn = compute_Tn_final
+  if(length(statistic)!=1){
+    stop('Choose "Tn" or "Mn" as the test statistic')
+  }else if(statistic=='Tn'){
+    fn <- compute_Tn_final
   }else if(statistic=='Mn'){
-    fn = compute_Mn_final
+    fn <- compute_Mn_final
   }else{
-    stop('Choose a Tn or Mn test statistic')
+    stop('Choose "Tn" or "Mn" as the test statistic')
   }
 
   # Noise
@@ -34,7 +36,7 @@ detect_changepoint_bootstrap <- function(X, statistic=c('Tn','Mn'),
 
   ## Get Function Value and estimate time
   st <- Sys.time()
-  full_val <- fn(X, W=W, J=J)
+  full_val <- fn(X, W=W, J=J)[[1]]
   en <- Sys.time()
 
   if (!silent) {
@@ -61,7 +63,7 @@ detect_changepoint_bootstrap <- function(X, statistic=c('Tn','Mn'),
   ## Sample via bootstrap
   bssamples <- sapply(as.data.frame(idxs),
                       function(loop_iter, fn, X1, W, J) {
-                        fn(X1[, stats::na.omit(loop_iter)], W=W, J=J)
+                        fn(X1[, stats::na.omit(loop_iter)], W=W, J=J)[[1]]
                       },
                       X1 = X, fn = fn, W=W, J=J
   )
