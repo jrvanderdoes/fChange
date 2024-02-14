@@ -63,7 +63,6 @@ detect_changepoint_final_Tn <- function(X,
   )
 }
 
-
 #' Title
 #'
 #' @param X
@@ -243,6 +242,8 @@ compute_Mn_final <- function(X,
 
   # Compute Gamma Matrix
   covMat <- .estimCovMat_final(X, W, x, h, K)
+
+  # TODO:: Test "GauPro::sqrt_matrix()" which is slightly faster
   tryCatch({
     covMat_svd <- La.svd(covMat)
     sqrtD <- diag(sqrt(covMat_svd$d))
