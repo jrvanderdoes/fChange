@@ -6,8 +6,8 @@
 \usage{
 generalized_resampling(
   X,
-  blockSize,
   fn,
+  blockSize = 1,
   iters = 1000,
   replace = FALSE,
   alpha = 0.05,
@@ -19,12 +19,12 @@ generalized_resampling(
 \item{X}{A data frame of the evaluated fd data
 (rows are evaled points and columns are fd)}
 
+\item{fn}{Function that returns the test statistic value}
+
 \item{blockSize}{Numeric value indicating blocking sizes
 
 Value of 1 should be used for iid data while larger values can be used to
 account for dependence in the data}
-
-\item{fn}{Function that returns the test statistic value}
 
 \item{iters}{Numeric value indicating number iterations used in bootstrapping}
 
