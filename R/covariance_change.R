@@ -14,7 +14,7 @@
 #' @return Location of change. NA for no change and numeric if there is a change.
 #' @export
 #'
-#' @references Aue, Alexander, et al. “Detecting and Dating Structural Breaks in Functional Data without Dimension Reduction.” Journal of the Royal Statistical Society. Series B, Statistical Methodology, vol. 80, no. 3, 2018, pp. 509–529, https://doi.org/10.1111/rssb.12257.
+#' @references Change point analysis of covariance functions: a weighted cumulative sum approach, L. Horvath, G. Rice, Y. Zhao (2022) Journal of Multivariate Analysis.
 #'
 #' @examples
 #' cov_change(electricity[,1:18])
@@ -274,7 +274,6 @@ long_run_covariance_4tensor <- function(dat) {
         ((times[i] * (1 - times[i]))^kappa * (times[j] * (1 - times[j]))^kappa)
     }
   }
-  ## TODO:: Add rounding if have errors
   weig <- as.vector(svd(wmat / grid_point)$d)
 
   ## cov operators
