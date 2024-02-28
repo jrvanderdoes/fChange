@@ -26,7 +26,8 @@
 #'
 #' @examples
 #' mean_change(electricity, M = 250)
-mean_change <- function(data, M = 1000, h = 0, K = bartlett_kernel, alpha = 0.05,
+mean_change <- function(data, data1 = data, M = 1000, h = 0,
+                        K = bartlett_kernel, alpha = 0.05,
                         inc.pval = FALSE, ...) {
   n <- ncol(data)
   Sn2 <- rep(0, n)
@@ -41,7 +42,7 @@ mean_change <- function(data, M = 1000, h = 0, K = bartlett_kernel, alpha = 0.05
   k.star <- min(which(Sn2 == max(Sn2)))
 
   ## Estimate eigenvalues (lambda_i, 1<=i<=d)
-  Ceps <- .estimateCeps(data, h, K)
+  Ceps <- .estimateCeps(data1, h, K)
   lambda <- eigen(Ceps / n)$values
 
   values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist(n, lambda),
