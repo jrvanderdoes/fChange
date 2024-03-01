@@ -29,6 +29,7 @@ computeSpaceMeasuringVectors <- function(M, space, X) {
       pcs = pComps$x
     ))
   } else if (space == "OU") {
+    stop('Error: Need to double check this')
     x <- seq(0, 1, length.out = nrow(X))
     covMat <- (matrix(1, ncol = length(x), nrow = length(x)))
     covMat[, 1] <- covMat[1, ] <- exp(abs(x - x[1]))
