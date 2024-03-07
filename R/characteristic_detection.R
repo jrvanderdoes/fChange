@@ -14,6 +14,77 @@
 #' @export
 #'
 #' @examples
+detect_changepoint_final_TnAndMn <- function(X,
+                                             M = 20, J=50,
+                                             nSims = 1000,
+                                             h = 3,
+                                             K = bartlett_kernel,
+                                             space = "BM",
+                                             silent = FALSE) {
+  # Generate Noise
+  W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
+
+  # Determine Number of Iterations
+  val_Mn <- compute_Mn_final(X, W, J)
+  val_Tn <- compute_Tn_final(X, W, J)
+
+  MJ <- M * J
+
+  sqrtMat <- .compute_sqrtMat_final(X,W,J,h,K)
+
+  gamProcess <- c()
+  nIters <- nSims / 100
+  gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ, sqrtMat, M, J) {
+    # (After trans + mult) Rows are iid MNV
+    mvnorms <- matrix(stats::rnorm(100*2*MJ),ncol=100,nrow=2*MJ)
+    mvnorms1 <- Rfast::mat.mult(t(mvnorms),sqrtMat)
+    # 0 0 0 0 (M times) ... .... 1 1 1 1 (M times)
+
+    gamVals <- mvnorms1[,1:MJ] + complex(imaginary = 1) * mvnorms1[,MJ + 1:MJ]
+
+    # Integrate out M
+    results <- matrix(NA,nrow=100, ncol=J)
+    for(i in 1:J){
+      results[,i] <- apply(abs(gamVals[,(i-1)*M +1:M])^2,
+                           MARGIN=1, mean)
+    }
+
+    # Estimate value
+    list(apply(results, MARGIN = 1, dot_integrate),
+         apply(results, MARGIN = 1, max) )
+  }, MJ = MJ, sqrtMat = sqrtMat, M=M, J=J)
+  gamProcessTn <- as.vector(unlist(gamProcess[1,]))
+  gamProcessMn <- as.vector(unlist(gamProcess[2,]))
+
+  list(
+    'Tn'=list(
+      "pval" = 1 - stats::ecdf(gamProcessTn)(val_Tn),
+      "gamProcess" = gamProcessTn,
+      "value" = val_Tn
+    ),
+    'Mn'=list(
+      "pval" = 1 - stats::ecdf(gamProcessMn)(val_Mn$value),
+      "gamProcess" = gamProcessMn,
+      "value" = val_Mn$value
+    )
+  )
+}
+
+#' Title
+#'
+#' @param X
+#' @param M
+#' @param J
+#' @param nSims
+#' @param h
+#' @param K
+#' @param space
+#' @param silent
+#'
+#' @return
+#' @export
+#'
+#' @examples
 detect_changepoint_final_Tn <- function(X,
                                      M = 20, J=50,
                                      nSims = 1000,
@@ -388,7 +459,7 @@ compute_Mn_final <- function(X,
     rs <- (1 - k):ncol(X)
   }
 
-  sum(.estimR(rs, fVals, mean1) * .estimR(rs + k, fpVals, mean2))
+  sum(.estimR(rs, fVals, mean1) * Conj(.estimR(rs + k, fpVals, mean2)))
 }
 
 
