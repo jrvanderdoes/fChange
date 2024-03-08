@@ -34,7 +34,8 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                                 #   )
                                 # },
                                 M=20, J=50, space='BM',
-                                h = 1, iters = 1000,
+                                h_function = function(X){ncol(X)^(1/3)},
+                                iters = 1000,
                                 replace = FALSE, alpha = 0.05,
                                 final_verify = TRUE,
                                 silent = FALSE) {
@@ -52,11 +53,20 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     #trim_function,
                     M, J, space,
                     blockSize, iters,
-                    alpha, ...){
+                    alpha, h_function,
+                    return_pval = FALSE,
+                    ...){
+        h <- h_function(X)
+
         W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
         tmp <-.ce_detect_Tn(X=X, W=W, M=M, J=J, nSims=iters,
                                            h=h, K=bartlett_kernel, silent=TRUE)
+
+        if(return_pval){
+          cp <- ifelse(tmp$pval<=alpha, compute_Mn_final(X,W=W,J=J)$location, NA)
+          return(c(cp,tmp$pval))
+        }
 
         ifelse(tmp$pval<=alpha, compute_Mn_final(X,W=W,J=J)$location, NA)
       }
@@ -67,7 +77,10 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     #trim_function,
                     M, J, space,
                     blockSize, iters,
-                    alpha, ...){
+                    alpha, h_function,
+                    ...){
+        h <- h_function(X)
+
         W = computeSpaceMeasuringVectors(M,space,X)
 
         stat <- compute_Tn_final(X=X, W=W, J=J)
@@ -81,8 +94,10 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     #trim_function,
                     M, J, space,
                     blockSize, iters,
-                    replace, alpha,
+                    replace, alpha, h_function,
                     ...){
+        h <- h_function(X)
+
         W = computeSpaceMeasuringVectors(M,space,X)
 
         ifelse(.ce_bootstrap(X=X,statistic='Tn',W=W,J=J,space=space,
@@ -99,8 +114,10 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
       fn = function(X,
                     #trim_function,
                     M, J, space,
-                    blockSize, iters,
-                    alpha, ...){
+                    blockSize, iters, h_function,
+                    ...){
+        h <- h_function(X)
+
         W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
         tmp <-.ce_detect_Mn(X=X, W=W, M=M, J=J, nSims=iters,
@@ -117,8 +134,10 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     #trim_function,
                     M, J, space,
                     blockSize, iters,
-                    replace, alpha,
+                    replace, alpha, h_function,
                     ...){
+        h <- h_function(X)
+
         W = computeSpaceMeasuringVectors(M,space,X)
 
         ifelse(.ce_bootstrap(X=X,statistic='Mn',W=W,J=J,space=space,
@@ -132,12 +151,11 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
   }
 
   # Get change points
-  ## TODO:: DISCUSS TRIMMING
   CPsVals <- .ce_recursive_segmentation(
     X=X, fn=fn,
     #trim_function,
     M=M, J=J, space=space,
-    h = h, iters = iters,
+    h_function = h_function, iters = iters,
     replace = replace, alpha = alpha,
     silent = silent,
     addAmt = 0
@@ -148,7 +166,7 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
     CPsVals <- .ce_verify_changes(
       CPsVals = CPsVals, X = X,
       fn=fn, M=M, J=J, space=space,
-      h=h, iters=iters,
+      h_function=h_function, iters=iters,
       replace=replace,
       alpha=alpha,
       silent = silent
@@ -163,10 +181,14 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
 .ce_recursive_segmentation <- function(X, fn,
                         #trim_function,
                         M=20, J=50, space='BM',
-                        h = 1, iters = 1000,
+                        h_function = function(X){ncol(X)^(1/3)},
+                        iters = 1000,
                         replace = FALSE, alpha = 0.05,
                         silent = FALSE,
                         addAmt = 0) {
+  if(ncol(X)<=1) return(NA)
+
+  h <- h_function(X)
   # Look for a single change
   potential_cp <- fn(X, M=M, J=J,
                      space=space,
@@ -194,7 +216,7 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
       fn=fn,
       #trim_function,
       M=M, J=J, space=space,
-      h = h, iters = iters,
+      h_function = h_function, iters = iters,
       replace = replace, alpha = alpha,
       silent = silent,
       addAmt = addAmt),
@@ -204,7 +226,7 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
       fn=fn,
       #trim_function,
       M=M, J=J, space=space,
-      h = h, iters = iters,
+      h_function = h_function, iters = iters,
       replace = replace, alpha = alpha,
       silent = silent,
       addAmt = addAmt + potential_cp)
@@ -214,30 +236,38 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
 ####################
 .ce_verify_changes <- function(CPsVals, X,
                                 fn, M=M, J=J, space=space,
-                                h=h, iters=iters,
+                               h_function=function(X){ncol(X)^(1/3)}, iters=iters,
                                 replace=replace,
                                 alpha=alpha,
                                 silent = FALSE) {
+
   if (!silent) cat("-- Verify Step --\n")
 
   if (length(CPsVals) >= 1) { # If there was a CP detected
     tmp_cps <- c(0, CPsVals, ncol(X))
     tmp_cps <- tmp_cps[order(tmp_cps)]
-    CPsVals <- c()
+    CPsVals <- pvals <- c()
     for (i in 2:(length(tmp_cps) - 1)) {
       # Get CP
-      potential_cp <- fn(X, M=M, J=J,
+      h <- h_function(X[,(tmp_cps[i-1]+1):tmp_cps[i+1]])
+      potential_cp <- fn(X[,(tmp_cps[i-1]+1):tmp_cps[i+1]], M=M, J=J,
                          space=space,
                          h=h, iters=iters,
-                         replace=replace, alpha=alpha
+                         replace=replace, alpha=alpha,
+                         return_pval=TRUE
       )
 
-      if (!is.na(potential_cp)) {
-        CPsVals <- c(CPsVals, potential_cp + tmp_cps[i - 1])
+      if (!is.na(potential_cp[1])) {
+        CPsVals <- c(CPsVals, potential_cp[1] + tmp_cps[i - 1])
+        pvals <- c(pvals,potential_cp[2])
       }
     }
+    return(list(
+      CPsVals[order(CPsVals)],
+      pvals[order(CPsVals)]))
   } else {
     # Get CP
+    h <- h_function(X)
     CPsVals <- fn(X, M=M, J=J,
                   space=space,
                   h=h, iters=iters,
