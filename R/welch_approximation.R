@@ -136,7 +136,6 @@ compute_Welch <- function(X, alpha = 0.05,
   sum(values)
 }
 
-
 #' Estimate Autocovariance Estimates
 #'
 #' This (internal) function estimates autocovariance at single point
