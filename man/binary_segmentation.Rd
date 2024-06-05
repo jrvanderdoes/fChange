@@ -11,7 +11,9 @@ binary_segmentation(
   M = 20,
   J = 50,
   space = "BM",
-  h = 1,
+  h_function = function(X) {
+     ncol(X)^(1/3)
+ },
   iters = 1000,
   replace = FALSE,
   alpha = 0.05,
