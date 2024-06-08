@@ -30,5 +30,5 @@ cov_change(electricity[,1:18])
 cov_change(electricity[,1:16])
 }
 \references{
-Aue, Alexander, et al. “Detecting and Dating Structural Breaks in Functional Data without Dimension Reduction.” Journal of the Royal Statistical Society. Series B, Statistical Methodology, vol. 80, no. 3, 2018, pp. 509–529, https://doi.org/10.1111/rssb.12257.
+Change point analysis of covariance functions: a weighted cumulative sum approach, L. Horvath, G. Rice, Y. Zhao (2022) Journal of Multivariate Analysis.
 }
