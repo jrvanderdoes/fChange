@@ -4,7 +4,7 @@
 \alias{generateOU}
 \title{Title}
 \usage{
-generateOU(resolution, N)
+generateOU(resolution, N, burnin = 500, rho = 0)
 }
 \arguments{
 \item{N}{}
