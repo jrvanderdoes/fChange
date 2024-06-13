@@ -6,6 +6,7 @@
 \usage{
 mean_change(
   data,
+  data1 = data,
   M = 1000,
   h = 0,
   K = bartlett_kernel,
