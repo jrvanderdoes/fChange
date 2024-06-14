@@ -1,7 +1,9 @@
-#' Title
+#' Detect Change Point - Bootstrap
 #'
-#' @param X
-#' @param statistic
+#' Detect the changes in data by using bootstrap.
+#'
+#' @param X Data.frame of the data
+#' @param statistic Test statistic (Tn or Mn)
 #' @param M
 #' @param J
 #' @param space
