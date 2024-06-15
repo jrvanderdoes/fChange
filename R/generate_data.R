@@ -1,13 +1,16 @@
 
-#' Title
+#' Generate Data via OU Process
 #'
-#' @param resolution
-#' @param N
+#' @param resolution Numeric for data resolution
+#' @param N Numeric for data length
+#' @param burnin Numeric for number of burnin. Default is 500.
+#' @param rho Numeric for amount of dependence
 #'
-#' @return
+#' @return Data.frame for generated data
 #' @export
 #'
 #' @examples
+#' generateOU(20,100)
 generateOU <- function(resolution, N, burnin=500, rho=0){
 
   times <- 1:resolution/resolution
