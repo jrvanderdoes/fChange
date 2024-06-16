@@ -1,12 +1,14 @@
-#' Title
+#' Generate FAR(1) Data
 #'
-#' @param resolution
-#' @param N
+#' Function to generate date according to FAR(1) process.
+#'
+#' @param resolution Numeric for resolution of data
+#' @param N Numeric for the number of observations
 #' @param d Numeric (0,Inf) which indicates the dependence on the previous
 #'    curve.
-#' @param burnin
+#' @param burnin Numeric for burn-in before data is computed
 #'
-#' @return
+#' @return Data.frame for functional observations
 #' @export
 #'
 #' @examples
