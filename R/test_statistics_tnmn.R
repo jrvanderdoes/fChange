@@ -1,15 +1,20 @@
-#' Title
+#' Compute Tn and Mn
 #'
-#' @param X
-#' @param M
-#' @param W
-#' @param space
-#' @param ...
+#' Function to compute both Tn and Mn.
 #'
-#' @return
+#' @param X Data to compute the test statistics for
+#' @param M Numeric for the number of vectors to measure space
+#' @param W Data.frame of vectors to measure spaces
+#' @param space String to indicate space for measure space
+#' @param ... Additional details which are unused
+#'
+#' @return List with 'tn' for test statistic, 'mn' for test statistic,
+#'  'location' for placement of change, and 'allmn' mn values at each
+#'  point
 #' @export
 #'
 #' @examples
+#' compute_TnMn(electricity,M=5)
 compute_TnMn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
   # Small bit of cpp Code for a function
   Rcpp::cppFunction('ComplexMatrix col_cumsum(ComplexMatrix m) {
