@@ -2,13 +2,29 @@
 % Please edit documentation in R/test_statistics_tnmn.R
 \name{compute_TnMn}
 \alias{compute_TnMn}
-\title{Title}
+\title{Compute Tn and Mn}
 \usage{
 compute_TnMn(X, M = 1e+05, W = NULL, space = "BM", ...)
 }
 \arguments{
-\item{...}{}
+\item{X}{Data to compute the test statistics for}
+
+\item{M}{Numeric for the number of vectors to measure space}
+
+\item{W}{Data.frame of vectors to measure spaces}
+
+\item{space}{String to indicate space for measure space}
+
+\item{...}{Additional details which are unused}
+}
+\value{
+List with 'tn' for test statistic, 'mn' for test statistic,
+'location' for placement of change, and 'allmn' mn values at each
+point
 }
 \description{
-Title
+Function to compute both Tn and Mn.
+}
+\examples{
+compute_TnMn(electricity,M=5)
 }
