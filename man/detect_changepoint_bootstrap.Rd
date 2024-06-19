@@ -2,7 +2,7 @@
 % Please edit documentation in R/characteristic_bootstrap.R
 \name{detect_changepoint_bootstrap}
 \alias{detect_changepoint_bootstrap}
-\title{Title}
+\title{Detect Change Point - Bootstrap}
 \usage{
 detect_changepoint_bootstrap(
   X,
@@ -18,8 +18,12 @@ detect_changepoint_bootstrap(
 )
 }
 \arguments{
+\item{X}{Data.frame of the data}
+
+\item{statistic}{Test statistic (Tn or Mn)}
+
 \item{silent}{}
 }
 \description{
-Title
+Detect the changes in data by using bootstrap.
 }
