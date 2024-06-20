@@ -2,18 +2,25 @@
 % Please edit documentation in R/generate_data_far.R
 \name{generateFAR1}
 \alias{generateFAR1}
-\title{Title}
+\title{Generate FAR(1) Data}
 \usage{
 generateFAR1(resolution, N, d = 1/2, burnin = 1000)
 }
 \arguments{
+\item{resolution}{Numeric for resolution of data}
+
+\item{N}{Numeric for the number of observations}
+
 \item{d}{Numeric (0,Inf) which indicates the dependence on the previous
 curve.}
 
-\item{burnin}{}
+\item{burnin}{Numeric for burn-in before data is computed}
+}
+\value{
+Data.frame for functional observations
 }
 \description{
-Title
+Function to generate date according to FAR(1) process.
 }
 \examples{
 res <- .generateFAR1(24,200)
