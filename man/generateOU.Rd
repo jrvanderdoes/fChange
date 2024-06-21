@@ -2,13 +2,25 @@
 % Please edit documentation in R/generate_data.R
 \name{generateOU}
 \alias{generateOU}
-\title{Title}
+\title{Generate Data via OU Process}
 \usage{
 generateOU(resolution, N, burnin = 500, rho = 0)
 }
 \arguments{
-\item{N}{}
+\item{resolution}{Numeric for data resolution}
+
+\item{N}{Numeric for data length}
+
+\item{burnin}{Numeric for number of burnin. Default is 500.}
+
+\item{rho}{Numeric for amount of dependence}
+}
+\value{
+Data.frame for generated data
 }
 \description{
-Title
+Generate Data via OU Process
+}
+\examples{
+generateOU(20,100)
 }
