@@ -4,16 +4,20 @@
 #'
 #' @param X Data.frame of the data
 #' @param statistic Test statistic (Tn or Mn)
-#' @param M
-#' @param J
-#' @param space
-#' @param blockSize
-#' @param iters
-#' @param replace
-#' @param alpha
-#' @param silent
+#' @param M Number of vectors to explore space
+#' @param J Resolution of curves for discretazation
+#' @param space Numeric to indicate space to measure data in
+#' @param blockSize Numeric for blocklength to manage dependece
+#' @param iters Numeric for number of iteration for bootstrapped statistic
+#' @param replace Boolean to convert from bootstrap to permutation
+#' @param alpha Numeric for significance level
+#' @param silent Boolean if output should be given while running
 #'
-#' @return
+#' @return List with the following parameters:
+#'    'value': Value of the test statistic for the original data
+#'    'cutoff': Cutoff from the bootstrap sample
+#'    'pval': p-value for the placement of the true in the bootstrapped sample
+#'    'BSSamples': Bootstrap samples
 #' @export
 #'
 #' @examples
