@@ -79,7 +79,7 @@ generalized_binary_segmentation <- function(data,
 #' This function implements traditional binary segmentation on functional data
 #'     for general functions. At most one change point is detected.
 #'
-#' @inheritParams complete_binary_segmentation
+#' @inheritParams generalized_binary_segmentation
 #' @param trim_function XXXXX
 #' @param include_value XXXXX
 #'
