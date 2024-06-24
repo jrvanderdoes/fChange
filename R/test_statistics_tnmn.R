@@ -49,17 +49,27 @@ compute_TnMn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
 }
 
 
-#' Title
+#' Resampling for Tn and Mn
 #'
-#' @param X
-#' @param blockSize
-#' @param iters
-#' @param replace
-#' @param alpha
-#' @param silent
-#' @param ...
+#' Compute resampling statistics for Tn and Mn
 #'
-#' @return
+#' @param X data.frame of the data
+#' @param blockSize Numeric for block length of the resampling
+#' @param iters Numeric for the number of iterations for resampling
+#' @param replace Boolean for replacement changing bootstrap to permutation
+#' @param alpha Numeric between [0,1] for the significance level of alpha
+#' @param silent Boolean for if anything should be output
+#' @param ... Additional parameters
+#'
+#' @return List with the following items:
+#'    'tn': Tn test statistic
+#'    'mn': Mn test statistic
+#'    'location': Estimate for the change location
+#'    'cutoff_tn': Cutoff for the Tn test statistic
+#'    'cutoff_mn': Cutoff for the Mn test statistic
+#'    'pval_tn': p-value for Tn
+#'    'pval_mn': p-value for Mn
+#'    'data_bs': Bootstrap samples of the data
 #' @export
 #'
 #' @examples
