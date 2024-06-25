@@ -1,12 +1,12 @@
-#' Title
+#' Detect the Changepoint Based on Welch Approximation
 #'
-#' @param X
-#' @param M
-#' @param J
-#' @param h
-#' @param K
-#' @param space
-#' @param alpha
+#' @param X Data.frame of the data
+#' @param M Numeric for the number of vectors to measure space
+#' @param J Numeric for the level of discretion
+#' @param h Numeric for bandwidth
+#' @param K Function for bandwidth
+#' @param space String for the space to measure data
+#' @param alpha Numeric for significance
 #'
 #' @return
 #' @export
