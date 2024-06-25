@@ -1,34 +1,3 @@
-#' #' Approximate Integral
-#' #'
-#' #' This (internal) function computes the estimates the integral for
-#' #'  evenly spaced observations.
-#' #'
-#' #' @param y Numeric vector of data
-#' #' @param type (Optional) String indicating type of integration. Currently the
-#' #'  options are "Rectangle" and "Trapezoidal", both done using Riemann sums.
-#' #'  Default is "Trapezoidal".
-#' #'
-#' #' @return Numeric indicating the estimated integral of the curve
-#' #'
-#' #' @noRd
-#' #'
-#' #' @examples
-#' #' .approx_int(rep(1, 10), type = "Rectangle")
-#' #' .approx_int(seq(0, 1, length.out = 20))
-#' #' .approx_int(seq(0, 1, length.out = 20)^2)
-#' .approx_int <- function(y, type = "Trapezoidal") {
-#'   if (type == "Rectangle") { # Rect Approx
-#'     value <- sum(y) / length(y)
-#'   } else if (type == "Trapezoidal") { # Trap Approx
-#'     value <- sum(y[-1] + y[-length(y)]) / (2 * (length(y) - 1))
-#'   } else {
-#'     stop("Error: This type is not yet implemented. See documentation.")
-#'   }
-#'
-#'   value
-#' }
-
-
 #' Specify Decimal
 #'
 #' This (internal) function returns a string of the numbers with the specified
@@ -47,15 +16,14 @@
 }
 
 
-#' Title
+#' Decretization to curve to n
 #'
-#' @param vals
-#' @param n
+#' @param vals Vector of values
+#' @param n Numeric for discretion
 #'
-#' @return
-#' @export
+#' @return Vector with the data select as the given level n
 #'
-#' @examples
+#' @noRd
 .select_n <- function(vals,n){
   vals[round(seq(1,length(vals),length.out=n))]
 }
