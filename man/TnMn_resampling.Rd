@@ -2,7 +2,7 @@
 % Please edit documentation in R/test_statistics_tnmn.R
 \name{TnMn_resampling}
 \alias{TnMn_resampling}
-\title{Title}
+\title{Resampling for Tn and Mn}
 \usage{
 TnMn_resampling(
   X,
@@ -15,10 +15,33 @@ TnMn_resampling(
 )
 }
 \arguments{
-\item{...}{}
+\item{X}{data.frame of the data}
+
+\item{blockSize}{Numeric for block length of the resampling}
+
+\item{iters}{Numeric for the number of iterations for resampling}
+
+\item{replace}{Boolean for replacement changing bootstrap to permutation}
+
+\item{alpha}{Numeric between \link{0,1} for the significance level of alpha}
+
+\item{silent}{Boolean for if anything should be output}
+
+\item{...}{Additional parameters}
+}
+\value{
+List with the following items:
+'tn': Tn test statistic
+'mn': Mn test statistic
+'location': Estimate for the change location
+'cutoff_tn': Cutoff for the Tn test statistic
+'cutoff_mn': Cutoff for the Mn test statistic
+'pval_tn': p-value for Tn
+'pval_mn': p-value for Mn
+'data_bs': Bootstrap samples of the data
 }
 \description{
-Title
+Compute resampling statistics for Tn and Mn
 }
 \examples{
 data_KL <- generate_data_fd(
