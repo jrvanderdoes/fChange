@@ -3,7 +3,6 @@
 export(.changepoint_verification)
 export(.phi_k)
 export(.phi_k0)
-export(.select_n)
 export(.w)
 export(TnMn_resampling)
 export(bartlett_kernel)
