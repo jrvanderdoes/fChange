@@ -2,7 +2,7 @@
 % Please edit documentation in R/welch_approximation.R
 \name{detect_changepoint_Welch}
 \alias{detect_changepoint_Welch}
-\title{Title}
+\title{Detect the Changepoint Based on Welch Approximation}
 \usage{
 detect_changepoint_Welch(
   X,
@@ -15,8 +15,20 @@ detect_changepoint_Welch(
 )
 }
 \arguments{
-\item{alpha}{}
+\item{X}{Data.frame of the data}
+
+\item{M}{Numeric for the number of vectors to measure space}
+
+\item{J}{Numeric for the level of discretion}
+
+\item{h}{Numeric for bandwidth}
+
+\item{K}{Function for bandwidth}
+
+\item{space}{String for the space to measure data}
+
+\item{alpha}{Numeric for significance}
 }
 \description{
-Title
+Detect the Changepoint Based on Welch Approximation
 }
