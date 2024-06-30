@@ -22,7 +22,28 @@ detect_changepoint_bootstrap(
 
 \item{statistic}{Test statistic (Tn or Mn)}
 
-\item{silent}{}
+\item{M}{Number of vectors to explore space}
+
+\item{J}{Resolution of curves for discretazation}
+
+\item{space}{Numeric to indicate space to measure data in}
+
+\item{blockSize}{Numeric for blocklength to manage dependece}
+
+\item{iters}{Numeric for number of iteration for bootstrapped statistic}
+
+\item{replace}{Boolean to convert from bootstrap to permutation}
+
+\item{alpha}{Numeric for significance level}
+
+\item{silent}{Boolean if output should be given while running}
+}
+\value{
+List with the following parameters:
+'value': Value of the test statistic for the original data
+'cutoff': Cutoff from the bootstrap sample
+'pval': p-value for the placement of the true in the bootstrapped sample
+'BSSamples': Bootstrap samples
 }
 \description{
 Detect the changes in data by using bootstrap.
