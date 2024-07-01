@@ -15,9 +15,21 @@
 )
 }
 \arguments{
+\item{data}{Numeric data.frame with rows for evaluated values and columns
+indicating functional observations}
+
+\item{test_statistic_function}{XXXXXXXXXXXXXXXXX.}
+
+\item{cutoff_function}{XXXXXX}
+
 \item{trim_function}{XXXXX}
 
+\item{alpha}{Numeric value in \eqn{[0, 1]} indicating the significance for
+cutoff_function.}
+
 \item{include_value}{XXXXX}
+
+\item{...}{Additional arguments passed into test_statistic_function}
 }
 \value{
 A numeric value indicating the cutoff location (if exists),
