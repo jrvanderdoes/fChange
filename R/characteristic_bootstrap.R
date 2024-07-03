@@ -21,6 +21,7 @@
 #' @export
 #'
 #' @examples
+#' detect_changepoint_bootstrap(electricity,statistic = 'Tn')
 detect_changepoint_bootstrap <- function(X, statistic=c('Tn','Mn'),
                                          M=20, J=50, space='BM',
                                          blockSize=1, iters = 1000,
