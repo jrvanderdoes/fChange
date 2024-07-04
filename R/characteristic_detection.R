@@ -1,19 +1,24 @@
 
-#' Title
+#' Detect Change Points using Tn and Mn Test Statistics
 #'
-#' @param X
-#' @param M
-#' @param J
-#' @param nSims
-#' @param h
-#' @param K
-#' @param space
-#' @param silent
+#' @param X Data.frame of the observations
+#' @param M Numeric for the number of vectors to explore space
+#' @param J Numeric for the reslolution to check
+#' @param nSims Numeric for the number of simulations for distributions
+#' @param h Numeric for bandwidth
+#' @param K Function for bandwidth
+#' @param space String for the space to explore space
+#' @param silent Boolean to display outputs when running
 #'
-#' @return
+#' @return A list with the following elements:
+#'    'Tn': List with ('pval') p-value, ('gamProcess') gamma process using in
+#'        processes, and ('value') Tn statistic for data.
+#'    'Mn': List with ('pval') p-value, ('gamProcess') gamma process using in
+#'        processes, and ('value') Mn statistic for data.
 #' @export
 #'
 #' @examples
+#' detect_changepoint_final_TnAndMn(electricity[,1:30],M = 10, J=25)
 detect_changepoint_final_TnAndMn <- function(X,
                                              M = 20, J=50,
                                              nSims = 1000,
@@ -134,7 +139,7 @@ detect_changepoint_final_Tn <- function(X,
   )
 }
 
-#' Title
+#' Detect Change point using Mn Test Statistic
 #'
 #' @param X
 #' @param M
