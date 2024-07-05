@@ -24,3 +24,12 @@
 #'
 #' @source <www.bom.gov.au>
 "temperature"
+
+#' S&P 500 Index Data
+#'
+#' Intraday prices for the S&P500 index (SPY) for 2019 to 2023.
+#'
+#' @format ## `temperature`
+#' A data.frame with columns being day and rows the resolution.
+"SPYUS500"
+
