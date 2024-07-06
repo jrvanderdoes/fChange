@@ -10,7 +10,8 @@
 #'  arguments as passed in as ... . This function should compute a statistic for
 #'  each candidate change point (i.e. each curve or column of data), returned as
 #'  a named value: allValues.
-#' @param trim_function XXXXXXX
+#' @param trim_function Function with the first element as data (rest with ...).
+#'  Used to trim data.
 #' @param errorType String of 'L2' or 'Tr' indicating the error function to use
 #' @param ... Additional parameters to pass into the respective functions
 #'
