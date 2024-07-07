@@ -2,16 +2,17 @@
 #'
 #' This implements a scalar characteristic change method
 #'
-#' @param Y XXXXX
-#' @param gam XXXXX
-#' @param nSims XXXXX
-#' @param alpha_val XXXXX
+#' @param Y Scalar data
+#' @param gam Numeric for weights
+#' @param nSims Numeric for number of simulations
+#' @param alpha_val Signficance of test
 #'
 #' @return XXXXX
 #' @export
+#' @references Hušková, M., & Meintanis, S.G. (2006). Change Point Analysis based on Empirical Characteristic Functions. Metrika, 63, 145-168.
 #'
 #' @examples
-#' # XXXXX
+#' scalarDetection(c(rnorm(50),rnorm(75,mean = 1)))
 scalarDetection <- function(Y, gam = 0.5, nSims = 200,
                             alpha_val = 0.05) {
   n <- length(Y)
@@ -65,7 +66,6 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
 #' @param k XXXXXX
 #'
 #' @return XXXXXX
-#' @export
 #'
 #' @noRd
 .phi_k <- function(Y, t, k) {
@@ -86,7 +86,6 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
 #' @param k XXXXXX
 #'
 #' @return XXXXXX
-#' @export
 #'
 #' @noRd
 .phi_k0 <- function(Y, t, k) {
@@ -108,7 +107,6 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
 #' @param a (Optional)
 #'
 #' @return XXXXXX
-#' @export
 #'
 #' @noRd
 .w <- function(t, a = 1) {
