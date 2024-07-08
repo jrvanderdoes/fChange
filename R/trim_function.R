@@ -1,9 +1,11 @@
 #' Basic trim function
 #'
+#' Basic trim function to select how much data to consider.
+#'
 #' @param data Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
 #' @param minVal Integer indicating the minimal trim amount
-#' @param ... Unused to allow for use in other functions
+#' @param ... Unused, but exist to allow for use in other functions
 #'
 #' @return Integer value indicating the amount to trim
 #' @export
