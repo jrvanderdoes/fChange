@@ -8,7 +8,11 @@
 #' @param space String for the space to measure data
 #' @param alpha Numeric for significance
 #'
-#' @return
+#' @return List with the following items:
+#'    'cutoff': Cutoff calculated for Tn using Welch approximation,
+#'    'value': Test statistic Tn for the data
+#'    'detected': Boolean if Tn is significant or not
+#'    'alpha': Significance of the result
 #' @export
 #'
 #' @examples
