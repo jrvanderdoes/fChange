@@ -29,6 +29,13 @@ detect_changepoint_Welch(
 
 \item{alpha}{Numeric for significance}
 }
+\value{
+List with the following items:
+'cutoff': Cutoff calculated for Tn using Welch approximation,
+'value': Test statistic Tn for the data
+'detected': Boolean if Tn is significant or not
+'alpha': Significance of the result
+}
 \description{
 Detect the Changepoint Based on Welch Approximation
 }
