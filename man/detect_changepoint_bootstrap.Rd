@@ -48,3 +48,6 @@ List with the following parameters:
 \description{
 Detect the changes in data by using bootstrap.
 }
+\examples{
+detect_changepoint_bootstrap(electricity,statistic = 'Tn')
+}
