@@ -2,7 +2,7 @@
 % Please edit documentation in R/characteristic_detection.R
 \name{detect_changepoint_final_Mn}
 \alias{detect_changepoint_final_Mn}
-\title{Title}
+\title{Detect Change point using Mn Test Statistic}
 \usage{
 detect_changepoint_final_Mn(
   X,
@@ -19,5 +19,5 @@ detect_changepoint_final_Mn(
 \item{silent}{}
 }
 \description{
-Title
+Detect Change point using Mn Test Statistic
 }
