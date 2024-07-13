@@ -2,7 +2,7 @@
 % Please edit documentation in R/characteristic_detection.R
 \name{detect_changepoint_final_TnAndMn}
 \alias{detect_changepoint_final_TnAndMn}
-\title{Title}
+\title{Detect Change Points using Tn and Mn Test Statistics}
 \usage{
 detect_changepoint_final_TnAndMn(
   X,
@@ -16,8 +16,32 @@ detect_changepoint_final_TnAndMn(
 )
 }
 \arguments{
-\item{silent}{}
+\item{X}{Data.frame of the observations}
+
+\item{M}{Numeric for the number of vectors to explore space}
+
+\item{J}{Numeric for the reslolution to check}
+
+\item{nSims}{Numeric for the number of simulations for distributions}
+
+\item{h}{Numeric for bandwidth}
+
+\item{K}{Function for bandwidth}
+
+\item{space}{String for the space to explore space}
+
+\item{silent}{Boolean to display outputs when running}
+}
+\value{
+A list with the following elements:
+'Tn': List with ('pval') p-value, ('gamProcess') gamma process using in
+processes, and ('value') Tn statistic for data.
+'Mn': List with ('pval') p-value, ('gamProcess') gamma process using in
+processes, and ('value') Mn statistic for data.
 }
 \description{
-Title
+Detect Change Points using Tn and Mn Test Statistics
+}
+\examples{
+detect_changepoint_final_TnAndMn(electricity[,1:30],M = 10, J=25)
 }
