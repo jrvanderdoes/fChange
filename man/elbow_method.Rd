@@ -23,7 +23,8 @@ arguments as passed in as ... . This function should compute a statistic for
 each candidate change point (i.e. each curve or column of data), returned as
 a named value: allValues.}
 
-\item{trim_function}{XXXXXXX}
+\item{trim_function}{Function with the first element as data (rest with ...).
+Used to trim data.}
 
 \item{errorType}{String of 'L2' or 'Tr' indicating the error function to use}
 
