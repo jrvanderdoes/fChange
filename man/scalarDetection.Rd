@@ -7,13 +7,13 @@
 scalarDetection(Y, gam = 0.5, nSims = 200, alpha_val = 0.05)
 }
 \arguments{
-\item{Y}{XXXXX}
+\item{Y}{Scalar data}
 
-\item{gam}{XXXXX}
+\item{gam}{Numeric for weights}
 
-\item{nSims}{XXXXX}
+\item{nSims}{Numeric for number of simulations}
 
-\item{alpha_val}{XXXXX}
+\item{alpha_val}{Signficance of test}
 }
 \value{
 XXXXX
@@ -22,5 +22,8 @@ XXXXX
 This implements a scalar characteristic change method
 }
 \examples{
-# XXXXX
+scalarDetection(c(rnorm(50),rnorm(75,mean = 1)))
+}
+\references{
+Hušková, M., & Meintanis, S.G. (2006). Change Point Analysis based on Empirical Characteristic Functions. Metrika, 63, 145-168.
 }
