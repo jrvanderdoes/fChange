@@ -12,13 +12,13 @@ indicating FD}
 
 \item{minVal}{Integer indicating the minimal trim amount}
 
-\item{...}{Unused to allow for use in other functions}
+\item{...}{Unused, but exist to allow for use in other functions}
 }
 \value{
 Integer value indicating the amount to trim
 }
 \description{
-Basic trim function
+Basic trim function to select how much data to consider.
 }
 \examples{
 trim_function(electricity)
