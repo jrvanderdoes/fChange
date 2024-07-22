@@ -16,10 +16,11 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(fChange)
+
 SPYUS500 <- SPYUS500
 ```
 
-```{r}
+```{r functions}
 
 compute_ocidr <- function(dat){
   dat_cidr <- dat
@@ -227,7 +228,7 @@ paperPlot <- function(data,CPs){
 }
 ```
 
-```{r}
+```{r plot_data}
 SPYUS_ocidr <- compute_ocidr(SPYUS500)
 
 set.seed(25641)
