@@ -7,55 +7,348 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r setup}
+```{r load_package}
 library(fChange)
+# library(devtools);load_all()
 ```
 
-```{r}
+In the code below, we generate all data for the null tables.
+```{r generate_null_data}
+path <- getwd()
+path <- paste0(path,'/paperFiles/Null/')
+
+nTrials <- 1000
+lengths <- c(100,500)
+dat_res <- 50
+
+################################################
+##  KL Data
+################################################
+###################
+## No Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  
+  set.seed(12345+l_idx)
+  data <- list()
+  
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+    data[[i]] <- generate_data_fd(
+      ns = lengths[l_idx],
+      eigsList = list(1/sqrt(1:5)),
+      basesList = list(
+        fda::create.bspline.basis(nbasis = 5, norder = 4)
+      ),
+      meansList = c(0),
+      distsArray = c("Normal"),
+      evals = seq(0, 1, length.out=dat_res),
+      kappasArray = c(0),
+      silent = T
+    )
+  }
+  
+  saveRDS(data,paste0(path, 'KL/Data/NullCase_len',l_idx,'_data.rds'))
+}
+
+
+###################
+## Mild Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  
+  set.seed(12345+l_idx)
+  data <- list()
+  
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+    data[[i]] <- generate_data_fd(
+      ns = lengths[l_idx],
+      eigsList = list(1/sqrt(1:5)),
+      basesList = list(
+        fda::create.bspline.basis(nbasis = 5, norder = 4)
+      ),
+      meansList = c(0),
+      distsArray = c("Normal"),
+      evals = seq(0, 1, length.out=dat_res),
+      kappasArray = c(0.5),
+      silent = T
+    )
+  }
+  
+  saveRDS(data,paste0(path, 'KL/Data/NullCase_len',l_idx,'_data_mild.rds'))
+}
+
+
+###################
+## Strong Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  
+  set.seed(12345+l_idx)
+  data <- list()
+  
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+    data[[i]] <- generate_data_fd(
+      ns = lengths[l_idx],
+      eigsList = list(1/sqrt(1:5)),
+      basesList = list(
+        fda::create.bspline.basis(nbasis = 5, norder = 4)
+      ),
+      meansList = c(0),
+      distsArray = c("Normal"),
+      evals = seq(0, 1, length.out=dat_res),
+      kappasArray = c(0.8),
+      silent = T
+    )
+  }
+  
+  saveRDS(data,paste0(path, 'KL/Data/NullCase_len',l_idx,'_data_strong.rds'))
+}
+
+################################################
+##  OU Data
+################################################
+###################
+## No Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  
+  set.seed(12345+l_idx)
+  data <- list()
+  
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=500, rho=0)
+  }
+  
+  saveRDS(data,paste0(path, 'OU/Data/OUNull_len',l_idx,'_data.rds'))
+}
+
+###################
+## Mild Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  
+  set.seed(12345+l_idx)
+  data <- list()
+  
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=500, rho=0.5)
+  }
+  
+  saveRDS(data,paste0(path, 'OU/Data/OUNull_len',l_idx,'_data_mild.rds'))
+  
+}
+
+###################
+## Strong Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  
+  set.seed(12345+l_idx)
+  data <- list()
+  
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=500, rho=0.8)
+  }
+  
+  saveRDS(data,paste0(path, 'OU/Data/OUNull_len',l_idx,'_data_strong.rds'))
+  
+}
+
+
+################################################
+##  FAR(1) Data
+################################################
+###################
+## No Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  
+  set.seed(12345+l_idx)
+  data <- list()
+  
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+    data[[i]] <- generateFAR1(resolution=dat_res, N=lengths[l_idx],
+                              d=0, burnin=1000)
+  }
+  
+  saveRDS(data,paste0(path,'FAR1/Data/FAR1Null_len',l_idx,'_data.rds'))
+}
+
+
+###################
+## Mild Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  
+  set.seed(12345+l_idx)
+  data <- list()
+  
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+    data[[i]] <- generateFAR1(resolution=dat_res, N=lengths[l_idx],
+                              d=0.5, burnin=1000)
+  }
+  
+  saveRDS(data,paste0(path,'FAR1/Data/FAR1Null_len',l_idx,'_data_mild.rds'))
+}
+
+
+###################
+## Strong Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  
+  set.seed(12345+l_idx)
+  data <- list()
+  
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+    data[[i]] <- generateFAR1(resolution=dat_res, N=lengths[l_idx],
+                              d=0.8, burnin=1000)
+  }
+  
+  saveRDS(data,paste0(path,'FAR1/Data/FAR1Null_len',l_idx,'_data_strong.rds'))
+}
+
+```
+
+Compute Statistics
+```{r compute_null_data}
+path <- getwd()
+path <- paste0(path,'/paperFiles/Null/KL/')
+
+nTrials <- 1000
+lengths <- c(100,500)
+dat_res <- 50
+
+###################
+## No Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  cat(paste0('\n',l_idx,': '))
+  results <- data.frame('length'=rep(NA, nTrials),
+                        'tnh0'=NA, 'tnh13'=NA, 'tnhd13'=NA)
+
+  data <- readRDS(paste0(path,'Data/',
+                         'NullCase_len',l_idx,'_data.rds'))
+
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+
+    # TN/Mn
+    set.seed(123456*l_idx+i)
+    tn0 <- detect_changepoint_final_TnAndMn(data[[i]], h=0,space='BM')
+    tn13 <- detect_changepoint_final_TnAndMn(data[[i]], h=lengths[l_idx]^(1/3),space='BM')
+    tnd13 <- detect_changepoint_final_TnAndMn(data[[i]], h=2*lengths[l_idx]^(1/3),space='BM')
+
+    # Bootstrap TN/Mn
+    set.seed(123456*l_idx+i)
+    
+    # Welch Tn
+    set.seed(123456*l_idx+i)
+    
+    
+    results[i,] <- c(lengths[l_idx],
+                     tn0$pval, tn13$pval, tnd13$pval)
+
+    if((nTrials %% 100) == 0)
+      saveRDS(results,paste0(path,'tmpResults/', 'Tn_NullCase_len',l_idx,'.rds'))
+  }
+
+  saveRDS(results,paste0(path,'Results/', 'Tn_NullCase_len',l_idx,'.rds'))
+}
+
+###################
+## Mild Dependence
+###################
+
+for(l_idx in 1:length(lengths)){
+  cat(paste0('\n',l_idx,': '))
+  results <- data.frame('length'=rep(NA, nTrials),
+                        'tnh0'=NA, 'tnh13'=NA, 'tnhd13'=NA)
+
+  data <- readRDS(paste0(path,'Data/',
+                         'NullCase_len',l_idx,'_data_mild.rds'))
+
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+
+    set.seed(123456*l_idx+i)
+    tn0 <- detect_changepoint_final_Tn(data[[i]], h=0,space='BM')
+    tn13 <- detect_changepoint_final_Tn(data[[i]], h=lengths[l_idx]^(1/3),space='BM')
+    tnd13 <- detect_changepoint_final_Tn(data[[i]], h=2*lengths[l_idx]^(1/3),space='BM')
+
+    results[i,] <- c(lengths[l_idx],
+                     tn0$pval, tn13$pval, tnd13$pval)
+
+    if((nTrials %% 100) == 0)
+      saveRDS(results,paste0(path,'tmpResults/', 'Tn_NullCase_len',l_idx,'_mild.rds'))
+  }
+
+  saveRDS(results,paste0(path,'Results/', 'Tn_NullCase_len',l_idx,'_mild.rds'))
+}
+
+
+###################
+## Strong Dependence
+###################
+library(devtools);load_all()
+
 # Normal
 nTrials <- 1000
-Len <- 100 # 100, 250, 500
+lengths <- c(100,250,500)
 dat_res <- 21
-spaces <- c('BM','OU','PC','RN')
 
-results <- data.frame('length'=rep(NA,nTrials*length(spaces)),
-                      'space'=NA,
-                      'h0'=NA, 'h13'=NA, 'hd13'=NA,
-                      'h23'=NA, 'hd23'=NA)
-set.seed(12345)
-for(i in 1:nTrials){
-  cat(paste0(i,', '))
-  X <- generate_data_fd(
-    ns = Len,
-    eigsList = list(5:1),
-    basesList = list(
-      fda::create.bspline.basis(nbasis = 5, norder = 4)
-    ),
-    meansList = c(0),
-    distsArray = c("Normal"),
-    evals = seq(0, 1, length.out=dat_res),
-    kappasArray = c(0),
-    silent = T
-  )
-  
-  for(s in 1:length(spaces)){
-    tmp0 <- detect_changepoint_final_Tn(X, h=0,space=spaces[s])
-    tmp13 <- detect_changepoint_final_Tn(X, h=Len^(1/3),space=spaces[s])
-    tmpd13 <- detect_changepoint_final_Tn(X, h=2*Len^(1/3),space=spaces[s])
-    tmp23 <- detect_changepoint_final_Tn(X, h=Len^(2/3),space=spaces[s])
-    tmpd23 <- detect_changepoint_final_Tn(X, h=2*Len^(2/3),space=spaces[s])
-    
-    results[length(spaces)*(i-1)+s,] <- 
-      c(Len, spaces[s], 
-        tmp0$pval, tmp13$pval, tmpd13$pval, tmp23$pval, tmpd23$pval)
+for(l_idx in 1:length(lengths)){
+  cat(paste0('\n',l_idx,': '))
+  results <- data.frame('length'=rep(NA, nTrials),
+                        'tnh0'=NA, 'tnh13'=NA, 'tnhd13'=NA)
+
+  data <- readRDS(paste0(path,'Data/',
+                         'NullCase_len',l_idx,'_data_strong.rds'))
+
+  for(i in 1:nTrials){
+    cat(paste0(i,', '))
+
+    set.seed(123456*l_idx+i)
+    tn0 <- detect_changepoint_final_Tn(data[[i]], h=0,space='BM')
+    tn13 <- detect_changepoint_final_Tn(data[[i]], h=lengths[l_idx]^(1/3),space='BM')
+    tnd13 <- detect_changepoint_final_Tn(data[[i]], h=2*lengths[l_idx]^(1/3),space='BM')
+
+    results[i,] <- c(lengths[l_idx],
+                     tn0$pval, tn13$pval, tnd13$pval)
+
+    if((nTrials %% 100) == 0)
+      saveRDS(results,paste0(path,'tmpResults/', 'Tn_NullCase_len',l_idx,'_strong.rds'))
   }
+
+  saveRDS(results,paste0(path,'Results/', 'Tn_NullCase_len',l_idx,'_strong.rds'))
 }
+
+```
+
+The mean change figure
+```{r mean_change}
 
 ```
