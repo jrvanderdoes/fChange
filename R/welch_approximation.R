@@ -16,6 +16,7 @@
 #' @export
 #'
 #' @examples
+#' detect_changepoint_Welch(electricity)
 detect_changepoint_Welch <- function(X,
                                      M = 20, J=50,
                                      h = ncol(X)^(1 / 3),

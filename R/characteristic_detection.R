@@ -75,21 +75,18 @@ detect_changepoint_final_TnAndMn <- function(X,
   )
 }
 
-#' Title
+#' Detect Change Point using Tn Statistic
 #'
-#' @param X
-#' @param M
-#' @param J
-#' @param nSims
-#' @param h
-#' @param K
-#' @param space
-#' @param silent
+#' @inheritParams detect_changepoint_final_TnAndMn
 #'
-#' @return
+#' @return List with three items:
+#'  'pval': p-value of change point
+#'  'gamProcess': Simulated gamma processes
+#'  'value': Value of Tn test statistic for the data
 #' @export
 #'
 #' @examples
+#' detect_changepoint_final_Tn(electricity,M=5,J=10,h=0)
 detect_changepoint_final_Tn <- function(X,
                                      M = 20, J=50,
                                      nSims = 1000,
@@ -141,18 +138,16 @@ detect_changepoint_final_Tn <- function(X,
 
 #' Detect Change point using Mn Test Statistic
 #'
-#' @param X
-#' @param M
-#' @param nSims
-#' @param h
-#' @param K
-#' @param space
-#' @param silent
+#' @inheritParams detect_changepoint_final_TnAndMn
 #'
-#' @return
+#' @return List with three items:
+#'  'pval': p-value of change point
+#'  'gamProcess': Simulated gamma processes
+#'  'value': Value of Mn test statistic for the data
 #' @export
 #'
 #' @examples
+#' detect_changepoint_final_Mn(electricity,M=5,J=10,h=0)
 detect_changepoint_final_Mn <- function(X,
                                         M = 20, J=50,
                                         nSims = 1000,
