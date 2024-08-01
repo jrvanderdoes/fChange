@@ -39,3 +39,6 @@ List with the following items:
 \description{
 Detect the Changepoint Based on Welch Approximation
 }
+\examples{
+detect_changepoint_Welch(electricity)
+}

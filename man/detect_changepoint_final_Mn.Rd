@@ -16,8 +16,31 @@ detect_changepoint_final_Mn(
 )
 }
 \arguments{
-\item{silent}{}
+\item{X}{Data.frame of the observations}
+
+\item{M}{Numeric for the number of vectors to explore space}
+
+\item{J}{Numeric for the reslolution to check}
+
+\item{nSims}{Numeric for the number of simulations for distributions}
+
+\item{h}{Numeric for bandwidth}
+
+\item{K}{Function for bandwidth}
+
+\item{space}{String for the space to explore space}
+
+\item{silent}{Boolean to display outputs when running}
+}
+\value{
+List with three items:
+'pval': p-value of change point
+'gamProcess': Simulated gamma processes
+'value': Value of Mn test statistic for the data
 }
 \description{
 Detect Change point using Mn Test Statistic
+}
+\examples{
+detect_changepoint_final_Mn(electricity,M=5,J=10,h=0)
 }
