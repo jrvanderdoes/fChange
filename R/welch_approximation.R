@@ -82,6 +82,17 @@ compute_Welch <- function(X, alpha = 0.05,
 
   muVals <- sigma2Vals <- rep(0, M)
 
+  # J <- nrow(X)
+  # CHat <- .estimCovMat_final(X = X, W = W,
+  #                            x = seq(0,1,length.out=J),
+  #                            h = h, K = K)
+  # # Integrate out M
+  # results <- matrix(NA,nrow=nrow(CHat), ncol=J)
+  # for(i in 1:J){
+  #   results[,i] <- apply(CHat[,(i-1)*M +1:M],
+  #                        MARGIN=1, mean)
+  # }
+
   for (i in 1:M) {
     v <- W[, i]
     v1 <- W1[, i]
