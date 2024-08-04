@@ -1,13 +1,18 @@
 #' Define funts Object
 #'
 #' @param x Data.frame to convert into data
-#' @param labels
+#' @param labels Labels for the observations. Defaults to the column names of
+#'  \code{x}.
+#' @param intraobs Vector of numerics indicating the points for each
+#'  observation. Defaults to even spacing on [0,1], but may be uneven or
+#'  for any real numbers.
 #'
-#' @return
+#' @return funts object
 #' @export
 #'
 #' @examples
 #' funts(electricity)
+#' funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
 funts <- function(X, labels=colnames(as.data.frame(X)),
                   intraobs=seq(0,1,length.out=nrow(X))){
   # Note: as.matrix is very important! Otherwise extraction and computation is
@@ -17,6 +22,7 @@ funts <- function(X, labels=colnames(as.data.frame(X)),
     'labels' = labels,
     'intraobs' = intraobs
   )
+  colnames(funts_obj$data) <- NULL
   # structure(x, 'labels' = labels, class = "funts")
   class(funts_obj) <- 'funts'
 
@@ -24,27 +30,30 @@ funts <- function(X, labels=colnames(as.data.frame(X)),
 }
 
 
-#' Check is funts
+#' Check data to see if its funts
 #'
-#' @param x
+#' @param x Data to examine class
 #'
-#' @return
+#' @return Boolean indicating if \code{x} is a funts object or not
 #' @export
 #'
 #' @examples
+#' is.funts(electricity)
+#' is.funts(funts(electricity))
 is.funts <- function(x){
   inherits(x, "funts") #& length(x$x) > 0
 }
 
 
-#' Check as funts
+#' Convert to funts
 #'
-#' @param x
+#' @param x Object to convert to funts
 #'
-#' @return
+#' @return funts object
 #' @export
 #'
 #' @examples
+#' as.funts(electricity)
 as.funts <- function(x){
   switch(class(x)[[1]],
          'data.frame'={
@@ -59,11 +68,12 @@ as.funts <- function(x){
   )
 }
 
+
 #' Validate funts
 #'
-#' @param x funts to verify class does not have violations
+#' @param x funts object to verify for any violations
 #'
-#' @return
+#' @return Silently returns the data if there are no violations
 #' @export
 #'
 #' @examples
@@ -77,16 +87,16 @@ validate.funts <- function(x){
     stop("There must be the same number of `labels` as values in `x`")
   }
 
-  # return(x)
+  invisible(x)
 }
 
 
 #' Math Group for funts
 #'
-#' @param x
-#' @param ...
+#' @param x funts object
+#' @param ... Additional parameters for functions in math group
 #'
-#' @return
+#' @return funts object with applied functions
 #' @export
 #'
 #' @examples
@@ -102,10 +112,12 @@ Math.funts <- function (x, ...) {
 
 #' Ops Group for funts
 #'
-#' @param e1
-#' @param e2
+#' TODO: Figure out for non-intersections.
 #'
-#' @return
+#' @param e1 funts object
+#' @param e2 funts object
+#'
+#' @return funts object from the two elements
 #' @export
 #'
 #' @examples
@@ -130,6 +142,8 @@ Ops.funts <- function (e1, e2) {
       }
       stopifnot( all.equal(class(e1$labels),
                            class(e2$labels)) )
+      stopifnot( all.equal(class(e1$intraobs),
+                           class(e2$intraobs)) )
 
       i.cols <- intersect( e1$labels, e2$labels )
 
@@ -137,8 +151,9 @@ Ops.funts <- function (e1, e2) {
 
       ## if there is an intersection, the do the Op
       if(length(i.cols)) {
-        e1 <- e1$data[,i.cols]
-        e2 <- e2$data[,i.cols]
+        io <- e1$intraobs
+        e1 <- e1$data[,e1$labels==i.cols]
+        e2 <- e2$data[,e2$labels==i.cols]
         # e1 <- e1[i.dates,]
         # e2 <- e2[i.dates,]
 
@@ -148,19 +163,20 @@ Ops.funts <- function (e1, e2) {
         #   e2 <- rep(e2,nce1)
         # }
 
-        .Class <- "data.frame"
+        .Class <- "matrix"
         ans <- NextMethod()
-        colnames(ans) <- i.cols
-        funts(ans,labels = i.cols)
+
+        #colnames(ans) <- i.cols
+        ans <- funts(ans,labels = i.cols,intraobs = io)
       } else {
         ## no matching cols, return NULL
         ans <- NULL
       }
     } else {
-      .Class <- "data.frame"
+      .Class <- "matrix"
       ans <- NextMethod()
       colnames(ans) <- i.cols
-      funts(ans,labels = i.cols)
+      ans <- funts(ans,labels = i.cols)
 
       # if("funts" %in% c.e1) {
       #   ans.dates <- attr(e1,"index")
@@ -177,65 +193,76 @@ Ops.funts <- function (e1, e2) {
 
 #' Difference funts
 #'
-#' @param x
-#' @param k
-#' @param ...
+#' @param x funts object
+#' @param lag An integer indicating which lag to use.
+#' @param differences	An integer indicating the order of the difference.
+#' @param ... Further arguments to be passed to or from methods.
 #'
-#' @return
+#' @return funts object with differenced values
 #' @export
 #'
 #' @examples
-#' diff(funts(electricity), k=1)
-#' diff(funts(electricity), k=2)
-diff.funts <- function(x, k, ...) {
-  stopifnot(k > -1)
+#' diff(funts(electricity), lag=1)
+#' diff(funts(electricity), differences=2)
+diff.funts <- function(x, lag = 1L, differences = 1L, ...) {
+  if(differences==0) return(x)
+
+  # Data check
+  if (length(lag) != 1L || length(differences) > 1L || lag <
+      1L || differences < 1L)
+    stop("'lag' and 'differences' must be integers >= 1")
+  if (lag * differences >= ncol(x$data))
+    return(NULL)
   #ans <- .Call("lag", x, as.integer(k),PACKAGE="fts")
 
   dat1 <- data.frame(matrix(NA,
                             nrow = nrow(x$data),
-                            ncol = ncol(x$data)-k))
-  colnames(dat1) <- x$labels[-c(length(x$labels)-(k-1):0)]
-  for(i in 1:(ncol(x$data)-k)){
-    dat1[,i] <- x$data[,i+k]-x$data[,i]
+                            ncol = ncol(x$data)-lag))
+  #colnames(dat1) <- x$labels[-c(length(x$labels)-(lag-1):0)]
+  for(i in 1:(ncol(x$data)-lag)){
+    dat1[,i] <- x$data[,i+lag]-x$data[,i]
   }
 
-  funts(dat1)
+  diff.funts(x=funts(dat1),lag=lag, differences=differences-1)
 }
 
 
 #' Lag funts
 #'
-#' @param x
-#' @param k
-#' @param ...
+#' @param x funts object
+#' @param k integer indicating the number of lags for the data
+#' @param ... Unused additional parameters
 #'
-#' @return
+#' @return A funts object
 #' @export
 #'
 #' @examples
+#' lag(funts(electricity))
 lag.funts <- function(x, k, ...) {
-  stopifnot(k > -1)
+  stopifnot(k >= 0)
   #ans <- .Call("lag", x, as.integer(k),PACKAGE="fts")
   #
-  dat1 <- x$data[,-c(1:k)]
-  funts(dat1,labels = x$labels[-c(1:k)])
+  dat1 <- x$data[,-c(1:round(k))]
+  funts(dat1,labels = x$labels[-c(1:round(k))])
 }
 
 
 #' Max funts
 #'
-#' Get observations with the max absolute value
+#' Get the observation(s) with the max average value.
 #'
-#' @param x
-#' @param ...
+#' TODO:: Add a pw option
 #'
-#' @return
+#' @param x funts object
+#' @param ... Unused additional parameters
+#'
+#' @return A funts object
 #' @export
 #'
 #' @examples
 #' max(funts(electricity))
 max.funts <- function(x, ...){
-  idx <- which.max(colMeans(abs(x$data)))
+  idx <- which.max(colMeans(x$data))
   funts(x$data[,idx,drop=FALSE],
         labels = x$labels[idx])
 }
@@ -243,12 +270,13 @@ max.funts <- function(x, ...){
 
 #' Min funts
 #'
-#' Get observations with the min absolute value
+#' Get the observation(s) with the min average value
 #'
-#' @param x
-#' @param ...
+#' TODO:: Add a pw option
 #'
-#' @return
+#' @inheritParams max.funts
+#'
+#' @return A funts object
 #' @export
 #'
 #' @examples
@@ -262,10 +290,9 @@ min.funts <- function(x, ...){
 
 #' Mean for funts
 #'
-#' @param x
-#' @param ...
+#' @inheritParams max.funts
 #'
-#' @return
+#' @return Numeric for the mean at each resolution
 #' @export
 #'
 #' @examples
@@ -277,10 +304,9 @@ mean.funts <- function(x, ...) {
 
 #' Median for funts
 #'
-#' @param x
-#' @param ...
+#' @inheritParams max.funts
 #'
-#' @return
+#' @return Numeric for the median at each resolution
 #' @export
 #'
 #' @examples
@@ -290,42 +316,11 @@ median.funts <- function(x, ...) {
 }
 
 
-#' SD for funts
-#'
-#' @param x
-#' @param ...
-#'
-#' @return
-#' @export
-#'
-#' @examples
-#' sd(funts(electricity))
-sd.funts <- function(x, ...) {
-  apply(x$data, MARGIN = 1, sd)
-}
-
-
-#' Variance for funts
-#'
-#' @param x
-#' @param ...
-#'
-#' @return
-#' @export
-#'
-#' @examples
-#' var(funts(electricity))
-sd.funts <- function(x, ...) {
-  apply(x$data, MARGIN = 1, var)
-}
-
-
 #' Dimension of funts
 #'
-#' @param x
-#' @param ...
+#' @inheritParams max.funts
 #'
-#' @return
+#' @return Numerics indicating the dimension of the funts object
 #' @export
 #'
 #' @examples
@@ -337,10 +332,10 @@ dim.funts <- function(x, ...) {
 
 #' Plot funts
 #'
-#' @param x
-#' @param ...
+#' @param x A funts object
+#' @param ... Additional parameters to pass into plotting
 #'
-#' @return
+#' @return Plot
 #' @export
 #'
 #' @examples
@@ -352,10 +347,10 @@ plot.funts <- function(x, ...){
 
 #' Quantile funts
 #'
-#' @param x
-#' @param ...
+#' @param x A funts object
+#' @param ... Additional parameters to pass into quantile function
 #'
-#' @return
+#' @return Matrix with columns for each requested quantile
 #' @export
 #'
 #' @examples
