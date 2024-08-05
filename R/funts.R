@@ -8,10 +8,12 @@
 #'
 #' @examples
 #' funts(electricity)
-funts <- function(x, labels=colnames(x)){
+funts <- function(X, labels=colnames(X),
+                  intraobs=seq(0,1,length.out=nrow(X))){
   funts_obj <- list(
-    'data' = as.data.frame(x),
-    'labels' = labels
+    'data' = as.data.frame(X),
+    'labels' = labels,
+    'intraobs' = intraobs
   )
   #structure(x, 'labels' = labels, class = "funts")
   class(funts_obj) <- 'funts'
@@ -193,4 +195,117 @@ lag.funts <- function(x, k, ...) {
   #
   dat1 <- x$data[,-c(1:k)]
   funts(dat1,labels = x$labels[-c(1:k)])
+}
+
+
+#' Max funts
+#'
+#' Get observations with the max absolute value
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' max(funts(electricity))
+max.funts <- function(x, ...){
+  idx <- which.max(colMeans(abs(x$data)))
+  funts(x$data[,idx,drop=FALSE],
+        labels = x$labels[idx])
+}
+
+
+#' Min funts
+#'
+#' Get observations with the min absolute value
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' min(funts(electricity))
+min.funts <- function(x, ...){
+  idx <- which.min(colMeans(abs(x$data)))
+  funts(x$data[,idx,drop=FALSE],
+        labels = x$labels[idx])
+}
+
+
+#' Mean for funts
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' mean(funts(electricity))
+mean.funts <- function(x, ...) {
+  rowMeans(x$data)
+}
+
+
+#' Median for funts
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' median(funts(electricity))
+median.funts <- function(x, ...) {
+  apply(x$data, MARGIN = 1, median)
+}
+
+
+#' SD for funts
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' sd(funts(electricity))
+sd.funts <- function(x, ...) {
+  apply(x$data, MARGIN = 1, sd)
+}
+
+
+#' Variance for funts
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' var(funts(electricity))
+sd.funts <- function(x, ...) {
+  apply(x$data, MARGIN = 1, var)
+}
+
+
+#' Dimension of funts
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' dim(funts(electricity))
+dim.funts <- function(x, ...) {
+  dim(x$data)
 }
