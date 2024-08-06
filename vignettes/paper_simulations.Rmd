@@ -17,7 +17,7 @@ library(fChange)
 ```
 
 In the code below, we generate all data for the null tables.
-```{r generate_null_data}
+```{r generate_null_data, eval=FALSE}
 path <- getwd()
 path <- paste0(path,'/paperFiles/Null/')
 
@@ -237,7 +237,7 @@ for(l_idx in 1:length(lengths)){
 ```
 
 Compute Statistics
-```{r compute_null_data}
+```{r compute_null_data, eval=FALSE}
 #path <- getwd()
 #path <- paste0(path,'/paperFiles/Null/KL/')
 path <- 'C:/Users/jerem/OneDrive/Documents/School/Waterloo/Research/RPackages/fChange-data/paperFiles/Null/KL/'
@@ -533,6 +533,6 @@ for(l_idx in 1:length(lengths)){
 ```
 
 The mean change figure
-```{r mean_change}
-
+```{r mean_change, eval=FALSE}
+  tmp = 0
 ```
