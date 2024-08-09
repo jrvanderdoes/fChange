@@ -2,6 +2,8 @@
 #'
 #' Function to compute both Tn and Mn.
 #'
+#' TODO:: Make this part of the original function
+#'
 #' @param X Data to compute the test statistics for
 #' @param M Numeric for the number of vectors to measure space
 #' @param W Data.frame of vectors to measure spaces
@@ -16,15 +18,15 @@
 #' @examples
 #' compute_TnMn(electricity,M=5)
 compute_TnMn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
-  # Small bit of cpp Code for a function
-  Rcpp::cppFunction('ComplexMatrix col_cumsum(ComplexMatrix m) {
-    for (int j = 0; j < m.ncol(); ++j) {
-        for (int i = 1; i < m.nrow(); ++i) {
-            m(i, j) = m(i, j) + m(i - 1, j);
-        }
-    }
-    return m;
-  }')
+  # # Small bit of cpp Code for a function
+  # Rcpp::cppFunction('ComplexMatrix col_cumsum(ComplexMatrix m) {
+  #   for (int j = 0; j < m.ncol(); ++j) {
+  #       for (int i = 1; i < m.nrow(); ++i) {
+  #           m(i, j) = m(i, j) + m(i - 1, j);
+  #       }
+  #   }
+  #   return m;
+  # }')
 
 
   n <- ncol(X)
@@ -52,6 +54,8 @@ compute_TnMn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
 #' Resampling for Tn and Mn
 #'
 #' Compute resampling statistics for Tn and Mn
+#'
+#' TODO:: Make this part of the original function
 #'
 #' @param X data.frame of the data
 #' @param blockSize Numeric for block length of the resampling
@@ -88,7 +92,7 @@ compute_TnMn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
 #' evals = seq(0, 1, 0.05),
 #' kappasArray = c(0, 0.5)
 #' )
-#' result <- TnMn_resampling(data_KL, M=1000)
+#' result <- TnMn_resampling(data_KL$data, M=1000)
 TnMn_resampling <- function(X, blockSize = 1, iters = 1000,
                             replace = FALSE, alpha = 0.05, silent = FALSE, ...) {
   st <- Sys.time()
