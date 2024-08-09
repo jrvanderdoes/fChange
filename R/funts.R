@@ -8,7 +8,7 @@
 #'
 #' @examples
 #' funts(electricity)
-funts <- function(X, labels=colnames(X),
+funts <- function(X, labels=colnames(as.data.frame(X)),
                   intraobs=seq(0,1,length.out=nrow(X))){
   funts_obj <- list(
     'data' = as.data.frame(X),
@@ -34,6 +34,28 @@ is.funts <- function(x){
   inherits(x, "funts") #& length(x$x) > 0
 }
 
+
+#' Check as funts
+#'
+#' @param x
+#'
+#' @return
+#' @export
+#'
+#' @examples
+as.funts <- function(x){
+  switch(class(x)[[1]],
+         'data.frame'={
+           funts(x)
+         },
+         'matrix'={
+           funts(x)
+         },
+         {
+           stop('Only matrix and data.frame objects currently setup')
+         }
+  )
+}
 
 #' Validate funts
 #'
@@ -308,4 +330,42 @@ sd.funts <- function(x, ...) {
 #' dim(funts(electricity))
 dim.funts <- function(x, ...) {
   dim(x$data)
+}
+
+
+#' Plot funts
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' plot(funts(electricity))
+plot.funts <- function(x, ...){
+  plot_fd(x$data, ...)
+}
+
+
+#' Quantile funts
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' quantile(funts(electricity))
+#' quantile(funts(electricity),probs = 0.95)
+quantile.funts <- function(x, probs = seq(0, 1, 0.25), ...){
+  if(length(probs)>1){
+    output <- t(apply(x$data, MARGIN = 1, quantile, probs=probs, ...))
+  } else{
+    output <- data.frame(apply(x$data, MARGIN = 1, quantile, probs=probs, ...))
+    colnames(output) <- paste0(probs*100,'%')
+  }
+
+  output
 }
