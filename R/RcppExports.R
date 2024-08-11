@@ -5,6 +5,10 @@ dot_integrate <- function(v) {
     .Call(`_fChange_dot_integrate`, v)
 }
 
+dot_integrate_uneven <- function(v, r) {
+    .Call(`_fChange_dot_integrate_uneven`, v, r)
+}
+
 dot_integrate_col <- function(v) {
     .Call(`_fChange_dot_integrate_col`, v)
 }
