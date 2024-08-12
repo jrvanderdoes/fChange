@@ -10,12 +10,14 @@
 #' funts(electricity)
 funts <- function(X, labels=colnames(as.data.frame(X)),
                   intraobs=seq(0,1,length.out=nrow(X))){
+  # Note: as.matrix is very important! Otherwise extraction and computation is
+  #   far more expensive!
   funts_obj <- list(
-    'data' = as.data.frame(X),
+    'data' = as.matrix(X),
     'labels' = labels,
     'intraobs' = intraobs
   )
-  #structure(x, 'labels' = labels, class = "funts")
+  # structure(x, 'labels' = labels, class = "funts")
   class(funts_obj) <- 'funts'
 
   funts_obj
