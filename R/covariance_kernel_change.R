@@ -1,7 +1,8 @@
-#' Covariance Change
+#' Covariance Kernel Change
 #'
-#' This method implements a method for detection of covariance changes in
-#'  functional data.
+#' This method implements a method for detection of changes in the covariance
+#'  kernel of functional data based on the norms of a generally weighted
+#'  process of partial sample estimates.
 #'
 #' Upcoming: Size estimates may be included (already coded).
 #'
@@ -14,12 +15,16 @@
 #' @return Location of change. NA for no change and numeric if there is a change.
 #' @export
 #'
-#' @references Change point analysis of covariance functions: a weighted cumulative sum approach, L. Horvath, G. Rice, Y. Zhao (2022) Journal of Multivariate Analysis.
+#' @references Change point analysis of covariance functions: a weighted
+#'  cumulative sum approach, L. Horvath, G. Rice, Y. Zhao (2022) Journal
+#'  of Multivariate Analysis.
+#'
+#'  https://github.com/yzhao7322/CovFun_Change
 #'
 #' @examples
-#' cov_change(electricity[,1:18])
-#' cov_change(electricity[,1:16])
-cov_change <- function(X, kappa = 1 / 4, len = 30) {
+#' covariance_kernel_change(electricity[,1:18])
+#' covariance_kernel_change(electricity[,1:16])
+covariance_kernel_change <- function(X, kappa = 1 / 4, len = 30) {
   stat_d0 <- .weight_TNstat(X, kappa = kappa)
   cv_d0 <- .weight_criticalvalueMC(X, len = len, kappa = kappa)
 
