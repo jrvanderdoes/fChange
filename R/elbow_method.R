@@ -4,7 +4,7 @@
 #'     cascading change points are not considered to allow for every possible
 #'     number of change points to be selectable.
 #'
-#' @param data Numeric data.frame with rows for evaluated values and columns
+#' @param data funts object or Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
 #' @param test_function Function with the first argument being data. Additional
 #'  arguments as passed in as ... . This function should compute a statistic for
@@ -42,24 +42,26 @@ elbow_method <- function(data,
                            0
                          },
                          errorType = "L2", ...) {
+  data <- .check_data(data)
+
   # Setup
-  n <- ncol(data)
+  n <- ncol(data$data)
   return_data <- data.frame(
     "CP" = NA,
     "Var" = NA
   )
 
   # Trim & stopping criteria
-  trim_amt <- trim_function(data, ...)
+  trim_amt <- trim_function(data$data, ...)
   if (1 + trim_amt > n - trim_amt) {
     return()
   }
 
   # Run First
-  stats_tmp <- test_function(data[, (1 + trim_amt):(n - trim_amt)], ...)
+  stats_tmp <- test_function(data$data[, (1 + trim_amt):(n - trim_amt)], ...)
   test_stat <- c(rep(NA, trim_amt), stats_tmp$allValues, rep(NA, trim_amt))
   tmp_loc <- which.max(stats_tmp$allValues) + trim_amt
-  return_data[1, ] <- c(tmp_loc, .compute_total_var(data, tmp_loc, errorType))
+  return_data[1, ] <- c(tmp_loc, .compute_total_var(data$data, tmp_loc, errorType))
 
   # Iteratively Search
   i <- 1
@@ -74,23 +76,23 @@ elbow_method <- function(data,
     ## We only need to recompute for the interval changed by last CP!
     # Before
     beforePrevCP <- (CPs[prev_CP_loc - 1] + 1):(CPs[prev_CP_loc])
-    trim_amt <- trim_function(data[, beforePrevCP], ...)
+    trim_amt <- trim_function(data$data[, beforePrevCP], ...)
     test_stat[beforePrevCP] <- NA
 
     if (1 + trim_amt < length(beforePrevCP) - trim_amt) {
       fill_idx <- (1 + trim_amt):(length(beforePrevCP) - trim_amt)
-      stats_tmp <- test_function(data[, beforePrevCP[fill_idx]], ...)
+      stats_tmp <- test_function(data$data[, beforePrevCP[fill_idx]], ...)
       test_stat[beforePrevCP[fill_idx]] <- stats_tmp$allValues
     }
 
     # After
     afterPrevCP <- (CPs[prev_CP_loc] + 1):CPs[prev_CP_loc + 1]
-    trim_amt <- trim_function(data[, afterPrevCP], ...)
+    trim_amt <- trim_function(data$data[, afterPrevCP], ...)
     test_stat[afterPrevCP] <- NA
 
     if (1 + trim_amt < length(afterPrevCP) - trim_amt) {
       fill_idx <- (1 + trim_amt):(length(afterPrevCP) - trim_amt)
-      stats_tmp <- test_function(data[, afterPrevCP[fill_idx]], ...)
+      stats_tmp <- test_function(data$data[, afterPrevCP[fill_idx]], ...)
       test_stat[afterPrevCP[fill_idx]] <- stats_tmp$allValues
     }
 
@@ -115,7 +117,7 @@ elbow_method <- function(data,
 
       return_data_tmp[k, ] <- c(
         section_max,
-        .compute_total_var(data, tmp, errorType)
+        .compute_total_var(data$data, tmp, errorType)
       )
     }
 
@@ -128,7 +130,7 @@ elbow_method <- function(data,
 
   # Add No Change option and compute percent change
   return_data <- rbind(
-    c(NA, .compute_total_var(data, c(), errorType)),
+    c(NA, .compute_total_var(data$data, c(), errorType)),
     return_data
   )
   return_data$Percent <- 1 - return_data$Var / max(return_data$Var)
