@@ -21,11 +21,21 @@ generate_brownian_motion <- function(
 
   res <- length(v)
 
-  data <- matrix(0, ncol = res, nrow = N)
-  data[,2:res] <- t(apply(matrix(stats::rnorm( (res-1) *N, sd = sd),
-                                     ncol = res-1, nrow = N), 1, cumsum))
+  # data <- matrix(0, ncol = N, nrow = res)
+  # for(i in 2:res){
+  #   data[i,] <- data[i-1,] + rnorm(N,sd=sd*sqrt(v[i]-v[i-1]))
+  # }
+  data <- apply(t(sapply(c(0,diff(v)),
+                         function(d,N,sd){rnorm(N,sd=sd*sqrt(d))},N=N,sd=sd)),
+                MARGIN = 2,cumsum)
+  # data[2:res,] <- data[1:(res-1),] +
+  #   t(sapply(c(0,diff(v)), function(d,N,sd){rnorm(N,sd=sd*d)},N=N,sd=sd))
 
   funts(X=data,intraobs = v)
+  # data[,2:res] <- t(apply(matrix(stats::rnorm( (res-1) * N, sd = sd),
+  #                                    ncol = res-1, nrow = N), 1, cumsum))
+  #
+  # funts(X=t(data),intraobs = v)
 }
 
 
@@ -51,14 +61,24 @@ generate_brownian_bridge <- function(
 
   res <- length(v)
 
+  # data <- matrix(0, ncol = N, nrow = res)
+  # data[2:res,] <-
+  #   as.matrix(generate_brownian_motion(N, v = v[1:res-1], sd)$data)
+
   # Initialize
-  data <- matrix(0, ncol = res, nrow = N)
-  data[,2:res] <-
-    as.matrix(generate_brownian_motion(N, v = v[1:res-1], sd)$data)
+  data = generate_brownian_motion(N, v = v, sd)$data
   data <- data -
-    data[,res] * matrix( rep(v, times = N),
-                             ncol = res, nrow = N, byrow = T)
+    t(data[res,] * t(matrix(rep(v, times = N), ncol = N, nrow = res)))
 
   funts(X=data,intraobs = v)
+  # # Initialize
+  # data <- matrix(0, ncol = res, nrow = N)
+  # data[,2:res] <-
+  #   as.matrix(generate_brownian_motion(N, v = v[1:res-1], sd)$data)
+  # data <- data -
+  #   data[,res] * matrix( rep(v, times = N),
+  #                            ncol = res, nrow = N, byrow = T)
+  #
+  # funts(X=t(data),intraobs = v)
 }
 
