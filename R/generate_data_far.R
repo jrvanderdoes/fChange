@@ -36,5 +36,5 @@ generateFAR1 <- function(resolution, N, d=1/2, burnin=1000){
     }
   }
 
-  X[,burnin + 1:N]
+  funts(X[,burnin + 1:N])
 }
