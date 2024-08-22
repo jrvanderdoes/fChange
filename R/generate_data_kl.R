@@ -34,7 +34,6 @@
 #' @param ... Examples such as dof which is used for t-distribution
 #'
 #' @return A data.frame of m columns length(evals) rows (TODO:: Verify)
-#'
 #' @export
 #'
 #' @examples
@@ -156,7 +155,7 @@ generate_data_fd <- function(ns,
     addIdx <- addIdx + ns[i] # j
   }
 
-  data
+  funts(data)
 }
 
 
