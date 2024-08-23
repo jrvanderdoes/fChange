@@ -6,7 +6,7 @@
 #' @param burnin Numeric for number of burnin. Default is 500.
 #' @param rho Numeric for amount of dependence
 #'
-#' @return Data.frame for generated data
+#' @return funts object of generated OU data
 #' @export
 #'
 #' @examples
@@ -33,5 +33,5 @@ generateOU <- function(resolution, N, burnin=500, rho=0){
     data[,i] <- rho*data[,i-1] + fiid[i,]
   }
 
-  data
+  funts(data[,(burnin+1):ncol(data)])
 }
