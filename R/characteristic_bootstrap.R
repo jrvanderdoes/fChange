@@ -2,7 +2,7 @@
 #'
 #' Detect the changes in data by using bootstrap.
 #'
-#' @param X Data.frame of the data
+#' @param X funts object or easily convertable data
 #' @param statistic Test statistic (Tn or Mn)
 #' @param M Number of vectors to explore space
 #' @param J Resolution of curves for discretazation
@@ -21,19 +21,21 @@
 #' @export
 #'
 #' @examples
-#' detect_changepoint_bootstrap(electricity,statistic = 'Tn')
+#' detect_changepoint_bootstrap(funts(electricity),statistic = 'Tn')
 detect_changepoint_bootstrap <- function(X, statistic=c('Tn','Mn'),
                                          M=20, J=50, space='BM',
                                          blockSize=1, iters = 1000,
                                          replace = FALSE, alpha = 0.05,
                                          silent = FALSE) {
+  X <- .check_data(X)
+
   # Test Statistics
   if(length(statistic)!=1){
     stop('Choose "Tn" or "Mn" as the test statistic')
   }else if(statistic=='Tn'){
-    fn <- compute_Tn_final
+    fn <- compute_Tn
   }else if(statistic=='Mn'){
-    fn <- compute_Mn_final
+    fn <- compute_Mn
   }else{
     stop('Choose "Tn" or "Mn" as the test statistic')
   }
@@ -43,7 +45,7 @@ detect_changepoint_bootstrap <- function(X, statistic=c('Tn','Mn'),
 
   ## Get Function Value and estimate time
   st <- Sys.time()
-  full_val <- fn(X, W=W, J=J)[[1]]
+  full_val <- fn(X$data, W=W, J=J)[[1]]
   en <- Sys.time()
 
   if (!silent) {
@@ -55,7 +57,7 @@ detect_changepoint_bootstrap <- function(X, statistic=c('Tn','Mn'),
   }
 
   ## Create Permuted Samples
-  n <- ncol(X)
+  n <- ncol(X$data)
   idxGroups <- .getChunks(1:n, n / blockSize)
   idxs <- sapply(1:iters, function(i, m, indxs, replace) {
     samps <- sample(1:m, replace = replace)
@@ -72,7 +74,7 @@ detect_changepoint_bootstrap <- function(X, statistic=c('Tn','Mn'),
                       function(loop_iter, fn, X1, W, J) {
                         fn(X1[, stats::na.omit(loop_iter)], W=W, J=J)[[1]]
                       },
-                      X1 = X, fn = fn, W=W, J=J
+                      X1 = X$data, fn = fn, W=W, J=J
   )
 
   list(
