@@ -15,14 +15,18 @@ Imports:
     grDevices,
     magrittr,
     mvtnorm,
+    plot3D,
     plotly,
     RColorBrewer,
     Rcpp,
     RcppArmadillo,
     Rfast,
+    sandwich,
+    scales,
     sde,
     stats,
-    tensorA
+    tensorA,
+    tidyr
 LinkingTo: Rcpp, RcppArmadillo
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
