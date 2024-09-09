@@ -95,7 +95,7 @@ characteristic_change_sim_Tn <- function(X,
   W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
   # Determine Number of Iterations
-  val_Tn <- compute_Tn(X, W, J)
+  val_Tn <- compute_Tn(X=X, W=W, J=J)
   #val_Tn <- compute_Tn_final1(X, W)
   #val_Tn <- compute_Tn_final2(X, W)
 
