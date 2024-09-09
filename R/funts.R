@@ -15,6 +15,7 @@
 #' funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
 funts <- function(X, labels=colnames(as.data.frame(X)),
                   intraobs=seq(0,1,length.out=nrow(X))){
+  if(is.funts(X)) return(X,labels=labels,intraobs=intraobs)
   # Note: as.matrix is very important! Otherwise extraction and computation is
   #   far more expensive!
   funts_obj <- list(

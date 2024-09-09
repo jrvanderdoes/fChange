@@ -66,11 +66,12 @@ characteristic_change_welch <- function(X,
 #' @return Numeric value indicating cutoff from Welsh approximation
 #'
 #' @examples
-#' .compute_Welch(electricity[,1:40], h = 0)
+#' .compute_Welch(X=electricity[,1:40], h = 0)
 .compute_Welch <- function(X, alpha = 0.05,
                      W = NULL, M = 100, J = 50,
-                     h = ncol(X$data)^(1 / 3),
+                     h = ncol(funts(X)$data)^(1 / 3),
                      K = bartlett_kernel ) {
+  x <- .check_data(X)
 
   if (is.null(W)) {
     W <- computeSpaceMeasuringVectors(M, "BM", X)

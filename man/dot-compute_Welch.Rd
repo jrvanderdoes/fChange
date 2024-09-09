@@ -10,7 +10,7 @@
   W = NULL,
   M = 100,
   J = 50,
-  h = ncol(X$data)^(1/3),
+  h = ncol(funts(X)$data)^(1/3),
   K = bartlett_kernel
 )
 }
@@ -47,5 +47,5 @@ Numeric value indicating cutoff from Welsh approximation
 This function approximates the Tn statistic using the Welch approximation.
 }
 \examples{
-.compute_Welch(electricity[,1:40], h = 0)
+.compute_Welch(X=electricity[,1:40], h = 0)
 }
