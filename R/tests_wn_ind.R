@@ -116,7 +116,7 @@
 #' Journal of the Royal Statistical Society: Series B (Statistical Methodology), 66, 117–130.
 #'
 #' @examples
-#' b <- brown_motion(250, 50)
+#' b <- generate_brownian_motion(250)
 #' port_tests(b, test = 'single-lag', lag = 10)
 #' port_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
 #' port_tests(b, test = 'single-lag', lag = 1, M = 250, low_disc = TRUE)
@@ -290,7 +290,7 @@ port_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag',
 #' under conditional heteroscedasticity. Journal of Multivariate Analysis, 162, 32-50.
 #'
 #' @examples
-#' f <- far_1_S(150, 50, S = 0.75)
+#' f <- generate_brownian_motion(100)
 #' single_lag_test(f, lag = 1)
 #' single_lag_test(f, lag = 2, M=100)
 single_lag_test <- function(
@@ -368,7 +368,7 @@ single_lag_test <- function(
 #'  under conditional heteroscedasticity. Journal of Multivariate Analysis, 162, 32-50.
 #'
 #' @examples
-#' b <- brown_motion(150, 50)
+#' b <- generate_brownian_motion(150)
 #' multi_lag_test(b, lag = 5)
 #' multi_lag_test(b, lag = 10, M = 50)
 multi_lag_test <- function(data, lag = 20, M=NULL,
@@ -433,7 +433,7 @@ multi_lag_test <- function(data, lag = 20, M=NULL,
 #' Journal of the Royal Statistical Society: Series B (Statistical Methodology), 66, 117–130.
 #'
 #' @examples
-#' b <- brown_motion(100, 50)
+#' b <- generate_brownian_motion(100)
 #' spectral_test(b)
 #' spectral_test(b, kernel = 'Parzen', bandwidth = 'adaptive')
 #' spectral_test(b, kernel = 'Bartlett', bandwidth = 2)
@@ -486,7 +486,7 @@ spectral_test <- function(data, kernel = 'Bartlett',
 #' Journal of the American Statistical Association, 102:480, 1338-1348, DOI: 10.1198/016214507000001111.
 #'
 #' @examples
-#' b <- brown_motion(250, 100)
+#' b <- generate_brownian_motion(250)
 #' independence_test(b, components = 3, lag = 5)
 independence_test <- function(data, components, lag, alpha = 0.05) {
   data <- .check_data(data)

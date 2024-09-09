@@ -69,7 +69,7 @@ operator is equal to 0. This test is designed for stationary functional time-ser
 conditional heteroscedasticity conditions.
 }
 \examples{
-f <- far_1_S(150, 50, S = 0.75)
+f <- generate_brownian_motion(100)
 single_lag_test(f, lag = 1)
 single_lag_test(f, lag = 2, M=100)
 }

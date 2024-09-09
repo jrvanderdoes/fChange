@@ -53,7 +53,7 @@ operators (h going from 1 to K) is equal to 0. This test is designed for station
 is valid under conditional heteroscedasticity conditions.
 }
 \examples{
-b <- brown_motion(150, 50)
+b <- generate_brownian_motion(150)
 multi_lag_test(b, lag = 5)
 multi_lag_test(b, lag = 10, M = 50)
 }

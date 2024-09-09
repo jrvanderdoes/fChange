@@ -44,7 +44,7 @@ Computes the spectral hypothesis test under a user-specified kernel function and
 bandwidth; automatic bandwidth selection methods are provided.
 }
 \examples{
-b <- brown_motion(100, 50)
+b <- generate_brownian_motion(100)
 spectral_test(b)
 spectral_test(b, kernel = 'Parzen', bandwidth = 'adaptive')
 spectral_test(b, kernel = 'Bartlett', bandwidth = 2)

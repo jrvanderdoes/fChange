@@ -133,7 +133,7 @@ The "imhof" test requires the "tensorA" and "CompQuadForm" packages. Note also t
 return a statistic, and thus returns a list with only 2 elements if suppress_raw_output = FALSE.
 }
 \examples{
-b <- brown_motion(250, 50)
+b <- generate_brownian_motion(250)
 port_tests(b, test = 'single-lag', lag = 10)
 port_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
 port_tests(b, test = 'single-lag', lag = 1, M = 250, low_disc = TRUE)

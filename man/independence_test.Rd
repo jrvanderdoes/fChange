@@ -44,7 +44,7 @@ may not hold under functional conditionally heteroscedastic assumptions. Please 
 deeper exposition, and consult the reference for a complete treatment.
 }
 \examples{
-b <- brown_motion(250, 100)
+b <- generate_brownian_motion(250)
 independence_test(b, components = 3, lag = 5)
 }
 \references{
