@@ -174,11 +174,11 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 #' @return Plot (ggplot) summarizing the data
 #'
 #' @examples
-#' .summary_nochange(
-#'   generate_brownian_motion(N = 500,
-#'      v=seq(from = 0, to = 1, length.out = 20)))
-#' .summary_nochange(funts(electricity),rainbow='full')
-#' .summary_nochange(generateFAR1(20,300))
+#' # .summary_nochange(
+#' #   generate_brownian_motion(N = 500,
+#' #      v=seq(from = 0, to = 1, length.out = 20)))
+#' # .summary_nochange(funts(electricity),rainbow='full')
+#' # .summary_nochange(generateFAR1(20,300))
 .summary_nochange <- function(object, max.lag = 20,
                               rainbow = c('subset','full'), ...){
 
