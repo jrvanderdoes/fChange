@@ -10,6 +10,7 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Imports: 
     CompQuadForm,
+    cubature,
     fastmatrix,
     fda,
     ftsa,
