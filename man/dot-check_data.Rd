@@ -16,6 +16,6 @@ funts object or error if the data is incorrect
 Check data for functions
 }
 \examples{
-.check_data(funts(electricity))
-.check_data(electricity)
+#.check_data(funts(electricity))
+#.check_data(electricity)
 }

@@ -6,8 +6,8 @@
 #' @return funts object or error if the data is incorrect
 #'
 #' @examples
-#' .check_data(funts(electricity))
-#' .check_data(electricity)
+#' #.check_data(funts(electricity))
+#' #.check_data(electricity)
 .check_data <- function(X){
   if(class(X)[1]=='funts') return(X)
 
