@@ -18,5 +18,5 @@ Numeric for the median at each resolution
 Median for funts
 }
 \examples{
-median(funts(electricity))
+# median(funts(electricity))
 }

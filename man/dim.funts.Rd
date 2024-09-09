@@ -18,5 +18,5 @@ Numerics indicating the dimension of the funts object
 Dimension of funts
 }
 \examples{
-dim(funts(electricity))
+# dim(funts(electricity))
 }

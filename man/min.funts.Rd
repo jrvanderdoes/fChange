@@ -21,5 +21,5 @@ Get the observation(s) with the min average value
 TODO:: Add a pw option
 }
 \examples{
-min(funts(electricity))
+# min(funts(electricity))
 }

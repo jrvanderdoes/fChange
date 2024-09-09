@@ -20,5 +20,5 @@ A funts object
 Lag funts
 }
 \examples{
-lag.funts(funts(electricity))
+# lag.funts(funts(electricity))
 }

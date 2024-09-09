@@ -18,6 +18,6 @@ funts object from the two elements
 TODO: Figure out for non-intersections.
 }
 \examples{
-funts(electricity) + funts(electricity)
-funts(electricity) * funts(electricity)
+# funts(electricity) + funts(electricity)
+# funts(electricity) * funts(electricity)
 }

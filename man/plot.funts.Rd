@@ -18,5 +18,5 @@ Plot
 Plot funts
 }
 \examples{
-plot(funts(electricity))
+# plot(funts(electricity))
 }

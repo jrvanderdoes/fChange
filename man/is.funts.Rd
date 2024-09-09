@@ -16,6 +16,6 @@ Boolean indicating if \code{x} is a funts object or not
 Check data to see if its funts
 }
 \examples{
-is.funts(electricity)
-is.funts(funts(electricity))
+# is.funts(electricity)
+# is.funts(funts(electricity))
 }

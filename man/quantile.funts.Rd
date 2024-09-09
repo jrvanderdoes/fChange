@@ -18,6 +18,6 @@ Matrix with columns for each requested quantile
 Quantile funts
 }
 \examples{
-quantile(funts(electricity))
-quantile(funts(electricity),probs = 0.95)
+# quantile(funts(electricity))
+# quantile(funts(electricity),probs = 0.95)
 }

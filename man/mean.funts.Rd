@@ -18,5 +18,5 @@ Numeric for the mean at each resolution
 Mean for funts
 }
 \examples{
-mean(funts(electricity))
+# mean(funts(electricity))
 }

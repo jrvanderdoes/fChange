@@ -16,5 +16,5 @@ funts object
 Convert to funts
 }
 \examples{
-as.funts(electricity)
+# as.funts(electricity)
 }

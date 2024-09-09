@@ -16,5 +16,5 @@ Silently returns the data if there are no violations
 Validate funts
 }
 \examples{
-validate.funts(funts(electricity))
+# validate.funts(funts(electricity))
 }

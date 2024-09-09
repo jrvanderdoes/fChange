@@ -11,8 +11,8 @@
 #' @export
 #'
 #' @examples
-#' funts(electricity)
-#' funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
+#' # funts(electricity)
+#' # funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
 funts <- function(X, labels=colnames(as.data.frame(X)),
                   intraobs=seq(0,1,length.out=nrow(X))){
   if(is.funts(X)) return(X)
@@ -39,8 +39,8 @@ funts <- function(X, labels=colnames(as.data.frame(X)),
 #' @export
 #'
 #' @examples
-#' is.funts(electricity)
-#' is.funts(funts(electricity))
+#' # is.funts(electricity)
+#' # is.funts(funts(electricity))
 is.funts <- function(x){
   inherits(x, "funts") #& length(x$x) > 0
 }
@@ -54,7 +54,7 @@ is.funts <- function(x){
 #' @export
 #'
 #' @examples
-#' as.funts(electricity)
+#' # as.funts(electricity)
 as.funts <- function(x){
   switch(class(x)[[1]],
          'data.frame'={
@@ -78,7 +78,7 @@ as.funts <- function(x){
 #' @export
 #'
 #' @examples
-#' validate.funts(funts(electricity))
+#' # validate.funts(funts(electricity))
 validate.funts <- function(x){
   if (!inherits(x, "funts")) stop("Objects must be of class funts")
   values <- unclass(x)$data
@@ -101,7 +101,7 @@ validate.funts <- function(x){
 #' @export
 #'
 #' @examples
-#' sqrt( funts(electricity) )
+#' # sqrt( funts(electricity) )
 Math.funts <- function (x, ...) {
   validate.funts(x)
 
@@ -122,8 +122,8 @@ Math.funts <- function (x, ...) {
 #' @export
 #'
 #' @examples
-#' funts(electricity) + funts(electricity)
-#' funts(electricity) * funts(electricity)
+#' # funts(electricity) + funts(electricity)
+#' # funts(electricity) * funts(electricity)
 Ops.funts <- function (e1, e2) {
   # Combines the columns that are the same
 
@@ -203,8 +203,8 @@ Ops.funts <- function (e1, e2) {
 #' @export
 #'
 #' @examples
-#' diff(funts(electricity), lag=1)
-#' diff(funts(electricity), differences=2)
+#' # diff(funts(electricity), lag=1)
+#' # diff(funts(electricity), differences=2)
 diff.funts <- function(x, lag = 1L, differences = 1L, ...) {
   if(differences==0) return(x)
 
@@ -238,7 +238,7 @@ diff.funts <- function(x, lag = 1L, differences = 1L, ...) {
 #' @export
 #'
 #' @examples
-#' lag.funts(funts(electricity))
+#' # lag.funts(funts(electricity))
 lag.funts <- function(x, k, ...) {
   stopifnot(k >= 0)
   #ans <- .Call("lag", x, as.integer(k),PACKAGE="fts")
@@ -261,7 +261,7 @@ lag.funts <- function(x, k, ...) {
 #' @export
 #'
 #' @examples
-#' max(funts(electricity))
+#' # max(funts(electricity))
 max.funts <- function(x, ...){
   idx <- which.max(colMeans(x$data))
   funts(x$data[,idx,drop=FALSE],
@@ -281,7 +281,7 @@ max.funts <- function(x, ...){
 #' @export
 #'
 #' @examples
-#' min(funts(electricity))
+#' # min(funts(electricity))
 min.funts <- function(x, ...){
   idx <- which.min(colMeans(abs(x$data)))
   funts(x$data[,idx,drop=FALSE],
@@ -297,7 +297,7 @@ min.funts <- function(x, ...){
 #' @export
 #'
 #' @examples
-#' mean(funts(electricity))
+#' # mean(funts(electricity))
 mean.funts <- function(x, ...) {
   rowMeans(x$data)
 }
@@ -311,7 +311,7 @@ mean.funts <- function(x, ...) {
 #' @export
 #'
 #' @examples
-#' median(funts(electricity))
+#' # median(funts(electricity))
 median.funts <- function(x, ...) {
   apply(x$data, MARGIN = 1, median)
 }
@@ -325,7 +325,7 @@ median.funts <- function(x, ...) {
 #' @export
 #'
 #' @examples
-#' dim(funts(electricity))
+#' # dim(funts(electricity))
 dim.funts <- function(x, ...) {
   dim(x$data)
 }
@@ -340,7 +340,7 @@ dim.funts <- function(x, ...) {
 #' @export
 #'
 #' @examples
-#' plot(funts(electricity))
+#' # plot(funts(electricity))
 plot.funts <- function(x, ...){
   plot_fd(x$data, ...)
 }
@@ -355,8 +355,8 @@ plot.funts <- function(x, ...){
 #' @export
 #'
 #' @examples
-#' quantile(funts(electricity))
-#' quantile(funts(electricity),probs = 0.95)
+#' # quantile(funts(electricity))
+#' # quantile(funts(electricity),probs = 0.95)
 quantile.funts <- function(x, probs = seq(0, 1, 0.25), ...){
   if(length(probs)>1){
     output <- t(apply(x$data, MARGIN = 1, quantile, probs=probs, ...))

@@ -18,5 +18,5 @@ funts object with applied functions
 Math Group for funts
 }
 \examples{
-sqrt( funts(electricity) )
+# sqrt( funts(electricity) )
 }

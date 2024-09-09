@@ -27,6 +27,6 @@ funts object
 Define funts Object
 }
 \examples{
-funts(electricity)
-funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
+# funts(electricity)
+# funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
 }

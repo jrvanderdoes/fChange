@@ -22,6 +22,6 @@ funts object with differenced values
 Difference funts
 }
 \examples{
-diff(funts(electricity), lag=1)
-diff(funts(electricity), differences=2)
+# diff(funts(electricity), lag=1)
+# diff(funts(electricity), differences=2)
 }

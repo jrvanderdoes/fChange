@@ -21,5 +21,5 @@ Get the observation(s) with the max average value.
 TODO:: Add a pw option
 }
 \examples{
-max(funts(electricity))
+# max(funts(electricity))
 }
