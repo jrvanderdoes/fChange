@@ -19,10 +19,13 @@ scalarDetection(Y, gam = 0.5, nSims = 200, alpha_val = 0.05)
 XXXXX
 }
 \description{
-This implements a scalar characteristic change method
+This implements a scalar characteristic change method.
 }
 \examples{
 scalarDetection(c(rnorm(50),rnorm(75,mean = 1)))
+\donttest{
+scalarDetection(as.numeric(colMeans(electricity)))
+}
 }
 \references{
 Hušková, M., & Meintanis, S.G. (2006). Change Point Analysis based on Empirical Characteristic Functions. Metrika, 63, 145-168.

@@ -15,7 +15,7 @@
 )
 }
 \arguments{
-\item{data}{Numeric data.frame with rows for evaluated values and columns
+\item{data}{funts object or numeric data.frame with rows for evaluated values and columns
 indicating functional observations}
 
 \item{test_statistic_function}{XXXXXXXXXXXXXXXXX.}
@@ -40,14 +40,14 @@ This function implements traditional binary segmentation on functional data
 for general functions. At most one change point is detected.
 }
 \examples{
-.single_binary_segmentation(
-  data = electricity[, 1:60],
-  test_statistic_function = compute_Mn,
-  cutoff_function = welch_approximation,
-  trim_function = function(data) {
-    max(10, floor(log(ncol(as.data.frame(data)))),
-      na.rm = TRUE
-    )
-  }
-)
+#.single_binary_segmentation(
+#   data = electricity[, 1:60],
+#   test_statistic_function = compute_Mn,
+#   cutoff_function = welch_approximation,
+#   trim_function = function(data) {
+#     max(10, floor(log(ncol(as.data.frame(data)))),
+#     na.rm = TRUE
+#  )
+# }
+#)
 }

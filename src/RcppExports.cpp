@@ -22,6 +22,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dot_integrate_uneven
+double dot_integrate_uneven(NumericVector v, NumericVector r);
+RcppExport SEXP _fChange_dot_integrate_uneven(SEXP vSEXP, SEXP rSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type v(vSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type r(rSEXP);
+    rcpp_result_gen = Rcpp::wrap(dot_integrate_uneven(v, r));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dot_integrate_col
 NumericVector dot_integrate_col(NumericMatrix v);
 RcppExport SEXP _fChange_dot_integrate_col(SEXP vSEXP) {
@@ -55,12 +67,196 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// make_Obs_tilde_h
+NumericMatrix make_Obs_tilde_h(NumericMatrix Obs);
+RcppExport SEXP _fChange_make_Obs_tilde_h(SEXP ObsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type Obs(ObsSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_Obs_tilde_h(Obs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// make_Obs_tilde_C
+NumericMatrix make_Obs_tilde_C(NumericMatrix Obs);
+RcppExport SEXP _fChange_make_Obs_tilde_C(SEXP ObsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type Obs(ObsSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_Obs_tilde_C(Obs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// adaptive_bw
+double adaptive_bw(NumericMatrix Obs);
+RcppExport SEXP _fChange_adaptive_bw(SEXP ObsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type Obs(ObsSEXP);
+    rcpp_result_gen = Rcpp::wrap(adaptive_bw(Obs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// matadd
+NumericMatrix matadd(NumericMatrix A, NumericMatrix B);
+RcppExport SEXP _fChange_matadd(SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(matadd(A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
+// kernel
+NumericVector kernel(double bw, int n);
+RcppExport SEXP _fChange_kernel(SEXP bwSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type bw(bwSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(kernel(bw, n));
+    return rcpp_result_gen;
+END_RCPP
+}
+// toeplitz
+NumericMatrix toeplitz(NumericVector v);
+RcppExport SEXP _fChange_toeplitz(SEXP vSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type v(vSEXP);
+    rcpp_result_gen = Rcpp::wrap(toeplitz(v));
+    return rcpp_result_gen;
+END_RCPP
+}
+// getRealSQM
+NumericMatrix getRealSQM(NumericMatrix M);
+RcppExport SEXP _fChange_getRealSQM(SEXP MSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type M(MSEXP);
+    rcpp_result_gen = Rcpp::wrap(getRealSQM(M));
+    return rcpp_result_gen;
+END_RCPP
+}
+// make_hC_Obs
+NumericMatrix make_hC_Obs(NumericMatrix Obs);
+RcppExport SEXP _fChange_make_hC_Obs(SEXP ObsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type Obs(ObsSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_hC_Obs(Obs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fill_U
+NumericMatrix fill_U(NumericMatrix A_h, NumericMatrix A_C, NumericVector norm, NumericMatrix hC_Obs, int m, int n, int d);
+RcppExport SEXP _fChange_fill_U(SEXP A_hSEXP, SEXP A_CSEXP, SEXP normSEXP, SEXP hC_ObsSEXP, SEXP mSEXP, SEXP nSEXP, SEXP dSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type A_h(A_hSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type A_C(A_CSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type norm(normSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type hC_Obs(hC_ObsSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type d(dSEXP);
+    rcpp_result_gen = Rcpp::wrap(fill_U(A_h, A_C, norm, hC_Obs, m, n, d));
+    return rcpp_result_gen;
+END_RCPP
+}
+// vecmult
+NumericVector vecmult(NumericMatrix M, NumericVector v);
+RcppExport SEXP _fChange_vecmult(SEXP MSEXP, SEXP vSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type M(MSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type v(vSEXP);
+    rcpp_result_gen = Rcpp::wrap(vecmult(M, v));
+    return rcpp_result_gen;
+END_RCPP
+}
+// outerProd
+NumericMatrix outerProd(NumericVector v, NumericVector w);
+RcppExport SEXP _fChange_outerProd(SEXP vSEXP, SEXP wSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type v(vSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(outerProd(v, w));
+    return rcpp_result_gen;
+END_RCPP
+}
+// find_max
+NumericMatrix find_max(NumericMatrix U_hC, int m, int n);
+RcppExport SEXP _fChange_find_max(SEXP U_hCSEXP, SEXP mSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type U_hC(U_hCSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_max(U_hC, m, n));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fill_T
+NumericMatrix fill_T(NumericMatrix hC_Obs, int n, int d);
+RcppExport SEXP _fChange_fill_T(SEXP hC_ObsSEXP, SEXP nSEXP, SEXP dSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type hC_Obs(hC_ObsSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type d(dSEXP);
+    rcpp_result_gen = Rcpp::wrap(fill_T(hC_Obs, n, d));
+    return rcpp_result_gen;
+END_RCPP
+}
+// h_cpp
+NumericVector h_cpp(NumericVector v1, NumericVector v2);
+RcppExport SEXP _fChange_h_cpp(SEXP v1SEXP, SEXP v2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type v1(v1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type v2(v2SEXP);
+    rcpp_result_gen = Rcpp::wrap(h_cpp(v1, v2));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_fChange_dot_integrate", (DL_FUNC) &_fChange_dot_integrate, 1},
+    {"_fChange_dot_integrate_uneven", (DL_FUNC) &_fChange_dot_integrate_uneven, 2},
     {"_fChange_dot_integrate_col", (DL_FUNC) &_fChange_dot_integrate_col, 1},
     {"_fChange_dot_col_cumsum", (DL_FUNC) &_fChange_dot_col_cumsum, 1},
     {"_fChange_dot_sqrt_mat", (DL_FUNC) &_fChange_dot_sqrt_mat, 1},
+    {"_fChange_make_Obs_tilde_h", (DL_FUNC) &_fChange_make_Obs_tilde_h, 1},
+    {"_fChange_make_Obs_tilde_C", (DL_FUNC) &_fChange_make_Obs_tilde_C, 1},
+    {"_fChange_adaptive_bw", (DL_FUNC) &_fChange_adaptive_bw, 1},
+    {"_fChange_matadd", (DL_FUNC) &_fChange_matadd, 2},
+    {"_fChange_kernel", (DL_FUNC) &_fChange_kernel, 2},
+    {"_fChange_toeplitz", (DL_FUNC) &_fChange_toeplitz, 1},
+    {"_fChange_getRealSQM", (DL_FUNC) &_fChange_getRealSQM, 1},
+    {"_fChange_make_hC_Obs", (DL_FUNC) &_fChange_make_hC_Obs, 1},
+    {"_fChange_fill_U", (DL_FUNC) &_fChange_fill_U, 7},
+    {"_fChange_vecmult", (DL_FUNC) &_fChange_vecmult, 2},
+    {"_fChange_outerProd", (DL_FUNC) &_fChange_outerProd, 2},
+    {"_fChange_find_max", (DL_FUNC) &_fChange_find_max, 3},
+    {"_fChange_fill_T", (DL_FUNC) &_fChange_fill_T, 3},
+    {"_fChange_h_cpp", (DL_FUNC) &_fChange_h_cpp, 2},
     {NULL, NULL, 0}
 };
 

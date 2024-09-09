@@ -20,7 +20,7 @@ plot_fd(
 )
 }
 \arguments{
-\item{data}{A data.frame of evaluated fd objects (the columns being lines and
+\item{data}{funts object or data.frame of evaluated fd objects (the columns being lines and
 the rows the evaluated points)}
 
 \item{CPs}{(Optional) Vectors of numeric values indicating the location of

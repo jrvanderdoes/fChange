@@ -4,19 +4,10 @@
 \alias{mean_change}
 \title{Fully Functional Mean Change Point Analysis}
 \usage{
-mean_change(
-  data,
-  data1 = data,
-  M = 1000,
-  h = 0,
-  K = bartlett_kernel,
-  alpha = 0.05,
-  inc.pval = FALSE,
-  ...
-)
+mean_change(data, M = 1000, h = 0, K = bartlett_kernel)
 }
 \arguments{
-\item{data}{Numeric data.frame with evaled points on rows and fd objects in columns}
+\item{data}{funts object or numeric data.frame with evaled points on rows and fd objects in columns}
 
 \item{M}{(Optional) Number of Monte Carlo simulations used to get the critical
 values. The default value is \code{M=1000}}
@@ -45,6 +36,7 @@ and hence does not depend on any dimension reduction technique such as
 fPCA.
 }
 \examples{
+mean_change(generate_brownian_motion(500,v=seq(0,1,length.out=25)), M = 250)
 mean_change(electricity, M = 250)
 }
 \references{

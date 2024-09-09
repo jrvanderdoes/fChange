@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples
-#' res <- .generateFAR1(24,200)
+#' res <- generateFAR1(24,200)
 generateFAR1 <- function(resolution, N, d=1/2, burnin=1000){
 
   times <- seq(0,1,length.out=resolution)
@@ -36,5 +36,5 @@ generateFAR1 <- function(resolution, N, d=1/2, burnin=1000){
     }
   }
 
-  X[,burnin + 1:N]
+  funts(X[,burnin + 1:N])
 }

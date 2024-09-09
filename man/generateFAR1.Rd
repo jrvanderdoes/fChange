@@ -23,5 +23,5 @@ Data.frame for functional observations
 Function to generate date according to FAR(1) process.
 }
 \examples{
-res <- .generateFAR1(24,200)
+res <- generateFAR1(24,200)
 }

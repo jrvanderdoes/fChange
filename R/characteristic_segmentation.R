@@ -4,7 +4,7 @@
 #'     for general functions. Change points are recursively found until no
 #'     more change points are detected.
 #'
-#' @param X Numeric data.frame with rows for evaluated values and columns
+#' @param X funts object or numeric data.frame with rows for evaluated values and columns
 #'    indicating functional observations
 #' @param test_statistic_function XXXXXXXXXXXXXXXXX.
 #' @param cutoff_function XXXXXX
@@ -25,7 +25,7 @@
 #' @export
 #'
 #' @examples
-#' binary_segmentation(X,"Tn","Boot")
+#' binary_segmentation(funts(electricity[,1:100]),"Tn","Boot")
 binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                                 method=c('Sim','Approx','Boot'),
                                 # trim_function = function(data) {
@@ -39,6 +39,8 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                                 replace = FALSE, alpha = 0.05,
                                 final_verify = TRUE,
                                 silent = FALSE) {
+  X <- .check_data(X)
+
   # Test Statistics
   if(length(statistic)!=1 || !(statistic %in% c('Tn','Mn'))){
     stop('Choose "Tn" or "Mn" as the test statistic')
@@ -56,19 +58,21 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     alpha, h_function,
                     return_pval = FALSE,
                     ...){
-        h <- h_function(X)
+        X <- .check_data(X)
+
+        h <- h_function(X$data)
 
         W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
-        tmp <-.ce_detect_Tn(X=X, W=W, M=M, J=J, nSims=iters,
+        tmp <-.ce_detect_Tn(X=X$data, W=W, M=M, J=J, nSims=iters,
                                            h=h, K=bartlett_kernel, silent=TRUE)
 
         if(return_pval){
-          cp <- ifelse(tmp$pval<=alpha, compute_Mn_final(X,W=W,J=J)$location, NA)
+          cp <- ifelse(tmp$pval<=alpha, compute_Mn(X$data,W=W,J=J)$location, NA)
           return(c(cp,tmp$pval))
         }
 
-        ifelse(tmp$pval<=alpha, compute_Mn_final(X,W=W,J=J)$location, NA)
+        ifelse(tmp$pval<=alpha, compute_Mn(X$data,W=W,J=J)$location, NA)
       }
 
     }else if(method=='Approx'){
@@ -79,14 +83,16 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     blockSize, iters,
                     alpha, h_function,
                     ...){
-        h <- h_function(X)
+        X <- .check_data(X)
+
+        h <- h_function(X$data)
 
         W = computeSpaceMeasuringVectors(M,space,X)
 
-        stat <- compute_Tn_final(X=X, W=W, J=J)
-        cutoff <- compute_Welch(X,alpha = alpha,W=W,M=M,h=h,K=K)
+        stat <- compute_Tn(X=X$data, W=W, J=J)
+        cutoff <- compute_Welch(X$data,alpha = alpha,W=W,M=M,h=h,K=K)
 
-        ifelse(stat>=cutoff,compute_Mn_final(X,W=W,J=J)$location,NA)
+        ifelse(stat>=cutoff,compute_Mn(X$data,W=W,J=J)$location,NA)
       }
 
     }else{
@@ -96,15 +102,17 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     blockSize, iters,
                     replace, alpha, h_function,
                     ...){
-        h <- h_function(X)
+        X <- .check_data(X)
+
+        h <- h_function(X$data)
 
         W = computeSpaceMeasuringVectors(M,space,X)
 
-        ifelse(.ce_bootstrap(X=X,statistic='Tn',W=W,J=J,space=space,
+        ifelse(.ce_bootstrap(X=X$data,statistic='Tn',W=W,J=J,space=space,
                                         blockSize=h,iters=iters,
                                         replace=replace,alpha=alpha,
                                         silent=TRUE)$pval <= alpha,
-               compute_Mn_final(X,W=W,J=J)$location,NA)
+               compute_Mn(X$data,W=W,J=J)$location,NA)
       }
 
     }
@@ -116,11 +124,13 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     M, J, space,
                     blockSize, iters, h_function,
                     ...){
-        h <- h_function(X)
+        X <- .check_data(X)
+
+        h <- h_function(X$data)
 
         W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
-        tmp <-.ce_detect_Mn(X=X, W=W, M=M, J=J, nSims=iters,
+        tmp <-.ce_detect_Mn(X=X$data, W=W, M=M, J=J, nSims=iters,
                                            h=h, K=bartlett_kernel, silent=TRUE)
 
         ifelse(tmp$pval<=alpha,tmp$location,NA)
@@ -136,15 +146,17 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     blockSize, iters,
                     replace, alpha, h_function,
                     ...){
-        h <- h_function(X)
+        X <- .check_data(X)
+
+        h <- h_function(X$data)
 
         W = computeSpaceMeasuringVectors(M,space,X)
 
-        ifelse(.ce_bootstrap(X=X,statistic='Mn',W=W,J=J,space=space,
+        ifelse(.ce_bootstrap(X=X$data,statistic='Mn',W=W,J=J,space=space,
                                              blockSize=h,iters=iters,
                                              replace=replace,alpha=alpha,
                                              silent=TRUE)$pval <= alpha,
-               compute_Mn_final(X,W=W,J=J)$location,NA)
+               compute_Mn(X$data,W=W,J=J)$location,NA)
       }
 
     }
@@ -152,7 +164,7 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
 
   # Get change points
   CPsVals <- .ce_recursive_segmentation(
-    X=X, fn=fn,
+    X=X$data, fn=fn,
     #trim_function,
     M=M, J=J, space=space,
     h_function = h_function, iters = iters,
@@ -177,7 +189,15 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
 }
 
 
-####################
+#' Characteristic Change - Recursive Segmentation
+#'
+#' @inheritParams binary_segmentation
+#' @param X numeric matrix of fd
+#' @param fn Method for test statistic
+#' @param addAmt Number to add when recursively splitting to get correct
+#'  change location
+#'
+#' @return Numeric vector of changes
 .ce_recursive_segmentation <- function(X, fn,
                         #trim_function,
                         M=20, J=50, space='BM',
@@ -233,24 +253,32 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
   ))
 }
 
-####################
+
+#' Characteristic Change - Verify Segmentation
+#'
+#' @inheritParams binary_segmentation
+#' @param CPsVals Numeric vector of potential change points
+#' @param fn Method for test statistic
+#'
+#' @return
 .ce_verify_changes <- function(CPsVals, X,
                                 fn, M=M, J=J, space=space,
                                h_function=function(X){ncol(X)^(1/3)}, iters=iters,
                                 replace=replace,
                                 alpha=alpha,
                                 silent = FALSE) {
+  X <- .check_data(X)
 
   if (!silent) cat("-- Verify Step --\n")
 
   if (length(CPsVals) >= 1) { # If there was a CP detected
-    tmp_cps <- c(0, CPsVals, ncol(X))
+    tmp_cps <- c(0, CPsVals, ncol(X$data))
     tmp_cps <- tmp_cps[order(tmp_cps)]
     CPsVals <- pvals <- c()
     for (i in 2:(length(tmp_cps) - 1)) {
       # Get CP
-      h <- h_function(X[,(tmp_cps[i-1]+1):tmp_cps[i+1]])
-      potential_cp <- fn(X[,(tmp_cps[i-1]+1):tmp_cps[i+1]], M=M, J=J,
+      h <- h_function(X$data[,(tmp_cps[i-1]+1):tmp_cps[i+1]])
+      potential_cp <- fn(X$data[,(tmp_cps[i-1]+1):tmp_cps[i+1]], M=M, J=J,
                          space=space,
                          h=h, iters=iters,
                          replace=replace, alpha=alpha,
@@ -267,8 +295,8 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
       pvals[order(CPsVals)]))
   } else {
     # Get CP
-    h <- h_function(X)
-    CPsVals <- fn(X, M=M, J=J,
+    h <- h_function(X$data)
+    CPsVals <- fn(X$data, M=M, J=J,
                   space=space,
                   h=h, iters=iters,
                   replace=replace, alpha=alpha
@@ -282,23 +310,29 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
   CPsVals[order(CPsVals)]
 }
 
-####################
 
-
-
+#' Characteristic Detection - Tn Method
+#'
+#' @inheritParams binary_segmentation
+#' @param X numeric matrix of fd
+#' @param W Space Measuring Vectors
+#' @param nSims iters from before
+#' @param K Kernel function
+#'
+#' @return List with p-value for change detection
 .ce_detect_Tn <- function(X, W,
-                                         M = 20, J=50,
-                                         nSims = 1000,
-                                         h = 3,
-                                         K = bartlett_kernel,
-                                         silent = FALSE) {
+                          M = 20, J=50,
+                          nSims = 1000,
+                          h = 3,
+                          K = bartlett_kernel,
+                          silent = FALSE) {
 
   # Determine Number of Iterations
-  val_Tn <- compute_Tn_final(X, W, J)
+  val_Tn <- compute_Tn(X, W, J)
 
   MJ <- M * J
 
-  sqrtMat <- .compute_sqrtMat_final(X,W,J,h,K)
+  sqrtMat <- .compute_sqrtMat(X,W,J,h,K)
 
   gamProcess <- c()
   nIters <- nSims / 100
@@ -329,19 +363,24 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
 }
 
 
+#' Characteristic Detection - Mn Method
+#'
+#' @inheritParams .ce_detect_Tn
+#'
+#' @return List with p-value for change detection
 .ce_detect_Mn <- function(X, W,
-                                         M = 20, J=50,
-                                         nSims = 1000,
-                                         h = 3,
-                                         K = bartlett_kernel,
-                                         silent = FALSE) {
+                          M = 20, J=50,
+                          nSims = 1000,
+                          h = 3,
+                          K = bartlett_kernel,
+                          silent = FALSE) {
 
   # Determine Number of Iterations
-  val_Mn <- compute_Mn_final(X, W, J)
+  val_Mn <- compute_Mn(X, W, J)
 
   MJ <- M * J
 
-  sqrtMat <- .compute_sqrtMat_final(X,W,J,h,K)
+  sqrtMat <- .compute_sqrtMat(X,W,J,h,K)
 
   gamProcess <- c()
   nIters <- nSims / 100
@@ -372,9 +411,12 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
 }
 
 
-##########################################
-
-
+#' Characteristic Detection - Mn Method
+#'
+#' @inheritParams .ce_detect_Tn
+#' @param statistic Test statistic of interest
+#'
+#' @return List with (1) value, (2) cutoff, (3) p-value, and (4) bootstrapped samples
 .ce_bootstrap <- function(X, statistic=c('Tn','Mn'),
                                           W=computeSpaceMeasuringVectors(M,space,X),
                                           J=50, space='BM',
@@ -385,9 +427,9 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
   if(length(statistic)!=1){
     stop('Choose "Tn" or "Mn" as the test statistic')
   }else if(statistic=='Tn'){
-    fn <- compute_Tn_final
+    fn <- compute_Tn
   }else if(statistic=='Mn'){
-    fn <- compute_Mn_final
+    fn <- compute_Mn
   }else{
     stop('Choose "Tn" or "Mn" as the test statistic')
   }

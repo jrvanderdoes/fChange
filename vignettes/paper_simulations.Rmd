@@ -17,7 +17,7 @@ library(fChange)
 ```
 
 In the code below, we generate all data for the null tables.
-```{r generate_null_data}
+```{r generate_null_data, eval=FALSE}
 path <- getwd()
 path <- paste0(path,'/paperFiles/Null/')
 
@@ -52,7 +52,7 @@ for(l_idx in 1:length(lengths)){
       kappasArray = c(0),
       silent = T,
       burnin = burnin
-    )
+    )$data
   }
   
   saveRDS(data,paste0(path, 'KL/Data/NullCase_len',l_idx,'_data.rds'))
@@ -82,7 +82,7 @@ for(l_idx in 1:length(lengths)){
       kappasArray = c(0.5),
       silent = T,
       burnin = burnin
-    )
+    )$data
   }
   
   saveRDS(data,paste0(path, 'KL/Data/NullCase_len',l_idx,'_data_mild.rds'))
@@ -112,7 +112,7 @@ for(l_idx in 1:length(lengths)){
       kappasArray = c(0.8),
       silent = T,
       burnin = burnin
-    )
+    )$data
   }
   
   saveRDS(data,paste0(path, 'KL/Data/NullCase_len',l_idx,'_data_strong.rds'))
@@ -132,7 +132,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0)
+    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0)$data
   }
   
   saveRDS(data,paste0(path, 'OU/Data/OUNull_len',l_idx,'_data.rds'))
@@ -149,7 +149,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0.5)
+    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0.5)$data
   }
   
   saveRDS(data,paste0(path, 'OU/Data/OUNull_len',l_idx,'_data_mild.rds'))
@@ -167,7 +167,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0.8)
+    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0.8)$data
   }
   
   saveRDS(data,paste0(path, 'OU/Data/OUNull_len',l_idx,'_data_strong.rds'))
@@ -190,7 +190,7 @@ for(l_idx in 1:length(lengths)){
   for(i in 1:nTrials){
     cat(paste0(i,', '))
     data[[i]] <- generateFAR1(resolution=dat_res, N=lengths[l_idx],
-                              d=0, burnin=burnin)
+                              d=0, burnin=burnin)$data
   }
   
   saveRDS(data,paste0(path,'FAR1/Data/FAR1Null_len',l_idx,'_data.rds'))
@@ -209,7 +209,7 @@ for(l_idx in 1:length(lengths)){
   for(i in 1:nTrials){
     cat(paste0(i,', '))
     data[[i]] <- generateFAR1(resolution=dat_res, N=lengths[l_idx],
-                              d=0.5, burnin=burnin)
+                              d=0.5, burnin=burnin)$data
   }
   
   saveRDS(data,paste0(path,'FAR1/Data/FAR1Null_len',l_idx,'_data_mild.rds'))
@@ -228,7 +228,7 @@ for(l_idx in 1:length(lengths)){
   for(i in 1:nTrials){
     cat(paste0(i,', '))
     data[[i]] <- generateFAR1(resolution=dat_res, N=lengths[l_idx],
-                              d=0.8, burnin=burnin)
+                              d=0.8, burnin=burnin)$data
   }
   
   saveRDS(data,paste0(path,'FAR1/Data/FAR1Null_len',l_idx,'_data_strong.rds'))
@@ -237,7 +237,7 @@ for(l_idx in 1:length(lengths)){
 ```
 
 Compute Statistics
-```{r compute_null_data}
+```{r compute_null_data, eval=FALSE}
 #path <- getwd()
 #path <- paste0(path,'/paperFiles/Null/KL/')
 path <- 'C:/Users/jerem/OneDrive/Documents/School/Waterloo/Research/RPackages/fChange-data/paperFiles/Null/KL/'
@@ -268,11 +268,11 @@ function(data_path_start, path){
       ## Simulation
       #   Tn and Mn
       set.seed(123456*l_idx+i)
-      sim0 <- detect_changepoint_final_TnAndMn(
+      sim0 <- characteristic_change_sim(
         data[[i]], h=0,space='BM')
-      sim13 <- detect_changepoint_final_TnAndMn(
+      sim13 <- characteristic_change_sim(
         data[[i]], h=lengths[l_idx]^(1/3),space='BM')
-      simd13 <- detect_changepoint_final_TnAndMn(
+      simd13 <- characteristic_change_sim(
         data[[i]], h=2*lengths[l_idx]^(1/3),space='BM')
   
       results[i, c('simTnh0','simTnh13','simTnhd13')] <-
@@ -320,13 +320,13 @@ function(data_path_start, path){
       ## Welch - 0.05
       #   Tn
       set.seed(123456*l_idx+i)
-      welch0 <- detect_changepoint_Welch(
+      welch0 <- characteristic_change_welch(
         X=data[[i]],
         h=0,space='BM', alpha = 0.05)
-      welch13 <- detect_changepoint_Welch(
+      welch13 <- characteristic_change_welch(
         X=data[[i]],
         h=lengths[l_idx]^(1/3),space='BM', alpha = 0.05)
-      welchd13 <- detect_changepoint_Welch(
+      welchd13 <- characteristic_change_welch(
         X=data[[i]],
         h=2*lengths[l_idx]^(1/3),space='BM', alpha = 0.05)
       
@@ -338,13 +338,13 @@ function(data_path_start, path){
       ## Welch - 0.01
       #   Tn
       set.seed(123456*l_idx+i)
-      tn0 <- detect_changepoint_Welch(
+      tn0 <- characteristic_change_welch(
         X=data[[i]],
         h=0, space='BM', alpha = 0.01)
-      tn13 <- detect_changepoint_Welch(
+      tn13 <- characteristic_change_welch(
         X=data[[i]],
         h=lengths[l_idx]^(1/3),space='BM', alpha = 0.01)
-      tnd13 <- detect_changepoint_Welch(
+      tnd13 <- characteristic_change_welch(
         X=data[[i]],
         h=2*lengths[l_idx]^(1/3),space='BM', alpha = 0.01)
   
@@ -387,11 +387,11 @@ for(l_idx in 1:length(lengths)){
     ## Simulation
     #   Tn and Mn
     set.seed(123456*l_idx+i)
-    tn0 <- detect_changepoint_final_TnAndMn(
+    tn0 <- characteristic_change_sim(
       data[[i]], h=0,space='BM')
-    tn13 <- detect_changepoint_final_TnAndMn(
+    tn13 <- characteristic_change_sim(
       data[[i]], h=lengths[l_idx]^(1/3),space='BM')
-    tnd13 <- detect_changepoint_final_TnAndMn(
+    tnd13 <- characteristic_change_sim(
       data[[i]], h=2*lengths[l_idx]^(1/3),space='BM')
 
     ## Bootstrap
@@ -428,13 +428,13 @@ for(l_idx in 1:length(lengths)){
     ## Welch - 0.05
     #   Tn
     set.seed(123456*l_idx+i)
-    tn0 <- detect_changepoint_Welch(
+    tn0 <- characteristic_change_welch(
       X=data[[i]],
       h=0,space='BM', alpha = 0.05)
-    tn13 <- detect_changepoint_Welch(
+    tn13 <- characteristic_change_welch(
       X=data[[i]],
       h=lengths[l_idx]^(1/3),space='BM', alpha = 0.05)
-    tnd13 <- detect_changepoint_Welch(
+    tnd13 <- characteristic_change_welch(
       X=data[[i]],
       h=2*lengths[l_idx]^(1/3),space='BM', alpha = 0.05)
 
@@ -446,13 +446,13 @@ for(l_idx in 1:length(lengths)){
     ## Welch - 0.01
     #   Tn
     set.seed(123456*l_idx+i)
-    tn0 <- detect_changepoint_Welch(
+    tn0 <- characteristic_change_welch(
       X=data[[i]],
       h=0, space='BM', alpha = 0.01)
-    tn13 <- detect_changepoint_Welch(
+    tn13 <- characteristic_change_welch(
       X=data[[i]],
       h=lengths[l_idx]^(1/3),space='BM', alpha = 0.01)
-    tnd13 <- detect_changepoint_Welch(
+    tnd13 <- characteristic_change_welch(
       X=data[[i]],
       h=2*lengths[l_idx]^(1/3),space='BM', alpha = 0.01)
 
@@ -533,6 +533,6 @@ for(l_idx in 1:length(lengths)){
 ```
 
 The mean change figure
-```{r mean_change}
-
+```{r mean_change, eval=FALSE}
+  tmp = 0
 ```

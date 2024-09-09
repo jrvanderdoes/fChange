@@ -115,7 +115,7 @@ plotly::save_image(plot_save,
 Now it is likely this data has some trends, so we will use principal component 
 analysis to convert it to finite dimensions, fit a model, and return this to 
 functional data to implement.
-```{r model_electricity}
+```{r model_electricity, eval=FALSE}
 set.seed(123456)
 electricity_fd <- fda::Data2fd(1:24, electricity)
 # sum(fda::eval.fd(1:24,electricity_fd)-electricity)
@@ -153,7 +153,7 @@ eval_fd_vals <- fda::eval.basis(1:24, electricity_fd$basis) %*% orig_coefs
 ```
 
 The above detect a change point, and occasionally the placement; however, if we have multiple change points then another method is necessary. We use binary segmentation in this case.
-```{r plot_function}
+```{r plot_function, eval=FALSE}
 paperPlot <- function(data,CPs){
   curve_points = 1:nrow(data)
   plot_title = NULL
@@ -267,7 +267,7 @@ paperPlot <- function(data,CPs){
 
 ```
 
-```{r binary_segmantation}
+```{r binary_segmantation, eval=FALSE}
 set.seed(654321)
 res <- binary_segmentation(X = eval_fd_vals,
                            statistic='Tn',

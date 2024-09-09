@@ -1,3 +1,21 @@
+
+#' Check data for functions
+#'
+#' @param X funts or object that can be directly converted into funts object
+#'
+#' @return funts object or error if the data is incorrect
+#'
+#' @examples
+#' #.check_data(funts(electricity))
+#' #.check_data(electricity)
+.check_data <- function(X){
+  if(class(X)[1]=='funts') return(X)
+
+  if(class(X)[1]=='matrix' || class(X)[1]=='data.frame') return(funts(X))
+
+  stop('Check format of input data',call. = FALSE)
+}
+
 #' Specify Decimal
 #'
 #' This (internal) function returns a string of the numbers with the specified
@@ -16,12 +34,14 @@
 }
 
 
-#' Decretization to curve to n
+#' Discretization for curve to n observations
+#'
+#' This will duplicate values if \code{length(vals)>n}.
 #'
 #' @param vals Vector of values
-#' @param n Numeric for discretion
+#' @param n Numeric for number of final observed points / final discretization
 #'
-#' @return Vector with the data select as the given level n
+#' @return Vector with the data selected at the given level n
 #'
 #' @noRd
 .select_n <- function(vals,n){
@@ -31,8 +51,8 @@
 
 #' Get Chunks
 #'
-#' This (internal) function splits the vector x into a chunksN number of
-#'     subsegments. The values of x are kept in order (i.e. no scrambled).
+#' This (internal) function splits the vector x into a \code{chunksN} number of
+#'     subsegments. The values of x are kept in order (i.e. not scrambled).
 #'
 #' @param x Vector of values
 #' @param chunksN Numeric indicating the number of chunks to split X into
@@ -47,6 +67,8 @@
 #' .getChunks(1:100, 2)
 #' .getChunks(1:100, 5)
 .getChunks <- function(x, chunksN) {
+  chunksN <- round(chunksN)
+
   if (chunksN < 2) {
     return(x)
   }
@@ -57,17 +79,15 @@
 #' Convert List of Samples into a Data Frame
 #'
 #' This (internal) function takes a list with differ length data.frames or
-#'     vectors and pads them all to make a clean data.frame.
+#'  vectors and pads them all to make a clean data.frame.
 #'
+#' This is an internal function and will not be viewable to user. See
+#'  generalized_resampling for usage
 #' @param data_list List of elements to be combined to a data.frame.
 #'
 #' @return Data.frame of the data in data_list
 #'
 #' @noRd
-#'
-#' @examples
-#' # This is an internal function and will not be viewable to user. See
-#' #     generalized_resampling.
 .convertSamplesToDF <- function(data_list) {
   m <- length(data_list)
   maxLen <- 0

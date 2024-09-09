@@ -1,5 +1,4 @@
-
-#' Detect Change Points using Tn and Mn Test Statistics
+#' Characteristic Functions Change Point Detection - Simulation
 #'
 #' @param X Data.frame of the observations
 #' @param M Numeric for the number of vectors to explore space
@@ -18,24 +17,21 @@
 #' @export
 #'
 #' @examples
-#' detect_changepoint_final_TnAndMn(electricity[,1:30],M = 10, J=25)
-detect_changepoint_final_TnAndMn <- function(X,
-                                             M = 20, J=50,
-                                             nSims = 1000,
-                                             h = 3,
-                                             K = bartlett_kernel,
-                                             space = "BM",
-                                             silent = FALSE) {
+#' characteristic_change_sim(electricity[,1:30],M = 10, J=25)
+characteristic_change_sim <- function(X, M = 20, J=50,
+                                      nSims = 1000, h = 3,
+                                      K = bartlett_kernel, space = "BM",
+                                      silent = FALSE) {
   # Generate Noise
   W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
   # Determine Number of Iterations
-  val_Mn <- compute_Mn_final(X, W, J)
-  val_Tn <- compute_Tn_final(X, W, J)
+  val_Mn <- compute_Mn(X = X, W = W, J = J)
+  val_Tn <- compute_Tn(X = X, W = W, J = J)
 
   MJ <- M * J
 
-  sqrtMat <- .compute_sqrtMat_final(X,W,J,h,K)
+  sqrtMat <- .compute_sqrtMat(X,W,J,h,K)
 
   gamProcess <- c()
   nIters <- nSims / 100
@@ -75,9 +71,10 @@ detect_changepoint_final_TnAndMn <- function(X,
   )
 }
 
-#' Detect Change Point using Tn Statistic
+
+#' Characteristic Functions Change Point Detection - Tn Simulation
 #'
-#' @inheritParams detect_changepoint_final_TnAndMn
+#' @inheritParams characteristic_change_sim
 #'
 #' @return List with three items:
 #'  'pval': p-value of change point
@@ -86,8 +83,8 @@ detect_changepoint_final_TnAndMn <- function(X,
 #' @export
 #'
 #' @examples
-#' detect_changepoint_final_Tn(electricity,M=5,J=10,h=0)
-detect_changepoint_final_Tn <- function(X,
+#' characteristic_change_sim_Tn(electricity,M=5,J=10,h=0)
+characteristic_change_sim_Tn <- function(X,
                                      M = 20, J=50,
                                      nSims = 1000,
                                      h = 3,
@@ -98,13 +95,13 @@ detect_changepoint_final_Tn <- function(X,
   W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
   # Determine Number of Iterations
-  val_Tn <- compute_Tn_final(X, W, J)
+  val_Tn <- compute_Tn(X=X, W=W, J=J)
   #val_Tn <- compute_Tn_final1(X, W)
   #val_Tn <- compute_Tn_final2(X, W)
 
   MJ <- M * J
 
-  sqrtMat <- .compute_sqrtMat_final(X,W,J,h,K)
+  sqrtMat <- .compute_sqrtMat(X,W,J,h,K)
 
   gamProcess <- c()
   nIters <- nSims / 100
@@ -136,9 +133,10 @@ detect_changepoint_final_Tn <- function(X,
   )
 }
 
-#' Detect Change point using Mn Test Statistic
+
+#' Characteristic Functions Change Point Detection - Mn Simulation
 #'
-#' @inheritParams detect_changepoint_final_TnAndMn
+#' @inheritParams characteristic_change_sim
 #'
 #' @return List with three items:
 #'  'pval': p-value of change point
@@ -147,8 +145,8 @@ detect_changepoint_final_Tn <- function(X,
 #' @export
 #'
 #' @examples
-#' detect_changepoint_final_Mn(electricity,M=5,J=10,h=0)
-detect_changepoint_final_Mn <- function(X,
+#' characteristic_change_sim_Mn(electricity,M=5,J=10,h=0)
+characteristic_change_sim_Mn <- function(X,
                                         M = 20, J=50,
                                         nSims = 1000,
                                         h = 3,
@@ -159,13 +157,13 @@ detect_changepoint_final_Mn <- function(X,
   W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
   # Determine Number of Iterations
-  val_Mn <- compute_Mn_final(X, W, J)
+  val_Mn <- compute_Mn(X = X, W = W, J=J)
   #val_Mn <- compute_Mn_final1(X, W)
   #val_Mn <- compute_Mn_final2(X, W)
 
   MJ <- M * J
 
-  sqrtMat <- .compute_sqrtMat_final(X,W,J,h,K)
+  sqrtMat <- .compute_sqrtMat(X,W,J,h,K)
 
   gamProcess <- c()
   nIters <- nSims / 100
@@ -198,10 +196,9 @@ detect_changepoint_final_Mn <- function(X,
 
 
 #############################################
-
-compute_Tn_final <- function(X,
-                             W=computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'),
-                             J=50) {
+compute_Tn <- function(X,
+                       W=computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'),
+                       J=50) {
   n <- ncol(X)
 
   Zn <- .Zn_final(W, X)
@@ -213,6 +210,7 @@ compute_Tn_final <- function(X,
   # Integrate observations
   dot_integrate(intVal)
 }
+
 
 .Zn_final <- function(W, X) {
   n <- ncol(X)
@@ -257,9 +255,9 @@ compute_Tn_final <- function(X,
 # }
 
 
-compute_Mn_final <- function(X,
-                             W=computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'),
-                             J=50) {
+compute_Mn <- function(X,
+                       W=computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'),
+                       J=50) {
   n <- ncol(X)
 
   Zn <- .Zn_final(W,X)
@@ -308,11 +306,11 @@ compute_Mn_final <- function(X,
 
 #############################################
 
-.compute_sqrtMat_final <- function(X,W,J,h,K){
+.compute_sqrtMat <- function(X,W,J,h,K){
   x <- seq(0,1,length.out=J)
 
   # Compute Gamma Matrix
-  covMat <- .estimCovMat_final(X, W, x, h, K)
+  covMat <- .estimCovMat(X, W, x, h, K)
 
   # TODO:: Test "GauPro::sqrt_matrix()" which is slightly faster
   tryCatch({
@@ -329,6 +327,7 @@ compute_Mn_final <- function(X,
   )
 }
 
+
 #' Estimate the Covariance Matrix
 #'
 #' This (internal) function computes the covariance matrix of some FD data.
@@ -342,7 +341,7 @@ compute_Mn_final <- function(X,
 #' @return Data.frame for covariance based on Gaussian measure and given data X
 #'
 #' @noRd
-.estimCovMat_final <- function(X, W, x,
+.estimCovMat <- function(X, W, x,
                                h = 3, K = bartlett_kernel) {
   M <- ncol(W)
 
@@ -396,6 +395,7 @@ compute_Mn_final <- function(X,
   )
 }
 
+
 #' Estimate Long-run Covariance (D) matrix
 #'
 #' This (internal) function
@@ -422,7 +422,7 @@ compute_Mn_final <- function(X,
   fVals <- as.numeric(.estimf(X, lfun, v))
   fpVals <- as.numeric(.estimf(X, lfunp, vp))
 
-  Kvals <- K(iters,h)
+  Kvals <- K(iters/h)
   data_tmp <- data.frame('K'=Kvals[Kvals>0],
                          'k'=iters[which(Kvals>0)])
   values <- apply(data_tmp, MARGIN = 1,

@@ -9,20 +9,28 @@ Description: Change point detection for discretely observed, yet innately functi
 License: GPL (>= 3)
 Encoding: UTF-8
 Imports: 
+    CompQuadForm,
+    cubature,
     fastmatrix,
     fda,
+    ftsa,
     ggplot2,
     grDevices,
     magrittr,
     mvtnorm,
+    plot3D,
     plotly,
+    rainbow,
     RColorBrewer,
     Rcpp,
     RcppArmadillo,
     Rfast,
+    sandwich,
+    scales,
     sde,
     stats,
-    tensorA
+    tensorA,
+    tidyr
 LinkingTo: Rcpp, RcppArmadillo
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
@@ -35,3 +43,4 @@ Depends:
     R (>= 2.10)
 LazyData: true
 VignetteBuilder: knitr
+URL: https://jrvanderdoes.github.io/fChange/

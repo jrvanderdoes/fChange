@@ -22,7 +22,7 @@ binary_segmentation(
 )
 }
 \arguments{
-\item{X}{Numeric data.frame with rows for evaluated values and columns
+\item{X}{funts object or numeric data.frame with rows for evaluated values and columns
 indicating functional observations}
 
 \item{alpha}{Numeric value in \eqn{[0, 1]} indicating the significance for
@@ -54,5 +54,5 @@ for general functions. Change points are recursively found until no
 more change points are detected.
 }
 \examples{
-binary_segmentation(X,"Tn","Boot")
+binary_segmentation(funts(electricity[,1:100]),"Tn","Boot")
 }

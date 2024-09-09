@@ -14,6 +14,16 @@ double dot_integrate(NumericVector v) {
 }
 
 // [[Rcpp::export]]
+double dot_integrate_uneven(NumericVector v, NumericVector r) {
+  double val = 0;
+
+  for(int i=0; i<v.size()-1; i++){
+    val += (v[i+1]+v[i]) * (r[i+1]-r[i]);
+  }
+  return val / 2 ;
+}
+
+// [[Rcpp::export]]
 NumericVector dot_integrate_col(NumericMatrix v) {
   NumericVector val(v.ncol());
 

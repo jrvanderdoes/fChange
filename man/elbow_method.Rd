@@ -15,7 +15,7 @@ elbow_method(
 )
 }
 \arguments{
-\item{data}{Numeric data.frame with rows for evaluated values and columns
+\item{data}{funts object or Numeric data.frame with rows for evaluated values and columns
 indicating FD}
 
 \item{test_function}{Function with the first argument being data. Additional

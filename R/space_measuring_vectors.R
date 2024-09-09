@@ -14,23 +14,26 @@
 #' @export
 #'
 #' @examples
-#' computeSpaceMeasuringVectors(10, "BM", electricity)
-#' computeSpaceMeasuringVectors(10, "OU", electricity)
-#' computeSpaceMeasuringVectors(10, "PC", electricity)
+#' computeSpaceMeasuringVectors(M=10, space="BM", X=funts(electricity))
+#' #computeSpaceMeasuringVectors(M=10, space="OU", X=funts(electricity))
+#' computeSpaceMeasuringVectors(M=10, space="PC", X=funts(electricity))
 computeSpaceMeasuringVectors <- function(M, space, X) {
+  X <- .check_data(X)
+
   if (space == "BM") {
-    W <- as.data.frame(sapply(rep(0, M), sde::BM, N = nrow(X) - 1))
+    W <- as.data.frame(sapply(rep(0, M), sde::BM, N = nrow(X$data) - 1))
   } else if (space == "PC") {
-    pComps <- stats::prcomp(X, center = FALSE, scale = FALSE)
-    W <- as.data.frame(sapply(rep(nrow(X), M),
+    pComps <- stats::prcomp(X$data, center = FALSE, scale = FALSE)
+    W <- as.data.frame(sapply(rep(nrow(X$data), M),
       function(x, pcs) {
         rowSums(stats::rnorm(ncol(pcs)) * pcs)
       },
       pcs = pComps$x
     ))
   } else if (space == "OU") {
-    stop('Error: Need to double check this')
-    x <- seq(0, 1, length.out = nrow(X))
+    # TODO:: Fix this
+    stop('Sorry, OU space is under testing.',call. = FALSE)
+    x <- seq(0, 1, length.out = nrow(X$data))
     covMat <- (matrix(1, ncol = length(x), nrow = length(x)))
     covMat[, 1] <- covMat[1, ] <- exp(abs(x - x[1]))
     for (i in 2:(length(x) - 1)) {
@@ -39,7 +42,7 @@ computeSpaceMeasuringVectors <- function(M, space, X) {
         exp(abs(x - x[i]))[-c(1:(i - 1))]
       )
     }
-    W <- as.data.frame(sapply(rep(nrow(X), M),
+    W <- as.data.frame(sapply(rep(nrow(X$data), M),
       function(x, covMat) {
         covMat %*% stats::rnorm(x)
       },
@@ -48,9 +51,9 @@ computeSpaceMeasuringVectors <- function(M, space, X) {
 
     # W <- as.data.frame(sapply(rep(nrow(X),M),sde::rsOU,theta=c(0,0,1)))
   } else if (space == "RN") {
-    W <- data.frame(matrix(1, ncol = M, nrow = nrow(X) - 1))
+    W <- data.frame(matrix(1, ncol = M, nrow = nrow(X$data) - 1))
     W <- as.data.frame(sapply(
-      rep(nrow(X), M),
+      rep(nrow(X$data), M),
       function(x) {
         rep(stats::rnorm(1), x)
       }

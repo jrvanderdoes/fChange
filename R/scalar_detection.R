@@ -1,6 +1,6 @@
 #' Scalar Characteristic Function Change Point Analysis
 #'
-#' This implements a scalar characteristic change method
+#' This implements a scalar characteristic change method.
 #'
 #' @param Y Scalar data
 #' @param gam Numeric for weights
@@ -9,10 +9,14 @@
 #'
 #' @return XXXXX
 #' @export
+#'
 #' @references Hušková, M., & Meintanis, S.G. (2006). Change Point Analysis based on Empirical Characteristic Functions. Metrika, 63, 145-168.
 #'
 #' @examples
 #' scalarDetection(c(rnorm(50),rnorm(75,mean = 1)))
+#' \donttest{
+#' scalarDetection(as.numeric(colMeans(electricity)))
+#' }
 scalarDetection <- function(Y, gam = 0.5, nSims = 200,
                             alpha_val = 0.05) {
   n <- length(Y)
@@ -59,13 +63,13 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
 }
 
 
-#' Title
+#' Compute Phi_k for scalar detection
 #'
-#' @param Y XXXXXX
-#' @param t XXXXXX
-#' @param k XXXXXX
+#' @inheritParams scalarDetection
+#' @param t Time dimension
+#' @param k potential change
 #'
-#' @return XXXXXX
+#' @return Numeric
 #'
 #' @noRd
 .phi_k <- function(Y, t, k) {
@@ -79,13 +83,11 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
 }
 
 
-#' Title
+#' Compute Phi_k0 for scalar detection
 #'
-#' @param Y XXXXXX
-#' @param t XXXXXX
-#' @param k XXXXXX
+#' @inheritParams .phi_k
 #'
-#' @return XXXXXX
+#' @return Numeric
 #'
 #' @noRd
 .phi_k0 <- function(Y, t, k) {
@@ -101,12 +103,12 @@ scalarDetection <- function(Y, gam = 0.5, nSims = 200,
 }
 
 
-#' Title
+#' Weighting Scheme for scalar change point detection
 #'
-#' @param t XXXXXX
-#' @param a (Optional)
+#' @inheritParams .phi_k
+#' @param a (Optional) Weight to consider. Default is 1.
 #'
-#' @return XXXXXX
+#' @return Numeric weight
 #'
 #' @noRd
 .w <- function(t, a = 1) {

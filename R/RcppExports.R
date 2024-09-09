@@ -5,6 +5,10 @@ dot_integrate <- function(v) {
     .Call(`_fChange_dot_integrate`, v)
 }
 
+dot_integrate_uneven <- function(v, r) {
+    .Call(`_fChange_dot_integrate_uneven`, v, r)
+}
+
 dot_integrate_col <- function(v) {
     .Call(`_fChange_dot_integrate_col`, v)
 }
@@ -15,5 +19,61 @@ dot_col_cumsum <- function(m) {
 
 dot_sqrt_mat <- function(A) {
     .Call(`_fChange_dot_sqrt_mat`, A)
+}
+
+make_Obs_tilde_h <- function(Obs) {
+    .Call(`_fChange_make_Obs_tilde_h`, Obs)
+}
+
+make_Obs_tilde_C <- function(Obs) {
+    .Call(`_fChange_make_Obs_tilde_C`, Obs)
+}
+
+adaptive_bw <- function(Obs) {
+    .Call(`_fChange_adaptive_bw`, Obs)
+}
+
+matadd <- function(A, B) {
+    .Call(`_fChange_matadd`, A, B)
+}
+
+kernel <- function(bw, n) {
+    .Call(`_fChange_kernel`, bw, n)
+}
+
+toeplitz <- function(v) {
+    .Call(`_fChange_toeplitz`, v)
+}
+
+getRealSQM <- function(M) {
+    .Call(`_fChange_getRealSQM`, M)
+}
+
+make_hC_Obs <- function(Obs) {
+    .Call(`_fChange_make_hC_Obs`, Obs)
+}
+
+fill_U <- function(A_h, A_C, norm, hC_Obs, m, n, d) {
+    .Call(`_fChange_fill_U`, A_h, A_C, norm, hC_Obs, m, n, d)
+}
+
+vecmult <- function(M, v) {
+    .Call(`_fChange_vecmult`, M, v)
+}
+
+outerProd <- function(v, w) {
+    .Call(`_fChange_outerProd`, v, w)
+}
+
+find_max <- function(U_hC, m, n) {
+    .Call(`_fChange_find_max`, U_hC, m, n)
+}
+
+fill_T <- function(hC_Obs, n, d) {
+    .Call(`_fChange_fill_T`, hC_Obs, n, d)
+}
+
+h_cpp <- function(v1, v2) {
+    .Call(`_fChange_h_cpp`, v1, v2)
 }
 

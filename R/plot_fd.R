@@ -2,7 +2,7 @@
 #'
 #' \code{plot_fd} plots functional data either in an fd object or evaluated at certain points
 #'
-#' @param data A data.frame of evaluated fd objects (the columns being lines and
+#' @param data funts object or data.frame of evaluated fd objects (the columns being lines and
 #'     the rows the evaluated points)
 #' @param CPs (Optional) Vectors of numeric values indicating the location of
 #'     change points. This will color each section differently. Default vallue
@@ -49,9 +49,11 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
                     eye = list(x = -1.5, y = -1.5, z = 1.5),
                     aspectratio = list(x = 1, y = 1, z = 1),
                     showticklabels = TRUE, interactive = TRUE) {
+  data <- .check_data(data)
+
   if (!interactive) {
     fdPlot <- .plot_evalfd_highdim(
-      data = data, curve_points = curve_points,
+      data = data$data, curve_points = curve_points,
       CPs = CPs, plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
@@ -61,7 +63,7 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
     )
   } else if (!is.null(CPs) && length(stats::na.omit(CPs)) > 0) {
     fdPlot <- .plot_evalfd_3dlines_cps(
-      data = data, curve_points = curve_points,
+      data = data$data, curve_points = curve_points,
       CPs = CPs[order(CPs)], plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
@@ -71,7 +73,7 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
     ) # ,FDReps)
   } else {
     fdPlot <- .plot_evalfd_3dlines(
-      data = data, curve_points = curve_points,
+      data = data$data, curve_points = curve_points,
       plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,

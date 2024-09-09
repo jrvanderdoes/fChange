@@ -17,5 +17,6 @@
 #' @examples
 #' trim_function(electricity)
 trim_function <- function(data, minVal = 10, ...) {
+  # TODO: Change to funts
   max(round(minVal), floor(log(ncol(as.data.frame(data)))), na.rm = TRUE)
 }
