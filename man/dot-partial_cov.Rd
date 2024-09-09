@@ -47,7 +47,7 @@ sum(round(autocov_approx_h(electricity,0),4) != round(e2$coef_matrix,4) )
 # operator based on the whole sample
 
 # estimates using only 90\% of the data
-Cov = partial_cov(electricity, 0.9)
+Cov = .partial_cov(electricity, 0.9)
 }
 \seealso{
 \code{\link{pca.fd}}

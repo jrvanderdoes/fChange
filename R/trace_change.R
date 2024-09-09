@@ -126,7 +126,7 @@ trace_change <- function (X, CPs = NULL, delta = 0.2, M = 1000){
 #' # operator based on the whole sample
 #'
 #' # estimates using only 90% of the data
-#' Cov = partial_cov(electricity, 0.9)
+#' Cov = .partial_cov(electricity, 0.9)
 .partial_cov <- function(X, x = NULL){
   X <- .check_data(X)
   if (is.null(x)) x <- 1
