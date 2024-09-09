@@ -29,31 +29,32 @@ fitted values into functional observations.
 }
 \examples{
 # Example 1
-
-N <- 250
-dv <- 20
-v <- seq(from = 0, to = 1, length.out = 20)
-
-phi <- 1.3 * ((v) \%*\% t(v))
-
-persp(v,v,phi,
-      ticktype = "detailed",
-      main = "Integral operator")
-
-set.seed(3)
-white_noise <-  generate_brownian_bridge(N, v = v)
-
-y <- matrix(nrow = dv, ncol = N)
-y[,1] <- white_noise$data[,1]
-for(jj in 2:N){
-    y[,jj] <- white_noise$data[,jj];
-
-    y[,jj] <- y[,jj] + .integral_operator(operator_kernel = phi,
-                                    v = v, curve = y[,jj-1])
-}
-
-# Fit an ARH(1) model
-mod <- .fit_ARHp_FPCA(X = funts(y,intraobs = v), p = 1, n_pcs = 5)
+#
+# Simulate an ARH(1) process
+# N <- 250
+# dv <- 20
+# v <- seq(from = 0, to = 1, length.out = 20)
+#
+# phi <- 1.3 * ((v) \%*\% t(v))
+#
+# persp(v,v,phi,
+#       ticktype = "detailed",
+#       main = "Integral operator")
+#
+# set.seed(3)
+# white_noise <-  generate_brownian_bridge(N, v = v)
+#
+# y <- matrix(nrow = dv, ncol = N)
+# y[,1] <- white_noise$data[,1]
+# for(jj in 2:N){
+#     y[,jj] <- white_noise$data[,jj];
+#
+#     y[,jj] <- y[,jj] + .integral_operator(operator_kernel = phi,
+#                                     v = v, curve = y[,jj-1])
+# }
+#
+# # Fit an ARH(1) model
+# mod <- .fit_ARHp_FPCA(X = funts(y,intraobs = v), p = 1, n_pcs = 5)
 
 # Plot results
 plot(v, y[,50], type = "l", lty = 1, ylab = "")
