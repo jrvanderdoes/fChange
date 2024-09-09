@@ -2,21 +2,21 @@
 % Please edit documentation in R/tests_wn_ind_functions.R
 \name{V_WS_quantile_iid}
 \alias{V_WS_quantile_iid}
-\title{Test Statistic - Welch Approximation for iid V_WS_hyp_test}
+\title{Test Statistic - Welch Approximation for iid \code{V_WS_hyp_test}}
 \usage{
 V_WS_quantile_iid(f_data, K, alpha = 0.05)
 }
 \arguments{
 \item{f_data}{the functional data matrix with functions in columns}
 
-\item{K}{specifies the range of lags 1:K for the test statistic V_K}
+\item{K}{specifies the range of lags 1:K for the test statistic \code{V_K}}
 
 \item{alpha}{the significance level to be used in the hypothesis test}
 }
 \value{
 Scalar value of the 1-alpha quantile of the beta * chi-square distribution with nu
-degrees of freedom (which approximates V_K)
+degrees of freedom (which approximates \code{V_K})
 }
 \description{
-Test Statistic - Welch Approximation for iid V_WS_hyp_test
+Test Statistic - Welch Approximation for iid \code{V_WS_hyp_test}
 }

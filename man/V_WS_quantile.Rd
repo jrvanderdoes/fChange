@@ -2,14 +2,14 @@
 % Please edit documentation in R/tests_wn_ind_functions.R
 \name{V_WS_quantile}
 \alias{V_WS_quantile}
-\title{Test Statistic - Welch Approximation for V_WS_hyp_test}
+\title{Test Statistic - Welch Approximation for \code{V_WS_hyp_test}}
 \usage{
 V_WS_quantile(f_data, K, alpha = 0.05, M = NULL, low_disc = FALSE)
 }
 \arguments{
 \item{f_data}{the functional data matrix with functions in columns}
 
-\item{K}{specifies the range of lags 1:K for the test statistic V_K}
+\item{K}{specifies the range of lags 1:K for the test statistic \code{V_K}}
 
 \item{alpha}{the significance level to be used in the hypothesis test}
 
@@ -20,11 +20,11 @@ for the Monte-Carlo method (only Sobol Sampling is currently supported)}
 }
 \value{
 Scalar value of the 1-alpha quantile of the beta * chi-square distribution with nu
-degrees of freedom (which approximates V_K)
+degrees of freedom (which approximates \code{V_K})
 }
 \description{
 Computes the 1-alpha quantile of the beta * chi-squared distribution with nu
 degrees of freedom, where beta and nu are obtained from a Welch-Satterthwaite approximation
 of the test statistic \code{V_K}. This quantile is used to conduct an approximate size alpha test
-of the hypothesis \code{H'_0_K}.
+of the hypothesis \code{H_0_K}.
 }

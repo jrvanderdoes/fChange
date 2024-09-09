@@ -259,22 +259,22 @@ covariance_diag_store <- function(f_data, K) {
 
 ################################################################################
 
-#' Test Statistic - Welch Approximation for V_WS_hyp_test
+#' Test Statistic - Welch Approximation for \code{V_WS_hyp_test}
 #'
 #' Computes the 1-alpha quantile of the beta * chi-squared distribution with nu
 #'   degrees of freedom, where beta and nu are obtained from a Welch-Satterthwaite approximation
 #'   of the test statistic \code{V_K}. This quantile is used to conduct an approximate size alpha test
-#'   of the hypothesis \code{H'_0_K}.
+#'   of the hypothesis \code{H_0_K}.
 #'
 #' @param f_data the functional data matrix with functions in columns
-#' @param K specifies the range of lags 1:K for the test statistic V_K
+#' @param K specifies the range of lags 1:K for the test statistic \code{V_K}
 #' @param alpha the significance level to be used in the hypothesis test
 #' @param M optional argument specifying the sampling size in the related Monte Carlo method
 #' @param low_disc Boolean value specifying whether or not to use low-discrepancy sampling
 #'                   for the Monte-Carlo method (only Sobol Sampling is currently supported)
 #'
 #' @return Scalar value of the 1-alpha quantile of the beta * chi-square distribution with nu
-#'           degrees of freedom (which approximates V_K)
+#'           degrees of freedom (which approximates \code{V_K})
 V_WS_quantile <- function(f_data, K, alpha=0.05, M=NULL, low_disc=FALSE) {
   mean_V_K <- mean_hat_V_K(f_data, K)
   var_V_K <- variance_hat_V_K(f_data, K, M=M, low_disc=low_disc)
@@ -290,12 +290,12 @@ V_WS_quantile <- function(f_data, K, alpha=0.05, M=NULL, low_disc=FALSE) {
 }
 
 
-#' Test Statistic - Welch Approximation for iid V_WS_hyp_test
+#' Test Statistic - Welch Approximation for iid \code{V_WS_hyp_test}
 #'
 #' @inheritParams V_WS_quantile
 #'
 #' @return Scalar value of the 1-alpha quantile of the beta * chi-square distribution with nu
-#'           degrees of freedom (which approximates V_K)
+#'           degrees of freedom (which approximates \code{V_K})
 V_WS_quantile_iid <- function(f_data, K, alpha=0.05) {
   mean_V_K <- mean_hat_V_K_iid(f_data, K)
   var_V_K <- variance_hat_V_K_iid(f_data, K)
