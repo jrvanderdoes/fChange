@@ -57,10 +57,10 @@ fitted values into functional observations.
 # mod <- .fit_ARHp_FPCA(X = funts(y,intraobs = v), p = 1, n_pcs = 5)
 
 # Plot results
-plot(v, y[,50], type = "l", lty = 1, ylab = "")
-lines(v, mod$x_est[,50], col = "red")
-legend("bottomleft", legend = c("real","est"),
-       lty = 1, col = c(1,2))
+# plot(v, y[,50], type = "l", lty = 1, ylab = "")
+# lines(v, mod$x_est[,50], col = "red")
+# legend("bottomleft", legend = c("real","est"),
+#        lty = 1, col = c(1,2))
 
 }
 \references{
