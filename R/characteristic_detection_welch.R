@@ -31,7 +31,7 @@ characteristic_change_welch <- function(X,
   # Determine Number of Iterations
   val_cutoff <- .compute_Welch(X, alpha = alpha, W = W,
                          M = M, J=J, h = h, K = K )
-  val_Tn <- compute_Tn(X$data, W, J)
+  val_Tn <- compute_Tn(X=X$data, W=W, J=J)
 
   list(
     "cutoff" = val_cutoff,
