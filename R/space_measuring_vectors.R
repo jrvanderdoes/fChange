@@ -14,9 +14,9 @@
 #' @export
 #'
 #' @examples
-#' computeSpaceMeasuringVectors(10, "BM", funts(electricity))
-#' computeSpaceMeasuringVectors(10, "OU", funts(electricity))
-#' computeSpaceMeasuringVectors(10, "PC", funts(electricity))
+#' computeSpaceMeasuringVectors(M=10, space="BM", X=funts(electricity))
+#' #computeSpaceMeasuringVectors(M=10, space="OU", X=funts(electricity))
+#' computeSpaceMeasuringVectors(M=10, space="PC", X=funts(electricity))
 computeSpaceMeasuringVectors <- function(M, space, X) {
   X <- .check_data(X)
 

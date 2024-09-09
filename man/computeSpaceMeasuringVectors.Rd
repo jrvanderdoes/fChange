@@ -24,7 +24,7 @@ This function is used to compute vectors from spaces to measure the function
 data objects.
 }
 \examples{
-computeSpaceMeasuringVectors(10, "BM", funts(electricity))
-computeSpaceMeasuringVectors(10, "OU", funts(electricity))
-computeSpaceMeasuringVectors(10, "PC", funts(electricity))
+computeSpaceMeasuringVectors(M=10, space="BM", X=funts(electricity))
+#computeSpaceMeasuringVectors(M=10, space="OU", X=funts(electricity))
+computeSpaceMeasuringVectors(M=10, space="PC", X=funts(electricity))
 }
