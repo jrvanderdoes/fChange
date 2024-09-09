@@ -206,6 +206,7 @@ t_statistic_Q <- function(f_data, lag) {
 #' @param lag the lag to use to compute the single lag test statistic
 #'
 #' @return A 2-dimensional array encoding the autocovariance matrix for a given lag h.
+#' @export
 autocov_approx_h <- function(f_data, lag) {
   N <- NCOL(f_data)
   c_f_data <- center(f_data)
