@@ -18,7 +18,7 @@ data - rowMeans(data)
 }
 Compute CUSUM Statistic for Mean Change}
 \usage{
-compute_mean_stat(data, k, ...)
+compute_mean_stat(data, k, weight = 0.5)
 }
 \arguments{
 \item{data}{funts object or numeric data.frame with evaled points on rows and fd objects in columns}
