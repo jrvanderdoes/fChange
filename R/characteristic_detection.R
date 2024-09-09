@@ -157,7 +157,7 @@ characteristic_change_sim_Mn <- function(X,
   W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
   # Determine Number of Iterations
-  val_Mn <- compute_Mn(X, W, J)
+  val_Mn <- compute_Mn(X = X, W = W, J=J)
   #val_Mn <- compute_Mn_final1(X, W)
   #val_Mn <- compute_Mn_final2(X, W)
 
