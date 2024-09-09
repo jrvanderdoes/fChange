@@ -488,10 +488,6 @@ spectral_test <- function(data, kernel = 'Bartlett',
 #' @examples
 #' b <- brown_motion(250, 100)
 #' independence_test(b, components = 3, lag = 5)
-#'
-#' @importFrom rainbow fts
-#' @importFrom ftsa ftsm
-#'
 independence_test <- function(data, components, lag, alpha = 0.05) {
   data <- .check_data(data)
 
