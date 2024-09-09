@@ -237,7 +237,7 @@ diff.funts <- function(x, lag = 1L, differences = 1L, ...) {
 #' @export
 #'
 #' @examples
-#' lag(funts(electricity))
+#' lag.funts(funts(electricity))
 lag.funts <- function(x, k, ...) {
   stopifnot(k >= 0)
   #ans <- .Call("lag", x, as.integer(k),PACKAGE="fts")
