@@ -1,6 +1,6 @@
 #' Generic ACF/PACF
 #'
-#' @param object Object for computation of (partial) autocorrelation function
+#' @param x Object for computation of (partial) autocorrelation function
 #'  (ACF/PACF)
 #' @param ... Additional parameters to function based on data
 #'
@@ -63,24 +63,20 @@ NULL
 #############################################
 
 #' @rdname acf
-#' @inheritParams stats::acf
 #'
 #' @export
 acf <- function(x, ...) UseMethod("acf")
 #' @rdname acf
-#' @inheritParams stats::acf
 #'
 #' @export
 acf.default <- function(x, ...) stats::acf(x)
 
 
 #' @rdname acf
-#' @inheritParams stats::pacf
 #'
 #' @export
 pacf <- function(x, ...) UseMethod("pacf")
 #' @rdname acf
-#' @inheritParams stats::pacf
 #'
 #' @export
 pacf.default <- function(x, ...) stats::pacf(x)

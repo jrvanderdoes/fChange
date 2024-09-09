@@ -11,16 +11,12 @@ MCint_eta_approx_i_j(f_data, i, j, M = NULL, low_disc = FALSE)
 \arguments{
 \item{f_data}{the functional data matrix with functions in columns}
 
-\item{i}{the indices in 1:T that we are computing eta^hat_i_j for}
-
-\item{j}{the indices in 1:T that we are computing eta^hat_i_j for}
+\item{i, j}{the indices i,j in 1:T that we are computing eta^hat_i_j for}
 
 \item{M}{number of vectors (v1, v2, v3, v4) to sample uniformly from U_J X U_J X U_J X U_J}
 
 \item{low_disc}{boolean value specifying whether or not to use low-discrepancy sampling
 for the Monte-Carlo method (only Sobol Sampling is currently supported)}
-
-\item{i, j}{the indices i,j in 1:T that we are computing eta^hat_i_j for}
 }
 \value{
 scalar value of eta^_hat_i_j computed using the MCint method.

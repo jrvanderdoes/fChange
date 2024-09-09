@@ -169,20 +169,20 @@ mean_change <- function(data, M = 1000, h = 0,
 }
 
 
-#' #' Center Data
-#' #'
-#' #' This (internal) function centers each time point.
-#' #'
-#' #' This is an internal function, see use in .estimateCeps.
-#' #'
-#' #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
-#' #'
-#' #' @return Numeric data.frame of the data, but with centered values at each time point
-#' #'
-#' #' @noRd
-#' .centerData <- function(data) {
-#'   data - rowMeans(data)
-#' }
+# #' Center Data
+# #'
+# #' This (internal) function centers each time point.
+# #'
+# #' This is an internal function, see use in .estimateCeps.
+# #'
+# #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
+# #'
+# #' @return Numeric data.frame of the data, but with centered values at each time point
+# #'
+# #' @noRd
+# .centerData <- function(data) {
+#   data - rowMeans(data)
+# }
 
 
 #' Compute CUSUM Statistic for Mean Change

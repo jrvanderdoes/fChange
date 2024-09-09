@@ -16,10 +16,10 @@ pacf(x, ...)
 \method{pacf}{default}(x, ...)
 }
 \arguments{
-\item{...}{Additional parameters to function based on data}
-
-\item{object}{Object for computation of (partial) autocorrelation function
+\item{x}{Object for computation of (partial) autocorrelation function
 (ACF/PACF)}
+
+\item{...}{Additional parameters to function based on data}
 }
 \value{
 ACF or PACF values and plots

@@ -121,50 +121,49 @@ mean_change_Tn <- function(data, M = 1000, h = 0, K = bartlett_kernel) {
 }
 
 
-#' #' Estimate Long-run Covariance Kernel
-#' #'
-#' #' This (internal) function estimates the long-run covariance kernel. That is,
-#' #'     \eqn{C_{\epsilon}(t,t') = \sum_{l=-\inf}^{\inf} \text{Cov}(\epsilon_0(t),
-#' #'     \epsilon_l(t'))} with error sequence \eqn{(\epsilon_i : i \in \mathbb{Z})}.
-#' #'
-#' #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
-#' #' @param  h The window parameter parameter for the estimation of the long run covariance kernel. The default
-#' #' value is \code{h=0}, i.e., it assumes iid data
-#' #' @param K (Optional) Function indicating the Kernel to use if h>0
-#' #'
-#' #' @return Data.frame of numerics with dim of ncol(data) x ncol(data), that is
-#' #'     symmetric.
-#' #'
-#' #' @noRd
-#' #'
-#' #' @examples
-#' #' # This is an internal function, see use in mean_change.
-#' .estimateCeps <- function(data, h, K) {
-#'   N <- ncol(data)
-#'   D <- nrow(data)
-#'   Ceps <- matrix(NA, nrow = D, ncol = D)
-#'
-#'   data <- .centerData(data)
-#'
-#'   for (k in 1:D) {
-#'     for (r in k:D) {
-#'       # Multiple all observations taken at the same point in time across FDs
-#'       s <- as.numeric(data[k, ]) %*% as.numeric(data[r, ])
-#'       if (h > 0) {
-#'         for (i in 1:h) {
-#'           # Don't fully understand
-#'           a <- as.numeric(data[k, 1:(N - i)]) %*% as.numeric(data[r, (i + 1):N])
-#'           a <- a + as.numeric(data[r, 1:(N - i)]) %*% as.numeric(data[k, (i + 1):N])
-#'           s <- s + K(i/h) * a
-#'         }
-#'       }
-#'       Ceps[k, r] <- Ceps[r, k] <- s
-#'     }
-#'   }
-#'
-#'   Ceps
-#' }
-
+# #' Estimate Long-run Covariance Kernel
+# #'
+# #' This (internal) function estimates the long-run covariance kernel. That is,
+# #'     \eqn{C_{\epsilon}(t,t') = \sum_{l=-\inf}^{\inf} \text{Cov}(\epsilon_0(t),
+# #'     \epsilon_l(t'))} with error sequence \eqn{(\epsilon_i : i \in \mathbb{Z})}.
+# #'
+# #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
+# #' @param  h The window parameter parameter for the estimation of the long run covariance kernel. The default
+# #' value is \code{h=0}, i.e., it assumes iid data
+# #' @param K (Optional) Function indicating the Kernel to use if h>0
+# #'
+# #' @return Data.frame of numerics with dim of ncol(data) x ncol(data), that is
+# #'     symmetric.
+# #'
+# #' @noRd
+# #'
+# #' @examples
+# #' # This is an internal function, see use in mean_change.
+# .estimateCeps <- function(data, h, K) {
+#   N <- ncol(data)
+#   D <- nrow(data)
+#   Ceps <- matrix(NA, nrow = D, ncol = D)
+#
+#   data <- .centerData(data)
+#
+#   for (k in 1:D) {
+#     for (r in k:D) {
+#       # Multiple all observations taken at the same point in time across FDs
+#       s <- as.numeric(data[k, ]) %*% as.numeric(data[r, ])
+#       if (h > 0) {
+#         for (i in 1:h) {
+#           # Don't fully understand
+#           a <- as.numeric(data[k, 1:(N - i)]) %*% as.numeric(data[r, (i + 1):N])
+#           a <- a + as.numeric(data[r, 1:(N - i)]) %*% as.numeric(data[k, (i + 1):N])
+#           s <- s + K(i/h) * a
+#         }
+#       }
+#       Ceps[k, r] <- Ceps[r, k] <- s
+#     }
+#   }
+#
+#   Ceps
+# }
 
 # #' Center Data
 # #'

@@ -99,8 +99,7 @@ variance_hat_Q_h <- function(f_data, lag, M=NULL, low_disc=FALSE) {
 #'   Monte Carlo integration method "MCint" defined on page 8.
 #'
 #' @param f_data the functional data matrix with functions in columns
-#' @param i the indices in 1:T that we are computing eta^hat_i_j for
-#' @param j the indices in 1:T that we are computing eta^hat_i_j for
+#' @param i,j the indices in 1:T that we are computing eta^hat_i_j for
 #' @param M number of vectors (v1, v2, v3, v4) to sample uniformly from U_J X U_J X U_J X U_J
 #' @param low_disc boolean value specifiying whether or not to use low-discrepancy sampling
 #'                   for the Monte-Carlo method (only Sobol Sampling is currently supported)

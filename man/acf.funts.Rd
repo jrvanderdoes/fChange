@@ -7,6 +7,9 @@
 \method{acf}{funts}(x, ...)
 }
 \arguments{
+\item{x}{Object for computation of (partial) autocorrelation function
+(ACF/PACF)}
+
 \item{...}{Additional parameters to function based on data}
 }
 \value{

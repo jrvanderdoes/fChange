@@ -2,21 +2,7 @@
 % Please edit documentation in R/mean_change.R
 \name{compute_mean_stat}
 \alias{compute_mean_stat}
-\title{#' Center Data
-#'
-#' This (internal) function centers each time point.
-#'
-#' This is an internal function, see use in .estimateCeps.
-#'
-#' @param data Numeric data.frame with evaled points on rows and fd objects in columns
-#'
-#' @return Numeric data.frame of the data, but with centered values at each time point
-#'
-#' @noRd
-.centerData <- function(data) {
-data - rowMeans(data)
-}
-Compute CUSUM Statistic for Mean Change}
+\title{Compute CUSUM Statistic for Mean Change}
 \usage{
 compute_mean_stat(data, k, weight = 0.5)
 }
