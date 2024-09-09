@@ -269,8 +269,8 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 #' @return Plot (ggplot2) with colored observations / regions
 #'
 #' @examples
-#' .plot_stack(funts(electricity))
-#' .plot_stack(funts(electricity), CPs=c(50,100,200))
+#' # .plot_stack(funts(electricity))
+#' # .plot_stack(funts(electricity), CPs=c(50,100,200))
 .plot_stack <- function(object, CPs=NULL){
   data <- object$data
   plot_data <-
@@ -354,8 +354,8 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 #' @export
 #'
 #' @examples
-#' .plot_substack(funts(electricity))
-#' .plot_substack(funts(electricity), CPs=c(50,100,200))
+#' # .plot_substack(funts(electricity))
+#' # .plot_substack(funts(electricity), CPs=c(50,100,200))
 .plot_substack <- function(object, CPs=NULL){
   # data <- object$data
   if(!is.null(CPs)) CPs <- unique(c(0, CPs, ncol(object$data)))
@@ -542,6 +542,8 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 #'
 #' @references Acker D (2024). gg3D: 3D perspective plots for ggplot2. R
 #'                package version 0.0.0.9000.
+#'
+#' @export
 #'
 #' @examples
 #' dat <- funts(electricity)

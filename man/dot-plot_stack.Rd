@@ -18,6 +18,6 @@ Plot (ggplot2) with colored observations / regions
 Plot data as stack on 2d plot
 }
 \examples{
-.plot_stack(funts(electricity))
-.plot_stack(funts(electricity), CPs=c(50,100,200))
+# .plot_stack(funts(electricity))
+# .plot_stack(funts(electricity), CPs=c(50,100,200))
 }
