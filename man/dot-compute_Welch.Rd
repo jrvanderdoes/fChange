@@ -47,5 +47,5 @@ Numeric value indicating cutoff from Welsh approximation
 This function approximates the Tn statistic using the Welch approximation.
 }
 \examples{
-.compute_Welch(X=electricity[,1:40], h = 0)
+# .compute_Welch(X=electricity[,1:40], h = 0)
 }

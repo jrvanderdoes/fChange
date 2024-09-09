@@ -66,7 +66,7 @@ characteristic_change_welch <- function(X,
 #' @return Numeric value indicating cutoff from Welsh approximation
 #'
 #' @examples
-#' .compute_Welch(X=electricity[,1:40], h = 0)
+#' # .compute_Welch(X=electricity[,1:40], h = 0)
 .compute_Welch <- function(X, alpha = 0.05,
                      W = NULL, M = 100, J = 50,
                      h = ncol(funts(X)$data)^(1 / 3),
