@@ -11,8 +11,8 @@
 #' @export
 #'
 #' @examples
-#' # funts(electricity)
-#' # funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
+#' funts(electricity)
+#' funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
 funts <- function(X, labels=colnames(as.data.frame(X)),
                   intraobs=seq(0,1,length.out=nrow(X))){
   if(is.funts(X)) return(X)
