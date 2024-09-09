@@ -9,6 +9,7 @@ Description: Change point detection for discretely observed, yet innately functi
 License: GPL (>= 3)
 Encoding: UTF-8
 Imports: 
+    CompQuadForm,
     fastmatrix,
     fda,
     ftsa,
