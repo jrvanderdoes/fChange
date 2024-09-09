@@ -43,6 +43,9 @@ List with the following items:
 \description{
 Compute resampling statistics for Tn and Mn
 }
+\details{
+TODO:: Make this part of the original function
+}
 \examples{
 data_KL <- generate_data_fd(
 ns = c(50, 50),
@@ -59,5 +62,5 @@ distsArray = c("Normal", "Binomial"),
 evals = seq(0, 1, 0.05),
 kappasArray = c(0, 0.5)
 )
-result <- TnMn_resampling(data_KL, M=1000)
+result <- TnMn_resampling(data_KL$data, M=1000)
 }

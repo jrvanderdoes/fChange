@@ -4,20 +4,21 @@
 \alias{bartlett_kernel}
 \title{Bartlett Kernel}
 \usage{
-bartlett_kernel(l, h)
+bartlett_kernel(x)
 }
 \arguments{
-\item{l}{A numeric value indicating current lag}
-
-\item{h}{A numeric value indicating smallest lag with no influence}
+\item{x}{A numeric value at which to evaluate kernel.
+It often indicates current lag divided by window.}
 }
 \value{
 A numeric value indicating value of Kernel at that point
 }
 \description{
-A very common Kernel. This is an obvious option in the Welsh-approximation.
+Kernel where \eqn{max(0,1-|m/h|), h\neq 0} and \eqn{1, h=0}.
+}
+\details{
+Note, this function is vectorized.
 }
 \examples{
-bartlett_kernel(1, 2)
-bartlett_kernel(0, 0)
+bartlett_kernel(-20:20/15)
 }

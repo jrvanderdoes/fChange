@@ -6,7 +6,6 @@
 \usage{
 mean_change(
   data,
-  data1 = data,
   M = 1000,
   h = 0,
   K = bartlett_kernel,
@@ -16,7 +15,7 @@ mean_change(
 )
 }
 \arguments{
-\item{data}{Numeric data.frame with evaled points on rows and fd objects in columns}
+\item{data}{funts object or numeric data.frame with evaled points on rows and fd objects in columns}
 
 \item{M}{(Optional) Number of Monte Carlo simulations used to get the critical
 values. The default value is \code{M=1000}}

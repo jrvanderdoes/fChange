@@ -18,7 +18,7 @@ detect_changepoint_bootstrap(
 )
 }
 \arguments{
-\item{X}{Data.frame of the data}
+\item{X}{funts object or easily convertable data}
 
 \item{statistic}{Test statistic (Tn or Mn)}
 
@@ -49,5 +49,5 @@ List with the following parameters:
 Detect the changes in data by using bootstrap.
 }
 \examples{
-detect_changepoint_bootstrap(electricity,statistic = 'Tn')
+detect_changepoint_bootstrap(funts(electricity),statistic = 'Tn')
 }

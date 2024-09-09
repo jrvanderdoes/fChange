@@ -65,11 +65,11 @@ data_KL <- generate_data_fd(
   kappasArray = c(0, 0.5)
 )
 # Metric
-compute_Tn(data_KL,M =100) # Note value
-compute_Tn(data_KL,M =100) # Note different value
+compute_Tn(data_KL$data,M =100) # Note value
+compute_Tn(data_KL$data,M =100) # Note different value
 # Permutation Method for Tn (this will get 1-alpha quantile of iters)
 generalized_resampling(
-  X = data_KL,
+  X = data_KL$data,
   blockSize = 5,
   fn = compute_Tn, iters = 10, replace = F
 )

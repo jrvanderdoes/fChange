@@ -16,7 +16,7 @@ mean_change_Tn(
 )
 }
 \arguments{
-\item{data}{Numeric data.frame with evaled points on rows and fd objects in columns}
+\item{data}{funts object or numeric data.frame with evaled points on rows and fd objects in columns}
 
 \item{M}{(Optional) Number of Monte Carlo simulations used to get the critical
 values. The default value is \code{M=1000}}

@@ -19,7 +19,7 @@ generalized_binary_segmentation(
 )
 }
 \arguments{
-\item{data}{Numeric data.frame with rows for evaluated values and columns
+\item{data}{funts object or numeric data.frame with rows for evaluated values and columns
 indicating functional observations}
 
 \item{test_statistic_function}{XXXXXXXXXXXXXXXXX.}

@@ -59,7 +59,7 @@ data_KL <- generate_data_fd(
 )
 
 complete_binary_segmentation(
-  data_KL, compute_Tn, welch_approximation,
+  data_KL$data, compute_Tn, welch_approximation,
   function(data) {
     max(2, floor(log(ncol(as.data.frame(data)))),
       na.rm = TRUE
@@ -67,7 +67,7 @@ complete_binary_segmentation(
   }
 )
 generalized_wild_binary_segmentation(
-  data = data_KL,
+  data = data_KL$data,
   test_statistic_function = compute_Tn,
   cutoff_function = welch_approximation,
   trim_function = function(data) {

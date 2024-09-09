@@ -25,6 +25,9 @@ point
 \description{
 Function to compute both Tn and Mn.
 }
+\details{
+TODO:: Make this part of the original function
+}
 \examples{
 compute_TnMn(electricity,M=5)
 }
