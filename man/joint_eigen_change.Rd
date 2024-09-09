@@ -52,6 +52,6 @@ that is defined by \code{d} of the covariance function. The critical
 values are approximated via \code{M} Monte Carlo simulations.
 }
 \examples{
-joint_eigen_change(generate_brownian_motion(500), 1)
-joint_eigen_change(funts(electricity), 2)
+#joint_eigen_change(generate_brownian_motion(500), 1)
+#joint_eigen_change(funts(electricity), 2)
 }

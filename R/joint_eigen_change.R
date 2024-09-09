@@ -33,8 +33,8 @@
 #'
 #'
 #' @examples
-#' joint_eigen_change(generate_brownian_motion(500), 1)
-#' joint_eigen_change(funts(electricity), 2)
+#' #joint_eigen_change(generate_brownian_motion(500), 1)
+#' #joint_eigen_change(funts(electricity), 2)
 joint_eigen_change <- function(X, d, h =2, CPs = NULL,
                                delta = 0.1, M = 1000,
                                K=bartlett_kernel){

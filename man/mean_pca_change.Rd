@@ -58,7 +58,7 @@ is recommended that the dimension of the subspace, \code{d}, that the functional
 TVE using \code{\link{pick_dim}}.
 }
 \examples{
-mean_pca_change(funts(electricity))
+#mean_pca_change(funts(electricity))
 }
 \references{
 Berkes, I., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Detecting changes in the mean of functional observations}

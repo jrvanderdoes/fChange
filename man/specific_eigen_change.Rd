@@ -45,9 +45,9 @@ This function dates and detects changes in the defined eigenvalue of the covaria
 approximated via \code{M} Monte Carlo simulations.
 }
 \examples{
-specific_eigen_change(generate_brownian_motion(500),1)
-specific_eigen_change(funts(electricity),1)
-specific_eigen_change(funts(electricity),2)
+#specific_eigen_change(generate_brownian_motion(500),1)
+#specific_eigen_change(funts(electricity),1)
+#specific_eigen_change(funts(electricity),2)
 }
 \references{
 Aue, A, G Rice, and O Sönmez. “Structural Break Analysis

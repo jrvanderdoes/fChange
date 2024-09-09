@@ -28,9 +28,9 @@
 #'  (London, Ont.) 31, no. 1 (2020). https://doi.org/10.1002/env.2617.
 #'
 #' @examples
-#' specific_eigen_change(generate_brownian_motion(500),1)
-#' specific_eigen_change(funts(electricity),1)
-#' specific_eigen_change(funts(electricity),2)
+#' #specific_eigen_change(generate_brownian_motion(500),1)
+#' #specific_eigen_change(funts(electricity),1)
+#' #specific_eigen_change(funts(electricity),2)
 specific_eigen_change <- function(X, component, h=2, CPs = NULL,
                                   delta = 0.1, M = 1000,
                                   K=bartlett_kernel){

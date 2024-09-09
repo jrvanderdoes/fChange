@@ -54,7 +54,7 @@
 #' of functional data}Journal of Multivariate Analysis 100, 2254–2269.
 #'
 #' @examples
-#' mean_pca_change(funts(electricity))
+#' #mean_pca_change(funts(electricity))
 mean_pca_change <- function(X, TVE=0.95, M=1000, h=0, K=bartlett_kernel){
   stop('Errors still remaining')
   fdata <- fun_IID(n=200, nbasis=21)
