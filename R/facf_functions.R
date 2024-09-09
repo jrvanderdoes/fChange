@@ -175,7 +175,7 @@ scalar_covariance_i_j <- function(f_data, i, j, times) {
 
 #' FACF - Test Statistic
 #'
-#' Computes the test statistic Q_{T,h} = T*||y^hat_h||^2 for fixed h and for T
+#' Computes the test statistic \code{Q_{T,h} = T*||y^hat_h||^2} for fixed h and for T
 #'   inferred from the functional data f_data that is passed.
 #'
 #' @param f_data the functional data matrix with observed functions in columns

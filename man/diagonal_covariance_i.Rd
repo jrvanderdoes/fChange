@@ -24,12 +24,6 @@ windows defined by i.
 Computes the approximate diagonal covariance matrix of the functional
 data for lag windows defined by i.
 
-c_f_data <- center(f_data)
-sum_parts <- as.list((1+max(i,j)):N)
-sum_parts <- lapply(sum_parts,
-function(k) c_f_data\link{,k-i} \%o\% c_f_data\link{,k} \%o\%
-c_f_data\link{,k-j} \%o\% c_f_data\link{,k})
-}
-\details{
-
+\code{diagonal_covariance_i} Computes the approximate diagonal covariance matrix of the functional
+data for lag windows defined by i.
 }

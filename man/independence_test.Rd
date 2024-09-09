@@ -46,7 +46,6 @@ deeper exposition, and consult the reference for a complete treatment.
 \examples{
 b <- brown_motion(250, 100)
 independence_test(b, components = 3, lag = 5)
-
 }
 \references{
 \link{1} Gabrys R., & Kokoszka P. (2007). Portmanteau Test of Independence for Functional Observations.

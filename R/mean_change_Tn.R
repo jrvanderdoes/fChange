@@ -166,150 +166,149 @@ mean_change_Tn <- function(data, M = 1000, h = 0, K = bartlett_kernel) {
 #' }
 
 
-#' #' Center Data
-#' #'
-#' #' This (internal) function centers each time point.
-#' #'
-#' #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
-#' #'
-#' #' @return Numeric data.frame of the data, but with centered values at each time point
-#' #'
-#' #' @noRd
-#' #'
-#' #' @examples
-#' #' # This is an internal function, see use in .estimateCeps.
-#' .centerData <- function(data) {
-#'   data - rowMeans(data)
-#' }
+# #' Center Data
+# #'
+# #' This (internal) function centers each time point.
+# #'
+# #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
+# #'
+# #' @return Numeric data.frame of the data, but with centered values at each time point
+# #'
+# #' @noRd
+# #'
+# #' @examples
+# #' # This is an internal function, see use in .estimateCeps.
+# .centerData <- function(data) {
+#   data - rowMeans(data)
+# }
 
 
-#' #' Compute CUSUM Statistic for Mean Change
-#' #'
-#' #' This function is used to compute the CUSUM statistic for a mean change of
-#' #'     FD observations.
-#' #'
-#' #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
-#' #' @param k Numeric indicating the change point of interest
-#' #' @param ... Unused, just for use in other functions
-#' #'
-#' #' @return Numeric indicating the CUSUM value at the given K value
-#' #' @export
-#' #'
-#' #' @examples
-#' #' \dontrun{
-#' #' # Null Example
-#' #' data_KL <- generate_data_fd(
-#' #'   ns = c(100, 100),
-#' #'   eigsList = list(
-#' #'     c(3, 2, 1, 0.5),
-#' #'     c(3, 2, 1, 0.5)
-#' #'   ),
-#' #'   basesList = list(
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
-#' #'   ),
-#' #'   meansList = c(0, 0),
-#' #'   distsArray = c("Normal", "Normal"),
-#' #'   evals = seq(0, 1, 0.05),
-#' #'   kappasArray = c(0, 0)
-#' #' )
-#' #'
-#' #' compute_mean_stat(data_KL$data, 100)
-#' #'
-#' #' # Mean CP Example
-#' #' data_KL <- generate_data_fd(
-#' #'   ns = c(100, 100),
-#' #'   eigsList = list(
-#' #'     c(3, 2, 1, 0.5),
-#' #'     c(3, 2, 1, 0.5)
-#' #'   ),
-#' #'   basesList = list(
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
-#' #'   ),
-#' #'   meansList = c(0, 0.2),
-#' #'   distsArray = c("Normal", "Normal"),
-#' #'   evals = seq(0, 1, 0.05),
-#' #'   kappasArray = c(0, 0)
-#' #' )
-#' #'
-#' #' compute_mean_stat(data_KL$data, 100)
-#' #' }
-#' compute_mean_stat <- function(data, k, ...) {
-#'   n <- ncol(data)
-#'
-#'   sum((rowSums(as.data.frame(data[, 1:k])) - (k / n) * rowSums(as.data.frame(data)))^2) / n
-#' }
+# #' Compute CUSUM Statistic for Mean Change
+# #'
+# #' This function is used to compute the CUSUM statistic for a mean change of
+# #'     FD observations.
+# #'
+# #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
+# #' @param k Numeric indicating the change point of interest
+# #' @param ... Unused, just for use in other functions
+# #'
+# #' @return Numeric indicating the CUSUM value at the given K value
+# #' @export
+# #'
+# #' @examples
+# #' \dontrun{
+# #' # Null Example
+# #' data_KL <- generate_data_fd(
+# #'   ns = c(100, 100),
+# #'   eigsList = list(
+# #'     c(3, 2, 1, 0.5),
+# #'     c(3, 2, 1, 0.5)
+# #'   ),
+# #'   basesList = list(
+# #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
+# #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
+# #'   ),
+# #'   meansList = c(0, 0),
+# #'   distsArray = c("Normal", "Normal"),
+# #'   evals = seq(0, 1, 0.05),
+# #'   kappasArray = c(0, 0)
+# #' )
+# #'
+# #' compute_mean_stat(data_KL$data, 100)
+# #'
+# #' # Mean CP Example
+# #' data_KL <- generate_data_fd(
+# #'   ns = c(100, 100),
+# #'   eigsList = list(
+# #'     c(3, 2, 1, 0.5),
+# #'     c(3, 2, 1, 0.5)
+# #'   ),
+# #'   basesList = list(
+# #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
+# #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
+# #'   ),
+# #'   meansList = c(0, 0.2),
+# #'   distsArray = c("Normal", "Normal"),
+# #'   evals = seq(0, 1, 0.05),
+# #'   kappasArray = c(0, 0)
+# #' )
+# #'
+# #' compute_mean_stat(data_KL$data, 100)
+# #' }
+# compute_mean_stat <- function(data, k, ...) {
+#   n <- ncol(data)
+#
+#   sum((rowSums(as.data.frame(data[, 1:k])) - (k / n) * rowSums(as.data.frame(data)))^2) / n
+# }
 
-
-#' #' Compute CUSUM Mean Statistic Cutoff
-#' #'
-#' #' This function computes the cutoff for CUSUM statistic of a mean change
-#' #'
-#' #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
-#' #' @param alpha Numeric value indicating significance
-#' #' @param  h (Optional) The window parameter parameter for the estimation of the
-#' #'     long run covariance kernel. The default value is \code{h=0}, i.e., it
-#' #'     assumes iid data
-#' #' @param K (Optional) Function indicating the Kernel to use if h>0
-#' #' @param M (Optional) Number of Monte Carlo simulations used to get the critical
-#' #'     values. The default value is \code{M=1000}
-#' #' @param ... Unused, just for use in other functions
-#' #'
-#' #' @return Numeric indicating the cutoff value for CUSUM mean statistic
-#' #' @export
-#' #'
-#' #' @examples
-#' #' \dontrun{
-#' #' # Null Example
-#' #' data_KL <- generate_data_fd(
-#' #'   ns = c(100, 100),
-#' #'   eigsList = list(
-#' #'     c(3, 2, 1, 0.5),
-#' #'     c(3, 2, 1, 0.5)
-#' #'   ),
-#' #'   basesList = list(
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
-#' #'   ),
-#' #'   meansList = c(0, 0),
-#' #'   distsArray = c("Normal", "Normal"),
-#' #'   evals = seq(0, 1, 0.05),
-#' #'   kappasArray = c(0, 0)
-#' #' )
-#' #'
-#' #' compute_mean_cutoff(data_KL$data, 0.05)
-#' #'
-#' #' # Mean CP Example
-#' #' data_KL <- generate_data_fd(
-#' #'   ns = c(100, 100),
-#' #'   eigsList = list(
-#' #'     c(3, 2, 1, 0.5),
-#' #'     c(3, 2, 1, 0.5)
-#' #'   ),
-#' #'   basesList = list(
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
-#' #'   ),
-#' #'   meansList = c(0, 0.2),
-#' #'   distsArray = c("Normal", "Normal"),
-#' #'   evals = seq(0, 1, 0.05),
-#' #'   kappasArray = c(0, 0)
-#' #' )
-#' #'
-#' #' compute_mean_cutoff(data_KL$data, 0.05)
-#' #' }
-#' compute_mean_cutoff <- function(data, alpha, h = 0, K = bartlett_kernel,
-#'                                 M = 1000, ...) {
-#'   n <- ncol(data)
-#'
-#'   ## Estimate eigenvalues (lambda_i, 1<=i<=d)
-#'   Ceps <- .estimateCeps(data, h, K)
-#'   lambda <- eigen(Ceps / n)$values
-#'
-#'   values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist(n, lambda),
-#'                        lambda = lambda, n = n
-#'   )
-#'
-#'   as.numeric(stats::quantile(values_sim, 1 - alpha))
-#' }
+# #' Compute CUSUM Mean Statistic Cutoff
+# #'
+# #' This function computes the cutoff for CUSUM statistic of a mean change
+# #'
+# #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
+# #' @param alpha Numeric value indicating significance
+# #' @param  h (Optional) The window parameter parameter for the estimation of the
+# #'     long run covariance kernel. The default value is \code{h=0}, i.e., it
+# #'     assumes iid data
+# #' @param K (Optional) Function indicating the Kernel to use if h>0
+# #' @param M (Optional) Number of Monte Carlo simulations used to get the critical
+# #'     values. The default value is \code{M=1000}
+# #' @param ... Unused, just for use in other functions
+# #'
+# #' @return Numeric indicating the cutoff value for CUSUM mean statistic
+# #' @export
+# #'
+# #' @examples
+# #' \dontrun{
+# #' # Null Example
+# #' data_KL <- generate_data_fd(
+# #'   ns = c(100, 100),
+# #'   eigsList = list(
+# #'     c(3, 2, 1, 0.5),
+# #'     c(3, 2, 1, 0.5)
+# #'   ),
+# #'   basesList = list(
+# #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
+# #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
+# #'   ),
+# #'   meansList = c(0, 0),
+# #'   distsArray = c("Normal", "Normal"),
+# #'   evals = seq(0, 1, 0.05),
+# #'   kappasArray = c(0, 0)
+# #' )
+# #'
+# #' compute_mean_cutoff(data_KL$data, 0.05)
+# #'
+# #' # Mean CP Example
+# #' data_KL <- generate_data_fd(
+# #'   ns = c(100, 100),
+# #'   eigsList = list(
+# #'     c(3, 2, 1, 0.5),
+# #'     c(3, 2, 1, 0.5)
+# #'   ),
+# #'   basesList = list(
+# #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
+# #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
+# #'   ),
+# #'   meansList = c(0, 0.2),
+# #'   distsArray = c("Normal", "Normal"),
+# #'   evals = seq(0, 1, 0.05),
+# #'   kappasArray = c(0, 0)
+# #' )
+# #'
+# #' compute_mean_cutoff(data_KL$data, 0.05)
+# #' }
+# compute_mean_cutoff <- function(data, alpha, h = 0, K = bartlett_kernel,
+#                                 M = 1000, ...) {
+#   n <- ncol(data)
+#
+#   ## Estimate eigenvalues (lambda_i, 1<=i<=d)
+#   Ceps <- .estimateCeps(data, h, K)
+#   lambda <- eigen(Ceps / n)$values
+#
+#   values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist(n, lambda),
+#                        lambda = lambda, n = n
+#   )
+#
+#   as.numeric(stats::quantile(values_sim, 1 - alpha))
+# }

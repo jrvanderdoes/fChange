@@ -25,6 +25,6 @@ degrees of freedom (which approximates V_K)
 \description{
 Computes the 1-alpha quantile of the beta * chi-squared distribution with nu
 degrees of freedom, where beta and nu are obtained from a Welch-Satterthwaite approximation
-of the test statistic V_K. This quantile is used to conduct an approximate size alpha test
-of the hypothesis H'_0_K.
+of the test statistic \code{V_K}. This quantile is used to conduct an approximate size alpha test
+of the hypothesis \code{H'_0_K}.
 }

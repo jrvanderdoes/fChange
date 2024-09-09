@@ -19,9 +19,9 @@ scalar value of the statistic Q_{T,h} to test the hypothesis H_{0,h} : y_h(t,s) 
 scalar value of the statistic Q_{T,h} to test the hypothesis H_{0,h} : y_h(t,s) = 0.
 }
 \description{
-Computes the test statistic Q_{T,h} = T*||y^hat_h||^2 for fixed h and for T
+Computes the test statistic \code{Q_{T,h} = T*||y^hat_h||^2} for fixed h and for T
 inferred from the functional data f_data that is passed.
 
-Computes the test statistic Q_{T,h} = T*||y^hat_h||^2 for fixed h and for T
+Computes the test statistic \code{Q_{T,h} = T*||y^hat_h||^2} for fixed h and for T
 inferred from the functional data f_data that is passed.
 }

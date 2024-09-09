@@ -58,6 +58,8 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     alpha, h_function,
                     return_pval = FALSE,
                     ...){
+        X <- .check_data(X)
+
         h <- h_function(X$data)
 
         W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
@@ -81,6 +83,8 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     blockSize, iters,
                     alpha, h_function,
                     ...){
+        X <- .check_data(X)
+
         h <- h_function(X$data)
 
         W = computeSpaceMeasuringVectors(M,space,X)
@@ -98,6 +102,8 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     blockSize, iters,
                     replace, alpha, h_function,
                     ...){
+        X <- .check_data(X)
+
         h <- h_function(X$data)
 
         W = computeSpaceMeasuringVectors(M,space,X)
@@ -118,6 +124,8 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     M, J, space,
                     blockSize, iters, h_function,
                     ...){
+        X <- .check_data(X)
+
         h <- h_function(X$data)
 
         W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
@@ -138,6 +146,8 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     blockSize, iters,
                     replace, alpha, h_function,
                     ...){
+        X <- .check_data(X)
+
         h <- h_function(X$data)
 
         W = computeSpaceMeasuringVectors(M,space,X)

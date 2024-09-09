@@ -16,6 +16,6 @@ scalar value of the statistic V_{T,K} to test the hypothesis
 H'_{0,K} : for all h in 1:K y_h(t,s) = 0.
 }
 \description{
-Computes the statistic V_{T,K} = T*sum_h(||y^hat_h||^2) or h in 1:K and for T
+Computes the statistic \code{V_{T,K} = T*sum_h(||y^hat_h||^2)} or h in 1:K and for T
 inferred from the functional data f_data that is passed to the function.
 }

@@ -2,25 +2,7 @@
 % Please edit documentation in R/tests_wn_ind_functions.R
 \name{covariance_diag_store}
 \alias{covariance_diag_store}
-\title{#' Compute part of the covariance under a strong white noise assumption
-#'
-#' \code{iid_covariance_vec} A helper function used to compute one of the two independent sum terms in the
-#' computation of the approximate covariance of the functional data under a strong white noise assumption;
-#' a vectorized version of iid_covariance.
-#'
-#' @param f_data the functional data matrix with observed functions in the columns
-#' @return A 2-dimensional matrix containing one of the two independent sums in the computation of the
-#' covariance.
-iid_covariance_vec <- function(f_data) {
-N <- NCOL(f_data)
-c_f_data <- center(f_data)
-sum_parts <- 1:N
-sum_parts <- lapply(sum_parts,
-function(i) c_f_data\link{,i} \%o\% c_f_data\link{,i})
-cov <- (1 / N) * Reduce('+', sum_parts)
-cov
-}
-List storage of diagonal covariances.}
+\title{List storage of diagonal covariances.}
 \usage{
 covariance_diag_store(f_data, K)
 }
@@ -35,5 +17,5 @@ functional data, for lags h in the range 1:K.
 }
 \description{
 \code{covariance_diag_store} Creates a list storage of approximate diagonal covariances computed
-by the function diagonal_covariance_i
+by the function \code{diagonal_covariance_i}.
 }

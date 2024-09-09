@@ -101,28 +101,28 @@ covariance_i_j <- function(f_data, i, j) {
 }
 
 
-#' #' Compute the approximate covariance tensor for lag windows defined by i,j
-#' #'
-#' #' \code{covariance_i_j_vec} Computes the approximate covariance tensor of the functional data for lag
-#' #' windows defined by i,j; a vectorized version of covariance_i_j.
-#' #'
-#' #' @param f_data the functional data matrix with observed functions in the columns
-#' #' @param i,j the indices i,j in 1:T that we are computing the covariance for
-#' #' @return A 4-dimensional array, encoding the covariance tensor of the functional data for lag
-#' #' windows defined by i,j.
-#' covariance_i_j_vec <- function(f_data, i, j) {
-#'   N = NCOL(f_data)
-#'   J = NROW(f_data)
-#'
-#'   c_f_data <- center(f_data)
-#'   sum_parts <- as.list((1+max(i,j)):N)
-#'   sum_parts <- lapply(sum_parts,
-#'                       function(k) c_f_data[,k-i] %o% c_f_data[,k] %o%
-#'                         c_f_data[,k-j] %o% c_f_data[,k])
-#'
-#'   cov <- Reduce('+', sum_parts)
-#'   cov / N
-#' }
+# #' Compute the approximate covariance tensor for lag windows defined by i,j
+# #'
+# #' \code{covariance_i_j_vec} Computes the approximate covariance tensor of the functional data for lag
+# #' windows defined by i,j; a vectorized version of covariance_i_j.
+# #'
+# #' @param f_data the functional data matrix with observed functions in the columns
+# #' @param i,j the indices i,j in 1:T that we are computing the covariance for
+# #' @return A 4-dimensional array, encoding the covariance tensor of the functional data for lag
+# #' windows defined by i,j.
+# covariance_i_j_vec <- function(f_data, i, j) {
+#   N = NCOL(f_data)
+#   J = NROW(f_data)
+#
+#   c_f_data <- center(f_data)
+#   sum_parts <- as.list((1+max(i,j)):N)
+#   sum_parts <- lapply(sum_parts,
+#                       function(k) c_f_data[,k-i] %o% c_f_data[,k] %o%
+#                         c_f_data[,k-j] %o% c_f_data[,k])
+#
+#   cov <- Reduce('+', sum_parts)
+#   cov / N
+# }
 
 
 #' Compute the approximate diagonal covariance matrix for lag windows defined by i
@@ -178,7 +178,7 @@ scalar_covariance_i_j <- function(f_data, i, j, times) {
 #' #' Compute the approximate covariance at a point for lag windows defined by i,j
 #' #'
 #' #' \code{scalar_covariance_i_j_vec} Computes the approximate covariance at a point of the functional data
-#' #'  for lag windows defined by i,j; a vectorized version of scalar_covariance_i_j.
+#' #'  for lag windows defined by i,j; a vectorized version of \code{scalar_covariance_i_j}.
 #' #'
 #' #' @param f_data the functional data matrix with observed functions in the columns
 #' #' @param i,j the indices i,j in 1:T that we are computing the covariance for
@@ -218,30 +218,30 @@ iid_covariance <- function(f_data) {
 }
 
 
-#' #' Compute part of the covariance under a strong white noise assumption
-#' #'
-#' #' \code{iid_covariance_vec} A helper function used to compute one of the two independent sum terms in the
-#' #' computation of the approximate covariance of the functional data under a strong white noise assumption;
-#' #' a vectorized version of iid_covariance.
-#' #'
-#' #' @param f_data the functional data matrix with observed functions in the columns
-#' #' @return A 2-dimensional matrix containing one of the two independent sums in the computation of the
-#' #' covariance.
-#' iid_covariance_vec <- function(f_data) {
-#'   N <- NCOL(f_data)
-#'   c_f_data <- center(f_data)
-#'   sum_parts <- 1:N
-#'   sum_parts <- lapply(sum_parts,
-#'                       function(i) c_f_data[,i] %o% c_f_data[,i])
-#'   cov <- (1 / N) * Reduce('+', sum_parts)
-#'   cov
-#' }
+# #' Compute part of the covariance under a strong white noise assumption
+# #'
+# #' \code{iid_covariance_vec} A helper function used to compute one of the two independent sum terms in the
+# #' computation of the approximate covariance of the functional data under a strong white noise assumption;
+# #' a vectorized version of iid_covariance.
+# #'
+# #' @param f_data the functional data matrix with observed functions in the columns
+# #' @return A 2-dimensional matrix containing one of the two independent sums in the computation of the
+# #' covariance.
+# iid_covariance_vec <- function(f_data) {
+#   N <- NCOL(f_data)
+#   c_f_data <- center(f_data)
+#   sum_parts <- 1:N
+#   sum_parts <- lapply(sum_parts,
+#                       function(i) c_f_data[,i] %o% c_f_data[,i])
+#   cov <- (1 / N) * Reduce('+', sum_parts)
+#   cov
+# }
 
 
 #' List storage of diagonal covariances.
 #'
 #' \code{covariance_diag_store} Creates a list storage of approximate diagonal covariances computed
-#' by the function diagonal_covariance_i
+#' by the function \code{diagonal_covariance_i}.
 #'
 #' @param f_data the functional data matrix with observed functions in the columns
 #' @param K the range of lags 1:K to use
@@ -263,8 +263,8 @@ covariance_diag_store <- function(f_data, K) {
 #'
 #' Computes the 1-alpha quantile of the beta * chi-squared distribution with nu
 #'   degrees of freedom, where beta and nu are obtained from a Welch-Satterthwaite approximation
-#'   of the test statistic V_K. This quantile is used to conduct an approximate size alpha test
-#'   of the hypothesis H'_0_K.
+#'   of the test statistic \code{V_K}. This quantile is used to conduct an approximate size alpha test
+#'   of the hypothesis \code{H'_0_K}.
 #'
 #' @param f_data the functional data matrix with functions in columns
 #' @param K specifies the range of lags 1:K for the test statistic V_K
@@ -558,7 +558,7 @@ adaptive_bandwidth <- function(f_data, kernel) {
 
 #' Test Statistic - t_statistic_Q
 #'
-#' Computes the test statistic Q_{T,h} = T*||y^hat_h||^2 for fixed h and for T
+#' Computes the test statistic \code{Q_{T,h} = T*||y^hat_h||^2} for fixed h and for T
 #'   inferred from the functional data f_data that is passed.
 #'
 #' @param f_data the functional data matrix with observed functions in columns
@@ -583,7 +583,7 @@ t_statistic_Q <- function(f_data, lag) {
 
 #' Test Statistic - t_statistic_V
 #'
-#' Computes the statistic V_{T,K} = T*sum_h(||y^hat_h||^2) or h in 1:K and for T
+#' Computes the statistic \code{V_{T,K} = T*sum_h(||y^hat_h||^2)} or h in 1:K and for T
 #'   inferred from the functional data f_data that is passed to the function.
 #'
 #' @param f_data the functional data with functions in columns
