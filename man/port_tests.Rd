@@ -136,10 +136,12 @@ return a statistic, and thus returns a list with only 2 elements if suppress_raw
 b <- generate_brownian_motion(250)
 port_tests(b, test = 'single-lag', lag = 10)
 port_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
-port_tests(b, test = 'single-lag', lag = 1, M = 250, low_disc = TRUE)
 port_tests(b, test = 'spectral', kernel = 'Bartlett', bandwidth = 'static', alpha = 0.05)
 port_tests(b, test = 'spectral', alpha = 0.1, kernel = 'Parzen', bandwidth = 'adaptive')
 port_tests(b, test = 'independence', components = 3, lag = 3)
+
+## Below works if you have 'fOptions'
+#port_tests(b, test = 'single-lag', lag = 1, M = 250, method = 'lowdiscrepancy')
 }
 \references{
 \link{1} Kim, M., Kokoszka P., & Rice G. (2023) White noise testing for functional

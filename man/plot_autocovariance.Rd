@@ -24,30 +24,10 @@ time series. This visualization is useful to detect any kind of dependency
 between the discretization points of the series.
 }
 \examples{
-# Example 1
-
 N <- 100
 v <- seq(from = 0, to = 1, length.out = 10)
-sig <- 2
-bbridge <- generate_brownian_bridge(N, v, sig)
+bbridge <- generate_brownian_bridge(N, v)
 nlags <- 1
-lagged_autocov <- .compute_autocovariance(X = bbridge,nlags = nlags)
+lagged_autocov <- .compute_autocovariance(X = bbridge,lag.max = nlags)
 plot_autocovariance(lagged_autocov,1)
-
-\donttest{
-# Example 2
-
-N <- 500
-v <- seq(from = 0, to = 1, length.out = 50)
-sig <- 2
-bbridge <- simulate_iid_brownian_bridge(N, v, sig)
-nlags <- 4
-lagged_autocov <- obtain_autocovariance(X = bbridge,nlags = nlags)
-opar <- par(no.readonly = TRUE)
-par(mfrow = c(1,5))
-for(k in 0:nlags){
-   plot_autocovariance(lagged_autocov,k)
-}
-par(opar)
-}
 }
