@@ -44,22 +44,26 @@
 #'
 #' @seealso \code{\link{change_FF}}
 #'
-#'@details This functions performs structural break analysis for the functional data using an fPCA based initial dimension reduction. It
-#'is recommended that the dimension of the subspace, \code{d}, that the functional observations are projected onto should be selected based on
-#'TVE using \code{\link{pick_dim}}.
+#' @details This functions performs structural break analysis for the functional
+#'  data using an fPCA based initial dimension reduction. It is recommended
+#'  that the dimension of the subspace, \code{d}, that the functional
+#'  observations are projected onto should be selected based on TVE using
+#'  \code{\link{pick_dim}}.
 #'
-#'@references Berkes, I., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Detecting changes in the mean of functional observations}
-#' Journal of the Royal Statistical Society, Series B 71, 927–946
+#' @references Berkes, I., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Detecting changes in the mean of functional observations}
+#'  Journal of the Royal Statistical Society, Series B 71, 927–946
 #' @references Aue, A., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Estimation of a change-point in the mean function
-#' of functional data}Journal of Multivariate Analysis 100, 2254–2269.
+#'  of functional data} Journal of Multivariate Analysis 100, 2254–2269.
 #'
 #' @examples
 #' #mean_pca_change(funts(electricity))
-mean_pca_change <- function(X, TVE=0.95, M=1000, h=0, K=bartlett_kernel){
-  stop('Errors still remaining')
+mean_pca_change <- function(X, TVE=0.95,
+                            M=1000, h=0, K=bartlett_kernel){
+  stop('This function is being worked on', call. = FALSE)
+  set.seed(1234)
   fdata <- fun_IID(n=200, nbasis=21)
   X <- fda::eval.fd(seq(0,1,length.out=21),fdata)
-  X <- electricity
+  #X <- electricity
   ## TODO:: FIX EXAMPLE
   X <- .check_data(X)
   X <- center(X)
@@ -72,37 +76,46 @@ mean_pca_change <- function(X, TVE=0.95, M=1000, h=0, K=bartlett_kernel){
 
   eta.hat <- t(pca_X$rotation)
 
-  Sigma.hat <- .long_run_var(X$data, h=h, K=K)[1:d, 1:d]
+  Sigma.hat <- .long_run_var(X, h=h, K=K)[1:d, 1:d]
   TT <- sapply(1:n,
                function(k,n,eta.hat) {
                  1/n *( t(.S_n_pca(eta.hat = eta.hat,k = k,n = n)) %*%
                           solve(Sigma.hat) %*%
                           .S_n_pca(eta.hat = eta.hat,k = k,n = n))},
-               n=n, eta.hat=eta.hat)
+               # function(k,n,eta.hat,pca_X) {
+               #   1/n *( #t(.S_n_pca(eta.hat = eta.hat,k = k,n = n)) %*%
+               #            diag(1/pca_X$sdev) %*%
+               #            .S_n_pca(eta.hat = eta.hat,k = k,n = n)^2)},
+               n=n, eta.hat=eta.hat,pca_X=pca_X)
   Tn <- max(TT)
   k.star <- min(which(TT==max(TT)))
 
-  Values <- sapply(1:M, function(k,d) {.asymp_pca(n, d)},d=d)
+  Values <- sapply(1:M, function(k,d) .asymp_pca(n, d), d=d)
   # z = Tn<=Values
   # p = length(z[z==TRUE])/length(z)
   p <- sum(Tn <= Values) / M # Compute p-value
   p
-  Tn
-  Values
-  # p <- 1-ecdf(Values)(Tn)
+  Tn# *sqrt(n)
+  Values[1:20]
+
   dat.b <- funts(X$data[,1:k.star])
   dat.a <- funts(X$data[,(k.star+1):n])
   mean.b <- mean(dat.b)
   mean.a <- mean(dat.a)
   delta <- mean.a - mean.b
 
-  # par(mfrow=c(1,2))
-  ## add before/after
-  plot1 <- .plot_stack(X,CPs=k.star) ## TODO:: lower, add mean
+  ## Plots
+  plot1 <- .plot_stack(data,CPs=k.star)
   # .plot_substack(X,CPs=k.star) ## TODO:: color bands
 
-  plot2 <- plot(delta, main="Estimated Change Function",
-                ylab="values", type='l')
+  plot2 <-
+    ggplot2::ggplot() +
+    ggplot2::geom_line(ggplot2::aes(x=X$intraobs, y=delta)) +
+    ggplot2::geom_hline(ggplot2::aes(yintercept=0),linetype='dotted') +
+    ggplot2::theme_bw() +
+    ggplot2::xlab('') +
+    ggplot2::ylab('')
+
   list('data_plot'=plot1, 'mean_diff_plot'=plot2,
        pvalue = p , change = k.star,
        DataBefore = dat.b, DataAfter = dat.a,
@@ -116,15 +129,17 @@ mean_pca_change <- function(X, TVE=0.95, M=1000, h=0, K=bartlett_kernel){
 #' @param k
 #'
 #' @return
-.S_n_pca = function(eta.hat, k, n){
+.S_n_pca <- function(eta.hat, k, n){
   # TODO:: Add
   # normalizer = ((k/n) * ((n-k) / n))^(-0.5)
   if(d==1){
-    eta.bar = sum(eta.hat)/n
-    out = sum(eta.hat[1:k]) - k*eta.bar
+    eta.bar <- sum(eta.hat)/n
+    # eta.bar <- sum(eta.hat)#/n
+    out <- sum(eta.hat[1:k]) - k*eta.bar
   } else {
-    eta.bar = as.matrix(rowSums(eta.hat)/n)
-    out = rowSums(as.matrix(eta.hat[, 1:k])) - k*eta.bar
+    eta.bar <- as.matrix(rowSums(eta.hat)/n)
+    # eta.bar <- as.matrix(rowSums(eta.hat))#/n)
+    out <- rowSums(as.matrix(eta.hat[, 1:k])) - k*eta.bar
   }
 
   out #* normalizer
@@ -136,7 +151,7 @@ mean_pca_change <- function(X, TVE=0.95, M=1000, h=0, K=bartlett_kernel){
 #'
 #' @return
 .asymp_pca <- function(N, d){
-  B.Bridges= matrix(0,d,(N))
+  B.Bridges <- matrix(0,nrow = d,ncol = N)
   for(j in (1:d)){
     B.Bridges[j,] <- sde::BBridge(0,0,0,1,N-1)^2
   }
