@@ -133,6 +133,7 @@ pca_fit <- function(X, TVE = 0.95, model=c('ets','arima'), ...){
 #' @examples
 #' results <- pcaExploration(funts(electricity))
 pcaExploration <- function(X, order = 3, ...){
+  X <- .check_data(X)
 
   pc_data <- pca(X)
 
