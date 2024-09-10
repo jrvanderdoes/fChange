@@ -104,32 +104,12 @@ obtain_autocorrelation <- function(X, nlags){
 #' @export
 #'
 #' @examples
-#' # Example 1
-#'
 #' N <- 100
 #' v <- seq(from = 0, to = 1, length.out = 10)
-#' sig <- 2
-#' bbridge <- generate_brownian_bridge(N, v, sig)
+#' bbridge <- generate_brownian_bridge(N, v)
 #' nlags <- 1
-#' lagged_autocov <- .compute_autocovariance(X = bbridge,nlags = nlags)
+#' lagged_autocov <- .compute_autocovariance(X = bbridge,lag.max = nlags)
 #' plot_autocovariance(lagged_autocov,1)
-#'
-#' \donttest{
-#' # Example 2
-#'
-#' N <- 500
-#' v <- seq(from = 0, to = 1, length.out = 50)
-#' sig <- 2
-#' bbridge <- simulate_iid_brownian_bridge(N, v, sig)
-#' nlags <- 4
-#' lagged_autocov <- obtain_autocovariance(X = bbridge,nlags = nlags)
-#' opar <- par(no.readonly = TRUE)
-#' par(mfrow = c(1,5))
-#' for(k in 0:nlags){
-#'    plot_autocovariance(lagged_autocov,k)
-#' }
-#' par(opar)
-#' }
 plot_autocovariance <- function(fun.autocovariance, lag = 0, ...){
 
   # Color palette
@@ -181,58 +161,11 @@ plot_autocovariance <- function(fun.autocovariance, lag = 0, ...){
 #' @export
 #'
 #' @examples
-#' # Example 1
-#'
-#' N <- 100
-#' v <- seq(from = 0, to = 1, length.out = 10)
-#' sig <- 2
-#' bbridge <- simulate_iid_brownian_bridge(N, v, sig)
-#' nlags <- 1
-#' lagged_autocov <- obtain_autocovariance(Y = bbridge,
-#'                                         nlags = nlags)
+#' v <- seq(0,1,length.out=20)
+#' lagged_autocov <- obtain_autocovariance(
+#'   X = generate_brownian_bridge(100,v=v),
+#'   nlags = 1)
 #' image(x = v, y = v, z = lagged_autocov$Lag0)
-#'
-#' \donttest{
-#' # Example 2
-#'
-#' N <- 500
-#' v <- seq(from = 0, to = 1, length.out = 50)
-#' sig <- 2
-#' bbridge <- simulate_iid_brownian_bridge(N, v, sig)
-#' nlags <- 10
-#' lagged_autocov <- obtain_autocovariance(Y = bbridge,
-#'                                         nlags = nlags)
-#' image(x = v, y = v, z = lagged_autocov$Lag0)
-#' image(x = v, y = v, z = lagged_autocov$Lag10)
-#'
-#' # Example 3
-#'
-#' require(fields)
-#' N <- 500
-#' v <- seq(from = 0, to = 1, length.out = 50)
-#' sig <- 2
-#' bbridge <- simulate_iid_brownian_bridge(N, v, sig)
-#' nlags <- 4
-#' lagged_autocov <- obtain_autocovariance(Y = bbridge,
-#'                                         nlags = nlags)
-#' z_lims <- range(lagged_autocov$Lag0)
-#' colors <- heat.colors(12)
-#' opar <- par(no.readonly = TRUE)
-#' par(mfrow = c(1,5))
-#' par(oma=c( 0,0,0,6))
-#' for(k in 0:nlags){
-#'    image(x=v,
-#'          y=v,
-#'          z = lagged_autocov[[paste0("Lag",k)]],
-#'          main = paste("Lag",k),
-#'          col = colors,
-#'          xlab = "u",
-#'          ylab = "v")
-#' }
-#' par(oma=c( 0,0,0,2.5)) # reset margin to be much smaller.
-#' image.plot( legend.only=TRUE, legend.width = 2,zlim=z_lims, col = colors)
-#' par(opar)
-#' }
 obtain_autocovariance <- function(X, nlags){
   .compute_autocovariance(X, nlags)
 }

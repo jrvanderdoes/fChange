@@ -290,9 +290,13 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
         pvals <- c(pvals,potential_cp[2])
       }
     }
-    return(list(
-      CPsVals[order(CPsVals)],
-      pvals[order(CPsVals)]))
+    if(length(CPsVals)>=1){
+      return(list(
+        CPsVals[order(CPsVals)],
+        pvals[order(CPsVals)]))
+    }else{
+      return(NA)
+    }
   } else {
     # Get CP
     h <- h_function(X$data)
@@ -304,9 +308,12 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
   }
 
   # Order and return
+  CPsVals <- unlist(CPsVals)
   if (sum(is.na(CPsVals)) == length(CPsVals)) {
     return(NA)
   }
+  if( length(CPsVals)<=1) return(CPsVals)
+
   CPsVals[order(CPsVals)]
 }
 
