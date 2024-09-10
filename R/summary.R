@@ -272,6 +272,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 #' # .plot_stack(funts(electricity))
 #' # .plot_stack(funts(electricity), CPs=c(50,100,200))
 .plot_stack <- function(object, CPs=NULL){
+  object <- .check_data(object)
   data <- object$data
   plot_data <-
     tidyr::pivot_longer(data = cbind(data.frame('Time'=object$intraobs),data),
@@ -323,7 +324,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
                                      means_mat),
                         cols = 1+1:ncol(means_mat))
   colnames(means_mat)<- c('Time','color','value')
-  means_mat$name <- rep(1:(length(CPs)-1),times=nrow(data))
+  means_mat$name <- rep(1:(max(2,length(CPs))-1),times=nrow(data))
 
 
   # Plot

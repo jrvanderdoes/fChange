@@ -73,6 +73,7 @@ mean_change <- function(data, M = 1000, h = 0,
   plot2 <-
     ggplot2::ggplot() +
     ggplot2::geom_line(ggplot2::aes(x=data$intraobs, y=delta)) +
+    ggplot2::geom_hline(ggplot2::aes(yintercept=0),linetype='dotted') +
     ggplot2::theme_bw() +
     ggplot2::xlab('') +
     ggplot2::ylab('')

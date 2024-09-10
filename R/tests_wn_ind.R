@@ -119,10 +119,12 @@
 #' b <- generate_brownian_motion(250)
 #' port_tests(b, test = 'single-lag', lag = 10)
 #' port_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
-#' port_tests(b, test = 'single-lag', lag = 1, M = 250, low_disc = TRUE)
 #' port_tests(b, test = 'spectral', kernel = 'Bartlett', bandwidth = 'static', alpha = 0.05)
 #' port_tests(b, test = 'spectral', alpha = 0.1, kernel = 'Parzen', bandwidth = 'adaptive')
 #' port_tests(b, test = 'independence', components = 3, lag = 3)
+#'
+#' ## Below works if you have 'fOptions'
+#' #port_tests(b, test = 'single-lag', lag = 1, M = 250, method = 'lowdiscrepancy')
 port_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag',
                                       'spectral', 'independence', 'imhof'),
                        lag=NULL, M=NULL,
@@ -322,7 +324,7 @@ single_lag_test <- function(
                     quantile = as.numeric(quantile),
                     p_value = as.numeric(p_value), block_size = block_size)
   } else if(method=='lowdiscrepancy') {
-    results <- Q_WS_quantile(data$data, lag, alpha=alpha, M=M, low_disc=low_disc)
+    results <- Q_WS_quantile(data$data, lag, alpha=alpha, M=M, low_disc=TRUE)
   } else if(method=='iid') {
     results <- Q_WS_quantile_iid(data$data, alpha=alpha)
   }

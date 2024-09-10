@@ -35,6 +35,7 @@ LinkingTo: Rcpp, RcppArmadillo
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Suggests: 
+    fOptions,
     jmuOutlier,
     knitr,
     lattice,

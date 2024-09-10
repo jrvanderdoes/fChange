@@ -21,7 +21,7 @@
 #'  Stat Papers (2024). https://doi.org/10.1007/s00362-024-01577-7
 #'
 #' @examples
-#' robust_change(n = 200, d = 100, ht = 0,  m = 100, S = 10,  quantiles = 0.95)
+#' robust_change(funts(electricity),m=10)
 robust_change <- function(X, m){#, type=c('Wilcox','Cusum')){
 
   # Create Proper Data and Bandwidths

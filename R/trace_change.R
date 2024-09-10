@@ -42,9 +42,9 @@
 #'  (London, Ont.) 31, no. 1 (2020). https://doi.org/10.1002/env.2617.
 #'
 #' @examples
-#' trace_change(generate_brownian_motion(500))
+#' trace_change(generate_brownian_motion(200,v=seq(0,1,0.05)))
 #' trace_change(electricity)
-trace_change <- function (X, CPs = NULL, delta = 0.2, M = 1000){
+trace_change <- function (X, CPs = NULL, M = 1000){
   X <- .check_data(X)
   X <- center(X, CPs=CPs)
 
@@ -57,11 +57,10 @@ trace_change <- function (X, CPs = NULL, delta = 0.2, M = 1000){
   Xi <- sapply(1:N, function(i) X$data[,i] %*% X$data[,i])
   sigma_sq <- sandwich::lrvar(Xi, prewhite = F)
   sigma <- sqrt(sigma_sq)
-  Values <- sapply(1:M, function(k) max(abs(sde::BBridge(0, 0, 0,
-                                                   1, N)[(floor(delta * N) + 1):N])))
-  s <- floor(delta*N)
-  Tn <- c(rep(0,s))
-  for (k in (s + 1):N) {
+  Values <- sapply(1:M, function(k) max(abs(sde::BBridge(0, 0, 0, 1, N-1))))
+
+  Tn <- rep(0,N)
+  for (k in 1:N) {
     T_x <- sum(Xi[1:k])/N
     Tn[k] <- (1/sigma) * abs(T_x - (k)/N * T_1)
   }

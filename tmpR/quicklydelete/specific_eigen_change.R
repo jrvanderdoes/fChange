@@ -28,25 +28,12 @@
 #'  (London, Ont.) 31, no. 1 (2020). https://doi.org/10.1002/env.2617.
 #'
 #' @examples
-#' #specific_eigen_change(generate_brownian_motion(500),1)
-#' #specific_eigen_change(funts(electricity),1)
-#' #specific_eigen_change(funts(electricity),2)
+#' specific_eigen_change(generate_brownian_motion(100, v=seq(0,1,length.out=20)),1)
+#' specific_eigen_change(funts(electricity),1)
+#' specific_eigen_change(funts(electricity),2)
 specific_eigen_change <- function(X, component, h=2, CPs = NULL,
                                   delta = 0.1, M = 1000,
                                   K=bartlett_kernel){
-  stop('Errors still remaining')
-  set.seed(1234)
-  fdata <- fun_IID(n=200, nbasis=21)
-  X <- fda::eval.fd(seq(0,1,length.out=21),fdata)
-  component <- 2
-  h <- 2
-  CPs <- NULL
-  delta = 0.1
-  M = 1000
-  K=bartlett_kernel
-
-  # X <- electricity
-  #TODO:: Size seems very off..
   X <- .check_data(X)
   X <- center(X, CPs = CPs)
 
@@ -56,21 +43,18 @@ specific_eigen_change <- function(X, component, h=2, CPs = NULL,
   # X$data is the evaled cdata
   #   Get autocov at lag 0, and its eigenval/functions
   Cov_op <- .partial_cov(X, 1)
-  PSI <- Cov_op$coef_matrix
-  Phi <- Cov_op$eigen_fun
-  lambda <- Cov_op$eigen_val
 
-  # Cov_op <- pca(X,TVE=1)
-  # PSI <- Cov_op$x
-  # Phi <- Cov_op$sdev
-  # Phi <- Cov_op$rotation
+  eig2 <- array(dim = c(D,D,D))
+  for(j in 1:D){
+    eig2[,,j] <- Cov_op$eigen_fun[,j] %*% t(Cov_op$eigen_fun[,j])
+  }
+  thetas <- matrix(nrow=N,ncol=1)
+  for(i in 1:N){
+    X2 <- X$data[,i] %*% t(X$data[,i]) - Cov_op$coef_matrix
 
-  Projections <- Phi %*% X$data
-  Proj_sq <- Projections^2
-  Psi_diag <- diag(PSI)
-  THETA <- Proj_sq - Psi_diag
-  theta <- matrix(THETA[component,], ncol = N, nrow = 1)
-  Sigma_d <- .long_run_var(theta, h=2, K=K)
+    thetas[i,1] <- sum(diag( t(eig2[,,component]) %*% X2 ))
+  }
+  Sigma_d <- .long_run_var(t(thetas),h=h,K = K)
 
   Values <- sapply(1:M, function(k)
     max(sde::BBridge(0, 0, 0, 1, N)[(floor(delta*N)+1):N]^2))
@@ -78,16 +62,12 @@ specific_eigen_change <- function(X, component, h=2, CPs = NULL,
   s <- floor(delta*N)
   Tn <- c(rep(0,s))
   for (k in (s+1):N){
-    .partial_cov1(X, k/N)$eigen_val[component]-
-    lam_i <- .partial_cov1(X, k/N)$eigen_val[component]
-    Tn[k] <- ( N*( lam_i - (k/N)*lambda[component] )^2 ) / Sigma_d
+    lam_i <- .partial_cov(X, k/N)$eigen_val[component]
+    Tn[k] <- ( N*( lam_i - (k/N)*Cov_op$eigen_val[component] )^2 ) / Sigma_d
   }
   Sn <- max(Tn)
   # p <- ecdf(Values)(Sn)
   p <- sum(Sn <= Values) / M # Compute p-value
-  p
-  Sn
-  Values[1:20]
   k_star <- min(which.max(Tn))
 
   list(change = k_star, pvalue = p)

@@ -32,7 +32,7 @@ A list with the following elements
 Robust Change Point Detection
 }
 \examples{
-robust_change(n = 200, d = 100, ht = 0,  m = 100, S = 10,  quantiles = 0.95)
+robust_change(funts(electricity),m=10)
 }
 \references{
 Wegner, L., Wendler, M. Robust change-point detection for
