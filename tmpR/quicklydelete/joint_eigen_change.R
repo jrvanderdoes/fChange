@@ -30,17 +30,17 @@
 #'  that is defined by \code{d} of the covariance function. The critical
 #'  values are approximated via \code{M} Monte Carlo simulations.
 #'
-#'
+#' @references Aue, A, G Rice, and O Sönmez. “Structural Break Analysis
+#'  for Spectrum and Trace of Covariance Operators.” Environmetrics
+#'  (London, Ont.) 31, no. 1 (2020). https://doi.org/10.1002/env.2617.
 #'
 #' @examples
-#' #joint_eigen_change(generate_brownian_motion(500), 1)
-#' #joint_eigen_change(funts(electricity), 2)
+#' joint_eigen_change(
+#'   generate_brownian_motion(200,v=seq(0,1,length.out=20)), 1)
+#' joint_eigen_change(funts(electricity), 2)
 joint_eigen_change <- function(X, d, h =2, CPs = NULL,
                                delta = 0.1, M = 1000,
                                K=bartlett_kernel){
-  stop('Errors still remaining')
-  #TODO:: Size seems very off..
-  #TODO:: Refernece
   X <- .check_data(X)
   X <- center(X, CPs=CPs)
 
@@ -48,18 +48,23 @@ joint_eigen_change <- function(X, d, h =2, CPs = NULL,
   D <- nrow(X$data)
 
   Cov_op <- .partial_cov(X, 1)
-  PSI <- Cov_op$coef_matrix
-  Phi <- Cov_op$eigen_fun
-  lambda <- Cov_op$eigen_val
 
-  Projections <- Phi %*% X$data
-  Proj_sq <- Projections^2
-  Psi_diag <- diag(PSI)
-  THETA <- Proj_sq - Psi_diag
-  theta <- matrix(THETA[1:d,], ncol = N, nrow = d)
-  Sigma_d <- .estimateCeps(theta, h=h, K=K)
+  eig2 <- array(dim = c(D,D,D))
+  for(j in 1:D){
+    eig2[,,j] <- Cov_op$eigen_fun[,j] %*% t(Cov_op$eigen_fun[,j])
+  }
+  thetas <- matrix(nrow=N,ncol=D)
+  X2 <- array(dim = c(D,D,N))
+  for(i in 1:N){
+    X2[,,i] <- X$data[,i] %*% t(X$data[,i]) - Cov_op$coef_matrix
 
-  asymp <- function(){
+    for(j in 1:D){
+      thetas[i,j] <- sum(diag( t(eig2[,,j]) %*% X2[,,i] ))
+    }
+  }
+  Sigma_d <- .long_run_var(t(thetas[,1:d]),h=h,K = K)
+
+  asymp <- function(N, delta, d){
     s <- floor(N * delta)
     WW <- matrix(0, d, N-s)
     for(i in 1:d){
@@ -68,29 +73,24 @@ joint_eigen_change <- function(X, d, h =2, CPs = NULL,
 
     max(colSums(WW^2))
   }
-  Values_j <- sapply(1:M, function(i) asymp())
+  Values_j <- sapply(1:M, function(i,N,delta,d) asymp(N, delta,d),
+                     N=N, delta=delta, d=d)
 
   s <- floor(delta*N)
   Tn_j <-  c(rep(0,s))
   for(k in (s+1):N){
     lam_i <- .partial_cov(X, k/N)$eigen_val[1:d]
-    kapa <- lam_i - (k/N) * lambda[1:d]
+    kapa <- lam_i - (k/N) * Cov_op$eigen_val[1:d]
     Tn_j[k] <- N * t(kapa) %*% solve(Sigma_d) %*% kapa
   }
   Sn_j <- max(Tn_j)
   k_star <- min(which.max(Tn_j))
-  # z_j <- Sn_j <= Values_j
-  # p <- ecdf(Values)(Sn)
   p_j <- sum(Sn_j <= Values_j) / M # Compute p-value
-  # p_j <- length(z_j[z_j==TRUE])/length(z_j)
 
   l1 <- pca(X$data[,1:k_star])$sdev[1:d]
   l2 <- pca(X$data[,(1+k_star):N])$sdev[1:d]
-  # l1 <- pca.fd(fdobj[1:k_star], nharm = D, centerfns = T)$values
-  # l2 <- pca.fd(fdobj[(1+k_star):N], nharm = D, centerfns = T)$values
 
-  list(change = k_star/N,
-       location = k_star,
+  list(change = k_star,
        pvalue = p_j,
        eval_before = l1,
        eval_after = l2)
