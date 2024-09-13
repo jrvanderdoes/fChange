@@ -4,17 +4,17 @@
 \alias{trace_change}
 \title{Testing changes in the trace of the covariance operator in functional data}
 \usage{
-trace_change(X, CPs = NULL, delta = 0.2, M = 1000)
+trace_change(X, CPs = NULL, M = 1000)
 }
 \arguments{
 \item{CPs}{If not NULL then the data is centered considering the changes.}
-
-\item{delta}{Trimming parameter to estimate the covariance function using partial sum estimates.}
 
 \item{M}{Number of monte carlo simulations used to get the critical values. The default value is \code{M=1000}
 value is \code{h=2}.}
 
 \item{fdobj}{A functional data object of class '\code{fd}'}
+
+\item{delta}{Trimming parameter to estimate the covariance function using partial sum estimates.}
 }
 \value{
 \item{\code{pvalue}}{
@@ -43,7 +43,7 @@ of basis functions that defines the functional data at hand. The critical
 values are approximated via \code{M} Monte Carlo simulations.
 }
 \examples{
-trace_change(generate_brownian_motion(500))
+trace_change(generate_brownian_motion(200,v=seq(0,1,0.05)))
 trace_change(electricity)
 }
 \references{

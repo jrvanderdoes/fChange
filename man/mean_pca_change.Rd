@@ -53,9 +53,11 @@ use the leading principal curves which explain \code{TVE} total variance
 to carry out the change point analysis.
 }
 \details{
-This functions performs structural break analysis for the functional data using an fPCA based initial dimension reduction. It
-is recommended that the dimension of the subspace, \code{d}, that the functional observations are projected onto should be selected based on
-TVE using \code{\link{pick_dim}}.
+This functions performs structural break analysis for the functional
+data using an fPCA based initial dimension reduction. It is recommended
+that the dimension of the subspace, \code{d}, that the functional
+observations are projected onto should be selected based on TVE using
+\code{\link{pick_dim}}.
 }
 \examples{
 #mean_pca_change(funts(electricity))
@@ -65,7 +67,7 @@ Berkes, I., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Detecting change
 Journal of the Royal Statistical Society, Series B 71, 927–946
 
 Aue, A., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Estimation of a change-point in the mean function
-of functional data}Journal of Multivariate Analysis 100, 2254–2269.
+of functional data} Journal of Multivariate Analysis 100, 2254–2269.
 }
 \seealso{
 \code{\link{change_FF}}

@@ -4,7 +4,7 @@
 \alias{sd.funts}
 \title{SD for funts}
 \usage{
-\method{sd}{funts}(x, type = c("op", "pw"), ...)
+\method{sd}{funts}(x, type = "pw", ...)
 }
 \arguments{
 \item{type}{Character to specify if an operator ('op') or pointwise ('pw')
