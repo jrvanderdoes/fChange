@@ -208,14 +208,14 @@ sd.default <- function(x, ...) stats::sd(x, ...)
 #'
 #' @examples
 #' sd(funts(electricity),type='pw')
-sd.funts <- function(x, type=c('op','pw'), ...) {
-  type <- c('op','pw')[min(pmatch(type,c('op','pw')))]
+sd.funts <- function(x, type='pw', ...) {
+  type <- c('pw')[min(pmatch(type,c('pw')))]
 
-  if(type=='op'){
-    stop('Not yet implemented, put type="pw" for implemented version',
-         call. = FALSE)
-  } else if(type=='pw'){
+  if(type=='pw'){
     return( apply(x$data, MARGIN = 1, sd) )
+  } else{
+    stop('only type="pw" is implemented',
+         call. = FALSE)
   }
 
   stop('Type must be "op" or "pw"', call. = FALSE)
@@ -242,11 +242,10 @@ var.funts <- function(x, type=c('op','pw'), ...) {
   type <- c('op','pw')[min(pmatch(type,c('op','pw')))]
 
   if(type=='op'){
-    stop('Not yet implemented, put type="pw" for implemented version',
-         call. = FALSE)
+    autocov_approx_h(X$data,0)
   } else if(type=='pw'){
-    return( apply(x$data, MARGIN = 1, var) )
+    Apply(x$data, MARGIN = 1, var)
+  } else{
+    stop('Type must be "op" or "pw"', call. = FALSE)
   }
-
-  stop('Type must be "op" or "pw"', call. = FALSE)
 }
