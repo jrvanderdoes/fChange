@@ -67,7 +67,8 @@ characteristic_change_sim <- function(X, M = 20, J=50,
       "pval" = 1 - stats::ecdf(gamProcessMn)(val_Mn$value),
       "gamProcess" = gamProcessMn,
       "value" = val_Mn$value
-    )
+    ),
+    'Location'=val_Mn$location
   )
 }
 
@@ -116,7 +117,7 @@ characteristic_change_sim_Tn <- function(X,
     # Integrate out M
     results <- matrix(NA,nrow=100, ncol=J)
     for(i in 1:J){
-      results[,i] <- apply(abs(gamVals[,(i-1)*M +1:M])^2,
+      results[,i] <- apply(abs(gamVals[,(i-1)*M +1:M,drop=FALSE])^2,
                            MARGIN=1, mean)
     }
 
@@ -199,11 +200,13 @@ characteristic_change_sim_Mn <- function(X,
 compute_Tn <- function(X,
                        W=computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'),
                        J=50) {
-  n <- ncol(X)
+  X <- .check_data(X)
 
-  Zn <- .Zn_final(W, X)
+  n <- ncol(X$data)
+
+  Zn <- .Zn_final(W, X$data)
   ns <- .select_n(1:n, J)
-  Zn <- Zn[ns,]
+  Zn <- Zn[ns,,drop=FALSE]
   # Integrate out W
   intVal <- rowMeans(abs(Zn)^2)#dot_integrate_col(t(abs(Zn)^2))
 
@@ -262,7 +265,7 @@ compute_Mn <- function(X,
 
   Zn <- .Zn_final(W,X)
   ns <- .select_n(1:n,J)
-  Zn <- Zn[ns,]
+  Zn <- Zn[ns,,drop=FALSE]
   # Integrate out W
   return_value <- rowMeans(abs(Zn)^2)#dot_integrate_col(t(abs(Zn)^2))
 
@@ -481,7 +484,7 @@ compute_Mn <- function(X,
 #'
 #' @noRd
 .estimR <- function(r, fVals, meanVal = NA) {
-  if (is.na(meanVal)) meanVal <- rowMeans(fVals)
+  if (is.na(meanVal)) meanVal <- mean(fVals)
 
   fVals[r] - meanVal
 }
