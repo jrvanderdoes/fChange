@@ -71,7 +71,7 @@ characteristic_change_welch <- function(X,
                      W = NULL, M = 100, J = 50,
                      h = ncol(funts(X)$data)^(1 / 3),
                      K = bartlett_kernel ) {
-  x <- .check_data(X)
+  X <- .check_data(X)
 
   if (is.null(W)) {
     W <- computeSpaceMeasuringVectors(M, "BM", X)
