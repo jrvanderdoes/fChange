@@ -65,7 +65,7 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
         W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
 
         tmp <-.ce_detect_Tn(X=X$data, W=W, M=M, J=J, nSims=iters,
-                                           h=h, K=bartlett_kernel, silent=TRUE)
+                            h=h, K=bartlett_kernel, silent=TRUE)
 
         if(return_pval){
           cp <- ifelse(tmp$pval<=alpha, compute_Mn(X$data,W=W,J=J)$location, NA)
@@ -82,6 +82,7 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                     M, J, space,
                     blockSize, iters,
                     alpha, h_function,
+                    K = bartlett_kernel,
                     ...){
         X <- .check_data(X)
 
@@ -90,7 +91,7 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
         W = computeSpaceMeasuringVectors(M,space,X)
 
         stat <- compute_Tn(X=X$data, W=W, J=J)
-        cutoff <- compute_Welch(X$data,alpha = alpha,W=W,M=M,h=h,K=K)
+        cutoff <- .compute_Welch(X$data,alpha = alpha,W=W,M=M,h=h,K=K)
 
         ifelse(stat>=cutoff,compute_Mn(X$data,W=W,J=J)$location,NA)
       }
@@ -333,13 +334,14 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                           h = 3,
                           K = bartlett_kernel,
                           silent = FALSE) {
+  X <- .check_data(X)
 
   # Determine Number of Iterations
-  val_Tn <- compute_Tn(X, W, J)
+  val_Tn <- compute_Tn(X$data, W, J)
 
   MJ <- M * J
 
-  sqrtMat <- .compute_sqrtMat(X,W,J,h,K)
+  sqrtMat <- .compute_sqrtMat(X$data,W,J,h,K)
 
   gamProcess <- c()
   nIters <- nSims / 100
