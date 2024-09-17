@@ -15,9 +15,10 @@
 #' @return Location of change. NA for no change and numeric if there is a change.
 #' @export
 #'
-#' @references Change point analysis of covariance functions: a weighted
-#'  cumulative sum approach, L. Horvath, G. Rice, Y. Zhao (2022) Journal
-#'  of Multivariate Analysis.
+#' @references Horváth, L., Rice, G., & Zhao, Y. (2022). Change point analysis
+#'  of covariance functions: A weighted cumulative sum approach. Journal of
+#'  Multivariate Analysis, 189, 104877-.
+#'  \url{https://doi.org/10.1016/j.jmva.2021.104877}
 #'
 #'  https://github.com/yzhao7322/CovFun_Change
 #'
@@ -28,17 +29,23 @@ covariance_kernel_change <- function(X, kappa = 1 / 4, len = 30) {
   stat_d0 <- .weight_TNstat(X, kappa = kappa)
   cv_d0 <- .weight_criticalvalueMC(X, len = len, kappa = kappa)
 
-  if (stat_d0[[1]] > cv_d0[2]) {
-    return(stat_d0[[2]])
-    # kstar = stat_d0[[2]]
-    # changetau = tau_est(dh1, kstar, len=20)
-    # cbar = changetau[[1]]
-    # tau = changetau[[2]]
-    # cpstat=l2norm(cbar)^2/tau*((kstar/samplesize)-truek)
-    # stat_vec[i]=cpstat
-  }
-
-  return(NA)
+  return(list(
+    pvalue=sum(stat_d0[[1]] <= cv_d0) / length(cv_d0),
+    location=stat_d0[[2]],
+    tn=stat_d0[[1]],
+    dist=cv_d0
+  ))
+  # if (stat_d0[[1]] > cv_d0[2]) {
+  #   return(stat_d0[[2]])
+  #   # kstar = stat_d0[[2]]
+  #   # changetau = tau_est(dh1, kstar, len=20)
+  #   # cbar = changetau[[1]]
+  #   # tau = changetau[[2]]
+  #   # cpstat=l2norm(cbar)^2/tau*((kstar/samplesize)-truek)
+  #   # stat_vec[i]=cpstat
+  # }
+  #
+  # return(NA)
 }
 
 #' L2 Norm
@@ -315,9 +322,10 @@ long_run_covariance_4tensor <- function(dat) {
     lim_sum <- lim_sum + klim
   }
 
-  cv <- stats::quantile(lim_sum, probs = c(0.90, 0.95, 0.99))
-
-  return(cv)
+  return(lim_sum)
+  # cv <- stats::quantile(lim_sum, probs = c(0.90, 0.95, 0.99))
+  #
+  # return(cv)
 }
 
 
