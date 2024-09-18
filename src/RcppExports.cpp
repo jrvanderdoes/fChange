@@ -12,36 +12,26 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // dot_integrate
-double dot_integrate(NumericVector v);
-RcppExport SEXP _fChange_dot_integrate(SEXP vSEXP) {
+double dot_integrate(NumericVector v, Nullable<NumericVector> r);
+RcppExport SEXP _fChange_dot_integrate(SEXP vSEXP, SEXP rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type v(vSEXP);
-    rcpp_result_gen = Rcpp::wrap(dot_integrate(v));
-    return rcpp_result_gen;
-END_RCPP
-}
-// dot_integrate_uneven
-double dot_integrate_uneven(NumericVector v, NumericVector r);
-RcppExport SEXP _fChange_dot_integrate_uneven(SEXP vSEXP, SEXP rSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type v(vSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type r(rSEXP);
-    rcpp_result_gen = Rcpp::wrap(dot_integrate_uneven(v, r));
+    Rcpp::traits::input_parameter< Nullable<NumericVector> >::type r(rSEXP);
+    rcpp_result_gen = Rcpp::wrap(dot_integrate(v, r));
     return rcpp_result_gen;
 END_RCPP
 }
 // dot_integrate_col
-NumericVector dot_integrate_col(NumericMatrix v);
-RcppExport SEXP _fChange_dot_integrate_col(SEXP vSEXP) {
+NumericVector dot_integrate_col(NumericMatrix v, Nullable<NumericVector> r);
+RcppExport SEXP _fChange_dot_integrate_col(SEXP vSEXP, SEXP rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type v(vSEXP);
-    rcpp_result_gen = Rcpp::wrap(dot_integrate_col(v));
+    Rcpp::traits::input_parameter< Nullable<NumericVector> >::type r(rSEXP);
+    rcpp_result_gen = Rcpp::wrap(dot_integrate_col(v, r));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -158,19 +148,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // fill_U
-NumericMatrix fill_U(NumericMatrix A_h, NumericMatrix A_C, NumericVector norm, NumericMatrix hC_Obs, int m, int n, int d);
-RcppExport SEXP _fChange_fill_U(SEXP A_hSEXP, SEXP A_CSEXP, SEXP normSEXP, SEXP hC_ObsSEXP, SEXP mSEXP, SEXP nSEXP, SEXP dSEXP) {
+NumericMatrix fill_U(NumericMatrix A_h, NumericVector norm, NumericMatrix hC_Obs, int m, int n, int d);
+RcppExport SEXP _fChange_fill_U(SEXP A_hSEXP, SEXP normSEXP, SEXP hC_ObsSEXP, SEXP mSEXP, SEXP nSEXP, SEXP dSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type A_h(A_hSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type A_C(A_CSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type norm(normSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type hC_Obs(hC_ObsSEXP);
     Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type d(dSEXP);
-    rcpp_result_gen = Rcpp::wrap(fill_U(A_h, A_C, norm, hC_Obs, m, n, d));
+    rcpp_result_gen = Rcpp::wrap(fill_U(A_h, norm, hC_Obs, m, n, d));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -198,16 +187,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// find_max
-NumericMatrix find_max(NumericMatrix U_hC, int m, int n);
-RcppExport SEXP _fChange_find_max(SEXP U_hCSEXP, SEXP mSEXP, SEXP nSEXP) {
+// find_rowmax
+NumericVector find_rowmax(NumericMatrix U_hC);
+RcppExport SEXP _fChange_find_rowmax(SEXP U_hCSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type U_hC(U_hCSEXP);
-    Rcpp::traits::input_parameter< int >::type m(mSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    rcpp_result_gen = Rcpp::wrap(find_max(U_hC, m, n));
+    rcpp_result_gen = Rcpp::wrap(find_rowmax(U_hC));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -238,9 +225,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fChange_dot_integrate", (DL_FUNC) &_fChange_dot_integrate, 1},
-    {"_fChange_dot_integrate_uneven", (DL_FUNC) &_fChange_dot_integrate_uneven, 2},
-    {"_fChange_dot_integrate_col", (DL_FUNC) &_fChange_dot_integrate_col, 1},
+    {"_fChange_dot_integrate", (DL_FUNC) &_fChange_dot_integrate, 2},
+    {"_fChange_dot_integrate_col", (DL_FUNC) &_fChange_dot_integrate_col, 2},
     {"_fChange_dot_col_cumsum", (DL_FUNC) &_fChange_dot_col_cumsum, 1},
     {"_fChange_dot_sqrt_mat", (DL_FUNC) &_fChange_dot_sqrt_mat, 1},
     {"_fChange_make_Obs_tilde_h", (DL_FUNC) &_fChange_make_Obs_tilde_h, 1},
@@ -251,10 +237,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fChange_toeplitz", (DL_FUNC) &_fChange_toeplitz, 1},
     {"_fChange_getRealSQM", (DL_FUNC) &_fChange_getRealSQM, 1},
     {"_fChange_make_hC_Obs", (DL_FUNC) &_fChange_make_hC_Obs, 1},
-    {"_fChange_fill_U", (DL_FUNC) &_fChange_fill_U, 7},
+    {"_fChange_fill_U", (DL_FUNC) &_fChange_fill_U, 6},
     {"_fChange_vecmult", (DL_FUNC) &_fChange_vecmult, 2},
     {"_fChange_outerProd", (DL_FUNC) &_fChange_outerProd, 2},
-    {"_fChange_find_max", (DL_FUNC) &_fChange_find_max, 3},
+    {"_fChange_find_rowmax", (DL_FUNC) &_fChange_find_rowmax, 1},
     {"_fChange_fill_T", (DL_FUNC) &_fChange_fill_T, 3},
     {"_fChange_h_cpp", (DL_FUNC) &_fChange_h_cpp, 2},
     {NULL, NULL, 0}
