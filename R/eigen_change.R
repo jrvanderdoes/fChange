@@ -32,7 +32,7 @@
 #'
 #' @references Aue, A, G Rice, and O Sönmez. “Structural Break Analysis
 #'  for Spectrum and Trace of Covariance Operators.” Environmetrics
-#'  (London, Ont.) 31, no. 1 (2020). https://doi.org/10.1002/env.2617.
+#'  (London, Ont.) 31, no. 1 (2020). \url{https://doi.org/10.1002/env.2617.}
 #'
 #' @examples
 #' bm <- generate_brownian_motion(200,v=seq(0,1,length.out=20))
@@ -69,7 +69,7 @@ eigen_change <- function(X, d, h =2, CPs = NULL,
   poss_tests <- c('joint', 'individual')
   test <- poss_tests[min(pmatch(test,poss_tests))]
   if(test=='joint'){
-    Sigma_d <- .long_run_var(t(thetas[,1:d]),h=h,K = K)
+    Sigma_d <- .long_run_cov(data = t(thetas[,1:d]),h=h,K = K)
 
     Values <- sapply(1:M,
                      function(i,N,d) .asymp_joint(N,d),
@@ -89,7 +89,7 @@ eigen_change <- function(X, d, h =2, CPs = NULL,
     before <- pca(X$data[,1:k_star])$sdev[1:d]
     after <- pca(X$data[,(1+k_star):N])$sdev[1:d]
   } else if(test=='individual'){
-    Sigma_d <- .long_run_var(t(thetas[,d]),h=h,K = K)
+    Sigma_d <- .long_run_cov(data = t(thetas[,d]),h=h,K = K)
 
     Values <- sapply(1:M, function(k)
       max(sde::BBridge(0, 0, 0, 1, N)^2))
