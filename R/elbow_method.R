@@ -41,8 +41,11 @@ elbow_method <- function(data,
                          trim_function = function(...) {
                            0
                          },
-                         errorType = "L2", ...) {
+                         max_changes = min(ncol(data),20),
+                         errorType = "L2",
+                         look_ahead = 2, look_alpha = 0.1, ...) {
   data <- .check_data(data)
+  max_changes <- min(max_changes,ncol(data))
 
   # Setup
   n <- ncol(data$data)
@@ -53,7 +56,7 @@ elbow_method <- function(data,
 
   # Trim & stopping criteria
   trim_amt <- trim_function(data$data, ...)
-  if (1 + trim_amt > n - trim_amt) {
+  if (1 + trim_amt >= n - trim_amt) {
     return()
   }
 
@@ -61,13 +64,13 @@ elbow_method <- function(data,
   stats_tmp <- test_function(data$data[, (1 + trim_amt):(n - trim_amt)], ...)
   test_stat <- c(rep(NA, trim_amt), stats_tmp$allValues, rep(NA, trim_amt))
   tmp_loc <- which.max(stats_tmp$allValues) + trim_amt
-  return_data[1, ] <- c(tmp_loc, .compute_total_var(data$data, tmp_loc, errorType))
+  return_data[1, ] <- c(tmp_loc,
+                        .compute_total_var(data = data$data, CPs = tmp_loc,
+                                           errorType = errorType))
 
   # Iteratively Search
-  i <- 1
-  while (TRUE) {
+  while (nrow(return_data) < max_changes) {
     # Setup
-    i <- i + 1
     CPs <- c(0, return_data$CP, n)
     CPs <- CPs[order(CPs)]
     prev_CP <- return_data[nrow(return_data), "CP"]
@@ -81,7 +84,9 @@ elbow_method <- function(data,
 
     if (1 + trim_amt < length(beforePrevCP) - trim_amt) {
       fill_idx <- (1 + trim_amt):(length(beforePrevCP) - trim_amt)
-      stats_tmp <- test_function(data$data[, beforePrevCP[fill_idx]], ...)
+      stats_tmp <- test_function(data$data[, beforePrevCP[fill_idx]],
+                                 J = length(fill_idx), ...)
+      # stats_tmp$allValues[1] <- 0 # Make first zero as don't want to segment
       test_stat[beforePrevCP[fill_idx]] <- stats_tmp$allValues
     }
 
@@ -92,7 +97,9 @@ elbow_method <- function(data,
 
     if (1 + trim_amt < length(afterPrevCP) - trim_amt) {
       fill_idx <- (1 + trim_amt):(length(afterPrevCP) - trim_amt)
-      stats_tmp <- test_function(data$data[, afterPrevCP[fill_idx]], ...)
+      stats_tmp <- test_function(data$data[, afterPrevCP[fill_idx]],
+                                 J = length(fill_idx), ...)
+      # stats_tmp$allValues[1] <- 0 # Make first zero as don't want to segment
       test_stat[afterPrevCP[fill_idx]] <- stats_tmp$allValues
     }
 
@@ -122,10 +129,7 @@ elbow_method <- function(data,
     }
 
     ## With max test-statistic on each section, take one leading to min variance
-    return_data[i, ] <- return_data_tmp[which.min(return_data_tmp$Var), ]
-
-
-    if (nrow(return_data) == (n - 1)) break
+    return_data[nrow(return_data)+1, ] <- return_data_tmp[which.min(return_data_tmp$Var), ]
   }
 
   # Add No Change option and compute percent change
@@ -134,27 +138,64 @@ elbow_method <- function(data,
     return_data
   )
   return_data$Percent <- 1 - return_data$Var / max(return_data$Var)
+  return_data$Gain <- c(NA,return_data$Var[-1] /return_data$Var[-nrow(return_data)])
 
   # Define vars to remove notes
   CP <- Var <- Percent <- NULL
 
   var_plot <-
     ggplot2::ggplot(return_data) +
-    ggplot2::geom_point(ggplot2::aes(x = 0:(length(CP) - 1), y = Var)) +
-    ggplot2::geom_line(ggplot2::aes(x = 0:(length(CP) - 1), y = Var)) +
+    ggplot2::geom_point(ggplot2::aes(x = 0:(length(CP) - 1), y = Var),size=4) +
+    ggplot2::geom_line(ggplot2::aes(x = 0:(length(CP) - 1), y = Var),linewidth=2) +
     ggplot2::xlab("Number of Change Points") +
     ggplot2::ylab("Total Variance") +
-    ggplot2::theme_bw()
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18),
+                   axis.title = ggplot2::element_text(size=22))
 
   per_plot <-
     ggplot2::ggplot(return_data) +
-    ggplot2::geom_point(ggplot2::aes(x = 0:(length(CP) - 1), y = Percent)) +
-    ggplot2::geom_line(ggplot2::aes(x = 0:(length(CP) - 1), y = Percent)) +
+    ggplot2::geom_point(ggplot2::aes(x = 0:(length(CP) - 1), y = Percent),size=4) +
+    ggplot2::geom_line(ggplot2::aes(x = 0:(length(CP) - 1), y = Percent),linewidth=2) +
     ggplot2::xlab("Number of Change Points") +
     ggplot2::ylab("Percent Explained") +
-    ggplot2::theme_bw()
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18),
+                   axis.title = ggplot2::element_text(size=22))
 
-  list("CPInfo" = return_data, "VarPlot" = var_plot, "PerPlot" = per_plot)
+  gain_plot <-
+    ggplot2::ggplot(return_data[-1,]) +
+    ggplot2::geom_point(ggplot2::aes(x = 1:length(CP), y = Gain), size=4) +
+    ggplot2::geom_line(ggplot2::aes(x = 1:length(CP), y = Gain),linewidth=2) +
+    ggplot2::xlab("Number of Change Points") +
+    ggplot2::ylab("Percent Explained") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18),
+                   axis.title = ggplot2::element_text(size=22))
+
+  data_change<- data.frame(matrix(NA,nrow=nrow(return_data),ncol = look_ahead))
+  for(i in 1:look_ahead){
+    data_change[,i] <- c(return_data$Gain[-c(1:i)]>1-look_alpha,rep(TRUE,i))
+  }
+  cutoff <- which.max(apply(data_change, MARGIN = 1, prod)) - 1
+
+  recommend_plot <-
+    ggplot2::ggplot(return_data) +
+    ggplot2::geom_line(ggplot2::aes(x = 0:(length(CP) - 1), y = Var),
+                       linewidth=2) +
+    ggplot2::geom_vline(ggplot2::aes(xintercept=cutoff),
+                        linetype='dotted', col='red',linewidth=2) +
+    ggplot2::geom_point(ggplot2::aes(x = 0:(length(CP) - 1), y = Var),
+                        size=4) +
+    ggplot2::xlab("Number of Change Points") +
+    ggplot2::ylab("Total Variance") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18),
+                   axis.title = ggplot2::element_text(size=22))
+
+  list("CPInfo" = return_data, "VariancePlot" = var_plot,
+       "PercentPlot" = per_plot, "GainPlot" = gain_plot,
+       "RecommendPlot" = recommend_plot)
 }
 
 #' Compute Total Variance
@@ -188,17 +229,20 @@ elbow_method <- function(data,
       data_std[, indices] <- data_std[, indices] - CP_mean
     }
 
-    ## Cannot use cov because it removes the mean from individual FDs, thus
-    #     making each change point near equally effective
-    covMatrix <- matrix(NA, ncol = ncol(data), nrow = ncol(data))
-    sampleCoef <- 1 / (nrow(data) - 1)
+    # ## Cannot use cov because it removes the mean from individual FDs, thus
+    # #     making each change point near equally effective
+    # covMatrix <- matrix(NA, ncol = ncol(data), nrow = ncol(data))
+    # sampleCoef <- 1 / (nrow(data) - 1)
+    #
+    # for (i in 1:ncol(data)) {
+    #   for (j in i:ncol(data)) {
+    #     covMatrix[i, j] <- covMatrix[j, i] <-
+    #       sum(sampleCoef * (data_std[, i] * data_std[, j]))
+    #   }
+    # }
+    #
+    covMatrix <- autocov_approx_h(data_std,0)
 
-    for (i in 1:ncol(data)) {
-      for (j in i:ncol(data)) {
-        covMatrix[i, j] <- covMatrix[j, i] <-
-          sum(sampleCoef * (data_std[, i] * data_std[, j]))
-      }
-    }
   } else if (errorType == "CE") {
     W <- as.data.frame(sapply(rep(0, M), sde::BM, N = nrow(data) - 1))
     CE <- data.frame(matrix(ncol = ncol(data), nrow = M))
