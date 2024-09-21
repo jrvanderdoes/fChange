@@ -73,6 +73,9 @@
 #'
 #' .compute_FACF(X=funts(electricity),lag.max = 30,alpha = 0.90)
 #' }
+#'
+#' @keywords internal
+#' @noRd
 .compute_FACF <- function(X, lag.max = NULL, alpha=0.05,
                           method = c('Welch','MC','Imhof'),
                           WWN = TRUE, figure = TRUE, ...){
@@ -80,6 +83,7 @@
 
   if(is.null(lag.max))
     lag.max <- 20 # 10 * log(ncol(X)/, base=10)
+  lag.max <- min(lag.max, ncol(X$data)-1)
 
   # Autocov surfaces
   autocovs <- .compute_autocovariance(X, lag.max)
@@ -160,6 +164,9 @@
 #'
 #' @examples
 #' .compute_autocovariance(funts(electricity), 10)
+#'
+#' @keywords internal
+#' @noRd
 .compute_autocovariance <- function(X, lag.max){
   X <- .check_data(X)
   lag.max <- ifelse(is.null(lag.max),20,lag.max)
@@ -175,7 +182,7 @@
     for( ind_curve in (1+nlag):obs ){
       autocovs[[paste0("Lag", nlag)]] <-
         autocovs[[paste0("Lag", nlag)]] +
-        X_demean[,ind_curve - nlag] %*% t(X_demean[,ind_curve])
+        X_demean[,ind_curve - nlag,drop=FALSE] %*% t(X_demean[,ind_curve,drop=FALSE])
     }
     autocovs[[paste0("Lag", nlag)]] <-
       autocovs[[paste0("Lag", nlag)]] / obs #TODO:: n or n-1
@@ -234,6 +241,9 @@
 #' title(sub = paste0("Lag ",2," - L2 Norm: ",norms[3]))
 #' par(opar)
 #' }
+#'
+#' @keywords internal
+#' @noRd
 .obtain_suface_L2_norm <- function(intraobs, autocovs){
   lag.max <- length(autocovs)
   matindex <- rep(NA, lag.max)
@@ -318,6 +328,9 @@
 #' plot(MC_dist$ex,MC_dist$ef,type = "l",main = "ecdf obtained by MC simulation")
 #' grid()
 #' }
+#'
+#' @keywords internal
+#' @noRd
 .estimate_iid_distr_MC <-
   function(X, autocovSurface, matindex, nsims= 10000){
     X <- .check_data(X)
@@ -380,6 +393,9 @@
 #' sig <- 2
 #' Y <- generate_brownian_bridge(N, v, sig)
 #' lambda <- .obtain_autocov_eigenvalues(X = Y)
+#'
+#' @keywords internal
+#' @noRd
 .obtain_autocov_eigenvalues <- function(X, epsilon = 0.0001){
   X <- .check_data(X)
 
@@ -459,6 +475,9 @@
 #' plot(Imhof_dist$ex,Imhof_dist$ef,type = "l",main = "ecdf obtained by Imhof's method")
 #' grid()
 #' }
+#'
+#' @keywords internal
+#' @noRd
 .estimate_iid_distr_Imhof <- function(X, autocovs, l2norms){
   X <- .check_data(X)
 
@@ -549,6 +568,9 @@
 #'                       alpha = upper_bound, figure = FALSE)
 #' .plot_FACF(rho = fACF$acfs,SWN = fACF$SWN_bound,WWN = fACF$WWN_bound)
 #' }
+#'
+#' @keywords internal
+#' @noRd
 .plot_FACF <- function(rho, SWN, WWN, ...){
   # Define suitable lwd for plotting
   lag.max <- length(rho)
@@ -558,13 +580,17 @@
   if(!"xlab" %in% names(arguments))  arguments$xlab <- "Lag"
   if(!"ylab" %in% names(arguments))  arguments$ylab <- "ACF"
   if(!"ylim" %in% names(arguments))  arguments$ylim <- c(0, min(max(rho)*1.5,1))
-  if(!"lwd"  %in% names(arguments))   arguments$lwd <- 1#lwd_1
+  if(!"lwd"  %in% names(arguments))   arguments$lwd <- 2#lwd_1
   if(!"las"  %in% names(arguments))   arguments$las <- 1
   if(!"lend" %in% names(arguments))  arguments$lend <- 2
   if(!"yaxs" %in% names(arguments))  arguments$yaxs <- "i"
   if(!"xaxs" %in% names(arguments))  arguments$xaxs <- "i"
   if(!"main" %in% names(arguments))  arguments$main <- ""
   if(!"xlim" %in% names(arguments))  arguments$xlim <- c(0, length(rho)+1)
+  if(!"cex.axis" %in% names(arguments)) arguments$cex.axis <- 1.5
+  if(!"cex.lab" %in% names(arguments)) arguments$cex.lab <- 2.5
+  if(!"mar" %in% names(arguments)) par(mar=c(5,6,4,1)+.1)
+
   arguments$x <- seq(1, length(rho), by = 1)
   arguments$y <- rho
   arguments$type <- "h"
@@ -578,6 +604,7 @@
                   y = arguments$y,
                   type = arguments$type,
                   col = 'black',#"lightgrey",
+                  # lwd = 2,
                   # lwd = arguments$lwd - 2,
                   lend = 2)
   blue_col <- "#0073C2FF"
@@ -662,6 +689,9 @@
 #' .compute_FPACF(X = funts(electricity), lag.max = 30, n_pcs = 5,
 #'                alpha = 0.90, figure = TRUE)
 #' }
+#'
+#' @keywords internal
+#' @noRd
 .compute_FPACF <- function(X, n_pcs = NULL, lag.max = NULL,
                            alpha=0.95, figure = TRUE, ...){
   X <- .check_data(X)
@@ -855,6 +885,9 @@
 #'  \emph{On the Prediction of Stationary Functional Time Series}
 #'  Journal of the American Statistical Association,
 #'  110, 378--392. \url{https://doi.org/10.1080/01621459.2014.909317}
+#'
+#' @keywords internal
+#' @noRd
 .fit_ARHp_FPCA <- function(X, p, n_pcs, show_varprop = TRUE){
   X <- .check_data(X)
 
@@ -932,6 +965,9 @@
 #' curve <- sin(v) + rnorm(length(v))
 #' operator_kernel <- 0.6*(v %*% t(v))
 #' hat_curve <- integral_operator(operator_kernel,curve,v)
+#'
+#' @keywords internal
+#' @noRd
 integral_operator <- function(operator_kernel, curve, v){
 
   # Initialize output
