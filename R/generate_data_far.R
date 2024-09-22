@@ -12,8 +12,8 @@
 #' @export
 #'
 #' @examples
-#' res <- generateFAR1(24,200)
-generateFAR1 <- function(resolution, N, d=1/2, burnin=1000){
+#' res <- generate_far1(24,200)
+generate_far1 <- function(resolution, N, d=1/2, burnin=1000){
 
   times <- seq(0,1,length.out=resolution)
   K <- function(s,t){exp(-(s^2+t^2)/2)}
