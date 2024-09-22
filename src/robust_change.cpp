@@ -16,7 +16,7 @@ NumericMatrix make_hC_Obs(NumericMatrix Obs);
 NumericMatrix fill_U(NumericMatrix A_h, NumericMatrix A_C, NumericVector norm, NumericMatrix hC_Obs, int m, int n, int d);
 NumericVector vecmult(NumericMatrix M, NumericVector v);
 NumericMatrix outerProd(NumericVector v, NumericVector w);
-NumericMatrix find_max(NumericMatrix U_hC, int m, int n);
+NumericVector find_rowmax(NumericMatrix U_hC);
 NumericMatrix fill_T(NumericMatrix hC_Obs, int n, int d);
 NumericVector h_cpp(NumericVector v1, NumericVector v2);
 
@@ -36,8 +36,7 @@ NumericVector h_cpp(NumericVector v1, NumericVector v2);
 static
 void parallel_for(unsigned nb_elements,
                   std::function<void (int start, int end)> functor,
-                  bool use_threads = true)
-{
+                  bool use_threads = true) {
   // -------
   unsigned nb_threads_hint = std::thread::hardware_concurrency();
   unsigned nb_threads = nb_threads_hint == 0 ? 8 : (nb_threads_hint);
@@ -87,19 +86,20 @@ NumericMatrix make_Obs_tilde_h(NumericMatrix Obs){
   for(int i=0; i<n; i++){
     for(int j=0; j<n; j++){
       if(j!=i){
-        for(int D=0;D<d;D++){
+        for(int D=0; D<d; D++){
           v1(D)=Obs(D,i);
           v2(D)=Obs(D,j);
         }
-        NumericVector help = h_cpp(v1,v2);
+        NumericVector help = h_cpp(v1, v2);
         for(int D=0; D<d; D++){
-          Obs_tilde(D,i)=Obs_tilde(D,i)+help(D);
+          Obs_tilde(D,i) = Obs_tilde(D,i) + help(D);
         }
       }
     }
   }
   return Obs_tilde/(n-1);
 }
+
 
 // for CUSUM: calculate \tilde(X)_i = 1/(n-1) \sum_{j=1,\neq j}^n (X_i - X_j) for data adapted bandwidth
 // [[Rcpp::export]]
@@ -119,6 +119,7 @@ NumericMatrix make_Obs_tilde_C(NumericMatrix Obs){
   }
   return Obs_tilde/(n-1);
 }
+
 
 // evaluate data-adaptive bandwidth
 // [[Rcpp::export]]
@@ -176,7 +177,7 @@ double adaptive_bw(NumericMatrix Obs){
 
 }
 
-// Matrix addition
+
 // [[Rcpp::export]]
 NumericMatrix matadd(NumericMatrix A, NumericMatrix B){
   int m=A.ncol();
@@ -191,7 +192,7 @@ NumericMatrix matadd(NumericMatrix A, NumericMatrix B){
   return M;
 }
 
-// kernel function
+
 // [[Rcpp::export]]
 NumericVector kernel(double bw, int n){
   NumericVector ker(n);
@@ -201,6 +202,7 @@ NumericVector kernel(double bw, int n){
   }
   return(ker);
 }
+
 
 // Toeplitz norm of Vector v
 // [[Rcpp::export]]
@@ -215,6 +217,7 @@ NumericMatrix toeplitz(NumericVector v){
   return KQS;
 }
 
+
 // evaluate real part of matrix square root
 // [[Rcpp::export]]
 NumericMatrix getRealSQM(NumericMatrix M){
@@ -225,12 +228,13 @@ NumericMatrix getRealSQM(NumericMatrix M){
   return SQM_real;
 }
 
+
 // calculate h(X_i,X_j) and X_i - X_j and save in one matrix
 // [[Rcpp::export]]
 NumericMatrix make_hC_Obs(NumericMatrix Obs){
   int d = Obs.nrow();
   int n = Obs.ncol();
-  NumericMatrix hC_Obs(d*(n-1),2*n);
+  NumericMatrix hC_Obs(d*(n-1),n);//2*n);
   NumericVector v1(d);
   NumericVector v2(d);
 
@@ -244,8 +248,7 @@ NumericMatrix make_hC_Obs(NumericMatrix Obs){
       NumericVector help = h_cpp(v1, v2);
       for (int D=0; D<d; D++){
         hC_Obs(D*(n-1)+i,j) = help(D);  //entries for h_Obs
-        hC_Obs(D*(n-1)+i,j+n)= Obs(D,i)-Obs(D,j); //entries for C_Obs
-
+        // hC_Obs(D*(n-1)+i,j+n)= Obs(D,i)-Obs(D,j); //entries for C_Obs
       }
     }
   }
@@ -253,15 +256,19 @@ NumericMatrix make_hC_Obs(NumericMatrix Obs){
   return hC_Obs;
 }
 
+
 // all of the above calculations are done once for simulated observations X_1,...,X_n.
 // for each bootstrap iteration t=0,...,m, add multiplier and calculate U_{n,k}^(t) for k=1,...,n
 // [[Rcpp::export]]
-NumericMatrix fill_U(NumericMatrix A_h, NumericMatrix A_C, NumericVector norm, NumericMatrix hC_Obs, int m, int n, int d){
+NumericMatrix fill_U(NumericMatrix A_h, //NumericMatrix A_C,
+                     NumericVector norm, NumericMatrix hC_Obs,
+                     int m, int n, int d){
   NumericMatrix Mult_h(n,m);
-  NumericMatrix Mult_C(n,m);
+  // NumericMatrix Mult_C(n,m);
   NumericVector norm_t(n);
 
-  NumericMatrix U_hC(m,2*n-2);
+  // NumericMatrix U_hC(m,2*n-2);
+  NumericMatrix U_hC(m,n-1);
 
   for (int t=0; t<m; t++){
 
@@ -270,23 +277,23 @@ NumericMatrix fill_U(NumericMatrix A_h, NumericMatrix A_C, NumericVector norm, N
     }
 
     NumericVector A_norm_h = vecmult(A_h, norm_t);
-    NumericVector A_norm_C = vecmult(A_C, norm_t);
-    for (int i=0; i<A_norm_h.length();i++){
+    // NumericVector A_norm_C = vecmult(A_C, norm_t);
+    for (int i=0; i<A_norm_h.length(); i++){
       Mult_h(i,t)=A_norm_h(i);
-      Mult_C(i,t)=A_norm_C(i);
+      // Mult_C(i,t)=A_norm_C(i);
     }
 
-    NumericMatrix h_Mult(d*(n-1),n);
-    NumericMatrix C_Mult(d*(n-1),n);
+    NumericMatrix h_Mult(d*(n-1), n);
+    // NumericMatrix C_Mult(d*(n-1),n);
     NumericMatrix h_Mult_sum(d, n-1);
-    NumericMatrix C_Mult_sum(d, n-1);
+    // NumericMatrix C_Mult_sum(d, n-1);
 
     parallel_for(d, [&](int start, int end){
       for(int D=start; D<end; ++D){
         for(int i=0; i<n-1; i++){
           for(int j=i+1; j<n; j++){  // add multiplier
             h_Mult(D*(n-1)+i,j)=hC_Obs(D*(n-1)+i,j)*(Mult_h(i,t)+Mult_h(j,t));  //h
-            C_Mult(D*(n-1)+i,j)=hC_Obs(D*(n-1)+i,j+n)*(Mult_C(i,t)+Mult_C(j,t));  //C
+            // C_Mult(D*(n-1)+i,j)=hC_Obs(D*(n-1)+i,j+n)*(Mult_C(i,t)+Mult_C(j,t));  //C
           }
         }
 
@@ -294,7 +301,7 @@ NumericMatrix fill_U(NumericMatrix A_h, NumericMatrix A_C, NumericVector norm, N
           for(int j=0;j<=i; j++){
             for(int k=i+1;k<n; k++){
               h_Mult_sum(D,i) += h_Mult(D*(n-1)+j,k);
-              C_Mult_sum(D,i) += C_Mult(D*(n-1)+j,k);
+              // C_Mult_sum(D,i) += C_Mult(D*(n-1)+j,k);
             }
           }
         }
@@ -304,13 +311,15 @@ NumericMatrix fill_U(NumericMatrix A_h, NumericMatrix A_C, NumericVector norm, N
 
     for (int k=0; k<n-1; k++){
       double help_h =0;
-      double help_C =0;
+      // double help_C =0;
       for(int D=0; D<d; D++){
         help_h += h_Mult_sum(D,k)*h_Mult_sum(D,k);
-        help_C += C_Mult_sum(D,k)*C_Mult_sum(D,k);
-      }                                       // U_{n,k}^(t) for Wilcoxon and Spatial Sign, saved in one matrix. Each row corresponds to one bootstrap iteration
+        // help_C += C_Mult_sum(D,k)*C_Mult_sum(D,k);
+      }
+      // U_{n,k}^(t) for Wilcoxon and Spatial Sign, saved in one matrix.
+      //    Each row corresponds to one bootstrap iteration
       U_hC(t,k)=std::sqrt(help_h);  //h
-      U_hC(t,k+(n-1))=std::sqrt(help_C);  //C
+      // U_hC(t,k+(n-1))=std::sqrt(help_C);  //C
     }
   }
 
@@ -327,7 +336,7 @@ NumericVector vecmult(NumericMatrix M, NumericVector v){
   NumericVector w(r);
   for(int i=0; i< r;i++) {
     for(int k=0;k<c;k++){
-      w(i) += M(i,k)*v(k);
+      w(i) += M(i,k) * v(k);
     }
 
   }
@@ -335,75 +344,64 @@ NumericVector vecmult(NumericMatrix M, NumericVector v){
 }
 
 
-// outer product of v and w
 // [[Rcpp::export]]
 NumericMatrix outerProd(NumericVector v, NumericVector w){
   int n=v.length();
   int m=w.length();
   NumericMatrix M(n,m);
   for(int i=0;i<n;i++){
-    for(int j=0;j<m;j++){
-      M(i,j)=v(i)*w(j);
-    }
+    M(i,_) = v(i) * w;
   }
   return M;
 }
 
 
-// for each bootstrap iteration t: Find max U_{n,k}^(t) over k
-// gives back a mx2 matrix with results for Wilcoxon-type and CUSUM in the columns
 // [[Rcpp::export]]
-NumericMatrix find_max(NumericMatrix U_hC, int m, int n){
-  NumericMatrix max_hC(m,2);
-  NumericVector vh(n-1);
-  NumericVector vC(n-1);
-  for (int t=0; t<m; t++){
-    for (int i=0; i<n-1; i++){
-      vh(i)=U_hC(t,i);
-      vC(i)=U_hC(t,i+(n-1));
-    }
-    max_hC(t,0) = max(vh);
-    max_hC(t,1) = max(vC);
+NumericVector find_rowmax(NumericMatrix U_hC){
+  NumericVector max_hC(U_hC.nrow());//2);
+  // NumericVector vC(n-1);
+  for (int t=0; t<U_hC.nrow(); t++){
+    max_hC(t) = max(U_hC(t,_));
+    // max_hC(t,1) = max(vC);
   }
   return max_hC;
 }
 
 
-// calculate U_{n,k} for k=1,..,n-1
-// gives back a (n-1)x2 matrix with the results for Wilcoxon-type and CUSUM
+// Calculate U_{n,k} for k=1, .., n-1
 // [[Rcpp::export]]
 NumericMatrix fill_T(NumericMatrix hC_Obs, int n, int d){
   NumericMatrix h_Obs_sum(d, n-1);
-  NumericMatrix C_Obs_sum(d, n-1);
+  // NumericMatrix C_Obs_sum(d, n-1);
 
   for(int D=0; D<d; D++){
     for(int i=0;i<n-1; i++){
       for(int j=0;j<=i; j++){
         for(int k=i+1;k<n; k++){
           h_Obs_sum(D,i) += hC_Obs(D*(n-1)+j,k);
-          C_Obs_sum(D,i) += hC_Obs(D*(n-1)+j,k+n);
+          // C_Obs_sum(D,i) += hC_Obs(D*(n-1)+j,k+n);
         }
       }
     }
   }
 
-  NumericMatrix T_hC((n-1),2);
+  NumericMatrix T_hC((n-1),1);//2);
   for (int k=0; k<n-1; k++){
     double help_h =0;
-    double help_C =0;
+    // double help_C =0;
     for(int D=0; D<d; D++){
-      help_h += h_Obs_sum(D,k)*h_Obs_sum(D,k);
-      help_C += C_Obs_sum(D,k)*C_Obs_sum(D,k);
+      help_h += h_Obs_sum(D,k) * h_Obs_sum(D,k);
+      // help_C += C_Obs_sum(D,k)*C_Obs_sum(D,k);
     }
     T_hC(k,0)=std::sqrt(help_h);
-    T_hC(k,1)=std::sqrt(help_C);
+    // T_hC(k,1)=std::sqrt(help_C);
   }
 
   return T_hC;
 }
 
 
-// calculate h(v1,v2) = S(v1-v2), S( ) spatial sign function
+// Calculate h(v1,v2) = S(v1-v2), S( ) spatial sign function
 // [[Rcpp::export]]
 NumericVector h_cpp(NumericVector v1, NumericVector v2){
   int n=v1.length();
@@ -413,14 +411,14 @@ NumericVector h_cpp(NumericVector v1, NumericVector v2){
   int eq=0;
   for (int i=0; i<n; i++){
     if (v1(i)==v2(i)) eq += 1;
-    help += (v1(i)-v2(i))*(v1(i)-v2(i));
+    help += (v1(i)-v2(i)) * (v1(i)-v2(i));
   }
 
-  if( eq == n) {return res;}
-  else{
+  if( eq != n) {
     for (int i=0; i<n; i++){
-      res(i)=(v1(i)-v2(i))/std::sqrt(help);
+      res(i)=(v1(i)-v2(i)) / std::sqrt(help);
     }
   }
+
   return res;
 }
