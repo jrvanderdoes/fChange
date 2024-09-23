@@ -1,6 +1,6 @@
 #' Generate functional data
 #'
-#' \code{generate_data_fd} generates functional data via KL expansion.
+#' \code{generate_kl} generates functional data via KL expansion.
 #' This can include change points in any combination of the following:
 #' \itemize{
 #'   \item Mean
@@ -40,7 +40,7 @@
 #' # Create 200 functions with a midway change point. The change point
 #' #     is a change point in the eigenvalues, eigenfunctions, means,
 #' #     distributions, and VAR(1) strength
-#' data_KL <- generate_data_fd(
+#' data_KL <- generate_kl(
 #'   ns = c(25, 25),
 #'   eigsList = list(
 #'     c(3, 2, 1, 0.5),
@@ -55,7 +55,7 @@
 #'   evals = seq(0, 1, 0.05),
 #'   kappasArray = c(0, 0.5)
 #' )
-generate_data_fd <- function(ns,
+generate_kl <- function(ns,
                              eigsList,
                              basesList,
                              meansList,
@@ -196,7 +196,7 @@ generate_data_fd <- function(ns,
 #' This (internal) function sets up the psi for dependence of each segment.
 #'
 #' @param D Vector of numerics for the number of eigenvalues in each segment
-#' @inheritParams generate_data_fd
+#' @inheritParams generate_kl
 #'
 #' @return List with the dependence for each segment
 #'
