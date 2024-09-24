@@ -17,7 +17,7 @@
 #' v <- seq(from = 0, to = 1, length.out = 20)
 #' bmotion <- generate_brownian_motion(N, v, sd = 1)
 generate_brownian_motion <- function(
-    N, v = seq(from = 0, to = 1, length.out = 100), sd = 1){
+    N, v = seq(from = 0, to = 1, length.out = 20), sd = 1){
 
   res <- length(v)
 
@@ -25,9 +25,16 @@ generate_brownian_motion <- function(
   # for(i in 2:res){
   #   data[i,] <- data[i-1,] + rnorm(N,sd=sd*sqrt(v[i]-v[i-1]))
   # }
-  data <- apply(t(sapply(c(0,diff(v)),
-                         function(d,N,sd){rnorm(N,sd=sd*sqrt(d))},N=N,sd=sd)),
-                MARGIN = 2,cumsum)
+  if(N>1){
+    data <- apply(t(sapply(c(0,diff(v)),
+                           function(d,N,sd){rnorm(N,sd=sd*sqrt(d))},N=N,sd=sd)),
+                  MARGIN = 2, cumsum)
+  }else{
+    data <- cumsum(sapply(c(0,diff(v)),
+                           function(d,N,sd){rnorm(N,sd=sd*sqrt(d))},N=N,sd=sd)
+                   )
+  }
+
   # data[2:res,] <- data[1:(res-1),] +
   #   t(sapply(c(0,diff(v)), function(d,N,sd){rnorm(N,sd=sd*d)},N=N,sd=sd))
 
@@ -58,27 +65,29 @@ generate_brownian_motion <- function(
 #' bbridge <- generate_brownian_bridge(N, v, sd=1)
 generate_brownian_bridge <- function(
     N, v = seq(from = 0, to = 1, length.out = 100), sd = 1){
+  ## TODO:: Convert to other BB (below) for large boost in speed
 
   res <- length(v)
 
-  # data <- matrix(0, ncol = N, nrow = res)
-  # data[2:res,] <-
-  #   as.matrix(generate_brownian_motion(N, v = v[1:res-1], sd)$data)
-
   # Initialize
-  data = generate_brownian_motion(N, v = v, sd)$data
+  data <- generate_brownian_motion(N, v = v, sd)$data
   data <- data -
-    t(data[res,] * t(matrix(rep(v, times = N), ncol = N, nrow = res)))
+    t(data[res,] * t(matrix(rep(v, times = N)/max(v), ncol = N, nrow = res)))
 
   funts(X=data,intraobs = v)
-  # # Initialize
-  # data <- matrix(0, ncol = res, nrow = N)
-  # data[,2:res] <-
-  #   as.matrix(generate_brownian_motion(N, v = v[1:res-1], sd)$data)
-  # data <- data -
-  #   data[,res] * matrix( rep(v, times = N),
-  #                            ncol = res, nrow = N, byrow = T)
-  #
-  # funts(X=t(data),intraobs = v)
 }
 
+
+generate_brownian_bridge1 <- function(
+    N, v = seq(from = 0, to = 1, length.out = 100), sd = 1){
+
+  n <- length(v)
+  dt <- diff(v)
+  t <- seq(v[1], v[n], length = n + 1)
+  BB <- sapply(1:N, function(m,v,n){
+    X <- c(0, cumsum(rnorm(n-1) * sqrt(dt) * sd))
+    v[1] + X - (v - v[1])/(v[n] - v[1]) * (X[n] - v[1] + v[1])
+  },v=v,n=n)
+
+  funts(X = BB, intraobs = v)
+}
