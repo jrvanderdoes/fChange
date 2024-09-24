@@ -10,8 +10,8 @@
 #' @export
 #'
 #' @examples
-#' generateOU(20,100)
-generateOU <- function(resolution, N, burnin=500, rho=0){
+#' generate_ou(20,100)
+generate_ou <- function(resolution, N, burnin=500, rho=0){
 
   times <- 1:resolution/resolution
 
