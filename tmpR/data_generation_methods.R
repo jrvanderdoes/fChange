@@ -24,7 +24,7 @@ brown_motion <- function(N, J) {
 #' Functional GARCH(1,1)
 #'
 #' Simulates an fGARCH(1,1) process with N independent observations, each observed
-#'  discretely at J points on the interval [0,1]. Uses the Ornstein-Uhlenbeck process.
+#'  discretely at J points on the interval \[0,1\]. Uses the Ornstein-Uhlenbeck process.
 #'
 #' @param N the number of fGARCH(1,1) curves to sample.
 #' @param J the number of points at which each curve is sampled (the resolution of the data).
@@ -73,7 +73,7 @@ fgarch11 <- function(N, J, delta=0.01, burn_in=50) {
 #' Simulation FAR(1,S)
 #'
 #' Simulates an FAR(1,S)-fGARCH(1,1) process with N independent observations, each
-#'  observed discretely at J points on the interval [0,1].
+#'  observed discretely at J points on the interval \[0,1\].
 #'
 #' @param N the number of fGARCH(1,1) curves to sample.
 #' @param J the number of points at which each curve is sampled (the resolution of the data).
