@@ -23,7 +23,7 @@
 #' @details This function dates and detects changes in the defined eigenvalue of the covariance function. The critical values are
 #'  approximated via \code{M} Monte Carlo simulations.
 #'
-#' @references Aue, A, G Rice, and O Sönmez. “Structural Break Analysis
+#' @references Aue, A, G Rice, and O S\"{o}nmez. “Structural Break Analysis
 #'  for Spectrum and Trace of Covariance Operators.” Environmetrics
 #'  (London, Ont.) 31, no. 1 (2020). https://doi.org/10.1002/env.2617.
 #'
