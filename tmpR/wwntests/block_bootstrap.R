@@ -22,6 +22,7 @@ block_bootsrap <- function(f_data, b, B = 300, moving = FALSE) {
   } else if (B < 1) {
     stop("The number of bootstrap samples must be a positive integer.")
   }
+
   blocks <- list()
   M <- floor(N / b)
   for (s in 1:M) {
