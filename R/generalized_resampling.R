@@ -25,7 +25,7 @@
 #' @examples
 #' \dontrun{
 #' # Setup Data
-#' data_KL <- generate_data_fd(
+#' data_KL <- generate_kl(
 #'   ns = c(20, 20),
 #'   eigsList = list(
 #'     c(3, 2, 1, 0.5),
@@ -41,8 +41,8 @@
 #'   kappasArray = c(0, 0.5)
 #' )
 #' # Metric
-#' compute_Tn(data_KL$data,M =100) # Note value
-#' compute_Tn(data_KL$data,M =100) # Note different value
+#' #compute_Tn(data_KL$data,M =100) # Note value
+#' #compute_Tn(data_KL$data,M =100) # Note different value
 #' # Permutation Method for Tn (this will get 1-alpha quantile of iters)
 #' generalized_resampling(
 #'   X = data_KL$data,
