@@ -37,17 +37,14 @@
 impute <- function(data,
                    method = c('zero','mean_obs','median_obs',
                               'mean_data','median_data',
-                              'linear'),
-                   obs_share_data = FALSE){
-  data <- .check_data(data)
-  poss_methods <- c('zero','mean_obs','median_obs', 'mean_data',
-                    'median_data', 'linear')
-  tryCatch({
-    method <- poss_methods[min(pmatch(method, poss_methods))]
-  }, error = function(e){
-    stop(paste0('Incorrect method selected. See documentation.'),
-         call. = FALSE)
-  })
+                              'linear','functional'),
+                   obs_share_data = FALSE, ...){
+  # TODO:: Read https://onlinelibrary-wiley-com.proxy.lib.uwaterloo.ca/doi/pdf/10.1002%2Fsta4.331
+  #   Modern multiple imputation with functional data
+  data <- .check_data(data,check.na = FALSE)
+  method <- .verify_input(method,
+                          c('zero','mean_obs','median_obs', 'mean_data',
+                            'median_data', 'linear', 'functional') )
 
   switch(method,
          zero = {
@@ -80,9 +77,20 @@ impute <- function(data,
          linear={
            .linear_imputatation(data, obs_share_data)
          },
-         # functional={
-         #
-         # },
+         functional={
+           na_row <- rowSums(is.na(data$data))
+           data_tmp <- stats::na.omit(data$data)
+
+           data_fd <- fda::eval.fd(evalarg = data$intraobs,
+                                   fda::Data2fd(
+                                     argvals = data$intraobs[na_row==0], y = data_tmp,
+                                     basisobj = fda::create.bspline.basis(
+                                       rangeval = range(data$intraobs[na_row==0])) )
+           )
+           data$data <- ifelse(is.na(data$data),data_fd,data$data)
+
+           data
+         },
          # pca={
          #
          # },
@@ -101,7 +109,8 @@ impute <- function(data,
 #'
 #' @return funts object with imputed values
 .linear_imputatation <- function(data, obs_share_data = FALSE) {
-  data <- .check_data(data)
+  ## TODO:: STUDY,  Modern multiple imputation with functional data
+  data <- .check_data(data,check.na = FALSE)
   data_fill <- data$data
   n <- ncol(data$data)
   r <- nrow(data$data)
@@ -165,7 +174,7 @@ impute <- function(data,
         # Get missing, sort so that I go inside to outside
         obs_missing <- which(is.na(data_i))
         obs_missing <-
-          obs_missing[order(abs(obs_missing-r/2))]
+          obs_missing[order(abs((obs_missing-obs_en)/2))]
 
         for(j in obs_missing){
           # Up or down
@@ -196,7 +205,8 @@ impute <- function(data,
         # Get missing, sort so that I go inside to outside
         obs_missing <- which(is.na(data_i))
         obs_missing <-
-          obs_missing[order(abs(obs_missing-r/2))]
+          obs_missing[order(abs((obs_missing-obs_en)/2))]
+          # obs_missing[order(abs(obs_missing-r/2))]
 
         for(j in obs_missing){
           # Up or down
