@@ -286,7 +286,7 @@ spectral_test <- function(f_data, kernel = 'Bartlett', bandwidth = 'adaptive', a
 #' or lag-window.
 #' @param alpha Numeric value between 0 and 1 specifying the significance level to be used in the specified
 #' hypothesis test. The default value is 0.05. Note, the significance value is only ever used to compute the
-#' 1-alpha quantile of the limiting distribution of the specified test's test statistic.
+#' 1 - alpha quantile of the limiting distribution of the specified test's test statistic.
 #' @param suppress_raw_output Boolean value, FALSE by default. If TRUE, the function will not return the list
 #' containing the p-value, quantile, and statistic.
 #' @param suppress_print_output Boolean value, FALSE by default. If TRUE, the function will not print any
