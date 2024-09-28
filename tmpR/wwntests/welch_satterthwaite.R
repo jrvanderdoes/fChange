@@ -1,12 +1,12 @@
-# true_eta_approx is a non-stochaistic approximation of eta_i_j (see (15)) using a Riemann sum.
-# Input: f_data = the functional data matrix with functions in columns
-#        i,j = the indices i,j in 1:T that we are computing eta^hat_i_j for
-# Output: scalar value of eta^hat_i_j computed using a simple Riemann sum.
-true_eta_approx_i_j <- function(f_data, i, j) {
-  J <- NROW(f_data)
-  cov_tensor <- covariance_i_j(f_data, i, j)
-  2 * sum(cov_tensor^2) / (J^4)
-}
+# # true_eta_approx is a non-stochastic approximation of eta_i_j (see (15)) using a Riemann sum.
+# # Input: f_data = the functional data matrix with functions in columns
+# #        i,j = the indices i,j in 1:T that we are computing eta^hat_i_j for
+# # Output: scalar value of eta^hat_i_j computed using a simple Riemann sum.
+# true_eta_approx_i_j <- function(f_data, i, j) {
+#   J <- NROW(f_data)
+#   cov_tensor <- covariance_i_j(f_data, i, j)
+#   2 * sum(cov_tensor^2) / (J^4)
+# }
 
 # MCint_eta_approx_i_j computes an approximation of eta_i_j (defined under (15)) using the second
 #   Monte Carlo integration method "MCint" defined on page 8.
@@ -46,38 +46,38 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
   eta_hat_i_j
 }
 
-# MCint_eta_approx_i_j_vec is a vectorized version of MCint_eta_approx_i_j.
-# Input: f_data = the functional data matrix with functions in columns
-#        i,j = the indices i,j in 1:T that we are computing eta^hat_i_j for
-#        M = number of vectors (v1, v2, v3, v4) to sample uniformly from U_J X U_J X U_J X U_J
-#        low_disc = boolean value specifiying whether or not to use low-discrepancy sampling
-#                   for the Monte-Carlo method (only Sobol Sampling is currently supported)
-# Output: scalar value of eta^_hat_i_j computed using the MCint method.
-MCint_eta_approx_i_j_vec <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
-  J <- NROW(f_data)
-  N <- NCOL(f_data)
-  M = floor((max(150 - N, 0) + max(100-J,0) + (J / sqrt(2))))
-  if (low_disc == TRUE) {
-    if (requireNamespace('fOptions', quietly = TRUE)) {
-      rand_samp_mat <- apply(J * fOptions::runif.sobol(M, 4, scrambling = 3), 2, floor)
-      rand_samp_mat[which(rand_samp_mat == 0)] = 1
-    } else {
-      stop("Please install the 'fOptions' package for low discrepancy sampling.")
-    }
-  } else {
-    rand_samp_mat <- matrix(nrow=M, ncol=4)
-    for (k in 1:4) {
-      rand_samp <- floor(J * stats::runif(M, 0, 1))
-      rand_samp[which(rand_samp == 0)] = 1
-      rand_samp_mat[,k] <- rand_samp
-    }
-  }
-  eta_parts <- as.list(1:M)
-  eta_parts <- lapply(eta_parts, function(k) scalar_covariance_i_j(f_data, i, j,
-                                                          rand_samp_mat[k,]) ^ 2)
-  eta_hat_i_j <- (2 / M) * Reduce('+', eta_parts)
-  eta_hat_i_j
-}
+# # MCint_eta_approx_i_j_vec is a vectorized version of MCint_eta_approx_i_j.
+# # Input: f_data = the functional data matrix with functions in columns
+# #        i,j = the indices i,j in 1:T that we are computing eta^hat_i_j for
+# #        M = number of vectors (v1, v2, v3, v4) to sample uniformly from U_J X U_J X U_J X U_J
+# #        low_disc = boolean value specifiying whether or not to use low-discrepancy sampling
+# #                   for the Monte-Carlo method (only Sobol Sampling is currently supported)
+# # Output: scalar value of eta^_hat_i_j computed using the MCint method.
+# MCint_eta_approx_i_j_vec <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
+#   J <- NROW(f_data)
+#   N <- NCOL(f_data)
+#   M = floor((max(150 - N, 0) + max(100-J,0) + (J / sqrt(2))))
+#   if (low_disc == TRUE) {
+#     if (requireNamespace('fOptions', quietly = TRUE)) {
+#       rand_samp_mat <- apply(J * fOptions::runif.sobol(M, 4, scrambling = 3), 2, floor)
+#       rand_samp_mat[which(rand_samp_mat == 0)] = 1
+#     } else {
+#       stop("Please install the 'fOptions' package for low discrepancy sampling.")
+#     }
+#   } else {
+#     rand_samp_mat <- matrix(nrow=M, ncol=4)
+#     for (k in 1:4) {
+#       rand_samp <- floor(J * stats::runif(M, 0, 1))
+#       rand_samp[which(rand_samp == 0)] = 1
+#       rand_samp_mat[,k] <- rand_samp
+#     }
+#   }
+#   eta_parts <- as.list(1:M)
+#   eta_parts <- lapply(eta_parts, function(k) scalar_covariance_i_j(f_data, i, j,
+#                                                           rand_samp_mat[k,]) ^ 2)
+#   eta_hat_i_j <- (2 / M) * Reduce('+', eta_parts)
+#   eta_hat_i_j
+# }
 
 
 # mean_hat_V_K computes the approximation of the mean defined in (15) which is used in the Welch-
