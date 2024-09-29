@@ -48,7 +48,7 @@ mean_change <- function(data, M = 1000, h = 0,
   k.star <- min(which(Sn2 == max(Sn2,na.rm = T)))
 
   ## Estimate eigenvalues (lambda_i, 1<=i<=d)
-  Ceps <- .long_run_var(data, h, K) # data1
+  Ceps <- .long_run_cov(data, h, K) # data1
   lambda <- eigen(Ceps)$values
 
   values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist(n, lambda),
@@ -67,8 +67,8 @@ mean_change <- function(data, M = 1000, h = 0,
   mean.a <- mean(dat.a)
   delta <- mean.a - mean.b
 
-  plot1 <- .plot_stack(data,CPs=k.star)
-  # .plot_substack(X,CPs=k.star) ## TODO:: color bands
+  plot1 <- rainbow_plot(data,CPs=k.star)
+  # distribution_plot(X,CPs=k.star) ## TODO:: color bands
 
   plot2 <-
     ggplot2::ggplot() +
@@ -142,7 +142,7 @@ mean_change <- function(data, M = 1000, h = 0,
 #'     symmetric.
 #'
 #' @noRd
-.long_run_var <- function(data, h, K){
+.long_run_cov <- function(data, h, K){
   data <- .check_data(data)
   data <- center(data)
 
@@ -167,6 +167,26 @@ mean_change <- function(data, M = 1000, h = 0,
   }
 
   Ceps / N
+
+  # iters <- (1-N):(N-1)
+  # Kvals <- K(iters/h)
+  # data_tmp <- data.frame('K'=Kvals[Kvals>0],
+  #                        'l'=iters[which(Kvals>0)])
+  # values <- apply(data_tmp, MARGIN = 1,
+  #                 function(kInfo, data, N) {
+  #                   if (kInfo[2] >= 0) {
+  #                     rs <- 1:(N - kInfo[2])
+  #                   } else {
+  #                     rs <- (1 - kInfo[2]):N
+  #                   }
+  #
+  #                   # TODO: Question on divisor
+  #                   kInfo[1] * (data$data[,rs,drop=FALSE] %*% t(data$data[,rs+kInfo[2],drop=FALSE]) ) / N#(N-abs(kInfo[2]))
+  #                 },
+  #                 data = data, N = N
+  # )
+  #
+  # values[1:D,1:D]
 }
 
 
@@ -201,7 +221,7 @@ mean_change <- function(data, M = 1000, h = 0,
 #' @examples
 #' \dontrun{
 #' # Null Example
-#' data_KL <- generate_data_fd(
+#' data_KL <- generate_kl(
 #'   ns = c(100, 100),
 #'   eigsList = list(
 #'     c(3, 2, 1, 0.5),
@@ -220,7 +240,7 @@ mean_change <- function(data, M = 1000, h = 0,
 #' compute_mean_stat(data_KL$data, 100)
 #'
 #' # Mean CP Example
-#' data_KL <- generate_data_fd(
+#' data_KL <- generate_kl(
 #'   ns = c(100, 100),
 #'   eigsList = list(
 #'     c(3, 2, 1, 0.5),
@@ -268,7 +288,7 @@ compute_mean_stat <- function(data, k, weight = 0.5) {
 #' #' @examples
 #' #' \dontrun{
 #' #' # Null Example
-#' #' data_KL <- generate_data_fd(
+#' #' data_KL <- generate_kl(
 #' #'   ns = c(100, 100),
 #' #'   eigsList = list(
 #' #'     c(3, 2, 1, 0.5),
@@ -287,7 +307,7 @@ compute_mean_stat <- function(data, k, weight = 0.5) {
 #' #' compute_mean_cutoff(data_KL$data, 0.05)
 #' #'
 #' #' # Mean CP Example
-#' #' data_KL <- generate_data_fd(
+#' #' data_KL <- generate_kl(
 #' #'   ns = c(100, 100),
 #' #'   eigsList = list(
 #' #'     c(3, 2, 1, 0.5),
