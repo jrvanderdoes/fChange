@@ -47,7 +47,7 @@ mean_change_Tn <- function(data, M = 1000, h = 0, K = bartlett_kernel) {
   k.star <- min(which(Sn2 == max(Sn2,na.rm = T)))
 
   ## Estimate eigenvalues (lambda_i, 1<=i<=d)
-  Ceps <- .long_run_var(data, h, K)
+  Ceps <- .long_run_cov(data, h, K)
   lambda <- eigen(Ceps)$values
 
   values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist_Tn(n, lambda),
@@ -65,8 +65,8 @@ mean_change_Tn <- function(data, M = 1000, h = 0, K = bartlett_kernel) {
   mean.a <- mean(dat.a)
   delta <- mean.a - mean.b
 
-  plot1 <- .plot_stack(data,CPs=k.star)
-  # .plot_substack(X,CPs=k.star) ## TODO:: color bands
+  plot1 <- rainbow_plot(data,CPs=k.star)
+  # distribution_plot(X,CPs=k.star) ## TODO:: color bands
 
   plot2 <-
     ggplot2::ggplot() +
@@ -198,7 +198,7 @@ mean_change_Tn <- function(data, M = 1000, h = 0, K = bartlett_kernel) {
 # #' @examples
 # #' \dontrun{
 # #' # Null Example
-# #' data_KL <- generate_data_fd(
+# #' data_KL <- generate_kl(
 # #'   ns = c(100, 100),
 # #'   eigsList = list(
 # #'     c(3, 2, 1, 0.5),
@@ -217,7 +217,7 @@ mean_change_Tn <- function(data, M = 1000, h = 0, K = bartlett_kernel) {
 # #' compute_mean_stat(data_KL$data, 100)
 # #'
 # #' # Mean CP Example
-# #' data_KL <- generate_data_fd(
+# #' data_KL <- generate_kl(
 # #'   ns = c(100, 100),
 # #'   eigsList = list(
 # #'     c(3, 2, 1, 0.5),
@@ -261,7 +261,7 @@ mean_change_Tn <- function(data, M = 1000, h = 0, K = bartlett_kernel) {
 # #' @examples
 # #' \dontrun{
 # #' # Null Example
-# #' data_KL <- generate_data_fd(
+# #' data_KL <- generate_kl(
 # #'   ns = c(100, 100),
 # #'   eigsList = list(
 # #'     c(3, 2, 1, 0.5),
@@ -280,7 +280,7 @@ mean_change_Tn <- function(data, M = 1000, h = 0, K = bartlett_kernel) {
 # #' compute_mean_cutoff(data_KL$data, 0.05)
 # #'
 # #' # Mean CP Example
-# #' data_KL <- generate_data_fd(
+# #' data_KL <- generate_kl(
 # #'   ns = c(100, 100),
 # #'   eigsList = list(
 # #'     c(3, 2, 1, 0.5),
