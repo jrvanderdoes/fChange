@@ -50,63 +50,75 @@
 #'  observations are projected onto should be selected based on TVE using
 #'  \code{\link{pick_dim}}.
 #'
-#' @references Berkes, I., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Detecting changes in the mean of functional observations}
+#' @references Berkes, I., Gabrys, R.,Horvath, L. & P. Kokoszka (2009).,
+#'  \emph{Detecting changes in the mean of functional observations}
 #'  Journal of the Royal Statistical Society, Series B 71, 927–946
-#' @references Aue, A., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Estimation of a change-point in the mean function
-#'  of functional data} Journal of Multivariate Analysis 100, 2254–2269.
+#' @references Aue, A., Gabrys, R.,Horvath, L. & P. Kokoszka (2009).,
+#'  \emph{Estimation of a change-point in the mean function of functional data}
+#'  Journal of Multivariate Analysis 100, 2254–2269.
 #'
 #' @examples
-#' #mean_pca_change(funts(electricity))
+#' res <- mean_pca_change(generate_brownian_bridge(200,seq(0,1,length.out=10)))
+#' res1 <- mean_pca_change(generate_ou(20,200))
+#' res2 <- mean_pca_change(funts(electricity))
 mean_pca_change <- function(X, TVE=0.95,
                             M=1000, h=0, K=bartlett_kernel){
-  stop('This function is being worked on', call. = FALSE)
-  set.seed(1234)
-  fdata <- fun_IID(n=200, nbasis=21)
-  X <- fda::eval.fd(seq(0,1,length.out=21),fdata)
-  #X <- electricity
-  ## TODO:: FIX EXAMPLE
   X <- .check_data(X)
   X <- center(X)
 
-  # D <- nrow(X$data)
+  D <- nrow(X$data)
   n <- ncol(X$data)
 
-  pca_X <- pca(X, TVE)
+  pca_X <- pca(X, TVE=TVE)
+
   d <- length(pca_X$sdev)
 
-  eta.hat <- t(pca_X$rotation)
+  eta.hat <- as.matrix(pca_X$x)
 
-  Sigma.hat <- .long_run_var(X, h=h, K=K)[1:d, 1:d]
-  TT <- sapply(1:n,
-               function(k,n,eta.hat) {
-                 1/n *( t(.S_n_pca(eta.hat = eta.hat,k = k,n = n)) %*%
-                          solve(Sigma.hat) %*%
-                          .S_n_pca(eta.hat = eta.hat,k = k,n = n))},
-               # function(k,n,eta.hat,pca_X) {
-               #   1/n *( #t(.S_n_pca(eta.hat = eta.hat,k = k,n = n)) %*%
-               #            diag(1/pca_X$sdev) %*%
-               #            .S_n_pca(eta.hat = eta.hat,k = k,n = n)^2)},
-               n=n, eta.hat=eta.hat,pca_X=pca_X)
-  Tn <- max(TT)
-  k.star <- min(which(TT==max(TT)))
+  ## Test Statistic
+  Snd_tmp <- rep(NA,d)
+  for(l in 1:d){
+    inner_sums <- rep(0, n)
+    for(k in 1:n){
+      inner_sums[k] <- sum(eta.hat[1:k,l]) - k/n * sum(eta.hat[,l])
+    }
+    Snd_tmp[l] <- 1/pca_X$sdev[l]^2 * sum(inner_sums^2)
+  }
 
-  Values <- sapply(1:M, function(k,d) .asymp_pca(n, d), d=d)
-  # z = Tn<=Values
-  # p = length(z[z==TRUE])/length(z)
-  p <- sum(Tn <= Values) / M # Compute p-value
-  p
-  Tn# *sqrt(n)
-  Values[1:20]
+  Snd <- 1/n^2 * sum(Snd_tmp)
 
-  dat.b <- funts(X$data[,1:k.star])
-  dat.a <- funts(X$data[,(k.star+1):n])
+  ## Pick k*
+  # Sigma.hat = .long_run_cov(X, h=h,K = K)[1:d,1:d]
+  kappa <-
+    sapply(1:n,function(k, eta.hat, n){
+      colSums(eta.hat[1:k, , drop=FALSE]) - k/n * colSums(eta.hat)
+    },eta.hat=eta.hat, n=n)
+  Q_nk <- rep(NA,n)
+  for(k in 1:n){
+    Q_nk[k] <- 1/n * ( t(kappa[,k]) %*% diag(1/pca_X$sdev^2) %*% kappa[,k] )
+  }
+  k_star <- which.max(Q_nk)
+
+  # ASMPYD
+  values <- sapply(1:M, function(k,d,n){
+    B.Bridges <- rep(0, d)
+    for(j in 1:d){
+      B.Bridges[j] <- dot_integrate( sde::BBridge(0,0,0,1,n-1)^2 )
+    }
+    sum(B.Bridges)
+  }, d=d,n=1000)
+
+  pvalue <- sum(Snd <= values) / M
+
+  dat.b <- funts(X$data[,1:k_star])
+  dat.a <- funts(X$data[,(k_star+1):n])
   mean.b <- mean(dat.b)
   mean.a <- mean(dat.a)
   delta <- mean.a - mean.b
 
   ## Plots
-  plot1 <- .plot_stack(data,CPs=k.star)
-  # .plot_substack(X,CPs=k.star) ## TODO:: color bands
+  plot1 <- rainbow_plot(X$data,CPs=k_star)
+  # distribution_plot(X,CPs=k_star) ## TODO:: color bands
 
   plot2 <-
     ggplot2::ggplot() +
@@ -117,7 +129,7 @@ mean_pca_change <- function(X, TVE=0.95,
     ggplot2::ylab('')
 
   list('data_plot'=plot1, 'mean_diff_plot'=plot2,
-       pvalue = p , change = k.star,
+       pvalue = pvalue, change = k_star,
        DataBefore = dat.b, DataAfter = dat.a,
        change_fun = delta)
 }
@@ -132,13 +144,11 @@ mean_pca_change <- function(X, TVE=0.95,
 .S_n_pca <- function(eta.hat, k, n){
   # TODO:: Add
   # normalizer = ((k/n) * ((n-k) / n))^(-0.5)
-  if(d==1){
+  if(is.null(dim(eta.hat))){
     eta.bar <- sum(eta.hat)/n
-    # eta.bar <- sum(eta.hat)#/n
     out <- sum(eta.hat[1:k]) - k*eta.bar
   } else {
     eta.bar <- as.matrix(rowSums(eta.hat)/n)
-    # eta.bar <- as.matrix(rowSums(eta.hat))#/n)
     out <- rowSums(as.matrix(eta.hat[, 1:k])) - k*eta.bar
   }
 
