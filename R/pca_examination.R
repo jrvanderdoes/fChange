@@ -104,7 +104,7 @@ pca_fit <- function(X, TVE = 0.95, model=c('ets','arima'), ...){
   attr(val,'scaled:center') <- NULL
   attr(val,'scaled:scale') <- NULL #TODO::CHECK
 
-  val
+  t(val)
   # if(pca$scale[1] != FALSE){
   #   pca_coef <- scale(pca_coef, center=FALSE, scale=1/pca$scale)
   # }
@@ -130,6 +130,11 @@ pca_fit <- function(X, TVE = 0.95, model=c('ets','arima'), ...){
 #' }
 #' @export
 #'
+#' @references Hyndman, R. J., & Shahid Ullah, M. (2007). Robust forecasting
+#'  of mortality and fertility rates: A functional data approach. Computational
+#'  Statistics & Data Analysis, 51(10), 4942–4956.
+#'  https://doi.org/10.1016/j.csda.2006.07.028
+#'
 #' @examples
 #' results <- pcaExploration(funts(electricity))
 pcaExploration <- function(X, order = 3, ...){
@@ -141,24 +146,25 @@ pcaExploration <- function(X, order = 3, ...){
   plots <- plots1 <- list()
   for(i in 1:order){
     results[,,i] <- .pca_mult(pc_data, i)
-    plots[[i]] <- .plot_stack(funts(results[,,i])) +
+
+    plots[[i]] <- rainbow_plot(funts(results[,,i])) +
       ggplot2::ggtitle(paste0('Principal Component ',i)) +
       ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
-    plots1[[i]] <- .plot_substack(funts(results[,,i])) +
+    plots1[[i]] <- distribution_plot(funts(results[,,i])) +
       ggplot2::ggtitle(paste0('Principal Component ',i)) +
       ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
   }
 
+  # pc_order <- list(sdev = pc_data$sdev[1:order],
+  #                  rotation = pc_data$rotation[,1:order],
+  #                  center = pc_data$center,
+  #                  scale = pc_data$scale,
+  #                  x = pc_data$x[,1:order],
+  #                  fullpc = pc_data)
+  reconstruction <- .pca_reconstruct(pc_data)
 
-  pc_order <- list(sdev = pc_data$sdev[1:order],
-                   rotation = pc_data$rotation[,1:order],
-                   center = pc_data$center,
-                   scale = pc_data$scale,
-                   x = pc_data$x[,1:order],
-                   fullpc = pc_data)
-  reconstruction <- .pca_reconstruct(pc_order)
   plot_reconstruction <-
-    .plot_stack(funts(reconstruction)) +
+    rainbow_plot(funts(reconstruction)) +
     ggplot2::ggtitle(
       paste0('Reconstruction With ', order,
              'Principal Components') ) +
@@ -166,7 +172,7 @@ pcaExploration <- function(X, order = 3, ...){
 
   residuals <- X$data - reconstruction
   plot_residuals <-
-    .plot_stack(funts(residuals)) +
+    rainbow_plot(funts(residuals)) +
     ggplot2::ggtitle(
       paste0('Residuals from reconstruction With ', order,
              ' Principal Components') ) +
