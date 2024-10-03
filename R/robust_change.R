@@ -18,7 +18,7 @@
 #'
 #' @references Wegner, L., Wendler, M. Robust change-point detection for
 #'  functional time series based on U-statistics and dependent wild bootstrap.
-#'  Stat Papers (2024). https://doi.org/10.1007/s00362-024-01577-7
+#'  Stat Papers (2024). \url{https://doi.org/10.1007/s00362-024-01577-7}
 #'
 #' @examples
 #' robust_change(funts(electricity),m=10)
