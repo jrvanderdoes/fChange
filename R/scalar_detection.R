@@ -10,7 +10,8 @@
 #' @return XXXXX
 #' @export
 #'
-#' @references Hušková, M., & Meintanis, S.G. (2006). Change Point Analysis based on Empirical Characteristic Functions. Metrika, 63, 145-168.
+#' @references Hušková, M., & Meintanis, S.G. (2006). Change Point Analysis
+#'  based on Empirical Characteristic Functions. Metrika, 63, 145-168.
 #'
 #' @examples
 #' scalarDetection(c(rnorm(50),rnorm(75,mean = 1)))
