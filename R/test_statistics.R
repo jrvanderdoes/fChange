@@ -1,80 +1,81 @@
-#' Compute Tn Test Statistic
+#' #' Compute Tn Test Statistic
+#' #'
+#' #' Function to calculate the change point test statistic for functional data
+#' #'     \deqn{Tn = \int_0^1 \int |Z_n(v,x)|^2 dQ(v) dx}
+#' #'
+#' #' @param X Numeric data.frame with rows for evaluated values and columns
+#' #'    indicating FD.
+#' #' @param M (Optional) Numeric indicating the number of vectors used to span W.
+#' #'  Defaults to 10,000.
+#' #' @param W (Optional) Data.frame of numerics with rows for evaluated values
+#' #'     and columns indicating function that contains the vectors to span the
+#' #'     space. Note the number of columns should match that of X. Default is NULL,
+#' #'     which generates the vectors in function. This overrides space and M if
+#' #'     not NULL.
+#' #' @param space (Optional) String indicating the space to integrate against.
+#' #'  Default is "BM", or Brownian motion. See `computeSpaceMeasuringVectors()`
+#' #'  for more information.
+#' #' @param ... Parameters are not passed anywhere. Just added for use in other
+#' #'  functions.
+#' #'
+#' #' @return Numeric value for the test statistic of entire sample or candidate
+#' #'     change point.
+#' #' @export
+#' #'
+#' #' @examples
+#' #' compute_Tn(electricity, M = 1000)
+#' compute_Tn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
+#'   X <- .check_data(X)
 #'
-#' Function to calculate the change point test statistic for functional data
-#'     \deqn{Tn = \int_0^1 \int |Z_n(v,x)|^2 dQ(v) dx}
+#'   n <- ncol(X$data)
 #'
-#' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD.
-#' @param M (Optional) Numeric indicating the number of vectors used to span W.
-#'  Defaults to 10,000.
-#' @param W (Optional) Data.frame of numerics with rows for evaluated values
-#'     and columns indicating function that contains the vectors to span the
-#'     space. Note the number of columns should match that of X. Default is NULL,
-#'     which generates the vectors in function. This overrides space and M if
-#'     not NULL.
-#' @param space (Optional) String indicating the space to integrate against.
-#'  Default is "BM", or Brownian motion. See `computeSpaceMeasuringVectors()`
-#'  for more information.
-#' @param ... Parameters are not passed anywhere. Just added for use in other
-#'  functions.
+#'   if (is.null(W)) {
+#'     W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
+#'   } else {
+#'     M <- ncol(W)
+#'   }
 #'
-#' @return Numeric value for the test statistic of entire sample or candidate
-#'     change point.
-#' @export
+#'   Zn <- .Zn(W, X$data, n)
+#'   intVal <- dot_integrate_col(abs(Zn)^2)
 #'
-#' @examples
-#' compute_Tn(electricity, M = 1000)
-compute_Tn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
-  n <- ncol(X)
+#'   sum(intVal)/M
+#' }
 
-  if (is.null(W)) {
-    W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
-  } else {
-    M <- ncol(W)
-  }
-
-
-  Zn <- .Zn(W,X, n)
-  intVal <- dot_integrate_col(abs(Zn)^2)
-
-  sum(intVal)/M
-}
-
-#' Compute Mn Test Statistic
+#' #' Compute Mn Test Statistic
+#' #'
+#' #' Function to calculate the change point test statistic for functional data
+#' #'     \deqn{Mn = sup_{x\in (0, 1)} \int |Z_n(v,x)|^2 dQ(v)}
+#' #'
+#' #' @inheritParams compute_Tn
+#' #'
+#' #' @return A list with three elements:
+#' #'  \itemize{
+#' #'    \item **value**: Numeric for maximum Mn value in data.
+#' #'    \item **location**: Numeric for location of maximum in data.
+#' #'    \item **allValues**: Vector of numerics for Mn values at each point.
+#' #'  }
+#' #' @export
+#' #'
+#' #' @examples
+#' #' compute_Mn(electricity)
+#' compute_Mn <- function(X, M = 10000, W = NULL, space = "BM", ...) {
+#'   n <- ncol(X)
 #'
-#' Function to calculate the change point test statistic for functional data
-#'     \deqn{Mn = sup_{x\in (0, 1)} \int |Z_n(v,x)|^2 dQ(v)}
+#'   if (is.null(W)) {
+#'     W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
+#'   } else {
+#'     M <- ncol(W)
+#'   }
 #'
-#' @inheritParams compute_Tn
+#'   Zn <- (abs(.Zn(W,X, n)))^2
+#'   return_value <- unname(unlist( 1 / M * rowSums(Zn) ))
 #'
-#' @return A list with three elements:
-#'  \itemize{
-#'    \item **value**: Numeric for maximum Mn value in data.
-#'    \item **location**: Numeric for location of maximum in data.
-#'    \item **allValues**: Vector of numerics for Mn values at each point.
-#'  }
-#' @export
-#'
-#' @examples
-#' compute_Mn(electricity)
-compute_Mn <- function(X, M = 10000, W = NULL, space = "BM", ...) {
-  n <- ncol(X)
-
-  if (is.null(W)) {
-    W <- computeSpaceMeasuringVectors(M = M, X = X, space = space)
-  } else {
-    M <- ncol(W)
-  }
-
-  Zn <- (abs(.Zn(W,X, n)))^2
-  return_value <- unname(unlist( 1 / M * rowSums(Zn) ))
-
-  list(
-    "value" = max(return_value),
-    "location" = which.max(return_value),
-    "allValues" = return_value
-  )
-}
+#'   list(
+#'     "value" = max(return_value),
+#'     "location" = which.max(return_value),
+#'     "allValues" = return_value
+#'   )
+#' }
 
 #' Compute Zn Statistic
 #'
