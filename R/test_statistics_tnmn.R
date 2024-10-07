@@ -77,7 +77,7 @@ compute_TnMn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
 #' @export
 #'
 #' @examples
-#' data_KL <- generate_data_fd(
+#' data_KL <- generate_kl(
 #' ns = c(50, 50),
 #' eigsList = list(
 #'   c(3, 2, 1, 0.5),
