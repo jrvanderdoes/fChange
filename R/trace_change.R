@@ -39,7 +39,7 @@
 #'
 #' @references Aue, A, G Rice, and O Sönmez. “Structural Break Analysis
 #'  for Spectrum and Trace of Covariance Operators.” Environmetrics
-#'  (London, Ont.) 31, no. 1 (2020). https://doi.org/10.1002/env.2617.
+#'  (London, Ont.) 31, no. 1 (2020). \url{https://doi.org/10.1002/env.2617.}
 #'
 #' @examples
 #' trace_change(generate_brownian_motion(200,v=seq(0,1,0.05)))
