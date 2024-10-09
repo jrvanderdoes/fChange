@@ -129,16 +129,24 @@ center.matrix <- function(x, ...) { x - rowMeans(x) }
 #' @rdname center
 #'
 #' @export
-center.funts <- function(x, CPs=NULL, ...) {
+center.funts <- function(x, CPs=NULL, type='mean', ...) {
+  type <- .verify_input(type, c('mean','median'))
+  if(type=='mean'){
+    row_method <- rowMeans
+  }else if(type=='median'){
+    row_method <- function(y){apply(y, MARGIN = 1, median)}
+  }
+
+
   if(is.null(CPs)){
-    x$data <- x$data - rowMeans(x$data)
+    x$data <- x$data - row_method(x$data)
   }else{
     CPs_use <- unique(c(0, CPs, ncol(x$data)))
     CPs_use <- CPs_use[order(CPs_use)]
     for(i in 1:(length(CPs)-1)){
       x$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE] <-
         x$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE] -
-        rowMeans(x$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE])
+        row_method(x$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE])
     }
   }
   x
@@ -169,23 +177,36 @@ pca.default <- function(x, ...) { prcomp(x, ...) }
 pca.funts <- function(x, TVE = 1, ...){
   if(TVE > 1 || TVE < 0) stop('TVE must be in [0,1].',call. = FALSE)
 
+  pc <- stats::prcomp(x=t(x$data), ...)
   if(TVE==1){
-    return(stats::prcomp(x$data, ...))
+    min_pc <- length(pc$sdev)
   } else{
-    pc <- stats::prcomp(x$data, ...)
-
-    min_pc <- min(which(cumsum(pc$sdev)/sum(pc$sdev)>TVE))
-
-    ## TODO:: Do I need sqrt(n)
-    pc_new <- list(sdev = pc$sdev[1:min_pc]*sqrt(ncol(x$data)),
-                   rotation = pc$rotation[,1:min_pc],#*sqrt(n),
-                   center = pc$center,
-                   scale = pc$scale,
-                   x = pc$x[,1:min_pc],
-                   fullpc = pc)
+    min_pc <- min( which(cumsum(pc$sdev^2)/sum(pc$sdev^2) > TVE) )
   }
 
-  pc_new
+  ## TODO:: Check out
+  new_rot <- pc$rotation[,1:min_pc,drop=FALSE]*sqrt(nrow(x$data))
+
+  # scores <- matrix(NA, nrow=ncol(x$data),ncol = min_pc)
+  # for(i in 1:ncol(x$data)){
+  #   for(l in 1:min_pc){
+  #     scores[i,l] <- dot_integrate(x$data[,i] %*% t(new_rot[,l]))
+  #   }
+  # }
+  scores <- (t(x$data-pc$center) %*% new_rot)[,1:min_pc,drop=FALSE]/nrow(x$data)
+
+  # res = fda::pca.fd(fda::Data2fd(X$data))
+  # pc$sdev^2
+  # res$values[1:2]
+  # View(pc$x); View(res$scores)
+  # View(pc$rotation); View(fda::eval.fd(seq(0,1,length.out=30),res$harmonics))
+
+  list(sdev = pc$sdev[1:min_pc]/sqrt(nrow(x$data)),
+       rotation = new_rot,
+       center = pc$center,
+       scale = pc$scale,
+       x = scores,
+       orig_pc = pc)
 }
 
 
@@ -207,18 +228,16 @@ sd.default <- function(x, ...) stats::sd(x, ...)
 #' @export
 #'
 #' @examples
-#' sd(funts(electricity),type='pw')
-sd.funts <- function(x, type='pw', ...) {
-  type <- c('pw')[min(pmatch(type,c('pw')))]
+#' sd(funts(electricity),type='pointwise')
+sd.funts <- function(x, type='pointwise', ...) {
+  type <- c('pointwise')[min(pmatch(type,c('pointwise')))]
 
-  if(type=='pw'){
+  if(type=='pointwise'){
     return( apply(x$data, MARGIN = 1, sd) )
   } else{
-    stop('only type="pw" is implemented',
-         call. = FALSE)
+    stop('Only type="pointwise" is implemented', call. = FALSE)
   }
 
-  stop('Type must be "op" or "pw"', call. = FALSE)
 }
 
 
@@ -237,15 +256,30 @@ var.default <- function(x, ...) stats::var(x, ...)
 #' @export
 #'
 #' @examples
-#' var(funts(electricity),type='pw')
-var.funts <- function(x, type=c('op','pw'), ...) {
-  type <- c('op','pw')[min(pmatch(type,c('op','pw')))]
+#' var(funts(electricity),type='pointwise')
+var.funts <- function(x, type=c('operator','pointwise'), ...) {
+  type <- c('operator','pointwise')[min(pmatch(type,c('operator','pointwise')))]
 
-  if(type=='op'){
+  if(type=='operator'){
     autocov_approx_h(X$data,0)
-  } else if(type=='pw'){
+  } else if(type=='pointwise'){
     Apply(x$data, MARGIN = 1, var)
   } else{
-    stop('Type must be "op" or "pw"', call. = FALSE)
+    stop('Type must be "operator" or "pointwise"', call. = FALSE)
   }
+}
+
+
+#' Cumsum for funts object
+#'
+#' @param x funts object
+#'
+#' @return funts object with data as cumsum
+#' @export
+#'
+#' @examples
+cumsum.funts <- function(x){
+    funts(t(apply(x$data,MARGIN = 1,cumsum)),
+          labels = x$labels,
+          intraobs = x$intraobs)
 }
