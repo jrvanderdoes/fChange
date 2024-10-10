@@ -43,17 +43,20 @@
 #'   data = electricity, CPs = c(50, 150, 220, 300),
 #'   interactive = FALSE, showticklabels = FALSE
 #' )
-plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = NULL,
-                    val_axis_title = "Value", res_axis_title = "resolution",
-                    FD_axis_title = "Observations", FDReps = 1:ncol(data),
+plot_fd <- function(X, CPs = NULL, plot_title = X$name,
+                    val_axis_title = "Value", res_axis_title = "Resolution",
+                    FD_axis_title = "Observations",
                     eye = list(x = -1.5, y = -1.5, z = 1.5),
-                    aspectratio = list(x = 1, y = 1, z = 1),
+                    aspectratio = NULL,
                     showticklabels = TRUE, interactive = TRUE) {
-  data <- .check_data(data)
+  X <- .check_data(X)
+  if(!is.null(CPs)) CPs <- CPs[order(CPs)]
 
   if (!interactive) {
+    if(is.null(aspectratio)) aspectratio <- c(2.5, 0.75, 1)
+
     fdPlot <- .plot_evalfd_highdim(
-      data = data$data, curve_points = curve_points,
+      X = X,
       CPs = CPs, plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
@@ -62,9 +65,11 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
       showticklabels = showticklabels
     )
   } else if (!is.null(CPs) && length(stats::na.omit(CPs)) > 0) {
+    if(is.null(aspectratio)) aspectratio <- list(x = 1, y = 1, z = 1)
+
     fdPlot <- .plot_evalfd_3dlines_cps(
-      data = data$data, curve_points = curve_points,
-      CPs = CPs[order(CPs)], plot_title = plot_title,
+      X = X,
+      CPs = CPs, plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
       FD_axis_title = FD_axis_title,
@@ -72,12 +77,14 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
       showticklabels = showticklabels
     ) # ,FDReps)
   } else {
+    if(is.null(aspectratio)) aspectratio <- list(x = 1, y = 1, z = 1)
+
     fdPlot <- .plot_evalfd_3dlines(
-      data = data$data, curve_points = curve_points,
+      X=X,
       plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
-      FD_axis_title = FD_axis_title, FDReps = FDReps,
+      FD_axis_title = FD_axis_title,
       eye = eye, aspectratio = aspectratio,
       showticklabels = showticklabels
     )
@@ -97,30 +104,22 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
 #' @return A plotly plot
 #'
 #' @noRd
-.plot_evalfd_3dlines <- function(data, curve_points, plot_title = NULL,
+.plot_evalfd_3dlines <- function(X, plot_title = NULL,
                                  val_axis_title = "Value",
                                  res_axis_title = "Resolution",
                                  FD_axis_title = "Observation",
-                                 FDReps = 1:ncol(data),
                                  eye = list(x = -1.5, y = -1.5, z = 1.5),
                                  aspectratio = list(x = 1, y = 1, z = 1),
                                  showticklabels = TRUE) {
-  number <- length(data[1, ])
-  valRange <- c(min(data), max(data))
 
-  plotData <- data.frame(
-    "resolution" = curve_points,
-    "FDRep" = FDReps[1],
-    "Value" = data[, 1]
-  )
-
-  for (i in 2:number) {
+  plotData <- data.frame()
+  for (i in 1:ncol(X)) {
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = curve_points,
-        "FDRep" = FDReps[i],
-        "Value" = as.factor(data[, i])
+        "resolution" = X$intraobs,
+        "FDRep" = X$labels[i],
+        "Value" = X$data[,i]
       )
     )
   }
@@ -131,39 +130,64 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
     aspectratio = aspectratio
   )
 
-  tmpColors <- RColorBrewer::brewer.pal(11, "Spectral")
-  tmpColors[6] <- "yellow"
+  plot_colors <- RColorBrewer::brewer.pal(11, "Spectral")
+  plot_colors[6] <- "yellow"
 
-  magrittr::`%>%`(
-    magrittr::`%>%`(
-      magrittr::`%>%`(
-        plotly::plot_ly(plotData,
-          x = ~FDRep, y = ~resolution, z = ~Value,
-          type = "scatter3d", mode = "lines",
-          color = ~ as.factor(FDRep),
-          colors = tmpColors
+  plotly::plot_ly(plotData,
+                  x = ~FDRep, y = ~resolution, z = ~Value,
+                  type = "scatter3d", mode = "lines",
+                  color = ~ as.factor(FDRep),
+                  colors = plot_colors
+  ) %>%
+    plotly::layout(
+      scene = list(
+        yaxis = list(
+          title = res_axis_title,
+          showticklabels = showticklabels
         ),
-        plotly::layout(
-          scene = list(
-            yaxis = list(
-              title = res_axis_title,
-              showticklabels = showticklabels
-            ),
-            xaxis = list(
-              title = FD_axis_title,
-              showticklabels = showticklabels
-            ),
-            zaxis = list(
-              title = val_axis_title,
-              showticklabels = showticklabels
-            )
-          )
+        xaxis = list(
+          title = FD_axis_title,
+          showticklabels = showticklabels
+        ),
+        zaxis = list(
+          title = val_axis_title,
+          showticklabels = showticklabels
         )
-      ),
-      plotly::layout(title = plot_title, scene = scene)
-    ),
+      )
+    ) %>%
+    plotly::layout(title = plot_title, scene = scene) %>%
     plotly::layout(showlegend = FALSE)
-  )
+
+  # magrittr::`%>%`(
+  #   magrittr::`%>%`(
+  #     magrittr::`%>%`(
+  #       plotly::plot_ly(plotData,
+  #         x = ~FDRep, y = ~resolution, z = ~Value,
+  #         type = "scatter3d", mode = "lines",
+  #         color = ~ as.factor(FDRep),
+  #         colors = plot_colors
+  #       ),
+  #       plotly::layout(
+  #         scene = list(
+  #           yaxis = list(
+  #             title = res_axis_title,
+  #             showticklabels = showticklabels
+  #           ),
+  #           xaxis = list(
+  #             title = FD_axis_title,
+  #             showticklabels = showticklabels
+  #           ),
+  #           zaxis = list(
+  #             title = val_axis_title,
+  #             showticklabels = showticklabels
+  #           )
+  #         )
+  #       )
+  #     ),
+  #     plotly::layout(title = plot_title, scene = scene)
+  #   ),
+  #   plotly::layout(showlegend = FALSE)
+  # )
 
   # plotly::plot_ly(plotData,
   #                x = ~as.factor(FDRep), y = ~resolution, z = ~Value,
@@ -197,7 +221,7 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
 #' @return A plotly plot
 #'
 #' @noRd
-.plot_evalfd_3dlines_cps <- function(data, curve_points, CPs,
+.plot_evalfd_3dlines_cps <- function(X, CPs,
                                      plot_title = NULL,
                                      val_axis_title = "Value",
                                      res_axis_title = "resolution",
@@ -205,37 +229,29 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
                                      eye = list(x = -1.5, y = -1.5, z = 1.5),
                                      aspectratio = list(x = 1, y = 1, z = 1),
                                      showticklabels = TRUE) {
-  number <- length(data[1, ])
-  valRange <- c(min(data), max(data))
-
-  plotData <- data.frame(
-    "resolution" = NA,
-    "FDRep" = NA,
-    "Color" = NA,
-    "Value" = NA
-  )[-1, ]
+  plotData <- data.frame()
 
   # Color Group to first CP
   for (j in 1:min(CPs)) {
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = curve_points,
+        "resolution" = X$intraobs,
         "FDRep" = j,
         "Color" = 1,
-        "Value" = data[, j]
+        "Value" = X$data[, j]
       )
     )
   }
   # Color Group from last CP
-  for (j in (max(CPs) + 1):number) {
+  for (j in (max(CPs) + 1):ncol(X)) {
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = curve_points,
+        "resolution" = X$intraobs,
         "FDRep" = j,
         "Color" = length(CPs) + 1,
-        "Value" = data[, j]
+        "Value" = X$data[, j]
       )
     )
   }
@@ -247,10 +263,10 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
         plotData <- rbind(
           plotData,
           data.frame(
-            "resolution" = curve_points,
+            "resolution" = X$intraobs,
             "FDRep" = j,
             "Color" = i,
-            "Value" = data[, j]
+            "Value" = X$data[, j]
           )
         )
       }
@@ -269,37 +285,62 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
     tmpColors <- rep(tmpColors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
   }
 
-  magrittr::`%>%`(
-    magrittr::`%>%`(
-      magrittr::`%>%`(
-        plotly::plot_ly(plotData,
-          x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
-          type = "scatter3d", mode = "lines",
-          split = ~ as.factor(FDRep),
-          color = ~ as.factor(Color),
-          colors = tmpColors
+  # magrittr::`%>%`(
+  #   magrittr::`%>%`(
+  #     magrittr::`%>%`(
+  #       plotly::plot_ly(plotData,
+  #         x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
+  #         type = "scatter3d", mode = "lines",
+  #         split = ~ as.factor(FDRep),
+  #         color = ~ as.factor(Color),
+  #         colors = tmpColors
+  #       ),
+  #       plotly::layout(
+  #         scene = list(
+  #           yaxis = list(
+  #             title = res_axis_title,
+  #             showticklabels = showticklabels
+  #           ),
+  #           xaxis = list(
+  #             title = FD_axis_title,
+  #             showticklabels = showticklabels
+  #           ),
+  #           zaxis = list(
+  #             title = val_axis_title,
+  #             showticklabels = showticklabels
+  #           )
+  #         )
+  #       )
+  #     ),
+  #     plotly::layout(title = plot_title, scene = scene)
+  #   ),
+  #   plotly::layout(showlegend = FALSE)
+  # )
+  plotly::plot_ly(plotData,
+                  x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
+                  type = "scatter3d", mode = "lines",
+                  split = ~ as.factor(FDRep),
+                  color = ~ as.factor(Color),
+                  colors = tmpColors
+  ) %>%
+    plotly::layout(
+      scene = list(
+        yaxis = list(
+          title = res_axis_title,
+          showticklabels = showticklabels
         ),
-        plotly::layout(
-          scene = list(
-            yaxis = list(
-              title = res_axis_title,
-              showticklabels = showticklabels
-            ),
-            xaxis = list(
-              title = FD_axis_title,
-              showticklabels = showticklabels
-            ),
-            zaxis = list(
-              title = val_axis_title,
-              showticklabels = showticklabels
-            )
-          )
+        xaxis = list(
+          title = FD_axis_title,
+          showticklabels = showticklabels
+        ),
+        zaxis = list(
+          title = val_axis_title,
+          showticklabels = showticklabels
         )
-      ),
-      plotly::layout(title = plot_title, scene = scene)
-    ),
+      )
+    ) %>%
+    plotly::layout(title = plot_title, scene = scene) %>%
     plotly::layout(showlegend = FALSE)
-  )
 }
 
 
@@ -313,8 +354,9 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
 #' @return A lattice plot
 #'
 #' @noRd
-.plot_evalfd_highdim <- function(data, curve_points, CPs = NULL,
-                                 plot_title = NULL, val_axis_title = NULL,
+.plot_evalfd_highdim <- function(X, CPs = NULL,
+                                 plot_title = NULL,
+                                 val_axis_title = NULL,
                                  res_axis_title = NULL,
                                  FD_axis_title = NULL,
                                  aspectratio = c(2.5, .75, 1),
@@ -326,63 +368,53 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
     )
   }
 
-  # This resets ratio, since default was likely used
-  if (is.list(aspectratio)) aspectratio <- c(2.5, 0.75, 1)
-
-  number <- length(data[1, ])
+  # data <- X$data
+  # curve_points <- X$intraobs
   valRange <- c(
-    floor(min(data)),
-    ceiling(max(data))
+    floor(min(X$data,na.rm = T)),
+    ceiling(max(X$data,na.rm = T))
   )
 
-  plotData <- data.frame(
-    "resolution" = curve_points,
-    "FDRep" = 1,
-    "Value" = data[, 1]
-  )
-
-  for (i in 2:number) {
-    plotData <- rbind(
-      plotData,
-      data.frame(
-        "resolution" = curve_points,
-        "FDRep" = i,
-        "Value" = data[, i]
-      )
-    )
-  }
+  data1 <- X$data
+  colnames(data1) <- 1:ncol(X)
+  plotData <- cbind(X$intraobs,data1) %>%
+    as.data.frame() %>%
+    tidyr::pivot_longer(cols = 1+1:ncol(X)) %>%
+    dplyr::mutate(name=as.numeric(name)) %>%
+    dplyr::rename(resolution=V1,
+           Value=value,
+           FDRep=name)
+  plotData <- plotData[order(plotData$FDRep),]
 
   ## Setup up Colors
   #   Rainbow for no CPs, colored for CPs
-  plotData[["color"]] <- rep(1:ncol(data), each = nrow(data))
+  plotData[["color"]] <- rep(1:ncol(X), each = nrow(X))
   if (!is.null(CPs)) {
     tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
     if (length(CPs) > 9) {
       tmp_colors <- rep(tmp_colors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
     }
 
-    CPs <- unique(c(1, CPs, ncol(data)))
-    colors_plot <- rep(tmp_colors[1], ncol(data))
+    CPs <- unique(c(1, CPs, ncol(X)))
+    colors_plot <- rep(tmp_colors[1], ncol(X))
     for (i in 2:(length(CPs) - 1)) {
       colors_plot[CPs[i]:CPs[i + 1]] <- tmp_colors[i]
     }
   } else {
     colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
     colors_plot[6] <- "yellow"
-    colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(data))
-    plotData[["color"]] <- rep(colors_plot,
-      each = nrow(data)
-    )
+    colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(X))
   }
+  plotData[["color"]] <- rep(colors_plot, each = nrow(X) )
 
   ## Set up Tick Labels
-  z_range <- round(range(plotData$Value), -2)
+  z_range <- round(range(plotData$Value,na.rm = T), -2)
   if (showticklabels) {
     scale_info <- list(
-      col = "black", arrows = FALSE, cex = 0.75, cex.title = 1.5,
+      col = "black", arrows = FALSE, cex = 1.2,
       x = list(
-        at = seq(min(curve_points),
-          max(curve_points),
+        at = seq(min(X$intraobs),
+          max(X$intraobs),
           length.out = 5
         ),
         # labels=.specify_decimal(rev(seq(max(curve_points),
@@ -391,10 +423,8 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
         labels = NULL
       ),
       y = list(
-        at = -seq(1, number, length.out = 8),
-        labels = .specify_decimal(
-          seq(1, number, length.out = 8), 0
-        )
+        at = -seq(1, ncol(X), length.out = 8),
+        labels = X$labels[rev(seq(1, ncol(X), length.out = 8))]
       ),
       z = list(
         at = seq(z_range[1], z_range[2],
@@ -407,16 +437,16 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
     )
   } else {
     scale_info <- list(
-      col = "black", arrows = FALSE, cex = 0.75, cex.title = 1.5,
+      col = "black", arrows = FALSE, cex = 0.75,
       x = list(
-        at = seq(min(curve_points),
-          max(curve_points),
+        at = seq(min(X$intraobs),
+          max(X$intraobs),
           length.out = 5
         ),
         labels = NULL
       ),
       y = list(
-        at = -seq(1, number, length.out = 8),
+        at = -seq(1, ncol(X), length.out = 8),
         labels = NULL
       ),
       z = list(
@@ -433,12 +463,12 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
   lattice::cloud(
     x = Value ~ (resolution) * (-FDRep),
     data = plotData,
-    type = "l", groups = color,
+    type = "l", groups = plotData$FDRep,
     par.box = c(col = "transparent"),
     par.settings =
       list(
         axis.line = list(col = "transparent"),
-        superpose.line = list(col = colors_plot)
+        superpose.line = list(col = (colors_plot))
       ),
     # screen=list(z = 90, x = -75,y=-45),
     # trellis.par.set(list(axis.text=list(cex=2)),
@@ -447,9 +477,9 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
     aspect = aspectratio,
     drape = TRUE, colorkey = FALSE,
     scales = scale_info,
-    xlab = list(res_axis_title, rot = 30),
-    ylab = list(paste0("\n", FD_axis_title), rot = -30),
-    zlab = list(val_axis_title, rot = 90, just = 0.75),
+    xlab = list(res_axis_title, rot = 30,cex=1.75),
+    ylab = list(paste0("\n", FD_axis_title), rot = -30,cex=1.75),
+    zlab = list(val_axis_title, rot = 90, just = 0.75,cex=1.75),
     main = plot_title
   )
 }
