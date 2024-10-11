@@ -1,21 +1,3 @@
-
-#' Check data for functions
-#'
-#' @param X funts or object that can be directly converted into funts object
-#'
-#' @return funts object or error if the data is incorrect
-#'
-#' @examples
-#' #.check_data(funts(electricity))
-#' #.check_data(electricity)
-.check_data <- function(X){
-  if(class(X)[1]=='funts') return(X)
-
-  if(class(X)[1]=='matrix' || class(X)[1]=='data.frame') return(funts(X))
-
-  stop('Check format of input data',call. = FALSE)
-}
-
 #' Specify Decimal
 #'
 #' This (internal) function returns a string of the numbers with the specified
@@ -73,6 +55,50 @@
     return(x)
   }
   split(x, cut(x, chunksN, labels = FALSE))
+}
+
+#' Bootstrap Data
+#'
+#' @param X
+#' @param blockSize
+#' @param M
+#' @param type
+#' @param replace
+#'
+#' @return
+#'
+#' @examples
+.bootstrap <- function(X, blockSize, M=1000, type='overlapping', replace=TRUE){
+  X <- .check_data(X)
+  N <- ncol(X$data)
+
+  # Get groups
+  if(type=='seperate'){
+    idxGroups <- .getChunks(1:ncol(X$data), ncol(X$data) / blockSize)
+  } else if(type=='overlapping'){
+    idxGroups <- sapply(0:(N-blockSize), function(x,blockSize){
+      x + 1:blockSize }, blockSize=blockSize, simplify = FALSE)
+  }
+
+  # Get BS sample indices
+  idxs <- sapply(1:M, function(i, m, indxs, replace,size,N) {
+    samps <- sample(x=1:m, size=size, replace = replace)
+    unlist(indxs[samps], use.names = FALSE)[1:N]
+  }, m = length(idxGroups), indxs = idxGroups, replace = replace,
+  size=ceiling(ncol(X$data) / blockSize), N=N)
+
+  if (!(is.matrix(idxs) | is.data.frame(idxs))) {
+    idxs <- .convertSamplesToDF(idxs)
+  }
+
+  ## Sample via bootstrap
+  bssamples <- sapply(as.data.frame(idxs),
+                      function(loop_iter, Xdata) {
+                        Xdata[, stats::na.omit(loop_iter)]
+                      }, Xdata=X$data,simplify = F
+  )
+
+  bssamples
 }
 
 
