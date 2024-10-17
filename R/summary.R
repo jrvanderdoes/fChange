@@ -12,14 +12,28 @@
 #' @examples
 #' summary(funts(electricity))
 #' summary(funts(electricity), CPs=c(50,200,300))
-#' summary(funts(electricity), rainbow='full')
-#' summary(funts(electricity), CPs=c(50,200,300), rainbow='full')
-summary.funts <- function(object, CPs=NULL, max.lag=20,
-                          rainbow=c('subset','full'),
-                          ...){
+#' summary(funts(electricity), CPs=c(50,200,300), demean = TRUE)
+summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, ...){
   object <- .check_data(object)
 
-  if(is.null(CPs)) return(.summary_nochange(object, max.lag, rainbow=rainbow, ...))
+  # Demean to send to correct places
+  if(demean){
+    if(!is.null(CPs)){
+      CPs <- unique(c(0, CPs, ncol(object)))
+      object_tmp <- object
+
+      for(d in 1:(length(CPs)-1)){
+        object_tmp <- funts(object$data[,(CPs[d]+1):CPs[d+1]], intraobs = object$intraobs)
+        object$data[,(CPs[d]+1):CPs[d+1]] <- object$data[,(CPs[d]+1):CPs[d+1]] - mean(object_tmp)
+      }
+
+      CPs <- NULL
+    }else{
+      object$data <- object$data - mean(object)
+    }
+  }
+
+  if(is.null(CPs)) return(.summary_nochange(object, max.lag, max.d, ...))
 
   CPs <- c(0,CPs, ncol(object$data))
   CPs <- CPs[!is.null(CPs)]
@@ -51,7 +65,8 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
   ## Plot white noise lags
   p_values_wn_plot <-
     cbind(data.frame('lag'=1:max.lag), p_values_wn) %>%
-    tidyr::pivot_longer(cols = colnames(p_values_wn))
+    tidyr::pivot_longer(cols = colnames(p_values_wn)) %>%
+    na.omit()
   plot_whitenoise <-
     ggplot2::ggplot(p_values_wn_plot) +
       ggplot2::geom_point(ggplot2::aes(x=lag, y=value,
@@ -60,6 +75,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
                                        group=name, color=name)) +
       ggplot2::geom_hline(ggplot2::aes(yintercept=0.05),linetype='dotted', col='red') +
       ggplot2::theme_bw() +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
       ggplot2::ylim(c(0,1)) +
       ggplot2::xlab('') +
       ggplot2::ylab('')  +
@@ -67,17 +83,8 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 
 
   #####
-  ## Plot rainbow
-  rainbow <- match.arg(rainbow, c('subset','full'))
-  if(rainbow=='full'){
-    if(length(CPs)>2){
-      plot_rainbow <- .plot_stack(object,CPs = CPs[-c(1,length(CPs))])
-    } else{
-      plot_rainbow <- .plot_stack(object)
-    }
-  } else if(rainbow=='subset'){
-    plot_rainbow <- .plot_substack(object, CPs)
-  }
+  ## Plot QQ
+  plot_qq <- distplot.funts(object,CPs = CPs,max.d = max.d,qq.sep = FALSE)
 
   #####
   ## Plot ACF
@@ -86,8 +93,9 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
     data.frame(matrix(0, nrow=max.lag,ncol=length(data_acf)))
   for(i in 1:length(data_acf)){
     SWNs[i] <- data_acf[[i]]$SWN_bound
-    rhos[,i] <- data_acf[[i]]$acfs
-    WWNs[,i] <- data_acf[[i]]$WWN_bound
+    max_len <- length(data_acf[[i]]$acfs)
+    rhos[1:max_len,i] <- data_acf[[i]]$acfs
+    WWNs[1:max_len,i] <- data_acf[[i]]$WWN_bound
   }
   rhos <- t( t(rhos) * SWNs/max(SWNs) )
   WWNs <- t( t(WWNs) * SWNs/max(SWNs) )
@@ -110,6 +118,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
                    color=unique(WWNs_long$name)),
       linetype='longdash') +
     ggplot2::theme_bw() +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
     ggplot2::xlab('') +
     ggplot2::ylab('') +
     ggplot2::guides(color='none')
@@ -157,13 +166,39 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
     ggplot2::guides(color='none')
 
   #####
+  ## Print Descriptive Statistics
+  data_summary <-
+    data.frame('Segment'=c(paste0('1-',ncol(object)),
+                           paste0(CPs[-length(CPs)],'-',CPs[-1])),
+               'Observations'=c(ncol(object),CPs[-1]-CPs[-length(CPs)]),
+               'kpss'=NA,
+               'stationarity'=NA,
+               'Resolution'=nrow(object)
+               )
+  for(i in 1:nrow(data_summary)){
+    endpoints <- as.numeric(stringr::str_split('1-365','-')[[1]])
+    data_summary[i,'kpss'] <-
+      .specify_decimal(
+        compute_kpss(object$data[,endpoints[1]:endpoints[2]],
+                     method="BS", boot_method='overlapping')$pvalue,
+        3)
+    data_summary[i,'stationarity'] <-
+      .specify_decimal(
+        compute_stationarity_test(object$data[,endpoints[1]:endpoints[2]])$pvalue,
+        3)
+  }
+
+  #####
   ## Plot Summary
-  ggpubr::ggarrange(plot_lines,
-                    ggpubr::ggarrange(plot_acf,
-                                      plot_rainbow,
-                                      ncol = 2),
-                    plot_whitenoise,
-                    nrow = 3 )
+  plot_summary <- ggpubr::ggarrange(plot_lines,
+                                    ggpubr::ggarrange(plot_acf,
+                                                      plot_qq,
+                                                      ncol = 2),
+                                    plot_whitenoise,
+                                    nrow = 3 )
+
+  list('summary_data'=data_summary,
+       'summary_figure'=plot_summary)
 }
 
 
@@ -178,9 +213,11 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 #' #   generate_brownian_motion(N = 500,
 #' #      v=seq(from = 0, to = 1, length.out = 20)))
 #' # .summary_nochange(funts(electricity),rainbow='full')
-#' # .summary_nochange(generateFAR1(20,300))
-.summary_nochange <- function(object, max.lag = 20,
-                              rainbow = c('subset','full'), ...){
+#' # .summary_nochange(generate_far1(20,300))
+#'
+#' @keywords internal
+#' @noRd
+.summary_nochange <- function(object, max.lag = 20, max.d=2, ...){
 
   #####
   ## Plot white noise lags
@@ -192,37 +229,37 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 
   plot_whitenoise <-
     ggplot2::ggplot() +
-    ggplot2::geom_point(ggplot2::aes(x=1:max.lag, y=wn_pvalues)) +
+    ggplot2::geom_point(ggplot2::aes(x=1:max.lag, y=wn_pvalues),size=3) +
     ggplot2::geom_hline(ggplot2::aes(yintercept=0.05),
-                        linetype='dotted', col='red') +
+                        linetype='dotted', col='red',linewidth=1.5) +
     ggplot2::theme_bw() +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
     ggplot2::ylim(c(0,1)) +
     ggplot2::xlab('') +
     ggplot2::ylab('')
 
   #####
-  ## Plot rainbow TODO:: QQ-plot??
-  rainbow <- match.arg(rainbow, c('subset','full'))
-  if(rainbow=='full'){
-    plot_rainbow <- .plot_stack(object)
-  } else if(rainbow=='subset'){
-    plot_rainbow <- .plot_substack(object)
-  }
+  ## Plot QQ
+  plot_qq <- distplot.funts(object,max.d=max.d,qq.sep = FALSE)
 
   #####
-  ## PlotA ACF
+  ## Plot ACF
   data_acf <- acf(object,figure=FALSE)
 
   plot_acf <-
     ggplot2::ggplot(
       mapping=ggplot2::aes( x=1:length(data_acf$WWN_bound) )
     ) +
-    ggplot2::geom_segment( ggplot2::aes(y=0, yend=data_acf$acfs)) +
+    ggplot2::geom_segment( ggplot2::aes(y=0, yend=data_acf$acfs),
+                           linewidth=2) +
     ggplot2::geom_line(ggplot2::aes( y=data_acf$WWN_bound),
-                       col='red', linetype='dashed'  ) +
+                       col='red', linetype='dashed',
+                       linewidth=2  ) +
     ggplot2::geom_hline(ggplot2::aes(yintercept=data_acf$SWN_bound),
-                        col='blue', linetype='longdash' ) +
+                        col='blue', linetype='longdash',
+                        linewidth=2) +
     ggplot2::theme_bw() +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
     ggplot2::xlab('') +
     ggplot2::ylab('')
 
@@ -252,13 +289,31 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
     ggplot2::guides(color='none')
 
   #####
+  ## Print Descriptive Statistics
+  data_summary <-
+    data.frame('Segment'=paste0('1-',ncol(object)),
+               'Observations'=ncol(object),
+               'kpss'=.specify_decimal(
+                 compute_kpss(object$data, method="BS", boot_method='overlapping')$pvalue,
+                 3),
+               'stationarity'=.specify_decimal(
+                 compute_stationarity_test(object$data)$pvalue,
+                 3),
+               'Resolution'=nrow(object)
+    )
+
+  #####
   ## Plot Summary
-  ggpubr::ggarrange(plot_lines,
-                    ggpubr::ggarrange(plot_acf,
-                                      plot_rainbow,
-                                      ncol = 2),
-                    plot_whitenoise,
-                    nrow = 3 )
+  plot_summary <- ggpubr::ggarrange(plot_lines,
+                                    ggpubr::ggarrange(plot_acf,
+                                                      plot_qq,
+                                                      ncol = 2),
+                                    plot_whitenoise,
+                                    nrow = 3 ) +
+    theme(plot.margin = margin(0,0.2,0,0.2, "cm"))
+
+  list('summary_data'=data_summary,
+       'summary_figure'=plot_summary)
 }
 
 
@@ -269,9 +324,12 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 #' @return Plot (ggplot2) with colored observations / regions
 #'
 #' @examples
-#' # .plot_stack(funts(electricity))
-#' # .plot_stack(funts(electricity), CPs=c(50,100,200))
-.plot_stack <- function(object, CPs=NULL){
+#' rainbow_plot(funts(electricity))
+#' rainbow_plot(funts(electricity), CPs=c(50,100,200))
+#'
+#' @keywords internal
+#' @noRd
+rainbow_plot <- function(object, CPs=NULL){
   object <- .check_data(object)
   data <- object$data
   plot_data <-
@@ -339,15 +397,20 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
                        data = means_mat, linewidth=1.5,
                        alpha=0.75, linetype='solid') +
     ggplot2::theme_bw() +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
     ggplot2::guides(color="none",alpha='none') +
     ggplot2::scale_color_manual(values = plot_data$color,
                                 breaks = plot_data$color) +
     ggplot2::xlab('') +
-    ggplot2::ylab('')
+    ggplot2::ylab('') +
+    ggplot2::xlim(range(object$intraobs))
 }
 
 
-#' Plot data as summary stack on 2d plot
+#' Distribution Plot
+#'
+#' Plot funtional data as 2-dimensional data with the mean(s) and the related
+#'  distribution(s) given.
 #'
 #' @inheritParams summary.funts
 #'
@@ -355,9 +418,12 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
 #' @export
 #'
 #' @examples
-#' # .plot_substack(funts(electricity))
-#' # .plot_substack(funts(electricity), CPs=c(50,100,200))
-.plot_substack <- function(object, CPs=NULL){
+#' distribution_plot(funts(electricity))
+#' distribution_plot(funts(electricity), CPs=c(50,100,200))
+#'
+#' @keywords internal
+#' @noRd
+distribution_plot <- function(object, CPs=NULL, alpha=0.05){
   # data <- object$data
   if(!is.null(CPs)) CPs <- unique(c(0, CPs, ncol(object$data)))
 
@@ -416,116 +482,60 @@ summary.funts <- function(object, CPs=NULL, max.lag=20,
   }
 
   # Get Mean Bounds
-  bounds95 <- quantile(object,probs = c(0.025,0.975))
-  bounds80 <- quantile(object,probs = c(0.1,0.9))
+  if(!is.null(CPs)){
+    bounds <- data.frame('Time'=object$intraobs)
+    for (i in 1:(length(CPs) - 1)) {
+      bounds_tmp <-
+        t(apply(object$data[,(CPs[i]+1):CPs[i+1]], MARGIN = 1,
+                quantile, probs=c(alpha/2,1-alpha/2),na.rm=TRUE))
+      colnames(bounds_tmp) <- paste0('X',i,c('_L','_U'))
+      bounds <- cbind(bounds, bounds_tmp)
+    }
+    bounds_long <- bounds %>%
+      pivot_longer(cols = colnames(.)[-1]) %>%
+      mutate('group'=str_split(name,'_')) %>%
+      unnest_wider(col = group,names_sep = '') %>%
+      mutate(group=group1, type=group2, group2=NULL, group1=NULL) %>%
+      merge(., plot_data[,c('Time','name','color')],
+            by.x = c('Time','group'), by.y = c('Time','name'),all = TRUE)
+    bounds_wide <- bounds_long %>%
+      pivot_wider(id_cols = c(Time,group,color),
+                  names_from = type,values_from = value)
+  }else{
+    bounds <- quantile.funts(object,
+                             probs = c(alpha/2,1-alpha/2),
+                             na.rm=TRUE)
+    colnames(bounds) <- c('L','U')
+    bounds_long <- cbind(data.frame('Time'=object$intraobs), bounds) %>%
+      pivot_longer(cols = colnames(.)[-1]) %>%
+      mutate('group'='X1',color='gray')
+    bounds_wide <- bounds_long %>%
+      pivot_wider(id_cols = c(Time,group,color),
+                  names_from = name,values_from = value)
+  }
 
-  # if(!is.null(CPs)){
-  #   # Get Mean Bounds
-  #   # lowerbounds95 <- upperbounds95 <-
-  #   #   lowerbounds80 <- upperbounds80 <-
-  #   mean_vals <-
-  #     data.frame(matrix(nrow=nrow(object$data),  ncol=length(CPs)+1))
-  #   CPs_tmp <- unique(c(0, CPs, ncol(data)))
-  #   for(i in 1:(length(CPs_tmp)-1)){
-  #     mean_vals[,i] <-
-  #       apply(object$data[,(CPs_tmp[i]+1):CPs_tmp[i+1]],
-  #             MARGIN = 1, mean)
-  #
-  #     # lowerbounds95[,i] <-
-  #     #   apply(object$data[,(CPs_tmp[i]+1):CPs_tmp[i+1]],
-  #     #         MARGIN = 1, quantile,probs=0.025)
-  #     # upperbounds95[,i] <-
-  #     #   apply(object$data[,(CPs_tmp[i]+1):CPs_tmp[i+1]],
-  #     #         MARGIN = 1, quantile,probs=0.975)
-  #     #
-  #     # lowerbounds80[,i] <-
-  #     #   apply(object$data[,(CPs_tmp[i]+1):CPs_tmp[i+1]],
-  #     #         MARGIN = 1, quantile,probs=0.1)
-  #     # upperbounds80[,i] <-
-  #     #   apply(object$data[,(CPs_tmp[i]+1):CPs_tmp[i+1]],
-  #     #         MARGIN = 1, quantile,probs=0.9)
-  #   }
-  #   mean_vals <- tidyr::pivot_longer(
-  #     data = cbind(data.frame('Time'=object$intraobs),mean_vals),
-  #     cols = 1+1:(length(CPs)+1))
-  #   # lowerbounds95 <- tidyr::pivot_longer(
-  #   #   data = cbind(data.frame('Time'=object$intraobs),lowerbounds95),
-  #   #   cols = 1+1:(length(CPs)+1))
-  #   # upperbounds95 <- tidyr::pivot_longer(
-  #   #   data = cbind(data.frame('Time'=object$intraobs),upperbounds95),
-  #   #   cols = 1+1:(length(CPs)+1))
-  #   # lowerbounds80 <- tidyr::pivot_longer(
-  #   #   data = cbind(data.frame('Time'=object$intraobs),lowerbounds80),
-  #   #   cols = 1+1:(length(CPs)+1))
-  #   # upperbounds80 <- tidyr::pivot_longer(
-  #   #   data = cbind(data.frame('Time'=object$intraobs),upperbounds80),
-  #   #   cols = 1+1:(length(CPs)+1))
-  #
-  #   # Plot
-  #   # return_plot <-
-  #     ggplot2::ggplot() +
-  #     ggplot2::geom_ribbon(ggplot2::aes(x=object$intraobs,
-  #                                       ymin=bounds95[,1], ymax=bounds95[,2]),
-  #                          color='gray', alpha=0.25) +
-  #     ggplot2::geom_ribbon(ggplot2::aes(x=object$intraobs,
-  #                                       ymin=bounds80[,1], ymax=bounds80[,2]),
-  #                          color='lightgray', alpha=0.25) +
-  #     ggplot2::geom_line(ggplot2::aes(x=mean_vals$Time, y=mean_vals$value,
-  #                                     color=mean_vals$name, group=mean_vals$name),
-  #                        linewidth=1, alpha=0.75) +
-  #     ggplot2::geom_line(ggplot2::aes(x=object$intraobs, y=mean(object)),
-  #                        linewidth=1, color='black', alpha=0.25) +
-  #     # ggplot2::geom_ribbon(ggplot2::aes(x=lowerbounds95$Time,
-  #     #                                   ymin=lowerbounds95$value,
-  #     #                                   ymax=upperbounds95$value,
-  #     #                                   fill=lowerbounds95$name,
-  #     #                                   color=lowerbounds95$name,
-  #     #                                   group=lowerbounds95$name),
-  #     #                      alpha=0.1) +
-  #     # ggplot2::geom_line(ggplot2::aes(x=object$intraobs, y=mean(object)-1.96*sd.funts(object)/sqrt(ncol(object))),
-  #     #                    linewidth=1, color='black', linetype='dashed', alpha=0.25) +
-  #     # ggplot2::geom_line(ggplot2::aes(x=object$intraobs, y=mean(object)+1.96*sd.funts(object)/sqrt(ncol(object))),
-  #     #                    linewidth=1, color='black', linetype='dashed', alpha=0.25) +
-  #     # ggplot2::geom_line(ggplot2::aes(x=Time,y=value,
-  #     #                                 group=name,
-  #     #                                 color=color),
-  #     #                    data = plot_data, linewidth=0.5) +
-  #     ggplot2::theme_bw() +
-  #     ggplot2::guides(color="none",alpha='none') +
-  #     ggplot2::scale_color_manual(values = plot_data$color,
-  #                                 breaks = plot_data$name) +
-  #     ggplot2::xlab('') +
-  #     ggplot2::ylab('')
-  #
-  # }
-
-  ## TODO:: Make average on for bands
   # Plot
-  max_val <- max(bounds95,plot_data$value)
-  min_val <- min(bounds95,plot_data$value)
+  max_val <- max(bounds_long$value,plot_data$value)
+  min_val <- min(bounds_long$value,plot_data$value)
   ggplot2::ggplot() +
-    ggplot2::ylim(c(min_val, max_val)) +
-    ggplot2::geom_ribbon(ggplot2::aes(x=object$intraobs,
-                                      ymin=bounds95[,1], ymax=bounds95[,2]),
-                         color='gray', alpha=0.25) +
-    ggplot2::geom_ribbon(ggplot2::aes(x=object$intraobs,
-                                      ymin=bounds80[,1], ymax=bounds80[,2]),
-                         # ymin=min(object)$data, ymax=max(object)$data),
-                         color='lightgray', alpha=0.25) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(x=Time,
+                   ymin=L, ymax=U,group=group, fill=color),
+      data = bounds_wide,, alpha=0.25) +
     ggplot2::geom_line(ggplot2::aes(x=object$intraobs, y=mean(object)),
-                       linewidth=1, color='black', linetype='dashed', alpha=0.25) +
-    # ggplot2::geom_line(ggplot2::aes(x=object$intraobs, y=mean(object)-1.96*sd.funts(object)/sqrt(ncol(object))),
-    #                    linewidth=1, color='black', linetype='dashed', alpha=0.25) +
-    # ggplot2::geom_line(ggplot2::aes(x=object$intraobs, y=mean(object)+1.96*sd.funts(object)/sqrt(ncol(object))),
-    #                    linewidth=1, color='black', linetype='dashed', alpha=0.25) +
+                       linewidth=1.5, color='black', linetype='dashed', alpha=0.25) +
     ggplot2::geom_line(ggplot2::aes(x=Time,y=value,
                                     group=name,
                                     color=color),
-                       data = plot_data, linewidth=0.5) +
+                       data = plot_data, linewidth=1) +
+    ggplot2::ylim(c(min_val, max_val)) +
     ggplot2::theme_bw() +
-    ggplot2::guides(color="none",alpha='none') +
+    ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
+    ggplot2::guides(color="none",alpha='none',fill='none') +
     ggplot2::scale_color_manual(values = plot_data$color,
                                 breaks = plot_data$color) +
+    ggplot2::scale_fill_manual(breaks = bounds_wide$color,
+                               values=bounds_wide$color) +
     ggplot2::xlab('') +
     ggplot2::ylab('')
 }
