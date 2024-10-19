@@ -47,7 +47,7 @@ Compute resampling statistics for Tn and Mn
 TODO:: Make this part of the original function
 }
 \examples{
-data_KL <- generate_data_fd(
+data_KL <- generate_kl(
 ns = c(50, 50),
 eigsList = list(
   c(3, 2, 1, 0.5),
