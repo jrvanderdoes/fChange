@@ -14,11 +14,17 @@ It often indicates current lag divided by window.}
 A numeric value indicating value of Kernel at that point
 }
 \description{
-Kernel where \eqn{max(0,1-|m/h|), h\neq 0} and \eqn{1, h=0}.
+Kernel where \eqn{max(0,1-|x|), h\neq 0}. If \eqn{x=0/0} then
+the value \eqn{1} is given.
 }
 \details{
 Note, this function is vectorized.
 }
 \examples{
 bartlett_kernel(-20:20/15)
+}
+\references{
+Horváth, L., & Rice, G. (2024). Change Point Analysis for Time
+Series (1st ed. 2024.). Springer Nature Switzerland.
+\url{https://doi.org/10.1007/978-3-031-51609-2}
 }
