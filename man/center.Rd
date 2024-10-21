@@ -16,7 +16,7 @@ center(x, ...)
 
 \method{center}{matrix}(x, ...)
 
-\method{center}{funts}(x, CPs = NULL, ...)
+\method{center}{funts}(x, CPs = NULL, type = "mean", ...)
 }
 \arguments{
 \item{...}{Additional parameters to function based on data}
