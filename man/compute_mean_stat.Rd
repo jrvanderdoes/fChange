@@ -23,7 +23,7 @@ FD observations.
 \examples{
 \dontrun{
 # Null Example
-data_KL <- generate_data_fd(
+data_KL <- generate_kl(
   ns = c(100, 100),
   eigsList = list(
     c(3, 2, 1, 0.5),
@@ -42,7 +42,7 @@ data_KL <- generate_data_fd(
 compute_mean_stat(data_KL$data, 100)
 
 # Mean CP Example
-data_KL <- generate_data_fd(
+data_KL <- generate_kl(
   ns = c(100, 100),
   eigsList = list(
     c(3, 2, 1, 0.5),
