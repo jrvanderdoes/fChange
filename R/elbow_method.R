@@ -4,18 +4,26 @@
 #'     cascading change points are not considered to allow for every possible
 #'     number of change points to be selectable.
 #'
-#' @param data funts object or Numeric data.frame with rows for evaluated values and columns
+#' @param X funts object or Numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
-#' @param test_function Function with the first argument being data. Additional
-#'  arguments as passed in as ... . This function should compute a statistic for
-#'  each candidate change point (i.e. each curve or column of data), returned as
-#'  a named value: allValues.
-#' @param trim_function Function with the first element as data (rest with ...).
-#'  Used to trim data.
-#' @param errorType String of 'L2' or 'Tr' indicating the error function to use
-#' @param ... Additional parameters to pass into the respective functions
+#' @param method Method of detecting changes. See [change()].
+#' @param W Basis to measure the space with when using a characteristic-based
+#'  approach.
+#' @param trim_function Function with data input. Used to trim data.
+#' @param max_changes Numeric for the maximum number of change points to
+#'  investigate. Default is the minimum between the data length and 20 changes
+#' @param errors String of 'L2' or 'Trace' indicating the error function to use
+#' @param K Kernel using for long run covariance
+#' @param d Integer for which eigenvalue to compare
+#' @param h Lag for long run covariance
+#' @param weighting Weights for weighted statistics
+#' @param recommendation_change_points Integer for the number of nodes to look ahead at and
+#'  confirm a flattening. Default is 2.
+#' @param recommendation_improvement Numeric to quantify the gain required of each additional
+#'  change. Default is 0.1.
+#' @param TVE Total variance explained for projection methods
 #'
-#' @return list with three elements.
+#' @return List with three elements.
 #'  \itemize{
 #'    \item **CPInfo**: Data.frame of candidate changes, ordered by impact. The
 #'      columns are: CP, Var, and Percent. CP indicates change location, Var is
@@ -27,51 +35,62 @@
 #'    \item **PerPlot**: A ggplot object showing the percent of variance removed
 #'      compared to the previous step.
 #'  }
-#' @export
+#'
+#' @noRd
+#' @keywords internal
 #'
 #' @examples
-#' results <- elbow_method(
-#'   data = electricity[, 1:50],
-#'   trim_function = function(...) {
-#'     10
-#'   },
-#'   max_changes=2
-#' )
-elbow_method <- function(data,
-                         test_function = compute_Mn,
-                         trim_function = function(...) {
-                           0
-                         },
-                         max_changes = min(ncol(data),20),
-                         errorType = "L2",
-                         look_ahead = 2, look_alpha = 0.1, ...) {
-  data <- .check_data(data)
-  max_changes <- min(max_changes,ncol(data))
+#' #results <- .elbow_method(
+#' #  X = electricity[, 1:50],
+#' #  trim_function = function(...) {
+#' #   10
+#' #  },
+#' #  max_changes=2
+#' #)
+.elbow_method <- function(X, method, W=NULL,
+                         trim_function = function(X) { 0 },
+                         max_changes = min(ncol(X),20),
+                         errors = "L2",
+                         K=bartlett_kernel,
+                         d=NULL, h=0, weighting=0,
+                         recommendation_change_points = 2,
+                         recommendation_improvement = 0.1,
+                         TVE=0.95) {
 
-  # Setup
-  n <- ncol(data$data)
+  ## Setup
+  X <- funts(X)
+  max_changes <- min(max_changes, ncol(X))
+
+  n <- ncol(X$data)
   return_data <- data.frame(
     "CP" = NA,
     "Var" = NA
   )
 
-  # Trim & stopping criteria
-  trim_amt <- trim_function(data$data, ...)
-  if (1 + trim_amt >= n - trim_amt) {
-    return()
+  ## Trim & stopping criteria
+  trim_amt <- trim_function(X$data)#, ...)
+  if (1 + trim_amt >= n - trim_amt) return()
+
+  ## Run First CP Detection
+  if( method=='characteristic' && is.null(W)){
+    stop('W must not be null when using this method',call. = FALSE)
   }
 
-  # Run First
-  stats_tmp <- test_function(data$data[, (1 + trim_amt):(n - trim_amt)], ...)
-  test_stat <- c(rep(NA, trim_amt), stats_tmp$allValues, rep(NA, trim_amt))
-  tmp_loc <- which.max(stats_tmp$allValues) + trim_amt
-  return_data[1, ] <- c(tmp_loc,
-                        .compute_total_var(data = data$data, CPs = tmp_loc,
-                                           errorType = errorType))
+  stats_tmp <- .elbow_statistics(X$data[, (1 + trim_amt):(n - trim_amt), drop=FALSE],
+                                 method=method,
+                                 W=W, d=d, h=h, K=K, weighting=weighting, TVE=TVE)
+  test_stats <- c(rep(NA, trim_amt), stats_tmp, rep(NA, trim_amt))
+  location <- which.max(stats_tmp) + trim_amt
 
-  # Iteratively Search
+  ## Total Var Remaining
+  return_data[1, ] <- c(location,
+                        .compute_total_var(X = X, CPs = location,
+                                           errors = errors, K=K,
+                                           W=W))
+
+  ## Iteratively Search
   while (nrow(return_data) < max_changes) {
-    # Setup
+    ## Setup
     CPs <- c(0, return_data$CP, n)
     CPs <- CPs[order(CPs)]
     prev_CP <- return_data[nrow(return_data), "CP"]
@@ -80,76 +99,101 @@ elbow_method <- function(data,
     ## We only need to recompute for the interval changed by last CP!
     # Before
     beforePrevCP <- (CPs[prev_CP_loc - 1] + 1):(CPs[prev_CP_loc])
-    trim_amt <- trim_function(data$data[, beforePrevCP], ...)
-    test_stat[beforePrevCP] <- NA
+    trim_amt <- trim_function(X$data[, beforePrevCP])#, ...)
+    test_stats[beforePrevCP] <- 0
 
     if (1 + trim_amt < length(beforePrevCP) - trim_amt) {
       fill_idx <- (1 + trim_amt):(length(beforePrevCP) - trim_amt)
-      stats_tmp <- test_function(data$data[, beforePrevCP[fill_idx]],
-                                 J = length(fill_idx), ...)
-      # stats_tmp$allValues[1] <- 0 # Make first zero as don't want to segment
-      test_stat[beforePrevCP[fill_idx]] <- stats_tmp$allValues
+      stats_tmp <- .elbow_statistics(X$data[, beforePrevCP[fill_idx], drop=FALSE],
+                                     method=method,
+                                     W=W, d=d, h=h, K=K, weighting=weighting,
+                                     TVE=TVE)
+
+      # Set CP to 0 if include (i.e. not trimmed)
+      if(max(beforePrevCP[fill_idx])==prev_CP) stats_tmp[length(stats_tmp)] <- 0
+
+      test_stats[beforePrevCP[fill_idx]] <- stats_tmp
     }
 
     # After
     afterPrevCP <- (CPs[prev_CP_loc] + 1):CPs[prev_CP_loc + 1]
-    trim_amt <- trim_function(data$data[, afterPrevCP], ...)
-    test_stat[afterPrevCP] <- NA
+    trim_amt <- trim_function(X$data[, afterPrevCP])#, ...)
+    test_stats[afterPrevCP] <- 0
 
     if (1 + trim_amt < length(afterPrevCP) - trim_amt) {
       fill_idx <- (1 + trim_amt):(length(afterPrevCP) - trim_amt)
-      stats_tmp <- test_function(data$data[, afterPrevCP[fill_idx]],
-                                 J = length(fill_idx), ...)
-      # stats_tmp$allValues[1] <- 0 # Make first zero as don't want to segment
-      test_stat[afterPrevCP[fill_idx]] <- stats_tmp$allValues
+      stats_tmp <- .elbow_statistics(X$data[, afterPrevCP[fill_idx], drop=FALSE],
+                                 method=method,
+                                 W=W, d=d, h=h, K=K, weighting=weighting, TVE=TVE)
+
+      # Set next CP to 0 if include (i.e. not trimmed)
+      if(max(afterPrevCP[fill_idx])==CPs[prev_CP_loc + 1]) stats_tmp[length(stats_tmp)] <- 0
+
+      test_stats[afterPrevCP[fill_idx]] <- stats_tmp
     }
 
-    # Temp fix in case of no trim. Will update the check / var calc later
-    test_stat <- ifelse(test_stat == 0, NA, test_stat)
+    #### Split based on 0s (CPs and trimmings)
+    is.sep <- test_stats==0
+    data_segments <- split(test_stats[!is.sep], cumsum(is.sep)[!is.sep])
 
-    if (sum(is.na(test_stat)) == n) break
 
     ## Get total variance for each potential CP
-    #     TODO: Save previous
-    data_segments <- .split_on_NA(test_stat)
-
     return_data_tmp <- data.frame("CP" = rep(NA,length(data_segments)), "Var" = NA)
     for (k in 1:length(data_segments)) {
-      # Find max test stat on interval
+      ## Find max in section
       value_max <- max(data_segments[[k]])
-
-      # Get CP and total variance with full data
-      section_max <- min(which(test_stat == value_max))
-      tmp <- c(section_max, return_data$CP)
-      tmp <- tmp[order(tmp)]
+      section_max <- min(which(test_stats == value_max))
+      CPs_proposed <- c(section_max, return_data$CP)
 
       return_data_tmp[k, ] <- c(
         section_max,
-        .compute_total_var(data$data, tmp, errorType)
+        .compute_total_var(X = X, CPs = CPs_proposed, errors = errors, W=W, K=K)
       )
     }
 
     ## With max test-statistic on each section, take one leading to min variance
     return_data[nrow(return_data)+1, ] <- return_data_tmp[which.min(return_data_tmp$Var), ]
+
+    if(sum(test_stats)==0) break
   }
 
-  # Add No Change option and compute percent change
+
+  ## Add No Change option and compute percent change
   return_data <- rbind(
-    c(NA, .compute_total_var(data$data, c(), errorType)),
+    c(NA, .compute_total_var(X=X, CPs=c(), errors=errors, W=W, K=K)),
     return_data
   )
   return_data$Percent <- 1 - return_data$Var / max(return_data$Var)
-  return_data$Gain <- c(NA,return_data$Var[-1] /return_data$Var[-nrow(return_data)])
+  return_data$Improvement <- c(NA,1-return_data$Var[-1] /return_data$Var[-nrow(return_data)])
 
-  # Define vars to remove notes
-  CP <- Var <- Percent <- NULL
+  ## Recommended Number of CPs
+  #   Look ahead at the next recommendation_change_points changes
+  #   Determine if the reduction in variance is less than requested
+  #   If so, select. Otherwise look at next point
+  data_change<- data.frame(matrix(NA,nrow=nrow(return_data),
+                                  ncol = recommendation_change_points))
+  for(i in 1:recommendation_change_points){
+    data_change[,i] <-
+      c(return_data$Improvement[-c(1:i)]<recommendation_improvement, rep(TRUE,i))
+  }
+  recommended_cp <- which.max(apply(data_change, MARGIN = 1, prod)) - 1
+  if(recommended_cp==0){
+    recommended_cps <- NA
+  } else{
+    recommended_cps <- return_data$CP[1:(recommended_cp+1)]
+    recommended_cps <- recommended_cps[!is.na(recommended_cps)]
+  }
+
+
+  ## Define vars to remove notes
+  CP <- Var <- Percent <- Improvement <- NULL
 
   var_plot <-
     ggplot2::ggplot(return_data) +
     ggplot2::geom_point(ggplot2::aes(x = 0:(length(CP) - 1), y = Var),size=4) +
     ggplot2::geom_line(ggplot2::aes(x = 0:(length(CP) - 1), y = Var),linewidth=2) +
     ggplot2::xlab("Number of Change Points") +
-    ggplot2::ylab("Total Variance") +
+    ggplot2::ylab("Variability") +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text = ggplot2::element_text(size=18),
                    axis.title = ggplot2::element_text(size=22))
@@ -159,32 +203,28 @@ elbow_method <- function(data,
     ggplot2::geom_point(ggplot2::aes(x = 0:(length(CP) - 1), y = Percent),size=4) +
     ggplot2::geom_line(ggplot2::aes(x = 0:(length(CP) - 1), y = Percent),linewidth=2) +
     ggplot2::xlab("Number of Change Points") +
-    ggplot2::ylab("Percent Explained") +
+    ggplot2::ylab("Percent of Total Variability Explained") +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text = ggplot2::element_text(size=18),
                    axis.title = ggplot2::element_text(size=22))
 
+  ## TODO:: CHECK THIS OUT
   gain_plot <-
     ggplot2::ggplot(return_data[-1,]) +
-    ggplot2::geom_point(ggplot2::aes(x = 1:length(CP), y = Gain), size=4) +
-    ggplot2::geom_line(ggplot2::aes(x = 1:length(CP), y = Gain),linewidth=2) +
+    ggplot2::geom_point(ggplot2::aes(x = 1:length(CP), y = Improvement), size=4) +
+    ggplot2::geom_line(ggplot2::aes(x = 1:length(CP), y = Improvement),linewidth=2) +
     ggplot2::xlab("Number of Change Points") +
-    ggplot2::ylab("Percent Explained") +
+    ggplot2::ylab("Variability Improvement from Previous") +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text = ggplot2::element_text(size=18),
                    axis.title = ggplot2::element_text(size=22))
 
-  data_change<- data.frame(matrix(NA,nrow=nrow(return_data),ncol = look_ahead))
-  for(i in 1:look_ahead){
-    data_change[,i] <- c(return_data$Gain[-c(1:i)]>1-look_alpha,rep(TRUE,i))
-  }
-  cutoff <- which.max(apply(data_change, MARGIN = 1, prod)) - 1
 
   recommend_plot <-
     ggplot2::ggplot(return_data) +
     ggplot2::geom_line(ggplot2::aes(x = 0:(length(CP) - 1), y = Var),
                        linewidth=2) +
-    ggplot2::geom_vline(ggplot2::aes(xintercept=cutoff),
+    ggplot2::geom_vline(ggplot2::aes(xintercept=recommended_cp),
                         linetype='dotted', col='red',linewidth=2) +
     ggplot2::geom_point(ggplot2::aes(x = 0:(length(CP) - 1), y = Var),
                         size=4) +
@@ -194,116 +234,272 @@ elbow_method <- function(data,
     ggplot2::theme(axis.text = ggplot2::element_text(size=18),
                    axis.title = ggplot2::element_text(size=22))
 
-  list("CPInfo" = return_data, "VariancePlot" = var_plot,
-       "PercentPlot" = per_plot, "GainPlot" = gain_plot,
-       "RecommendPlot" = recommend_plot)
+  list("information" = return_data,
+       "plots"=list(
+         "variability" = var_plot,
+         "explained" = per_plot,
+         "improvement" = gain_plot
+         ),
+       "suggestion" = list(
+         'plot'=recommend_plot,
+         'changes'=recommended_cps)
+       )
 }
+
+
+
+#' Compute Test Statistics for Elbow Plot
+#'
+#' @inheritParams .elbow_method
+#'
+#' @returns Statistic based on the method given
+#'
+#' @noRd
+#' @keywords internal
+.elbow_statistics <- function(X, method, W=NULL, d=NULL, h=NULL, K=NULL,
+                              weighting=0, TVE=0.95){
+
+  n <- ncol(X)
+  r <- nrow(X)
+
+  if(method=='characteristic'){
+
+    # Compute Zn
+    fhat_vals <- as.matrix(.fhat_all(X, W))
+    Zn <- sqrt(n) * (fhat_vals - (seq_len(n)/n) %o% fhat_vals[nrow(fhat_vals),])
+
+    # ns <- .select_n(1:n, J)
+    # Zn <- Zn[ns,,drop=FALSE]
+
+    # Integrate out W
+    stats <- dot_integrate_col(t(abs(Zn)^2))
+  } else if(method=='mean'){
+    stats <- rep(0, n)
+    # CUSUM
+    for (k in 1:n) {
+      stats[k] <- sum((rowSums(X[, 1:k,drop=FALSE]) -
+                       (k / n) * rowSums(X))^2)
+    }
+    stats <- stats / n
+  }  else if(method=='robust'){
+    # U_N(x) stacked
+    hC_Obs <- make_hC_Obs(X)
+
+    # find max_k U_{n,k} (missing constants)
+    stats <- c(fill_T(hC_Obs, n, r)[,1],0)
+
+  } else if(method=='eigenjoint'){
+
+    Cov_op <- .partial_cov(X, 1)
+
+    eig2 <- array(dim = c(r,r,r))
+    for(j in 1:r){
+      eig2[,,j] <- Cov_op$eigen_fun[,j] %*% t(Cov_op$eigen_fun[,j])
+    }
+    thetas <- matrix(nrow=n,ncol=r)
+    X2 <- array(dim = c(r,r,n))
+    for(i in 1:n){
+      X2[,,i] <- X[,i] %*% t(X[,i]) - Cov_op$coef_matrix
+
+      for(j in 1:r){
+        thetas[i,j] <- sum(diag( t(eig2[,,j]) %*% X2[,,i] ))
+      }
+    }
+
+    Sigma_d <- .long_run_cov(data = t(thetas[,1:d]), h = h, K = K)
+    # Moore Penrose solve if non-invertable
+    Sigma_d_inv <- tryCatch({
+      solve(Sigma_d)
+    }, error = function(e){
+      eigs <- eigen( Sigma_d )
+      eigs$vectors <- eigs$vectors * sqrt(r)
+      eigs$values <- eigs$values / r
+
+      K_eigs <- which.min(cumsum(eigs$values)/sum(eigs$values) < 0.95)
+
+      tmp_inv <- matrix(0, nrow=nrow(Sigma_d), ncol=ncol(Sigma_d))
+      for(i in 1:K_eigs){
+        tmp_inv <- tmp_inv +
+          ( 1 / eigs$values[i] ) * (eigs$vectors[,i] %o% eigs$vectors[,i] )
+      }
+
+      tmp_inv
+    })
+
+
+    stats <-  rep(0,n)
+    for(k in 1:n){
+      lam <- .partial_cov(X, k/n)$eigen_val[1:d]
+      kapa <- lam - (k/n) * Cov_op$eigen_val[1:d]
+      stats[k] <- n * t(kapa) %*% Sigma_d_inv %*% kapa
+    }
+  } else if(method=='eigensingle'){
+
+    Cov_op <- .partial_cov(X, 1)
+
+    eig2 <- array(dim = c(r,r,r))
+    for(j in 1:r){
+      eig2[,,j] <- Cov_op$eigen_fun[,j] %*% t(Cov_op$eigen_fun[,j])
+    }
+    thetas <- matrix(nrow=n,ncol=r)
+    X2 <- array(dim = c(r,r,n))
+    for(i in 1:n){
+      X2[,,i] <- X[,i] %*% t(X[,i]) - Cov_op$coef_matrix
+
+      for(j in 1:r){
+        thetas[i,j] <- sum(diag( t(eig2[,,j]) %*% X2[,,i] ))
+      }
+    }
+
+    Sigma_d <- .long_run_cov(data = t(thetas[,d]), h = h, K = K)
+
+    stats <- rep(0,n)
+    for (k in 1:n){
+      lam <- .partial_cov(X, k/n)$eigen_val[d]
+      stats[k] <- ( n*( lam - (k/n)*Cov_op$eigen_val[d] )^2 ) / Sigma_d
+    }
+
+  }else if(method=='trace'){
+
+    Cov_op <- .partial_cov(X, 1)
+    lambda <- Cov_op$eigen_val
+    T_1 <- sum(lambda)
+    Xi <- sapply(1:n, function(i,X1){ X[,i] %*% X[,i] }, X1=X)
+    sigma_sq <- tryCatch({
+      suppressWarnings(sandwich::lrvar(Xi, prewhite = F))
+    },error=function(e){
+      NA
+    })
+    if(is.na(sigma_sq)) return(rep(0, n))
+
+    sigma <- sqrt(sigma_sq)
+
+    stats <- rep(0,n)
+    for (k in 1:n) {
+      T_x <- sum(Xi[1:k])/n
+      stats[k] <- (1/sigma) * abs(T_x - k/n * T_1)
+    }
+  }else if(method=='covariance'){
+
+    xdm <- center(funts(X))$data
+
+    uind <- seq(0, 1, length = n + 1)[2:(n + 1)]
+    zn2 <- list()
+    stats <- c(rep(0, n))
+    for (i in 1:(n - 1)) {
+      Zn_stat <- .covariance_statistic_cp(xdm, uind[i])
+
+      stats[i] <- (n / (i * (n - i)))^weighting *
+        dot_integrate(dot_integrate_col( Zn_stat^2))
+    }
+
+  }else if(method=='pcamean'){
+
+    pca_X <- pca(funts(X), TVE=TVE)
+    d <- length(pca_X$sdev)
+
+    eta.hat <- as.matrix(pca_X$x)
+
+    ## Test Statistic
+    kappa <-
+      sapply(1:n,function(k, eta.hat, n){
+        colSums(eta.hat[1:k, , drop=FALSE]) - k/n * colSums(eta.hat)
+      },eta.hat=eta.hat, n=n)
+    # If same names, only 1 pc and sapply flips it incorrectly
+    if(length(unique(names(kappa)))==1) kappa <- t(kappa)
+
+    if(length(pca_X$sdev)>1){
+      stats <-  diag( 1/n * ( t(kappa) %*% diag(1/pca_X$sdev^2) %*% kappa ) )
+    }else{
+      stats <-  diag( 1/n * ( t(kappa) %*% (1/pca_X$sdev^2) %*% kappa ) )
+    }
+  }else if(method=='pcadistribution'){
+
+    pca_X <- pca(funts(X), TVE=TVE)
+    d <- length(pca_X$sdev)
+
+    kappa <- matrix(nrow=d, ncol=n-1)
+    for(i in 1:d){
+      for (k in 1:(n - 1)) {
+        kappa[i,k] <- ((k * (n - k)) / n^2)^weighting * ((k * (n - k)) / n) *
+          stats::integrate(
+            function(t, Y, k) {
+              abs(.phi_k(Y, t, k) - .phi_k0(Y, t, k))^2 * .w(t)
+            },
+            lower = 0, upper = 1, Y = pca_X$x[,i], k = k
+          )[[1]]
+      }
+    }
+    if(d > 1){
+      stats <-  diag( 1/n * ( t(kappa) %*% diag(1/pca_X$sdev^2) %*% kappa ) )
+    }else{
+      stats <-  diag( 1/n * ( t(kappa) %*% (1/pca_X$sdev^2) %*% kappa ) )
+    }
+
+    stats <- c(stats,0)
+  }
+
+  # Make last value 0
+  stats[length(stats)] <- 0
+
+  stats
+}
+
 
 #' Compute Total Variance
 #'
 #' This (internal) function computes the total variance in the data with given
 #'  CPs.
 #'
-#' @param data Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD.
-#' @param CPs Vector of numerics indicating the changepoint locations
-#' @param errorType (Optional) String of 'L2' or 'Tr' indicating the error
-#'                  function to use. Default is L2.
-#' @param M (Optional) Numeric indicating the number of Brownian motions needed
-#'          for CE error.
+#' @inheritParams .elbow_method
 #'
 #' @return Numeric indicating the variance between all subsegments
 #'
 #' @noRd
-.compute_total_var <- function(data, CPs, errorType = "L2", M = 1000) {
-  # Setup
-  data <- as.data.frame(data)
-  data_std <- data
-  CPs <- unique(c(0, CPs, ncol(data)))
+#' @keywords internal
+.compute_total_var <- function(X, CPs, errors = "L2", K=bartlett_kernel,
+                               W=generate_brownian_motion(100, v=X$intraobs )$data) {
+  # Get Information
+  if (tolower(errors) == "l2" || tolower(errors) == "trace") {
 
-  if (errorType == "L2" || errorType == "Tr") {
-    # Standardize Data
-    for (i in 2:length(CPs)) {
-      indices <- (CPs[i - 1] + 1):CPs[i]
-      CP_mean <- rowMeans(as.data.frame(data[, indices])) ## TODO:: Verify
-      # Standardize Data
-      data_std[, indices] <- data_std[, indices] - CP_mean
-    }
+    X_std <- center(X, CPs=CPs)$data
+    covMatrix <- .long_run_cov(X_std, h=0, K=K)
 
-    # ## Cannot use cov because it removes the mean from individual FDs, thus
-    # #     making each change point near equally effective
-    # covMatrix <- matrix(NA, ncol = ncol(data), nrow = ncol(data))
-    # sampleCoef <- 1 / (nrow(data) - 1)
-    #
-    # for (i in 1:ncol(data)) {
-    #   for (j in i:ncol(data)) {
-    #     covMatrix[i, j] <- covMatrix[j, i] <-
-    #       sum(sampleCoef * (data_std[, i] * data_std[, j]))
-    #   }
-    # }
-    #
-    covMatrix <- autocov_approx_h(data_std,0)
-
-  } else if (errorType == "CE") {
-    W <- as.data.frame(sapply(rep(0, M), sde::BM, N = nrow(data) - 1))
-    CE <- data.frame(matrix(ncol = ncol(data), nrow = M))
-
-    ## Compute CEs
-    for (i in 1:ncol(data)) {
-      CE[, i] <- apply(W, 2,
-        FUN = function(v, dat) {
-          exp(complex(real = 0, imaginary = 1) * (t(dat) %*% v))
-        }, dat = data[, i]
-      )
-    }
-
-    CE_std <- CE
-
-    # Standardize Data
-    for (i in 2:length(CPs)) {
-      indices <- (CPs[i - 1] + 1):CPs[i]
-      CP_mean <- rowMeans(as.data.frame(CE[, indices])) ## TODO:: Verify
-      # Standardize Data
-      CE_std[, indices] <- CE[, indices] - CP_mean
-    }
-
-    # covMatrix <- matrix(NA,ncol=ncol(data), nrow = ncol(data))
-    # sampleCoef <- 1/(nrow(data)-1)
-    #
-    # ## Compute covMatrix
-    # for(i in 1:ncol(data)){
-    #   for(j in (i):ncol(data)){
-    #     covMatrix[i,j] <- covMatrix[j,i] <-
-    #       sum(sampleCoef*(CE[,i] %*% CE[,j]))
-    #   }
-    # }
   }
+  # else if (tolower(errors) == "ce") {
+  #
+  #   CE <- data.frame(matrix(ncol = ncol(X), nrow = ncol(W)))
+  #
+  #   ## Compute CEs
+  #   for (i in 1:ncol(X)) {
+  #     CE[, i] <- apply(W, 2,
+  #                      FUN = function(v, dat) {
+  #                        exp(complex(real = 0, imaginary = 1) * (t(dat) %*% v))
+  #                      }, dat = X$data[, i]
+  #     )
+  #   }
+  #
+  #   CE_std <- center(funts(CE),CPs=CPs)$data
+  #   covMatrix <- .long_run_cov(t(CE_std) %*% CE_std, h=0, K=K)
+  #
+  #
+  # }
 
   # Apply error metric
-  if (errorType == "L2") {
+  if (tolower(errors) == "l2") {
     returnValue <- sqrt(sum(covMatrix^2))
-  } else if (errorType == "Tr") {
+  } else if (tolower(errors) == "trace") {
     returnValue <- sum(diag(covMatrix))
-  } else if (errorType == "CE") {
-    returnValue <- sum(colSums(abs(CE_std)^2) / M) # sum(colSums(abs(CE_std)^2)/M)
   } else {
-    stop("Only L2, Tr, and CE error functions implemented")
+    stop("Only L2 and Trace error functions implemented")
   }
+  # else if (tolower(errors) == "ce") {
+  #   # returnValue <- sum(colSums(abs(CE_std)^2) / ncol(W))
+  #   returnValue <- sqrt(sum(abs(covMatrix)^2))
+  # }
 
   returnValue
 }
 
 
-#' Split on NA
-#'
-#' This (internal) function splits a vector based on any NA values.
-#'
-#' @param vec Vector to be split containing numerics and NA values.
-#'
-#' @return List with each item being a group separated by NAs.
-#'
-#' @noRd
-.split_on_NA <- function(vec) {
-  is.sep <- is.na(vec)
-  split(vec[!is.sep], cumsum(is.sep)[!is.sep])
-}
+
