@@ -14,11 +14,17 @@ It often indicates current lag divided by window.}
 A numeric value indicating value of Kernel at that point
 }
 \description{
-Kernel where \eqn{sin(pi * x) / (pi * x), x!=0} and \eqn{1,X\x=0}.
+Kernel where \eqn{sin(pi * x) / (pi * x)*(1 + cos(pi*x)), abs(x)<=1}.
+If \eqn{x=0/0} then the value \eqn{1} is given.
 }
 \details{
 Note, this function is vectorized.
 }
 \examples{
 daniell_kernel(-20:20/15)
+}
+\references{
+Horváth, L., & Rice, G. (2024). Change Point Analysis for Time
+Series (1st ed. 2024.). Springer Nature Switzerland.
+\url{https://doi.org/10.1007/978-3-031-51609-2}
 }
