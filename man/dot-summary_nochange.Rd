@@ -25,5 +25,5 @@ Summary for funts Object with no changes
 #   generate_brownian_motion(N = 500,
 #      v=seq(from = 0, to = 1, length.out = 20)))
 # .summary_nochange(funts(electricity),rainbow='full')
-# .summary_nochange(generateFAR1(20,300))
+# .summary_nochange(generate_far1(20,300))
 }
