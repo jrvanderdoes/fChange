@@ -6,6 +6,7 @@
 \usage{
 funts(
   X,
+  name = NULL,
   labels = colnames(as.data.frame(X)),
   intraobs = seq(0, 1, length.out = nrow(X))
 )
