@@ -2,15 +2,18 @@
 #'
 #' This plots the functional data with means for each segment.
 #'
-#' @inheritParams plot_fd
+#' @inheritParams .plot_fd
+#' @param warnings Boolean if warning should be given
 #'
 #' @return An interactive plotly plot for the data.
-#' @export
+#'
+#' @noRd
+#' @keywords internal
 #'
 #' @examples
-#' change_plot(funts(electricity[,1:150]),CPs = c(66, 144))
-#' #change_plot(funts(electricity),CPs = c(66, 144, 204, 243, 305))
-change_plot <- function(X, CPs,
+#' #.plot_change(funts(electricity[,1:150]),CPs = c(66, 144))
+#' #.plot_change(funts(electricity),CPs = c(66, 144, 204, 243, 305))
+.plot_change <- function(X, CPs,
                   plot_title = NULL,
                   val_axis_title = "Value",
                   res_axis_title = "resolution",
@@ -19,7 +22,7 @@ change_plot <- function(X, CPs,
                   aspectratio = list(x = 1, y = 1, z = 1),
                   showticklabels = TRUE,
                   warnings = TRUE) {
-  X <- .check_data(X)
+  X <- funts(X)
   data <- X$data
   curve_points <- X$intraobs
 
@@ -138,7 +141,7 @@ change_plot <- function(X, CPs,
                   colors = tmpColors,
                   opacity=0.15
   ) %>%
-    plotly::add_lines(., data=plotData_mean,
+    plotly::add_lines(data=plotData_mean,
                     x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
                     type = "scatter3d", mode = "lines",
                     split = ~ as.factor(FDRep),
@@ -172,16 +175,20 @@ change_plot <- function(X, CPs,
 #'
 #' A plot to show changes and their confidence interval on a functional data set.
 #'
-#' @inheritParams plot_fd
-#' @param intervals Data.frame from \code{compute_confidence_interval()}.
+#' @inheritParams .plot_fd
+#' @param intervals Data.frame from \code{confidence_interval()}.
+#' @param highlight_changes Boolean if changes should be highlighted with a
+#'  black line.
 #'
 #' @return An interactive plotly plot for the data.
-#' @export
+#'
+#' @noRd
+#' @keywords internal
 #'
 #' @examples
-#' interval_plot(funts(electricity[,1:80]),
-#'               data.frame('change'=66, 'lower'=60.169, 'upper'=72.542))
-interval_plot <- function(X, intervals,
+#' #result <- .plot_interval(funts(electricity[,1:80]),
+#' #                        data.frame('change'=66, 'lower'=60.169, 'upper'=72.542))
+.plot_interval <- function(X, intervals,
                           plot_title = X$name,
                           val_axis_title = "Value",
                           res_axis_title = "resolution",
@@ -189,8 +196,10 @@ interval_plot <- function(X, intervals,
                           eye = list(x = -1.5, y = -1.5, z = 1.5),
                           aspectratio = list(x = 1, y = 1, z = 1),
                           showticklabels = TRUE,
-                          highlight_changes = TRUE) {
-  X <- .check_data(X)
+                          highlight_changes = TRUE, int.gradual=FALSE) {
+  if(is.null(intervals)) stop('The variable `intervals` cannot be NULL.',
+                              call. = FALSE)
+  X <- funts(X)
   if(!is.null(intervals)){
     CPs <- unique(c(0,intervals[,1],ncol(X)))
     CPs <- CPs[order(CPs)]
@@ -255,65 +264,165 @@ interval_plot <- function(X, intervals,
   # Color Confidence Intervals and Changes
   if(!is.null(intervals)){
 
-    for(i in 1:nrow(intervals)){
-      # Lower
-      int <- floor(intervals[i,2]):(round(intervals[i,1]))
-      plotData_mean[plotData_mean$FDRep %in% X$labels[int], "Color"] <- 'gray'
-      #colorRampPalette(c("lightgray", "darkgray"))(length(int))
+    if(!int.gradual){
+      for(i in 1:nrow(intervals)){
+        # Lower
+        int <- floor(intervals[i,2]):(round(intervals[i,1]))
+        plotData_mean[plotData_mean$FDRep %in% X$labels[int], "Color"] <- 'gray'
+        #colorRampPalette(c("lightgray", "darkgray"))(length(int))
 
-      # Upper
-      int <- (round(intervals[i,1])):round(intervals[i,3])
-      plotData_mean[plotData_mean$FDRep %in% X$labels[int], "Color"] <- 'gray'
+        # Upper
+        int <- (round(intervals[i,1])):round(intervals[i,3])
+        plotData_mean[plotData_mean$FDRep %in% X$labels[int], "Color"] <- 'gray'
 
-      # Changes
-      if(highlight_changes){
-        plotData_mean[plotData_mean$FDRep %in%
-                        X$labels[round(intervals$change[i]) + 0:1],
-                      "Color"] <- 'black'
+        # Changes
+        if(highlight_changes){
+          plotData_mean[plotData_mean$FDRep %in%
+                          X$labels[round(intervals$change[i]) + 0:1],
+                        "Color"] <- 'black'
 
+        }
       }
-    }
 
-    if(highlight_changes){
-      plot_colors <- c(plot_colors,'black','gray')
+      if(highlight_changes){
+        plot_colors <- c(plot_colors,'black','gray')
+      }else{
+        plot_colors <- c(plot_colors,'gray')
+      }
+
+
+      return_plot <- plotly::plot_ly(plotData,
+                                     x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
+                                     type = "scatter3d", mode = "lines",
+                                     split = ~ as.factor(FDRep),
+                                     color = ~ as.factor(Color),
+                                     colors = plot_colors,
+                                     opacity=0.15
+      ) %>%
+        plotly::add_lines(data=plotData_mean,
+                          x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
+                          type = "scatter3d", mode = "lines",
+                          split = ~ as.factor(FDRep),
+                          color = ~ as.factor(Color),
+                          colors = plot_colors,
+                          opacity=1
+        ) %>%
+        plotly::layout(
+          scene = list(
+            yaxis = list(
+              title = res_axis_title,
+              showticklabels = showticklabels
+            ),
+            xaxis = list(
+              title = FD_axis_title,
+              showticklabels = showticklabels
+            ),
+            zaxis = list(
+              title = val_axis_title,
+              showticklabels = showticklabels
+            )
+          )
+        ) %>%
+        plotly::layout(title = plot_title, scene = scene) %>%
+        plotly::layout(showlegend = FALSE)
+
     }else{
-      plot_colors <- c(plot_colors,'gray')
-    }
-  }
 
-  # Plot
-  plotly::plot_ly(plotData,
-                  x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
-                  type = "scatter3d", mode = "lines",
-                  split = ~ as.factor(FDRep),
-                  color = ~ as.factor(Color),
-                  colors = plot_colors,
-                  opacity=0.15
-  ) %>%
-    plotly::add_lines(., data=plotData_mean,
+      for(i in 1:nrow(intervals)){
+        change <- round(intervals$change[i])
+        lower <- floor(intervals$lower[i])
+        upper <- floor(intervals$upper[i])
+
+        # Lower Ramp
+        # rgb <- pmin(255,grDevices::col2rgb(plot_colors[i])*1.25)/255
+        # light_plot_col <- grDevices::rgb(rgb[1],rgb[2],rgb[3])
+        color_ramp <-
+          grDevices::colorRampPalette(#c('darkgray','darkgray'))(
+            c('darkgray',plot_colors[i]))(
+            change - lower+2)
+        if( change >= lower ){
+          for (j in change:lower) {
+            # Ensure not another break/interval
+            curr_color <- plotData[plotData$FDRep==X$labels[j],"Color"][1]
+            use_color <- ifelse(curr_color == plot_colors[i],
+                                color_ramp[change-j+1],
+                                min(curr_color, color_ramp[change-j+1]))
+
+            # Save colors
+            plotData[plotData$FDRep==X$labels[j], "Color"] <- use_color
+            plotData_mean[plotData_mean$FDRep==X$labels[j], "Color"] <- use_color
+          }
+        }
+
+        # # Upper Ramp
+        color_ramp <-
+          grDevices::colorRampPalette(
+            c('darkgray',plot_colors[i+1]))(
+              upper - change+2)
+        if( (change+1) <= upper ){
+          for (j in (change+1):upper) {
+            # Ensure not another break/interval
+            curr_color <- plotData[plotData$FDRep==X$labels[j],"Color"][1]
+            use_color <- ifelse(curr_color == plot_colors[i+1],
+                                color_ramp[j-(change+1)+1],
+                                min(curr_color, color_ramp[j-(change+1)+1]))
+
+            # Save colors
+            plotData[plotData$FDRep==X$labels[j], "Color"] <- use_color
+            plotData_mean[plotData_mean$FDRep==X$labels[j], "Color"] <- use_color
+          }
+        }
+
+        if(highlight_changes){
+          plotData_mean[plotData_mean$FDRep %in% X$labels[change+0:1],"Color"] <- 'black'
+          plotData[plotData$FDRep %in% X$labels[change+0:1],"Color"] <- 'black'
+        }
+      }
+
+
+      # Plot
+
+      pal <- plotData_mean$Color
+      names(pal) <- as.factor(plotData_mean$FDRep)
+      # pal <- setNames(pal, as.factor(plotData_mean$FDRep))
+      pal <- pal[unique(names(pal))]
+
+      return_plot <- plotly::plot_ly(plotData,
                       x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
                       type = "scatter3d", mode = "lines",
                       split = ~ as.factor(FDRep),
-                      color = ~ as.factor(Color),
-                      colors = plot_colors,
-                      opacity=1
-    ) %>%
-    plotly::layout(
-      scene = list(
-        yaxis = list(
-          title = res_axis_title,
-          showticklabels = showticklabels
-        ),
-        xaxis = list(
-          title = FD_axis_title,
-          showticklabels = showticklabels
-        ),
-        zaxis = list(
-          title = val_axis_title,
-          showticklabels = showticklabels
-        )
-      )
-    ) %>%
-    plotly::layout(title = plot_title, scene = scene) %>%
-    plotly::layout(showlegend = FALSE)
+                      color = ~ as.factor(FDRep),
+                      colors = pal,
+                      opacity=0.15
+      ) %>%
+        plotly::add_lines(data=plotData_mean,
+                          x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
+                          type = "scatter3d", mode = "lines",
+                          split = ~ as.factor(FDRep),
+                          color = ~ as.factor(FDRep),
+                          colors = pal,#c(plot_colors,'black',ramp),
+                          opacity=1
+        ) %>%
+        plotly::layout(
+          scene = list(
+            yaxis = list(
+              title = res_axis_title,
+              showticklabels = showticklabels
+            ),
+            xaxis = list(
+              title = FD_axis_title,
+              showticklabels = showticklabels
+            ),
+            zaxis = list(
+              title = val_axis_title,
+              showticklabels = showticklabels
+            )
+          )
+        ) %>%
+        plotly::layout(title = plot_title, scene = scene) %>%
+        plotly::layout(showlegend = FALSE)
+    }
+  }
+
+  return_plot
 }
