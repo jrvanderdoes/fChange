@@ -4,11 +4,7 @@
 \alias{generate_brownian_motion}
 \title{Generate a Brownian Motion Process}
 \usage{
-generate_brownian_motion(
-  N,
-  v = seq(from = 0, to = 1, length.out = 100),
-  sd = 1
-)
+generate_brownian_motion(N, v = seq(from = 0, to = 1, length.out = 20), sd = 1)
 }
 \arguments{
 \item{N}{Numeric. The number of observations for the generated data.}
