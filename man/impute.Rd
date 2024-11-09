@@ -6,8 +6,10 @@
 \usage{
 impute(
   data,
-  method = c("zero", "mean_obs", "median_obs", "mean_data", "median_data", "linear"),
-  obs_share_data = FALSE
+  method = c("zero", "mean_obs", "median_obs", "mean_data", "median_data", "linear",
+    "functional"),
+  obs_share_data = FALSE,
+  ...
 )
 }
 \arguments{
