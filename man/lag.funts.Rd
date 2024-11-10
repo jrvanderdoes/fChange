@@ -4,7 +4,7 @@
 \alias{lag.funts}
 \title{Lag funts}
 \usage{
-\method{lag}{funts}(x, k, ...)
+lag.funts(x, k, ...)
 }
 \arguments{
 \item{x}{funts object}
