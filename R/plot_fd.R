@@ -1,14 +1,12 @@
 #' Plot functional data
 #'
-#' \code{plot_fd} plots functional data either in an fd object or evaluated at certain points
+#' \code{.plot_fd} plots functional data either in an fd object or evaluated at certain points
 #'
-#' @param data funts object or data.frame of evaluated fd objects (the columns being lines and
+#' @param X funts object or data.frame of evaluated fd objects (the columns being lines and
 #'     the rows the evaluated points)
 #' @param CPs (Optional) Vectors of numeric values indicating the location of
 #'     change points. This will color each section differently. Default vallue
 #'     is NULL.
-#' @param curve_points (Optional) An vector containing the points at which the
-#'     data was evaluated. Default is 1:nrow(data)
 #' @param plot_title (Optional) String to title the plot. Default value is NULL.
 #' @param val_axis_title (Optional) String to title the axis for values of
 #'     observation. Default value is 'Value'.
@@ -16,8 +14,6 @@
 #'     range axis (observations in an FD object). Default value is 'resolution'.
 #' @param FD_axis_title (Optional) String to title the axis for FD observations.
 #'     Default value is 'Observation'.
-#' @param FDReps (Optional) Vector of values for FD observation names. Default
-#'     value is 1:ncol(data).
 #' @param eye (Optional) List with certain parameters to determine the view of
 #'     the resulting image. The default value is list(x = -1.5, y = -1.5, z = 1.5).
 #' @param aspectratio (Optional) List with certain parameters to determine the
@@ -34,22 +30,26 @@
 #'
 #' @return A plot for the data. It is an interactive plotly plot if
 #'  interactive is FALSE (default) and a lattice plot if TRUE.
-#' @export
+#'
+#' @noRd
+#' @keywords internal
 #'
 #' @examples
-#' plot_fd(X = electricity[, 1:10])
-#' plot_fd(X = electricity[, 1:50], CPs = c(25))
-#' plot_fd(
-#'   X = electricity, CPs = c(50, 150, 220, 300),
-#'   interactive = FALSE, showticklabels = FALSE
-#' )
-plot_fd <- function(X, CPs = NULL, plot_title = X$name,
+#' #.plot_fd(X = electricity[, 1:10])
+#' #.plot_fd(X = electricity[, 1:50], CPs = c(25))
+#' #.plot_fd(
+#' #  X = electricity, CPs = c(50, 150, 220, 300),
+#' #  interactive = FALSE, showticklabels = FALSE
+#' #)
+.plot_fd <- function(X, CPs = NULL, plot_title = X$name,
                     val_axis_title = "Value", res_axis_title = "Resolution",
                     FD_axis_title = "Observations",
                     eye = list(x = -1.5, y = -1.5, z = 1.5),
                     aspectratio = NULL,
                     showticklabels = TRUE, interactive = TRUE) {
-  X <- .check_data(X)
+  if(is.null(eye)) eye <- list(x = -1.5, y = -1.5, z = 1.5)
+
+  X <- funts(X)
   if(!is.null(CPs)) CPs <- CPs[order(CPs)]
 
   if (!interactive) {
@@ -99,11 +99,12 @@ plot_fd <- function(X, CPs = NULL, plot_title = X$name,
 #' This (internal) function to plot the function data, with no coloring based on
 #'     change points.
 #'
-#' @inheritParams plot_fd
+#' @inheritParams .plot_fd
 #'
 #' @return A plotly plot
 #'
 #' @noRd
+#' @keywords internal
 .plot_evalfd_3dlines <- function(X, plot_title = NULL,
                                  val_axis_title = "Value",
                                  res_axis_title = "Resolution",
@@ -118,7 +119,7 @@ plot_fd <- function(X, CPs = NULL, plot_title = X$name,
       plotData,
       data.frame(
         "resolution" = X$intraobs,
-        "FDRep" = X$labels[i],
+        "FDRep" = i, #X$labels[i],
         "Value" = X$data[,i]
       )
     )
@@ -147,7 +148,9 @@ plot_fd <- function(X, CPs = NULL, plot_title = X$name,
         ),
         xaxis = list(
           title = FD_axis_title,
-          showticklabels = showticklabels
+          showticklabels = showticklabels,
+          ticktext=.select_n(vals=X$labels, n=6),
+          tickvals=.select_n(vals=1:length(X$labels), n=6)
         ),
         zaxis = list(
           title = val_axis_title,
@@ -214,13 +217,14 @@ plot_fd <- function(X, CPs = NULL, plot_title = X$name,
 #' This (internal) function to plot the function data, with coloring based on
 #'     change points.
 #'
-#' @inheritParams plot_fd
+#' @inheritParams .plot_fd
 #' @param CPs Vectors of numeric values indicating the location of change points.
 #'     This will color each section differently.
 #'
 #' @return A plotly plot
 #'
 #' @noRd
+#' @keywords internal
 .plot_evalfd_3dlines_cps <- function(X, CPs,
                                      plot_title = NULL,
                                      val_axis_title = "Value",
@@ -346,14 +350,16 @@ plot_fd <- function(X, CPs = NULL, plot_title = X$name,
 
 #' Plot With Surface for Speed
 #'
-#' @inheritParams plot_fd
+#' @inheritParams .plot_fd
 #' @param aspectratio (Optional) List with certain parameters to determine the
 #'     image size parameters. The default value is c(2.5,.75,1). Also any lists
-#'     are converted to this (as it is likely from default call `in plot_fd()`).
+#'     are converted to this (as it is likely from default call in
+#'     \code{.plot_fd()}).
 #'
 #' @return A lattice plot
 #'
 #' @noRd
+#' @keywords internal
 .plot_evalfd_highdim <- function(X, CPs = NULL,
                                  plot_title = NULL,
                                  val_axis_title = NULL,
@@ -375,6 +381,7 @@ plot_fd <- function(X, CPs = NULL, plot_title = X$name,
     ceiling(max(X$data,na.rm = T))
   )
 
+  name <- V1 <- value <- NULL
   data1 <- X$data
   colnames(data1) <- 1:ncol(X)
   plotData <- cbind(X$intraobs,data1) %>%
