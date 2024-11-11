@@ -60,14 +60,18 @@ observations are projected onto should be selected based on TVE using
 \code{\link{pick_dim}}.
 }
 \examples{
-#mean_pca_change(funts(electricity))
+res <- mean_pca_change(generate_brownian_bridge(200,seq(0,1,length.out=10)))
+res1 <- mean_pca_change(generate_ou(20,200))
+res2 <- mean_pca_change(funts(electricity))
 }
 \references{
-Berkes, I., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Detecting changes in the mean of functional observations}
+Berkes, I., Gabrys, R.,Horvath, L. & P. Kokoszka (2009).,
+\emph{Detecting changes in the mean of functional observations}
 Journal of the Royal Statistical Society, Series B 71, 927–946
 
-Aue, A., Gabrys, R.,Hovarth, L. & P. Kokoszka (2009)., \emph{Estimation of a change-point in the mean function
-of functional data} Journal of Multivariate Analysis 100, 2254–2269.
+Aue, A., Gabrys, R.,Horvath, L. & P. Kokoszka (2009).,
+\emph{Estimation of a change-point in the mean function of functional data}
+Journal of Multivariate Analysis 100, 2254–2269.
 }
 \seealso{
 \code{\link{change_FF}}
