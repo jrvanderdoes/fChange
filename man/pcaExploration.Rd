@@ -28,3 +28,9 @@ Principal Component Exploration
 \examples{
 results <- pcaExploration(funts(electricity))
 }
+\references{
+Hyndman, R. J., & Shahid Ullah, M. (2007). Robust forecasting
+of mortality and fertility rates: A functional data approach. Computational
+Statistics & Data Analysis, 51(10), 4942–4956.
+https://doi.org/10.1016/j.csda.2006.07.028
+}
