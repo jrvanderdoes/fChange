@@ -28,5 +28,6 @@ scalarDetection(as.numeric(colMeans(electricity)))
 }
 }
 \references{
-Hušková, M., & Meintanis, S.G. (2006). Change Point Analysis based on Empirical Characteristic Functions. Metrika, 63, 145-168.
+Hušková, M., & Meintanis, S.G. (2006). Change Point Analysis
+based on Empirical Characteristic Functions. Metrika, 63, 145-168.
 }
