@@ -40,7 +40,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generate_data_fd(
+    data[[i]] <- generate_kl(
       ns = lengths[l_idx],
       eigsList = list(1/sqrt(1:5)),
       basesList = list(
@@ -70,7 +70,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generate_data_fd(
+    data[[i]] <- generate_kl(
       ns = lengths[l_idx],
       eigsList = list(1/sqrt(1:5)),
       basesList = list(
@@ -100,7 +100,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generate_data_fd(
+    data[[i]] <- generate_kl(
       ns = lengths[l_idx],
       eigsList = list(1/sqrt(1:5)),
       basesList = list(
@@ -132,7 +132,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0)$data
+    data[[i]] <- generate_ou(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0)$data
   }
   
   saveRDS(data,paste0(path, 'OU/Data/OUNull_len',l_idx,'_data.rds'))
@@ -149,7 +149,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0.5)$data
+    data[[i]] <- generate_ou(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0.5)$data
   }
   
   saveRDS(data,paste0(path, 'OU/Data/OUNull_len',l_idx,'_data_mild.rds'))
@@ -167,7 +167,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generateOU(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0.8)$data
+    data[[i]] <- generate_ou(res=dat_res,N=lengths[l_idx], burnin=burnin, rho=0.8)$data
   }
   
   saveRDS(data,paste0(path, 'OU/Data/OUNull_len',l_idx,'_data_strong.rds'))
@@ -189,7 +189,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generateFAR1(resolution=dat_res, N=lengths[l_idx],
+    data[[i]] <- generate_far1(resolution=dat_res, N=lengths[l_idx],
                               d=0, burnin=burnin)$data
   }
   
@@ -208,7 +208,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generateFAR1(resolution=dat_res, N=lengths[l_idx],
+    data[[i]] <- generate_far1(resolution=dat_res, N=lengths[l_idx],
                               d=0.5, burnin=burnin)$data
   }
   
@@ -227,7 +227,7 @@ for(l_idx in 1:length(lengths)){
   
   for(i in 1:nTrials){
     cat(paste0(i,', '))
-    data[[i]] <- generateFAR1(resolution=dat_res, N=lengths[l_idx],
+    data[[i]] <- generate_far1(resolution=dat_res, N=lengths[l_idx],
                               d=0.8, burnin=burnin)$data
   }
   
