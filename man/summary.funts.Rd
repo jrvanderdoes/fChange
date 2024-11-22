@@ -4,7 +4,7 @@
 \alias{summary.funts}
 \title{Summary for funts Object}
 \usage{
-\method{summary}{funts}(object, CPs = NULL, max.lag = 20, rainbow = c("subset", "full"), ...)
+\method{summary}{funts}(object, CPs = NULL, max.lag = 20, max.d = 2, demean = FALSE, ...)
 }
 \arguments{
 \item{object}{funts object}
@@ -23,8 +23,7 @@ Plot (ggplot) summarizing the data
 Summary for funts Object
 }
 \examples{
-summary(funts(electricity))
-summary(funts(electricity), CPs=c(50,200,300))
-summary(funts(electricity), rainbow='full')
-summary(funts(electricity), CPs=c(50,200,300), rainbow='full')
+summary(funts(electricity[,1:20]), max.lag=3)
+# summary(funts(electricity[,1:50]), CPs=c(20,38), max.lag=3)
+# summary(funts(electricity), CPs=c(50,200,300), max.lag=5, demean = TRUE)
 }

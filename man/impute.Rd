@@ -39,14 +39,14 @@ Imputation
 }
 \examples{
 temp <- data.frame(c(NA,NA,3:9,NA),
-                   c(NA,rnorm(2),NA, rnorm(6)),
-                   rnorm(10),
-                   c(rnorm(4),rep(NA,3), rnorm(3)),
+                   c(NA,stats::rnorm(2),NA, stats::rnorm(6)),
+                   stats::rnorm(10),
+                   c(stats::rnorm(4),rep(NA,3), stats::rnorm(3)),
                    rep(NA,10),
-                   c(rnorm(1), rep(NA,9)),
-                   c(rnorm(9),NA),
-                   rnorm(10),
-                   rnorm(10),
+                   c(stats::rnorm(1), rep(NA,9)),
+                   c(stats::rnorm(9),NA),
+                   stats::rnorm(10),
+                   stats::rnorm(10),
                    c(NA,NA,3:9, NA))
 impute(temp, method='mean_obs')
 impute(temp, method='mean_data')

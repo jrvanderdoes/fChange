@@ -8,7 +8,7 @@
 #'
 #' @param X The functional time series being tested, inputted in a matrix form
 #'  with each row representing each observation of the functional data values
-#'  on equidistant points of any prespecified interval.
+#'  on equidistant points of any pre-specified interval.
 #' @param statistic description
 #' @param method description
 #' @param boot_method description
@@ -75,15 +75,16 @@ compute_stationarity_test <-
 }
 
 
-#' Title
+#' Compute Stationarity Test Statistic
 #'
-#' @param X
-#' @param statistic
+#' Internal function to compute stationarity test statistic
 #'
-#' @return
-#' @export
+#' @inheritParams compute_stationarity_test
+#'
+#' @return Numeric test statistic
 #'
 #' @keywords internal
+#' @noRd
 .compute_stationary_test_stat <- function(X,statistic){
   X <- .check_data(X)
   N <- ncol(X$data)

@@ -15,10 +15,10 @@ Q_WS_quantile_iid <- function(f_data, alpha=0.05) {
 
   beta <- var_Q_h / (2 * mean_Q_h)
   nu <- 2 * (mean_Q_h^2) / var_Q_h
-  quantile <- beta * qchisq(1 - alpha, nu)
+  quantile <- beta * stats::qchisq(1 - alpha, nu)
 
   statistic <- t_statistic_Q(f_data, lag = 1)
-  p_val <- pchisq(statistic / beta, nu, lower.tail = FALSE)
+  p_val <- stats::pchisq(statistic / beta, nu, lower.tail = FALSE)
 
   list(statistic = statistic, quantile = quantile, p_value = p_val)
 }

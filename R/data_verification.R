@@ -5,10 +5,11 @@
 #' @return funts object or error if the data is incorrect
 #'
 #' @examples
-#' .check_data(funts(electricity))
-#' .check_data(electricity)
+#' #.check_data(funts(electricity))
+#' #.check_data(electricity)
 #'
 #' @keywords internal
+#' @noRd
 .check_data <- function(X, check.na=TRUE){
   if(class(X)[1]=='funts') {
     if(check.na & sum(is.na(X$data))>0)
@@ -26,17 +27,17 @@
 }
 
 
-#' Title
+#' Verify Inputs
 #'
-#' @param selection
-#' @param poss_selections
+#' Standard function to do checks on input values
 #'
-#' @return
-#' @export
+#' @param selection User entered selection
+#' @param poss_selections All possible sections
 #'
-#' @examples
+#' @return The formatted input
 #'
 #' @keywords internal
+#' @noRd
 .verify_input <- function(selection, poss_selections){
   # TODO:: Use this in functions instead of repeating code
   final_selection <- poss_selections[min(pmatch(selection, poss_selections))]

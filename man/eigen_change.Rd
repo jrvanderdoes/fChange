@@ -52,11 +52,14 @@ that is defined by \code{d} of the covariance function. The critical
 values are approximated via \code{M} Monte Carlo simulations.
 }
 \examples{
+eigen_change(funts(electricity), 2, test='joint')
+eigen_change(funts(electricity), 2, test='individual')
+
+\donttest{
 bm <- generate_brownian_motion(200,v=seq(0,1,length.out=20))
 eigen_change(bm, 3, test='joint')
 eigen_change(bm, 3, test='individual')
-eigen_change(funts(electricity), 2, test='joint')
-eigen_change(funts(electricity), 2, test='individual')
+}
 }
 \references{
 Aue, A, G Rice, and O Sönmez. “Structural Break Analysis

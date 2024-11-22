@@ -134,7 +134,7 @@ center.funts <- function(x, CPs=NULL, type='mean', ...) {
   if(type=='mean'){
     row_method <- rowMeans
   }else if(type=='median'){
-    row_method <- function(y){apply(y, MARGIN = 1, median)}
+    row_method <- function(y){apply(y, MARGIN = 1, stats::median)}
   }
 
 
@@ -159,7 +159,7 @@ center.funts <- function(x, CPs=NULL, type='mean', ...) {
 pca <- function(x, ...) UseMethod("pca")
 #' @rdname pca
 #' @export
-pca.default <- function(x, ...) { prcomp(x, ...) }
+pca.default <- function(x, ...) { stats::prcomp(x, ...) }
 
 
 #' Principal component analysis
@@ -224,7 +224,7 @@ sd.default <- function(x, ...) stats::sd(x, ...)
 #'  calculation is desired
 #' @param ... Unused parameters
 #'
-#' @return
+#' @return Vector for pointwise sd
 #' @export
 #'
 #' @examples
@@ -252,7 +252,7 @@ var.default <- function(x, ...) stats::var(x, ...)
 #'
 #' @inheritParams sd.funts
 #'
-#' @return
+#' @return Vector for matrix for pointwise or operator variance
 #' @export
 #'
 #' @examples
@@ -263,7 +263,7 @@ var.funts <- function(x, type=c('operator','pointwise'), ...) {
   if(type=='operator'){
     autocov_approx_h(X$data,0)
   } else if(type=='pointwise'){
-    Apply(x$data, MARGIN = 1, var)
+    apply(x$data, MARGIN = 1, var)
   } else{
     stop('Type must be "operator" or "pointwise"', call. = FALSE)
   }
@@ -278,6 +278,7 @@ var.funts <- function(x, type=c('operator','pointwise'), ...) {
 #' @export
 #'
 #' @examples
+#' cumsum(funts(electricity))
 cumsum.funts <- function(x){
     funts(t(apply(x$data,MARGIN = 1,cumsum)),
           labels = x$labels,

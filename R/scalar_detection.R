@@ -14,7 +14,7 @@
 #'  based on Empirical Characteristic Functions. Metrika, 63, 145-168.
 #'
 #' @examples
-#' scalarDetection(c(rnorm(50),rnorm(75,mean = 1)))
+#' scalarDetection(c(stats::rnorm(10),stats::rnorm(15,mean = 1)))
 #' \donttest{
 #' scalarDetection(as.numeric(colMeans(electricity)))
 #' }

@@ -1,7 +1,7 @@
 #' Change Point Confidence Intervals
 #'
-#' @param X
-#' @param CPs
+#' @param X funts data
+#' @param CPs Numeric vector for change points
 #' @param K Default is bartlett_kernel.
 #' @param h Default is 3.
 #' @param kappa Default is 0.5.
@@ -17,7 +17,8 @@
 #'  Statistical Society. Series B, Statistical Methodology, 80(3), 509–529.
 #'  \url{https://doi.org/10.1111/rssb.12257}
 #'
-#' @return
+#' @return Data.frame with the first column for the change, second for the lower
+#'  confidence interval, and the third for the upper confidence interval.
 #' @export
 #'
 #' @examples
@@ -129,13 +130,13 @@ compute_confidence_interval <- function(X, CPs, K=bartlett_kernel,
         double_t[which.max(w - abs(double_t) * m)]
       },double_t=double_t,m=m)
 
-      thetas0 <- quantile(xi, probs = c(alpha/2, 1-alpha/2))
+      thetas0 <- stats::quantile(xi, probs = c(alpha/2, 1-alpha/2))
 
     } else if(method=='distribution'){
       # Pg 40 (pdf 52), information
       .h_func <- function(u,x,y){
-        2*x * (x+2*y) * (1- pnorm( (x+2*y)*sqrt(u) )) *
-          exp(2*y * (x+y) * u) - 2*x^2 * (1-pnorm( x*sqrt(u) ))
+        2*x * (x+2*y) * (1- stats::pnorm( (x+2*y)*sqrt(u) )) *
+          exp(2*y * (x+y) * u) - 2*x^2 * (1-stats::pnorm( x*sqrt(u) ))
       }
       .f_distribution <- function(t, kappa, theta){
         ifelse(t<=0,
@@ -146,7 +147,7 @@ compute_confidence_interval <- function(X, CPs, K=bartlett_kernel,
 
       thetas0 <- rep(NA,2)
       f_CDF <- function(up, kappa, theta, alpha){
-        abs(integrate(.f_distribution,-20,up, kappa=kappa, theta=theta)$value - alpha)
+        abs(stats::integrate(.f_distribution,-20,up, kappa=kappa, theta=theta)$value - alpha)
       }
       # thetas0[1] <- -10.63
       #   # dot_integrate_uneven(.f_distribution(seq(-25,-10.63,0.01),kappa,theta),
@@ -155,10 +156,10 @@ compute_confidence_interval <- function(X, CPs, K=bartlett_kernel,
       #   # dot_integrate_uneven(.f_distribution(seq(-25,11.4,0.01),kappa,theta),
       #   #                      seq(-25,11.4,0.01))
 
-      tmp <- optimize(f_CDF, interval = c(-20,20),
+      tmp <- stats::optimize(f_CDF, interval = c(-20,20),
                       kappa=kappa, theta=theta, alpha=alpha/2)$minimum
       thetas0[1] <- tmp#.f_distribution(tmp,kappa,theta)
-      tmp <- optimize(f_CDF, interval = c(-20,20),
+      tmp <- stats::optimize(f_CDF, interval = c(-20,20),
                       kappa=kappa, theta=theta, alpha=1-alpha/2)$minimum
       thetas0[2] <- tmp#.f_distribution(tmp,kappa,theta)
 

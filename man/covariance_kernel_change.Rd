@@ -27,8 +27,7 @@ process of partial sample estimates.
 Upcoming: Size estimates may be included (already coded).
 }
 \examples{
-covariance_kernel_change(electricity[,1:18])
-covariance_kernel_change(electricity[,1:16])
+result <- covariance_kernel_change(electricity[,1:18], len=20)
 }
 \references{
 Horváth, L., Rice, G., & Zhao, Y. (2022). Change point analysis

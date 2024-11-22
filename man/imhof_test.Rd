@@ -22,5 +22,5 @@ the probability that the observed value of the statistic Q_h is larger than the 
 quantile of the quadratic form in normal variables described in (15)
 }
 \examples{
-imhof_test(funts(electricity),1)
+imhof_test(funts(electricity[,1:50]),1)
 }

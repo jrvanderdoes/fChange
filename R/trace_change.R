@@ -65,7 +65,7 @@ trace_change <- function (X, CPs = NULL, M = 1000){
     Tn[k] <- (1/sigma) * abs(T_x - (k)/N * T_1)
   }
   Sn <- max(Tn)
-  # p <- ecdf(Values)(Sn)
+  # p <- stats::ecdf(Values)(Sn)
   p <- sum(Sn <= Values) / M # Compute p-value
   k_star <- min(which.max(Tn))
 

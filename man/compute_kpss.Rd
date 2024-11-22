@@ -29,6 +29,9 @@ compute_kpss(
 
 \item{replace}{description}
 }
+\value{
+List with statistic and p-value, respectively
+}
 \description{
 Functional KPSS Test
 }

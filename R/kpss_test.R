@@ -8,7 +8,7 @@
 #' @param TVE description
 #' @param replace description
 #'
-#' @return
+#' @return List with statistic and p-value, respectively
 #' @export
 #'
 #' @references Chen, Y., & Pun, C. S. (2019). A bootstrap-based KPSS test for
@@ -29,7 +29,7 @@ compute_kpss <-function(X, method="MC", boot_method='seperate',
   N <- ncol(X$data)
   r <- nrow(X$data)
 
-  tmp <- .compute_fpss_test_stat(X)
+  tmp <- .compute_kpss_test_stat(X)
   RN <- tmp$test_statistic
   hat_eta <- tmp$hat_eta
 
@@ -56,7 +56,7 @@ compute_kpss <-function(X, method="MC", boot_method='seperate',
       boot_X[[i]] <- matrix(mu_hat,nrow = r,ncol = N) +
         matrix(1:N,ncol=N, nrow=r,byrow = TRUE) * xi_hat + boot_etas[[i]]
 
-      tmp <- .compute_fpss_test_stat(funts(boot_X[[i]]))
+      tmp <- .compute_kpss_test_stat(funts(boot_X[[i]]))
       sim_RNs[i] <- tmp$test_statistic
     }
 
@@ -67,17 +67,15 @@ compute_kpss <-function(X, method="MC", boot_method='seperate',
 
 
 
-#' Title
+#' Compute KPSS Test statistic
 #'
-#' @param X
+#' @inheritParams compute_kpss
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return List with test statistics and non-integrated values
 #'
 #' @keywords internal
-.compute_fpss_test_stat <- function(X){
+#' @noRd
+.compute_kpss_test_stat <- function(X){
   N <- ncol(X$data)
   r <- nrow(X$data)
 
@@ -94,15 +92,17 @@ compute_kpss <-function(X, method="MC", boot_method='seperate',
   list('test_statistic'=RN,'hat_eta'=hat_eta)
 }
 
-#' Title
+#' Generate Second-Order Brownian Motion
 #'
-#' @param M
-#' @param v
+#' Generates a second-order Brownian Motion for use in KPSS test
 #'
-#' @return
-#' @export
+#' @param M Numeric number of simulations
+#' @param v Observation points
 #'
-#' @examples
+#' @return funts object of the Brownian Motion
+#'
+#' @keywords internal
+#' @noRd
 .generate_second_BB <- function(M,v){
   # TODO:: Add to generation script
   W <- generate_brownian_motion(M,v=v)

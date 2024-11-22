@@ -231,8 +231,8 @@
 #' lag.max <- 2
 #' autocovSurface <- obtain_autocovariance(X=X,nlags = lag.max)
 #' norms <- .obtain_suface_L2_norm(intraobs = v,autocovs = autocovSurface)
-#' opar <- par(no.readonly = TRUE)
-#' par(mfrow = c(1,3))
+#' opar <- graphics::par(no.readonly = TRUE)
+#' graphics::par(mfrow = c(1,3))
 #' plot_autocovariance(fun.autocovariance = autocovSurface,lag = 0)
 #' title(sub = paste0("Lag ",0," - L2 Norm: ",norms[1]))
 #' plot_autocovariance(fun.autocovariance = autocovSurface,lag = 1)
@@ -589,7 +589,7 @@
   if(!"xlim" %in% names(arguments))  arguments$xlim <- c(0, length(rho)+1)
   if(!"cex.axis" %in% names(arguments)) arguments$cex.axis <- 1.5
   if(!"cex.lab" %in% names(arguments)) arguments$cex.lab <- 2.5
-  if(!"mar" %in% names(arguments)) par(mar=c(5,6,4,1)+.1)
+  if(!"mar" %in% names(arguments)) graphics::par(mar=c(5,6,4,1)+.1)
 
   arguments$x <- seq(1, length(rho), by = 1)
   arguments$y <- rho
@@ -616,7 +616,7 @@
   #   col = blue_col,
   #   lty = 2,
   #   lwd = 4)
-  box()
+  graphics::box()
 }
 
 
@@ -953,18 +953,18 @@
 #'  observation. The dimension of the matrix is \eqn{(1 x m)}, where
 #'  \eqn{m} is the number of points observed in the curve.
 #' @param v Numerical vector specifying the discretization points of the curves.
+#'
 #' @return Returns a matrix the same size as \code{curve} with the transformed
 #'  values.
-#' @export
 #'
 #' @examples
-#' # Example 1
+#' ## Example 1
 #'
-#' v <- seq(from = 0, to = 1, length.out = 20)
-#' set.seed(10)
-#' curve <- sin(v) + rnorm(length(v))
-#' operator_kernel <- 0.6*(v %*% t(v))
-#' hat_curve <- integral_operator(operator_kernel,curve,v)
+#' #v <- seq(from = 0, to = 1, length.out = 20)
+#' #set.seed(10)
+#' #curve <- sin(v) + stats::rnorm(length(v))
+#' #operator_kernel <- 0.6*(v %*% t(v))
+#' #hat_curve <- integral_operator(operator_kernel,curve,v)
 #'
 #' @keywords internal
 #' @noRd

@@ -22,7 +22,7 @@ XXXXX
 This implements a scalar characteristic change method.
 }
 \examples{
-scalarDetection(c(rnorm(50),rnorm(75,mean = 1)))
+scalarDetection(c(stats::rnorm(10),stats::rnorm(15,mean = 1)))
 \donttest{
 scalarDetection(as.numeric(colMeans(electricity)))
 }

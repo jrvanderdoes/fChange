@@ -25,7 +25,7 @@
 #' @export
 #'
 #' @examples
-#' binary_segmentation(funts(electricity[,1:100]),"Tn","Boot")
+#' binary_segmentation(funts(electricity[,1:50]),"Tn","Boot")
 binary_segmentation <- function(X, statistic=c('Tn','Mn'),
                                 method=c('Sim','Approx','Boot'),
                                 # trim_function = function(data) {
@@ -261,7 +261,10 @@ binary_segmentation <- function(X, statistic=c('Tn','Mn'),
 #' @param CPsVals Numeric vector of potential change points
 #' @param fn Method for test statistic
 #'
-#' @return
+#' @return Vector of change points or NA if none
+#'
+#' @keywords internal
+#' @noRd
 .ce_verify_changes <- function(CPsVals, X,
                                 fn, M=M, J=J, space=space,
                                h_function=function(X){ncol(X)^(1/3)}, iters=iters,

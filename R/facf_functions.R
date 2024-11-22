@@ -20,10 +20,10 @@ Q_WS_quantile <- function(f_data, lag, alpha=0.05, M=NULL, low_disc=FALSE) {
 
   beta <- var_Q_h / (2 * mean_Q_h)
   nu <- 2 * (mean_Q_h^2) / var_Q_h
-  quantile <- beta * qchisq(1 - alpha, nu)
+  quantile <- beta * stats::qchisq(1 - alpha, nu)
 
   statistic <- t_statistic_Q(f_data, lag)
-  p_val <- pchisq(statistic / beta, nu, lower.tail = FALSE)
+  p_val <- stats::pchisq(statistic / beta, nu, lower.tail = FALSE)
 
   list(statistic = statistic, quantile = quantile, p_value = p_val)
 }
@@ -122,7 +122,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
   } else {
     rand_samp_mat <- matrix(nrow=M, ncol=4)
     for (k in 1:4) {
-      rand_samp <- floor(J * runif(M, 0, 1))
+      rand_samp <- floor(J * stats::runif(M, 0, 1))
       rand_samp[which(rand_samp == 0)] <- 1
       rand_samp_mat[,k] <- rand_samp
     }

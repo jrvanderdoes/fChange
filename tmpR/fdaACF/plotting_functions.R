@@ -16,7 +16,7 @@ plot_autocovariance <- function(fun.autocovariance,lag = 0,...){
   #' function.
   #' @examples
   #' # Example 1
-  #' 
+  #'
   #' N <- 100
   #' v <- seq(from = 0, to = 1, length.out = 10)
   #' sig <- 2
@@ -24,10 +24,10 @@ plot_autocovariance <- function(fun.autocovariance,lag = 0,...){
   #' nlags <- 1
   #' lagged_autocov <- obtain_autocovariance(Y = bbridge,nlags = nlags)
   #' plot_autocovariance(lagged_autocov,1)
-  #' 
+  #'
   #' \donttest{
   #' # Example 2
-  #' 
+  #'
   #' N <- 500
   #' v <- seq(from = 0, to = 1, length.out = 50)
   #' sig <- 2
@@ -93,7 +93,7 @@ plot_FACF <- function(rho,Blueline,ci,...){
   #' function.
   #' @examples
   #' # Example 1
-  #' 
+  #'
   #' N <- 100
   #' v <- seq(from = 0, to = 1, length.out = 10)
   #' sig <- 2
@@ -102,10 +102,10 @@ plot_FACF <- function(rho,Blueline,ci,...){
   #' upper_bound <- 0.95
   #' fACF <- obtain_FACF(Y = bbridge,v = v,nlags = nlags,ci=upper_bound,figure = FALSE)
   #' plot_FACF(rho = fACF$rho,Blueline = fACF$Blueline,ci = upper_bound)
-  #' 
+  #'
   #' \donttest{
   #' # Example 2
-  #' 
+  #'
   #' N <- 200
   #' v <- seq(from = 0, to = 1, length.out = 30)
   #' sig <- 2
@@ -116,7 +116,7 @@ plot_FACF <- function(rho,Blueline,ci,...){
   #' plot_FACF(rho = fACF$rho,Blueline = fACF$Blueline,ci = upper_bound)
   #' }
   #' @export plot_FACF
-  
+
   # Define suitable lwd for plotting
   nlags <- length(rho)
   if(nlags <= 30){
@@ -128,7 +128,7 @@ plot_FACF <- function(rho,Blueline,ci,...){
   }else{
     lwd_1 <- 3
   }
-  
+
   # Check if any additional plotting parameters are present
   arguments <- list(...)
   if(!"xlab" %in% names(arguments))  arguments$xlab <- "Lag"
@@ -144,15 +144,15 @@ plot_FACF <- function(rho,Blueline,ci,...){
   arguments$x = seq(1,length(rho),by = 1)
   arguments$y = rho
   arguments$type = "h"
-  
+
   do.call(graphics::plot,arguments)
   grid(lty = 1)
   do.call(graphics::lines,arguments)
-  graphics::lines(x = arguments$x, 
+  graphics::lines(x = arguments$x,
                   y = arguments$y,
-                  type = arguments$type, 
-                  col = "lightgrey", 
-                  lwd = arguments$lwd-2, 
+                  type = arguments$type,
+                  col = "lightgrey",
+                  lwd = arguments$lwd-2,
                   lend = 2);
   blue_color <- "#0073C2FF"
   graphics::abline(h = Blueline,col = blue_color,lwd = 4, lty = 2)
@@ -161,5 +161,5 @@ plot_FACF <- function(rho,Blueline,ci,...){
                    col = blue_color,
                    lty = 2,
                    lwd = 4)
-  box()
+  graphics::box()
 }

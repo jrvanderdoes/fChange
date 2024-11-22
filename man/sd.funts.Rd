@@ -4,7 +4,7 @@
 \alias{sd.funts}
 \title{SD for funts}
 \usage{
-\method{sd}{funts}(x, type = "pw", ...)
+\method{sd}{funts}(x, type = "pointwise", ...)
 }
 \arguments{
 \item{type}{Character to specify if an operator ('op') or pointwise ('pw')
@@ -12,9 +12,12 @@ calculation is desired}
 
 \item{...}{Unused parameters}
 }
+\value{
+Vector for pointwise sd
+}
 \description{
 SD for funts
 }
 \examples{
-sd(funts(electricity),type='pw')
+sd(funts(electricity),type='pointwise')
 }

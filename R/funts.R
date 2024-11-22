@@ -111,7 +111,7 @@ validate.funts <- function(x){
 Math.funts <- function (x, ...) {
   validate.funts(x)
 
-  x$data <- callGeneric(x$data,...)
+  x$data <- methods::callGeneric(x$data,...)
 
   x
 }
@@ -234,26 +234,6 @@ diff.funts <- function(x, lag = 1L, differences = 1L, ...) {
 }
 
 
-#' Lag funts
-#'
-#' @param x funts object
-#' @param k integer indicating the number of lags for the data
-#' @param ... Unused additional parameters
-#'
-#' @return A funts object
-#' @export
-#'
-#' @examples
-#' # lag.funts(funts(electricity))
-lag.funts <- function(x, k, ...) {
-  stopifnot(k >= 0)
-  #ans <- .Call("lag", x, as.integer(k),PACKAGE="fts")
-  #
-  dat1 <- x$data[,-c(1:round(k))]
-  funts(dat1,labels = x$labels[-c(1:round(k))])
-}
-
-
 #' Max funts
 #'
 #' Get the observation(s) with the max average value.
@@ -309,20 +289,6 @@ mean.funts <- function(x, ...) {
 }
 
 
-#' Median for funts
-#'
-#' @inheritParams max.funts
-#'
-#' @return Numeric for the median at each resolution
-#' @export
-#'
-#' @examples
-#' # median(funts(electricity))
-median.funts <- function(x, ...) {
-  apply(x$data, MARGIN = 1, median)
-}
-
-
 #' Dimension of funts
 #'
 #' @inheritParams max.funts
@@ -349,27 +315,4 @@ dim.funts <- function(x, ...) {
 #' # plot(funts(electricity))
 plot.funts <- function(x, ...){
   plot_fd(x$data, ...)
-}
-
-
-#' Quantile funts
-#'
-#' @param x A funts object
-#' @param ... Additional parameters to pass into quantile function
-#'
-#' @return Matrix with columns for each requested quantile
-#' @export
-#'
-#' @examples
-#' # quantile(funts(electricity))
-#' # quantile(funts(electricity),probs = 0.95)
-quantile.funts <- function(x, probs = seq(0, 1, 0.25), ...){
-  if(length(probs)>1){
-    output <- t(apply(x$data, MARGIN = 1, quantile, probs=probs, ...))
-  } else{
-    output <- data.frame(apply(x$data, MARGIN = 1, quantile, probs=probs, ...))
-    colnames(output) <- paste0(probs*100,'%')
-  }
-
-  output
 }

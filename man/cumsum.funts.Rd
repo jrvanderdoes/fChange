@@ -15,3 +15,6 @@ funts object with data as cumsum
 \description{
 Cumsum for funts object
 }
+\examples{
+cumsum(funts(electricity))
+}

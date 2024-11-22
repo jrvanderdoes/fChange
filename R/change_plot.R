@@ -1,22 +1,16 @@
-#' Title
+#' Change Plot
 #'
-#' @param data
-#' @param curve_points
-#' @param CPs
-#' @param plot_title
-#' @param val_axis_title
-#' @param res_axis_title
-#' @param FD_axis_title
-#' @param eye
-#' @param aspectratio
-#' @param showticklabels
+#' This plots the functional data with means for each segment.
 #'
-#' @return
+#' @inheritParams plot_fd
+#'
+#' @return An interactive plotly plot for the data.
 #' @export
 #'
 #' @examples
-#' change_plot(electricity,curve_points = 1:nrow(electricity),CPs = c(66, 144, 204, 243, 305))
-change_plot <- function(data, curve_points, CPs,
+#' change_plot(funts(electricity[,1:150]),CPs = c(66, 144))
+#' #change_plot(funts(electricity),CPs = c(66, 144, 204, 243, 305))
+change_plot <- function(X, CPs,
                   plot_title = NULL,
                   val_axis_title = "Value",
                   res_axis_title = "resolution",
@@ -25,6 +19,12 @@ change_plot <- function(data, curve_points, CPs,
                   aspectratio = list(x = 1, y = 1, z = 1),
                   showticklabels = TRUE,
                   warnings = TRUE) {
+  X <- .check_data(X)
+  data <- X$data
+  curve_points <- X$intraobs
+
+
+
   if(ncol(data)>750 & warnings)
     warning(paste0('Time to generate plot may be extensive ',
                    '(Ignore warning by setting warnings=FALSE).'),
@@ -167,210 +167,20 @@ change_plot <- function(data, curve_points, CPs,
 }
 
 
-#' #' Title
-#' #'
-#' #' @param X
-#' #' @param intervals
-#' #' @param plot_title
-#' #' @param val_axis_title
-#' #' @param res_axis_title
-#' #' @param FD_axis_title
-#' #' @param eye
-#' #' @param aspectratio
-#' #' @param showticklabels
-#' #'
-#' #' @return
-#' #' @export
-#' #'
-#' #' @examples
-#' interval_plot <- function(X, intervals,
-#'                         plot_title = X$name,
-#'                         val_axis_title = "Value",
-#'                         res_axis_title = "resolution",
-#'                         FD_axis_title = "FD Sims",
-#'                         eye = list(x = -1.5, y = -1.5, z = 1.5),
-#'                         aspectratio = list(x = 1, y = 1, z = 1),
-#'                         showticklabels = TRUE) {
-#'   X <- .check_data(X)
-#'
-#'   data <- X$data
-#'   curve_points <- X$intraobs
-#'   CPs <- intervals[,1]
-#'
-#'   number <- length(data[1, ])
-#'   valRange <- c(min(data), max(data))
-#'
-#'
-#'   plotData <- plotData_mean <- data.frame(
-#'     "resolution" = NA,
-#'     "FDRep" = NA,
-#'     "Color" = NA,
-#'     "Value" = NA
-#'   )[-1, ]
-#'
-#'   # Color Group to first CP
-#'   means <- rowMeans(data[, 1:min(CPs),drop=FALSE])
-#'   for (j in 1:min(CPs)) {
-#'     plotData <- rbind(
-#'       plotData,
-#'       data.frame(
-#'         "resolution" = curve_points,
-#'         "FDRep" = j,
-#'         "Color" = 1,
-#'         "Value" = data[, j]
-#'       )
-#'     )
-#'
-#'     plotData_mean <- rbind(
-#'       plotData_mean,
-#'       data.frame(
-#'         "resolution" = curve_points,
-#'         "FDRep" = j,
-#'         "Color" = 1,
-#'         "Value" = means
-#'       )
-#'     )
-#'   }
-#'   # Color Group from last CP
-#'   means <- rowMeans(data[, (max(CPs) + 1):number,drop=FALSE])
-#'   for (j in (max(CPs) + 1):number) {
-#'     plotData <- rbind(
-#'       plotData,
-#'       data.frame(
-#'         "resolution" = curve_points,
-#'         "FDRep" = j,
-#'         "Color" = length(CPs) + 1,
-#'         "Value" = data[, j]
-#'       )
-#'     )
-#'
-#'     plotData_mean <- rbind(
-#'       plotData_mean,
-#'       data.frame(
-#'         "resolution" = curve_points,
-#'         "FDRep" = j,
-#'         "Color" = length(CPs) + 1,
-#'         "Value" = means
-#'       )
-#'     )
-#'   }
-#'
-#'   # Color Additional Groups
-#'   if (length(CPs) > 1) {
-#'     for (i in 2:length(CPs)) {
-#'       means <- rowMeans(data[, (CPs[i - 1] + 1):CPs[i], drop=FALSE])
-#'
-#'       for (j in (CPs[i - 1] + 1):CPs[i]) {
-#'         plotData <- rbind(
-#'           plotData,
-#'           data.frame(
-#'             "resolution" = curve_points,
-#'             "FDRep" = j,
-#'             "Color" = i,
-#'             "Value" = data[, j]
-#'           )
-#'         )
-#'
-#'         plotData_mean <- rbind(
-#'           plotData_mean,
-#'           data.frame(
-#'             "resolution" = curve_points,
-#'             "FDRep" = j,
-#'             "Color" = i,
-#'             "Value" = means
-#'           )
-#'         )
-#'       }
-#'     }
-#'   }
-#'
-#'   # Color Confidence Intervals
-#'   for(i in 1:nrow(intervals)){
-#'     # Lower
-#'     plotData_mean[plotData_mean$FDRep %in%
-#'                     floor(intervals[i,2]):round(intervals[i,1]),"Color"] <- 'gray'
-#'
-#'     # Upper
-#'     plotData_mean[plotData_mean$FDRep %in%
-#'                     round(intervals[i,1]):floor(intervals[i,3]),"Color"] <- 'gray'
-#'   }
-#'
-#'   scene <- list(
-#'     camera = list(eye = eye),
-#'     aspectmode = "manual",
-#'     aspectratio = aspectratio
-#'   )
-#'
-#'   # Get Colors
-#'   tmpColors <- RColorBrewer::brewer.pal(length(CPs) + 1, "Set1")
-#'   tmpColors <- c(tmpColors,'gray')
-#'
-#'   # Parameters
-#'   if(is.null(res_axis_title)){
-#'     res_axis_title <- ''
-#'   }
-#'   if(is.null(FD_axis_title)){
-#'     FD_axis_title <- ''
-#'   }
-#'   if(is.null(val_axis_title)){
-#'     val_axis_title <- ''
-#'   }
-#'
-#'
-#'   plotly::plot_ly(plotData,
-#'                   x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
-#'                   type = "scatter3d", mode = "lines",
-#'                   split = ~ as.factor(FDRep),
-#'                   # color = 'gray',
-#'                   # colors='gray',
-#'                   color = ~ as.factor(Color),
-#'                   colors = tmpColors,
-#'                   opacity=0.15
-#'   ) %>%
-#'     plotly::add_lines(., data=plotData_mean,
-#'                       x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
-#'                       type = "scatter3d", mode = "lines",
-#'                       split = ~ as.factor(FDRep),
-#'                       color = ~ as.factor(Color),
-#'                       colors = tmpColors,
-#'                       opacity=1
-#'     ) %>%
-#'     plotly::layout(
-#'       scene = list(
-#'         yaxis = list(
-#'           title = res_axis_title,
-#'           showticklabels = showticklabels
-#'         ),
-#'         xaxis = list(
-#'           title = FD_axis_title,
-#'           showticklabels = showticklabels
-#'         ),
-#'         zaxis = list(
-#'           title = val_axis_title,
-#'           showticklabels = showticklabels
-#'         )
-#'       )
-#'     ) %>%
-#'     plotly::layout(title = plot_title, scene = scene) %>%
-#'     plotly::layout(showlegend = FALSE)
-#' }
 
-#' Title
+#' Interval Plot
 #'
-#' @param X
-#' @param intervals
-#' @param plot_title
-#' @param val_axis_title
-#' @param res_axis_title
-#' @param FD_axis_title
-#' @param eye
-#' @param aspectratio
-#' @param showticklabels
+#' A plot to show changes and their confidence interval on a functional data set.
 #'
-#' @return
+#' @inheritParams plot_fd
+#' @param intervals Data.frame from \code{compute_confidence_interval()}.
+#'
+#' @return An interactive plotly plot for the data.
 #' @export
 #'
 #' @examples
+#' interval_plot(funts(electricity[,1:80]),
+#'               data.frame('change'=66, 'lower'=60.169, 'upper'=72.542))
 interval_plot <- function(X, intervals,
                           plot_title = X$name,
                           val_axis_title = "Value",
@@ -386,7 +196,7 @@ interval_plot <- function(X, intervals,
     CPs <- CPs[order(CPs)]
 
     # Get Colors
-    plot_colors <- RColorBrewer::brewer.pal(length(CPs) - 1, "Set1")
+    plot_colors <- RColorBrewer::brewer.pal(max(length(CPs) - 1,3), "Set1")[1:(length(CPs)-1)]
   }else{
     CPs <- 0:ncol(X)
 

@@ -4,7 +4,7 @@
 \alias{var.funts}
 \title{Variance for funts}
 \usage{
-\method{var}{funts}(x, type = c("op", "pw"), ...)
+\method{var}{funts}(x, type = c("operator", "pointwise"), ...)
 }
 \arguments{
 \item{type}{Character to specify if an operator ('op') or pointwise ('pw')
@@ -12,9 +12,12 @@ calculation is desired}
 
 \item{...}{Unused parameters}
 }
+\value{
+Vector for matrix for pointwise or operator variance
+}
 \description{
 Variance for funts
 }
 \examples{
-var(funts(electricity),type='pw')
+var(funts(electricity),type='pointwise')
 }

@@ -7,3 +7,13 @@ NULL
 #' @importFrom Rcpp sourceCpp
 ## usethis namespace: end
 NULL
+
+#' Waste Function to use packages
+#'
+#' @name waste
+#'
+#' @import RcppArmadillo
+#'
+#' @keywords internal
+#' @noRd
+NULL

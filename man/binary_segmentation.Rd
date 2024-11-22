@@ -54,5 +54,5 @@ for general functions. Change points are recursively found until no
 more change points are detected.
 }
 \examples{
-binary_segmentation(funts(electricity[,1:100]),"Tn","Boot")
+binary_segmentation(funts(electricity[,1:50]),"Tn","Boot")
 }

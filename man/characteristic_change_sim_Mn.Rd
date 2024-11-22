@@ -42,5 +42,5 @@ List with three items:
 Characteristic Functions Change Point Detection - Mn Simulation
 }
 \examples{
-characteristic_change_sim_Mn(electricity,M=5,J=10,h=0)
+characteristic_change_sim_Mn(electricity[,1:50],M=5,J=10,h=0)
 }

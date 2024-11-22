@@ -34,7 +34,8 @@
 #'   data = electricity[, 1:50],
 #'   trim_function = function(...) {
 #'     10
-#'   }
+#'   },
+#'   max_changes=2
 #' )
 elbow_method <- function(data,
                          test_function = compute_Mn,
@@ -112,13 +113,13 @@ elbow_method <- function(data,
     #     TODO: Save previous
     data_segments <- .split_on_NA(test_stat)
 
-    return_data_tmp <- data.frame("CP" = NA, "Var" = NA)
+    return_data_tmp <- data.frame("CP" = rep(NA,length(data_segments)), "Var" = NA)
     for (k in 1:length(data_segments)) {
       # Find max test stat on interval
       value_max <- max(data_segments[[k]])
 
       # Get CP and total variance with full data
-      section_max <- which(test_stat == value_max)
+      section_max <- min(which(test_stat == value_max))
       tmp <- c(section_max, return_data$CP)
       tmp <- tmp[order(tmp)]
 
@@ -218,7 +219,7 @@ elbow_method <- function(data,
   # Setup
   data <- as.data.frame(data)
   data_std <- data
-  CPs <- c(0, CPs, ncol(data))
+  CPs <- unique(c(0, CPs, ncol(data)))
 
   if (errorType == "L2" || errorType == "Tr") {
     # Standardize Data

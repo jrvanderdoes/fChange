@@ -77,22 +77,7 @@ compute_TnMn <- function(X, M = 100000, W = NULL, space = "BM", ...) {
 #' @export
 #'
 #' @examples
-#' data_KL <- generate_kl(
-#' ns = c(50, 50),
-#' eigsList = list(
-#'   c(3, 2, 1, 0.5),
-#'   c(3, 3, 2)
-#' ),
-#' basesList = list(
-#'   fda::create.bspline.basis(nbasis = 4, norder = 4),
-#'   fda::create.fourier.basis(nbasis = 2)
-#' ),
-#' meansList = c(0, 0.5),
-#' distsArray = c("Normal", "Binomial"),
-#' evals = seq(0, 1, 0.05),
-#' kappasArray = c(0, 0.5)
-#' )
-#' result <- TnMn_resampling(data_KL$data, M=1000)
+#' # result <- TnMn_resampling(electricity[,1:20], iters=5,blockSize=4)
 TnMn_resampling <- function(X, blockSize = 1, iters = 1000,
                             replace = FALSE, alpha = 0.05, silent = FALSE, ...) {
   st <- Sys.time()

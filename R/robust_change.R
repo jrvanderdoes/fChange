@@ -21,7 +21,7 @@
 #'  Stat Papers (2024). \url{https://doi.org/10.1007/s00362-024-01577-7}
 #'
 #' @examples
-#' robust_change(funts(electricity),m=10)
+#' robust_change(funts(electricity[,1:100]),m=10)
 robust_change <- function(X, m){#, type=c('Wilcox','Cusum')){
 
   # Create Proper Data and Bandwidths
@@ -52,7 +52,7 @@ robust_change <- function(X, m){#, type=c('Wilcox','Cusum')){
   ## TODO:: fill_U is slow
   U_hC <- fill_U(A_h=Re_A_h,
                  A_C=Re_A_C,
-                 norm=rnorm(m*ncol(Obs)),
+                 norm=stats::rnorm(m*ncol(Obs)),
                  hC_Obs=hC_Obs,
                  m=m, n=ncol(Obs), d=nrow(Obs) )
   maxis <- find_max(U_hC, m, ncol(Obs))
@@ -61,8 +61,8 @@ robust_change <- function(X, m){#, type=c('Wilcox','Cusum')){
   Te <- fill_T(hC_Obs, ncol(Obs), nrow(Obs))
   T_max <- apply(Te,MARGIN = 2, max)
 
-  list("Wilcox_pvalue"=1-ecdf(maxis[,1])(T_max[1]),
-       "Cusum_pvalue"=1-ecdf(maxis[,2])(T_max[2]),
+  list("Wilcox_pvalue"=1-stats::ecdf(maxis[,1])(T_max[1]),
+       "Cusum_pvalue"=1-stats::ecdf(maxis[,2])(T_max[2]),
        "Wilcox_bandwidth"=bw_h,
        "Cusum_bandwidth"=bw_C)
 }

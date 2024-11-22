@@ -21,28 +21,17 @@ generate_brownian_motion <- function(
 
   res <- length(v)
 
-  # data <- matrix(0, ncol = N, nrow = res)
-  # for(i in 2:res){
-  #   data[i,] <- data[i-1,] + rnorm(N,sd=sd*sqrt(v[i]-v[i-1]))
-  # }
   if(N>1){
     data <- apply(t(sapply(c(0,diff(v)),
-                           function(d,N,sd){rnorm(N,sd=sd*sqrt(d))},N=N,sd=sd)),
+                           function(d,N,sd){stats::rnorm(N,sd=sd*sqrt(d))},N=N,sd=sd)),
                   MARGIN = 2, cumsum)
   }else{
     data <- cumsum(sapply(c(0,diff(v)),
-                           function(d,N,sd){rnorm(N,sd=sd*sqrt(d))},N=N,sd=sd)
+                           function(d,N,sd){stats::rnorm(N,sd=sd*sqrt(d))},N=N,sd=sd)
                    )
   }
 
-  # data[2:res,] <- data[1:(res-1),] +
-  #   t(sapply(c(0,diff(v)), function(d,N,sd){rnorm(N,sd=sd*d)},N=N,sd=sd))
-
   funts(X=data,intraobs = v)
-  # data[,2:res] <- t(apply(matrix(stats::rnorm( (res-1) * N, sd = sd),
-  #                                    ncol = res-1, nrow = N), 1, cumsum))
-  #
-  # funts(X=t(data),intraobs = v)
 }
 
 
@@ -85,7 +74,7 @@ generate_brownian_bridge1 <- function(
   dt <- diff(v)
   t <- seq(v[1], v[n], length = n + 1)
   BB <- sapply(1:N, function(m,v,n){
-    X <- c(0, cumsum(rnorm(n-1) * sqrt(dt) * sd))
+    X <- c(0, cumsum(stats::rnorm(n-1) * sqrt(dt) * sd))
     v[1] + X - (v - v[1])/(v[n] - v[1]) * (X[n] - v[1] + v[1])
   },v=v,n=n)
 

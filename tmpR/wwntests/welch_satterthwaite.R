@@ -32,7 +32,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
   } else {
     rand_samp_mat <- matrix(nrow=M, ncol=4)
     for (k in 1:4) {
-      rand_samp <- floor(J * runif(M, 0, 1))
+      rand_samp <- floor(J * stats::runif(M, 0, 1))
       rand_samp[which(rand_samp == 0)] = 1
       rand_samp_mat[,k] <- rand_samp
     }
@@ -67,7 +67,7 @@ MCint_eta_approx_i_j_vec <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
   } else {
     rand_samp_mat <- matrix(nrow=M, ncol=4)
     for (k in 1:4) {
-      rand_samp <- floor(J * runif(M, 0, 1))
+      rand_samp <- floor(J * stats::runif(M, 0, 1))
       rand_samp[which(rand_samp == 0)] = 1
       rand_samp_mat[,k] <- rand_samp
     }

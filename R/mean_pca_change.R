@@ -136,11 +136,16 @@ mean_pca_change <- function(X, TVE=0.95,
 
 
 
-#' Title
+#' Compute S_n Test statistic for PCA change
 #'
-#' @param k
+#' @param eta.hat TODO
+#' @param k TODO
+#' @param n TODO
 #'
-#' @return
+#' @return Numeric test statistic
+#'
+#' @keywords internal
+#' @noRd
 .S_n_pca <- function(eta.hat, k, n){
   # TODO:: Add
   # normalizer = ((k/n) * ((n-k) / n))^(-0.5)
@@ -155,11 +160,15 @@ mean_pca_change <- function(X, TVE=0.95,
   out #* normalizer
 }
 
-#' Title
+#' Asymptotic Threshold for mean PCA change
 #'
-#' @param N
+#' @param N description
+#' @param d description
 #'
-#' @return
+#' @return Numeric asymptotic threshold
+#'
+#' @keywords internal
+#' @noRd
 .asymp_pca <- function(N, d){
   B.Bridges <- matrix(0,nrow = d,ncol = N)
   for(j in (1:d)){

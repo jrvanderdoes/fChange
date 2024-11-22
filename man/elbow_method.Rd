@@ -10,7 +10,10 @@ elbow_method(
   trim_function = function(...) {
      0
  },
+  max_changes = min(ncol(data), 20),
   errorType = "L2",
+  look_ahead = 2,
+  look_alpha = 0.1,
   ...
 )
 }
@@ -54,6 +57,7 @@ results <- elbow_method(
   data = electricity[, 1:50],
   trim_function = function(...) {
     10
-  }
+  },
+  max_changes=2
 )
 }

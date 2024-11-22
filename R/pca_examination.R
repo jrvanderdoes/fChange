@@ -21,6 +21,8 @@
 #' pca_fit(funts(electricity))
 #' pca_fit(generate_brownian_motion(100))
 pca_fit <- function(X, TVE = 0.95, model=c('ets','arima'), ...){
+  if(!requireNamespace('forecast',quietly = TRUE))
+    stop("Please install the 'forecast' package",call. = FALSE)
 
   pc_data <- pca(X, TVE = TVE, ...)
 
@@ -29,11 +31,11 @@ pca_fit <- function(X, TVE = 0.95, model=c('ets','arima'), ...){
   model <- c('ets','arima')[min(pmatch(model,c('ets','arima')))]
   for (i in 1:ncol(pc_data$rotation)) {
     if(model=='ets'){
-      comps[[i]] <- forecast::ets(ts(pc_data$rotation[, i]))
+      comps[[i]] <- forecast::ets(stats::ts(pc_data$rotation[, i]))
     }else if(model=='arima'){
-      comps[[i]] <- forecast::auto.arima(ts(pc_data$rotation[, i]))
+      comps[[i]] <- forecast::auto.arima(stats::ts(pc_data$rotation[, i]))
     }
-    comps_resids[[i]] <- residuals(comps[[i]])#$residuals
+    comps_resids[[i]] <- stats::residuals(comps[[i]])#$residuals
     comps_fits[[i]] <- comps[[i]]$fitted
   }
 

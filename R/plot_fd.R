@@ -37,10 +37,10 @@
 #' @export
 #'
 #' @examples
-#' plot_fd(data = electricity[, 1:10])
-#' plot_fd(data = electricity[, 1:50], CPs = c(25))
+#' plot_fd(X = electricity[, 1:10])
+#' plot_fd(X = electricity[, 1:50], CPs = c(25))
 #' plot_fd(
-#'   data = electricity, CPs = c(50, 150, 220, 300),
+#'   X = electricity, CPs = c(50, 150, 220, 300),
 #'   interactive = FALSE, showticklabels = FALSE
 #' )
 plot_fd <- function(X, CPs = NULL, plot_title = X$name,

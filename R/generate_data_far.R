@@ -30,7 +30,7 @@ generate_far1 <- function(resolution, N, d=1/2, burnin=1000){
 
   for(i in 2:(N+burnin)){
     for(j in 1:length(times)){
-      X[j,i] <- c * integrate(function(s,t,X_lag){
+      X[j,i] <- c * stats::integrate(function(s,t,X_lag){
         K(s,t)*X_lag
       },lower = 0,upper = 1,t=times[j], X_lag=X[j,i-1])$value + w[j,i]
     }

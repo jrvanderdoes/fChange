@@ -59,15 +59,16 @@
 
 #' Bootstrap Data
 #'
-#' @param X
-#' @param blockSize
-#' @param M
-#' @param type
-#' @param replace
+#' @param X funts data object
+#' @param blockSize Numeric indicating size of blocks
+#' @param M Numeric indicating the number of iterations
+#' @param type String for 'overlapping' or 'seperate' block bootstrapping
+#' @param replace Boolean if data should be sample with or without replacement
 #'
-#' @return
+#' @return List of permuted data
 #'
-#' @examples
+#' @keywords internal
+#' @noRd
 .bootstrap <- function(X, blockSize, M=1000, type='overlapping', replace=TRUE){
   X <- .check_data(X)
   N <- ncol(X$data)

@@ -42,5 +42,5 @@ List with three items:
 Characteristic Functions Change Point Detection - Tn Simulation
 }
 \examples{
-characteristic_change_sim_Tn(electricity,M=5,J=10,h=0)
+characteristic_change_sim_Tn(electricity[,1:50],M=5,J=10,h=0)
 }

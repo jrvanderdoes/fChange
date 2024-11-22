@@ -11,11 +11,15 @@ compute_confidence_interval(
   h = 3,
   kappa = 0.5,
   M = 5000,
-  alpha = 0.05,
+  alpha = 0.1,
   method = "distribution"
 )
 }
 \arguments{
+\item{X}{funts data}
+
+\item{CPs}{Numeric vector for change points}
+
 \item{K}{Default is bartlett_kernel.}
 
 \item{h}{Default is 3.}
@@ -27,6 +31,10 @@ compute_confidence_interval(
 \item{alpha}{Default is 0.05}
 
 \item{method}{Options are 'distribution' and 'simulation'. Default is distribution.}
+}
+\value{
+Data.frame with the first column for the change, second for the lower
+confidence interval, and the third for the upper confidence interval.
 }
 \description{
 Change Point Confidence Intervals

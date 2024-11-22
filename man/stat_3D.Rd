@@ -31,7 +31,7 @@ This function adds 3D geoms such as points and paths to a ggplot2 plot.
 \examples{
 dat <- funts(electricity)
 
-data_lines <- cbind(data.frame('time'=dat$intraobs), dat$data) \%>\%
+data_lines <- cbind(data.frame('Time'=dat$intraobs), dat$data) \%>\%
  tidyr::pivot_longer(cols = 1+1:ncol(dat$data))
 
 colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
@@ -39,8 +39,8 @@ colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(dat$data))
 data_lines$color <- rep(colors_plot, nrow(dat$data) )
 data_lines$name <- as.numeric(data_lines$name)
 
-ggplot2::ggplot(data_lines,
-   ggplot2::aes(y=time, x=name, z=value, color=color)) +
+result <- ggplot2::ggplot(data_lines,
+   ggplot2::aes(y=Time, x=name, z=value, color=color)) +
 ggplot2::theme_void() +
 stat_3D(theta=0, phi=15, geom='path') +
 ggplot2::scale_color_manual(

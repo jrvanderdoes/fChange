@@ -84,7 +84,7 @@ characteristic_change_sim <- function(X, M = 20, J=50,
 #' @export
 #'
 #' @examples
-#' characteristic_change_sim_Tn(electricity,M=5,J=10,h=0)
+#' characteristic_change_sim_Tn(electricity[,1:50],M=5,J=10,h=0)
 characteristic_change_sim_Tn <- function(X,
                                      M = 20, J=50,
                                      nSims = 1000,
@@ -146,7 +146,7 @@ characteristic_change_sim_Tn <- function(X,
 #' @export
 #'
 #' @examples
-#' characteristic_change_sim_Mn(electricity,M=5,J=10,h=0)
+#' characteristic_change_sim_Mn(electricity[,1:50],M=5,J=10,h=0)
 characteristic_change_sim_Mn <- function(X,
                                         M = 20, J=50,
                                         nSims = 1000,
@@ -197,6 +197,18 @@ characteristic_change_sim_Mn <- function(X,
 
 
 #############################################
+#' Compute Characteristic Integrated Test Statistic
+#'
+#' Computes the integrated test statistic for the characteristic functional-based
+#'  change point detection.
+#'
+#' @inheritParams characteristic_change_sim
+#'
+#' @return Numeric integrated test statistic
+#' @export
+#'
+#' @examples
+#' compute_Tn(electricity[,1:100])
 compute_Tn <- function(X,
                        W=computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'),
                        J=50) {
@@ -215,6 +227,14 @@ compute_Tn <- function(X,
 }
 
 
+#' Compute CUSUM value for integrated test statistic
+#'
+#' @inheritParams characteristic_change_sim
+#'
+#' @return Numeric CUSUM value
+#'
+#' @keywords internal
+#' @noRd
 .Zn_final <- function(W, X) {
   n <- ncol(X)
   fhat_vals <- as.matrix(.fhat_all(X, W))
@@ -223,44 +243,27 @@ compute_Tn <- function(X,
 }
 
 
-# compute_Tn_final1 <- function(X, W) {
-#   n <- ncol(X)
-#   M <- ncol(W)
-#
-#   Zn <- .Zn_final(W, X)
-#   # Integrate out W
-#   intVal <- rowMeans(abs(Zn)^2)#dot_integrate_col(t(abs(Zn)^2))
-#
-#   # Integrate observations
-#   dot_integrate(intVal)
-# }
-#
-# .Zn_final1 <- function(W, X) {
-#   fhat_vals <- as.matrix(.fhat_all(X, W))
-#
-#   n <- ncol(X)
-#   res <- nrow(X)
-#   ns <- .select_n(1:ncol(X),res)
-#
-#   sqrt(n) * (fhat_vals[ns,] - (ns/n) %o% fhat_vals[nrow(fhat_vals),])
-# }
-#
-# compute_Tn_final2 <- function(X, W) {
-#   n <- ncol(X)
-#   M <- ncol(W)
-#
-#   Zn <- .Zn_final(W, X)
-#   # Integrate out W
-#   intVal <- rowMeans(abs(Zn)^2)#dot_integrate_col(t(abs(Zn)^2))
-#
-#   # Integrate observations
-#   dot_integrate(intVal)
-# }
 
-
+#' Compute Characteristic Maximized Test Statistic
+#'
+#' Computes the maximized test statistic for the characteristic functional-based
+#'  change point detection.
+#'
+#' @inheritParams characteristic_change_sim
+#'
+#' @return List with the following
+#'  \itemize{
+#'    \item value: numeric maximized test statistic
+#'    \item location: placement of maximized value
+#'    \item allValues: test statistic value at each point
+#'  }
+#' @export
+#'
+#' @examples
+#' compute_Mn(electricity[,1:100])
 compute_Mn <- function(X,
                        W=computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'),
-                       J=50) {
+                       J=min(50,ncol(X))) {
   n <- ncol(X)
 
   Zn <- .Zn_final(W,X)
@@ -277,38 +280,20 @@ compute_Mn <- function(X,
 }
 
 
-# compute_Mn_final1 <- function(X, W) {
-#   n <- ncol(X)
-#   M <- ncol(W)
-#
-#   Zn <- .Zn_final1(W, X)
-#   # Integrate out W
-#   return_value <- rowMeans(abs(Zn)^2)#dot_integrate_col(t(abs(Zn)^2))
-#
-#   list(
-#     "value" = max(return_value),
-#     "location" = which.max(return_value),
-#     "allValues" = return_value
-#   )
-# }
-#
-# compute_Mn_final2 <- function(X, W) {
-#   n <- ncol(X)
-#   M <- ncol(W)
-#
-#   Zn <- .Zn_final(W,X)
-#   # Integrate out W
-#   return_value <- rowMeans(abs(Zn)^2)#dot_integrate_col(t(abs(Zn)^2))
-#
-#   list(
-#     "value" = max(return_value),
-#     "location" = which.max(return_value),
-#     "allValues" = return_value
-#   )
-# }
 
 #############################################
 
+#' Compute the Square Root Matrix
+#'
+#' Computes the square root matrix for the characteristic functional-based
+#'  change point detection
+#'
+#' @inheritParams characteristic_change_sim
+#'
+#' @return Matrix representing the square root matrix
+#'
+#' @keywords internal
+#' @noRd
 .compute_sqrtMat <- function(X,W,J,h,K){
   x <- seq(0,1,length.out=J)
 
@@ -343,6 +328,7 @@ compute_Mn <- function(X,
 #'
 #' @return Data.frame for covariance based on Gaussian measure and given data X
 #'
+#' @keywords internal
 #' @noRd
 .estimCovMat <- function(X, W, x,
                                h = 3, K = bartlett_kernel) {
@@ -417,6 +403,7 @@ compute_Mn <- function(X,
 #'
 #' @return Data.frame with autocovariance value based on data given
 #'
+#' @keywords internal
 #' @noRd
 .estimD <- function(K, h, X, lfun, v, lfunp, vp) {
   iters <- (1 - ncol(X)):(ncol(X) - 1)
@@ -453,6 +440,7 @@ compute_Mn <- function(X,
 #'
 #' @return Numeric autocovariance value for given data
 #'
+#' @keywords internal
 #' @noRd
 .estimGamma <- function(k, X, fVals, fpVals, mean1, mean2) {
 
@@ -482,6 +470,7 @@ compute_Mn <- function(X,
 #'
 #' @return Numeric value of R-hat for fd object of interest
 #'
+#' @keywords internal
 #' @noRd
 .estimR <- function(r, fVals, meanVal = NA) {
   if (is.na(meanVal)) meanVal <- mean(fVals)
@@ -502,6 +491,7 @@ compute_Mn <- function(X,
 #'
 #' @return Numeric value(s) indicating function value for each FD object given
 #'
+#' @keywords internal
 #' @noRd
 .estimf <- function(Xr, lfun, v) {
   lfun((t(Xr) %*% v) / nrow(Xr))

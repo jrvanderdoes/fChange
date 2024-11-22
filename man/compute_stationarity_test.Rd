@@ -18,7 +18,7 @@ compute_stationarity_test(
 \arguments{
 \item{X}{The functional time series being tested, inputted in a matrix form
 with each row representing each observation of the functional data values
-on equidistant points of any prespecified interval.}
+on equidistant points of any pre-specified interval.}
 
 \item{statistic}{description}
 

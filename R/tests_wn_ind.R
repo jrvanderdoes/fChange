@@ -316,7 +316,7 @@ single_lag_test <- function(
 
     bootstrap_samples <- block_bootstrap(data$data, block_size, B = B, moving = moving)
     stats_distr <- lapply(bootstrap_samples, t_statistic_Q, lag=lag)
-    quantile <- quantile(as.numeric(stats_distr), 1 - alpha)
+    quantile <- stats::quantile(as.numeric(stats_distr), 1 - alpha)
     statistic <- t_statistic_Q(data$data, lag)
     p_value <- sum(statistic > stats_distr) / length(stats_distr)
 
@@ -446,8 +446,8 @@ spectral_test <- function(data, kernel = 'Bartlett',
   statistic <- spectral_t_statistic(data$data, kernel = kernel, bandwidth = bandwidth)
 
   list(statistic = statistic$stat,
-       quantile = qnorm(1 - alpha),
-       p_value = 1 - pnorm(statistic$stat),
+       quantile = stats::qnorm(1 - alpha),
+       p_value = 1 - stats::pnorm(statistic$stat),
        band = statistic$band)
 }
 
@@ -530,8 +530,8 @@ independence_test <- function(data, components, lag, alpha = 0.05) {
     summand[h] <- sum(r_f_h[,,h] * r_b_h[,,h])
   }
   Q_n <- N * sum(summand)
-  p_val <- as.numeric(1 - pchisq(Q_n, df = components^2 * lag))
-  quantile <- as.numeric(qchisq(1 - alpha, df = components^2 * lag))
+  p_val <- as.numeric(1 - stats::pchisq(Q_n, df = components^2 * lag))
+  quantile <- as.numeric(stats::qchisq(1 - alpha, df = components^2 * lag))
 
   list(statistic = Q_n, quantile = quantile, p_value = p_val)
 }
@@ -552,7 +552,7 @@ independence_test <- function(data, components, lag, alpha = 0.05) {
 #' @export
 #'
 #' @examples
-#' imhof_test(funts(electricity),1)
+#' imhof_test(funts(electricity[,1:50]),1)
 imhof_test <- function(data, lag) {
   data <- .check_data(data)
 

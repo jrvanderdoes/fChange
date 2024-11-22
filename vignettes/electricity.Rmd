@@ -131,12 +131,12 @@ ts_dat <- list()
 comps <- list()
 comps_resids <- list()
 for (i in 1:nPCs) {
-  ts_dat[[i]] <- ts(electricity_fpca_comp[, i], freq = 7)
+  ts_dat[[i]] <- stats::ts(electricity_fpca_comp[, i], freq = 7)
   # comps[[i]] <- forecast::ets(ts_dat[[i]])
   # comps_resids[[i]] <- resid(comps[[i]])
   #comps[[i]] <- forecast::auto.arima(ts_dat[[i]])
   comps[[i]] <- forecast::ets(ts_dat[[i]])
-  comps_resids[[i]] <- resid(comps[[i]])
+  comps_resids[[i]] <- stats::resid(comps[[i]])
 }
 
 electricity_fpca_forecast <- do.call(cbind, comps_resids)

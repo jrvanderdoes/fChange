@@ -1,59 +1,70 @@
 
-#' @rdname acf
+#' @rdname qqplot
 #'
 #' @export
-qqplot <- function(x, ...) UseMethod("acf")
-#' @rdname acf
+qqplot <- function(x, ...) UseMethod("qqplot")
+#' @rdname qqplot
 #'
 #' @export
 qqplot.default <- function(x, ...) stats::qqplot(x, ...)
 
 
 
-#' Title
+#' Generic Function to Compute QQ plot for funts
 #'
-#' @param x
-#' @param TVE
-#' @param max.d
-#' @param qq.sep
-#' @param alpha
+#' Creates normal QQ plots on the principal components of functional data
+#'
+#' @param x funts object
+#' @param TVE Numeric in [0,1] giving the total variance explained for selecting
+#'  the number of principal components.
+#' @param max.d Max number of principal components
+#' @param qq.sep Boolean for if the QQ plots should be seperate or stacked
+#' @param alpha Significant
 #' @param ...
 #'
-#' @return
+#' @return ggplot2 for QQ plot
 #' @export
 #'
 #' @examples
-qqplot.funts <- function(x, TVE=0.95, max.d=3, qq.sep=TRUE, alpha = 0.95,...){
-  distplot.funts(x, TVE, max.d, distribution = 'norm', qq.sep, alpha, ...)
+#' result <- qqplot(funts(electricity))
+qqplot.funts <- function(x, TVE=0.95, max.d=3, qq.sep=TRUE, alpha = 0.05, ...){
+  distplot(X = x, TVE = TVE, max.d = max.d, distribution = 'norm',
+           qq.sep = qq.sep, alpha = alpha, ...)
 }
 
-#' Title
+#' Distribution plot
 #'
-#' @param x
-#' @param distribution
-#' @param alpha
-#' @param ...
+#' @param x description
+#' @param CPs description
+#' @param alpha description
+#' @param TVE description
+#' @param max.d description
+#' @param distribution description
+#' @param qq.sep description
+#' @param alpha description
+#' @param legend description
+#' @param ... description
 #'
-#' @return
+#' @return ggplot2 for plot to compare principal components to a distribution
 #' @export
 #'
 #' @references John Fox, & Sanford Weisberg (2019). An R Companion to Applied
 #'  Regression. Sage.
 #'
 #' @examples
-#' distplot.funts(electricity)
-#' distplot.funts(electricity, max.d=2, qq.sep=FALSE)
-#' distplot.funts(electricity,dist='exp')
-distplot.funts <- function(X, CPs=NULL, TVE=0.95, max.d = 3,
+#' result <- distplot(electricity)
+#' result1 <- distplot(electricity, max.d=2, qq.sep=FALSE)
+#' result2 <- distplot(electricity,dist='exp')
+distplot <- function(X, CPs=NULL, TVE=0.95, max.d = 3,
                            distribution = "norm",
                            qq.sep = TRUE,
-                           alpha = 0.95, legend = FALSE, ...){
+                           alpha = 0.05, legend = FALSE, ...){
   X <- .check_data(X)
 
-  # Paramters
+  # Parameters
   #   All data will be of length n
   #     Since pca missing value will be fixed or already an error
-  Z_alpha <- qnorm(1 - (1 - alpha)/2)
+  Z_alpha <- stats::qnorm(1 - alpha/2)
 
   # Convert X to pca
   if(is.null(CPs)){
@@ -63,18 +74,18 @@ distplot.funts <- function(X, CPs=NULL, TVE=0.95, max.d = 3,
     dat <- X_pca$x[,1:D]
   }else{
     CPs <- unique(c(0, CPs, ncol(X)))
-    max_n <- max((CPs-lag(CPs))[-1])
+    max_n <- max(CPs[-1] - CPs[-length(CPs)])#max((CPs-lag(CPs))[-1])
     D <- length(CPs)-1
     dat <- data.frame(matrix(nrow=max_n,ncol=D))
     for(d in 1:(length(CPs)-1)){
       X_pca <- pca(funts(X$data[,(CPs[d]+1):CPs[d+1]]), TVE = 0)
-      dat[,d] <- c(X_pca$x,rep(NA,max_n-length(X_pca$x)))
+      dat[,d] <- c(X_pca$x,rep(NA,length.out=max_n-length(X_pca$x)))
     }
 
   }
 
 
-  # Get QQ on components
+  ## Get QQ on components
 
 
   # Distribution Function
@@ -84,9 +95,9 @@ distplot.funts <- function(X, CPs=NULL, TVE=0.95, max.d = 3,
   # Each components
   results <- results_coefs <- data.frame()
   for(d in 1:D){
-    data_comp <- na.omit(dat[,d])
+    data_comp <- stats::na.omit(dat[,d])
     n <- length(data_comp)
-    P <- ppoints(n)
+    P <- stats::ppoints(n)
 
     ord <- order(data_comp)
     df <- data.frame('ord' = data_comp[ord],
@@ -94,7 +105,7 @@ distplot.funts <- function(X, CPs=NULL, TVE=0.95, max.d = 3,
 
     # Line
     #   c(0.25, 0.75) for x-axis on plot
-    Q.x <- quantile(df$ord, c(0.25, 0.75))
+    Q.x <- stats::quantile(df$ord, c(0.25, 0.75))
     Q.z <- q.function(c(0.25, 0.75))#, ...)
     b <- diff(Q.x)/diff(Q.z)
     coef <- c(Q.x[1] - b * Q.z[1], b)

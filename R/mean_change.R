@@ -55,7 +55,7 @@ mean_change <- function(data, M = 1000, h = 0,
     lambda = lambda, n = n
   )
   p <- sum(Tn <= values_sim) / M # Compute p-value
-  # p <- 1-ecdf(Values)(Tn) # Compute p-value
+  # p <- 1-stats::ecdf(Values)(Tn) # Compute p-value
 
   dat.b <- funts(data$data[,1:k.star],
                  intraobs = data$intraobs,

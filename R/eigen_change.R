@@ -35,11 +35,14 @@
 #'  (London, Ont.) 31, no. 1 (2020). \url{https://doi.org/10.1002/env.2617.}
 #'
 #' @examples
+#' eigen_change(funts(electricity), 2, test='joint')
+#' eigen_change(funts(electricity), 2, test='individual')
+#'
+#' \donttest{
 #' bm <- generate_brownian_motion(200,v=seq(0,1,length.out=20))
 #' eigen_change(bm, 3, test='joint')
 #' eigen_change(bm, 3, test='individual')
-#' eigen_change(funts(electricity), 2, test='joint')
-#' eigen_change(funts(electricity), 2, test='individual')
+#' }
 eigen_change <- function(X, d, h =2, CPs = NULL,
                                test = c('joint', 'individual'),
                                M = 1000,
@@ -118,13 +121,17 @@ eigen_change <- function(X, d, h =2, CPs = NULL,
 }
 
 
-#' Title
+#' Asympotic Results for Joint
 #'
-#' @param N
-#' @param delta
-#' @param d
+#' Compute the test statistic threshold when joint
 #'
-#' @return
+#' @param N Length of data
+#' @param d Number of dimension
+#'
+#' @return Test statistic threshold
+#'
+#' @keywords internal
+#' @noRd
 .asymp_joint <- function(N, d){
   WW <- matrix(0, d, N)
   for(i in 1:d){

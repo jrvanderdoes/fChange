@@ -10,9 +10,9 @@
 #' @export
 #'
 #' @examples
-#' summary(funts(electricity))
-#' summary(funts(electricity), CPs=c(50,200,300))
-#' summary(funts(electricity), CPs=c(50,200,300), demean = TRUE)
+#' summary(funts(electricity[,1:20]), max.lag=3)
+#' # summary(funts(electricity[,1:50]), CPs=c(20,38), max.lag=3)
+#' # summary(funts(electricity), CPs=c(50,200,300), max.lag=5, demean = TRUE)
 summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, ...){
   object <- .check_data(object)
 
@@ -58,7 +58,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
     p_values_wn[,cp] <- p_values
 
     ## ACF
-    data_acf[[cp]] <- acf(X_cp, figure=FALSE)
+    data_acf[[cp]] <- acf(X_cp, lag.max=max.lag, figure=FALSE)
   }
 
   #####
@@ -66,7 +66,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
   p_values_wn_plot <-
     cbind(data.frame('lag'=1:max.lag), p_values_wn) %>%
     tidyr::pivot_longer(cols = colnames(p_values_wn)) %>%
-    na.omit()
+    stats::na.omit()
   plot_whitenoise <-
     ggplot2::ggplot(p_values_wn_plot) +
       ggplot2::geom_point(ggplot2::aes(x=lag, y=value,
@@ -75,7 +75,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
                                        group=name, color=name)) +
       ggplot2::geom_hline(ggplot2::aes(yintercept=0.05),linetype='dotted', col='red') +
       ggplot2::theme_bw() +
-    ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
+      ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
       ggplot2::ylim(c(0,1)) +
       ggplot2::xlab('') +
       ggplot2::ylab('')  +
@@ -84,7 +84,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
 
   #####
   ## Plot QQ
-  plot_qq <- distplot.funts(object,CPs = CPs,max.d = max.d,qq.sep = FALSE)
+  plot_qq <- distplot(object,CPs = CPs,max.d = max.d,qq.sep = FALSE)
 
   #####
   ## Plot ACF
@@ -125,7 +125,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
 
   #####
   ## Plot Lines
-  data_lines <- cbind(data.frame('time'=object$intraobs),
+  data_lines <- cbind(data.frame('Time'=object$intraobs),
                       object$data) %>%
     tidyr::pivot_longer(cols = 1+1:ncol(object$data))
 
@@ -153,7 +153,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
   data_lines$name <- as.numeric(data_lines$name)
 
   plot_lines <- ggplot2::ggplot(data_lines,
-                                ggplot2::aes(y=time,
+                                ggplot2::aes(y=Time,
                                     x=name,#as.Date(name)),
                                     z=value,
                                     color=as.character(color),
@@ -176,7 +176,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
                'Resolution'=nrow(object)
                )
   for(i in 1:nrow(data_summary)){
-    endpoints <- as.numeric(stringr::str_split('1-365','-')[[1]])
+    endpoints <- as.numeric(stringr::str_split(data_summary$Segment[1],'-')[[1]])
     data_summary[i,'kpss'] <-
       .specify_decimal(
         compute_kpss(object$data[,endpoints[1]:endpoints[2]],
@@ -240,7 +240,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
 
   #####
   ## Plot QQ
-  plot_qq <- distplot.funts(object,max.d=max.d,qq.sep = FALSE)
+  plot_qq <- distplot(object,max.d=max.d,qq.sep = FALSE)
 
   #####
   ## Plot ACF
@@ -265,7 +265,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
 
   #####
   ## Plot Lines
-  data_lines <- cbind(data.frame('time'=object$intraobs),
+  data_lines <- cbind(data.frame('Time'=object$intraobs),
                       object$data) %>%
     tidyr::pivot_longer(cols = 1+1:ncol(object$data))
 
@@ -276,7 +276,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
   data_lines$name <- as.numeric(data_lines$name)
 
   plot_lines <- ggplot2::ggplot(data_lines,
-                                ggplot2::aes(y=time,
+                                ggplot2::aes(y=Time,
                                     x=name,
                                     z=value,
                                     color=color)) +
@@ -310,7 +310,7 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
                                                       ncol = 2),
                                     plot_whitenoise,
                                     nrow = 3 ) +
-    theme(plot.margin = margin(0,0.2,0,0.2, "cm"))
+    ggplot2::theme(plot.margin = ggplot2::margin(0,0.2,0,0.2, "cm"))
 
   list('summary_data'=data_summary,
        'summary_figure'=plot_summary)
@@ -322,13 +322,11 @@ summary.funts <- function(object, CPs=NULL, max.lag=20, max.d=2, demean=FALSE, .
 #' @inheritParams summary.funts
 #'
 #' @return Plot (ggplot2) with colored observations / regions
+#' @export
 #'
 #' @examples
 #' rainbow_plot(funts(electricity))
 #' rainbow_plot(funts(electricity), CPs=c(50,100,200))
-#'
-#' @keywords internal
-#' @noRd
 rainbow_plot <- function(object, CPs=NULL){
   object <- .check_data(object)
   data <- object$data
@@ -409,7 +407,7 @@ rainbow_plot <- function(object, CPs=NULL){
 
 #' Distribution Plot
 #'
-#' Plot funtional data as 2-dimensional data with the mean(s) and the related
+#' Plot functional data as 2-dimensional data with the mean(s) and the related
 #'  distribution(s) given.
 #'
 #' @inheritParams summary.funts
@@ -420,9 +418,6 @@ rainbow_plot <- function(object, CPs=NULL){
 #' @examples
 #' distribution_plot(funts(electricity))
 #' distribution_plot(funts(electricity), CPs=c(50,100,200))
-#'
-#' @keywords internal
-#' @noRd
 distribution_plot <- function(object, CPs=NULL, alpha=0.05){
   # data <- object$data
   if(!is.null(CPs)) CPs <- unique(c(0, CPs, ncol(object$data)))
@@ -431,7 +426,7 @@ distribution_plot <- function(object, CPs=NULL, alpha=0.05){
   if (!is.null(CPs)) {
     subset_data <- data.frame(matrix(nrow=nrow(object$data),ncol=length(CPs)-1))
     for (i in 1:(length(CPs) - 1)) {
-      # subsets <- c(subsets,round(median((CPs_tmp[i]+1):CPs_tmp[i+1])))
+      # subsets <- c(subsets,round(stats::median((CPs_tmp[i]+1):CPs_tmp[i+1])))
       subset_data[,i] <- rowMeans(object$data[,(CPs[i]+1):CPs[i+1]])
     }
   } else{
@@ -487,19 +482,19 @@ distribution_plot <- function(object, CPs=NULL, alpha=0.05){
     for (i in 1:(length(CPs) - 1)) {
       bounds_tmp <-
         t(apply(object$data[,(CPs[i]+1):CPs[i+1]], MARGIN = 1,
-                quantile, probs=c(alpha/2,1-alpha/2),na.rm=TRUE))
+                stats::quantile, probs=c(alpha/2,1-alpha/2),na.rm=TRUE))
       colnames(bounds_tmp) <- paste0('X',i,c('_L','_U'))
       bounds <- cbind(bounds, bounds_tmp)
     }
     bounds_long <- bounds %>%
-      pivot_longer(cols = colnames(.)[-1]) %>%
-      mutate('group'=str_split(name,'_')) %>%
-      unnest_wider(col = group,names_sep = '') %>%
-      mutate(group=group1, type=group2, group2=NULL, group1=NULL) %>%
+      tidyr::pivot_longer(cols = colnames(.)[-1]) %>%
+      dplyr::mutate('group'=stringr::str_split(name,'_')) %>%
+      tidyr::unnest_wider(col = group,names_sep = '') %>%
+      dplyr::mutate(group=group1, type=group2, group2=NULL, group1=NULL) %>%
       merge(., plot_data[,c('Time','name','color')],
             by.x = c('Time','group'), by.y = c('Time','name'),all = TRUE)
     bounds_wide <- bounds_long %>%
-      pivot_wider(id_cols = c(Time,group,color),
+      tidyr::pivot_wider(id_cols = c(Time,group,color),
                   names_from = type,values_from = value)
   }else{
     bounds <- quantile.funts(object,
@@ -507,10 +502,10 @@ distribution_plot <- function(object, CPs=NULL, alpha=0.05){
                              na.rm=TRUE)
     colnames(bounds) <- c('L','U')
     bounds_long <- cbind(data.frame('Time'=object$intraobs), bounds) %>%
-      pivot_longer(cols = colnames(.)[-1]) %>%
-      mutate('group'='X1',color='gray')
+      tidyr::pivot_longer(cols = colnames(.)[-1]) %>%
+      dplyr::mutate('group'='X1',color='gray')
     bounds_wide <- bounds_long %>%
-      pivot_wider(id_cols = c(Time,group,color),
+      tidyr::pivot_wider(id_cols = c(Time,group,color),
                   names_from = name,values_from = value)
   }
 
@@ -559,7 +554,7 @@ distribution_plot <- function(object, CPs=NULL, alpha=0.05){
 #' @examples
 #' dat <- funts(electricity)
 #'
-#' data_lines <- cbind(data.frame('time'=dat$intraobs), dat$data) %>%
+#' data_lines <- cbind(data.frame('Time'=dat$intraobs), dat$data) %>%
 #'  tidyr::pivot_longer(cols = 1+1:ncol(dat$data))
 #'
 #' colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
@@ -567,8 +562,8 @@ distribution_plot <- function(object, CPs=NULL, alpha=0.05){
 #' data_lines$color <- rep(colors_plot, nrow(dat$data) )
 #' data_lines$name <- as.numeric(data_lines$name)
 #'
-#' ggplot2::ggplot(data_lines,
-#'    ggplot2::aes(y=time, x=name, z=value, color=color)) +
+#' result <- ggplot2::ggplot(data_lines,
+#'    ggplot2::aes(y=Time, x=name, z=value, color=color)) +
 #' ggplot2::theme_void() +
 #' stat_3D(theta=0, phi=15, geom='path') +
 #' ggplot2::scale_color_manual(
