@@ -1,20 +1,23 @@
 #' Change Point Confidence Intervals
 #'
-#' @param X funts data
-#' @param CPs Numeric vector for change points
-#' @param K Default is bartlett_kernel.
-#' @param h Default is 3.
-#' @param kappa Default is 0.5.
-#' @param M Default is 1000.
-#' @param alpha Default is 0.05
-#' @param method Options are 'distribution' and 'simulation'. Default is distribution.
+#' @param X Funts object or data easily convertible. See [funts()].
+#' @param CPs Numeric vector for detected change points.
+#' @param K Function for the Kernel. Default is bartlett_kernel.
+#' @param h Numeric for bandwidth in computation of long run variance.
+#' @param weighting Weighting for the interval computation, value in \[0,1\].
+#'  Default is 0.5.
+#' @param M Numeric for the number of Brownian motion simulations in computation
+#'  of the confidence interval. Default is 1000.
+#' @param alpha Numeric for the significance level, in \[0,1\]. Default is 0.05.
+#' @param method String to indicate the method for computing the confidence
+#'  interval. The options are 'distribution' and 'simulation'. Default is 'distribution'.
 #'
-#' @references Horváth, L., & Rice, G. (2024). Change Point Analysis for Time
+#' @references Horv\'{a}th, L., & Rice, G. (2024). Change Point Analysis for Time
 #'  Series (First edition.). Springer. \url{https://doi.org/10.1007/978-3-031-51609-2}
 #'
-#' @references Aue, A., Rice, G., & Sönmez, O. (2018). Detecting and dating structural
+#' @references Aue, A., Rice, G., & S\"{o}nmez, O. (2018). Detecting and dating structural
 #'  breaks in functional data without dimension reduction. Journal of the Royal
-#'  Statistical Society. Series B, Statistical Methodology, 80(3), 509–529.
+#'  Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
 #'  \url{https://doi.org/10.1111/rssb.12257}
 #'
 #' @return Data.frame with the first column for the change, second for the lower
@@ -24,32 +27,43 @@
 #' @examples
 #' X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
 #'            generate_brownian_motion(100,v=seq(0,1,0.05))$data+1000)
-#' compute_confidence_interval(X,CPs = 100)
-#' compute_confidence_interval(X,CPs=100,method = 'simulation')
+#' confidence_interval(X,CPs = 100)
+#' confidence_interval(X,CPs=100,method = 'simulation')
 #'
 #' X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
 #'            generate_brownian_motion(100,v=seq(0,1,0.05))$data+0.5)
-#' compute_confidence_interval(X,100,alpha = 0.1)
-#' compute_confidence_interval(X,CPs=100,alpha = 0.1,method = 'simulation')
+#' confidence_interval(X,100,alpha = 0.1)
+#' confidence_interval(X,CPs=100,alpha = 0.1,method = 'simulation')
 #'
 #' X <- generate_brownian_motion(200,v=seq(0,1,0.05))
-#' compute_confidence_interval(X,100)
-#' compute_confidence_interval(X,100,method = 'simulation')
+#' confidence_interval(X,100)
+#' confidence_interval(X,100,method = 'simulation')
 #'
 #' X <- cbind(generate_brownian_motion(200,v=seq(0,1,0.05))$data,
 #'            generate_brownian_motion(100,v=seq(0,1,0.05))$data+0.1,
 #'            generate_brownian_motion(150,v=seq(0,1,0.05))$data-0.05)
-#' compute_confidence_interval(X,c(200,300))
+#' confidence_interval(X,c(200,300))
 #'
 #' # set.seed(12345)
 #' # bs <- binary_segmentation(electricity,statistic = 'Tn',method = 'Boot')
-#' compute_confidence_interval(X = electricity, CPs = c(66, 144, 204, 243, 305),alpha = 0.1)
-compute_confidence_interval <- function(X, CPs, K=bartlett_kernel,
-                                h=3, kappa=0.5, M=5000,
+#' confidence_interval(X = electricity, CPs = c(66, 144, 204, 243, 305),alpha = 0.1)
+confidence_interval <- function(X, CPs, K=bartlett_kernel,
+                                h=3, weighting=0.5, M=5000,
                                 alpha=0.1, method='distribution'){
+  ## Verify Inputs
   method <- .verify_input(method, c('distribution','simulation'))
-
-  X <- .check_data(X)
+  if(weighting>1 || weighting<0){
+    stop('The parameter weighting must be in [0,1].', call. = FALSE)
+  }
+  if(alpha>1 || alpha<0){
+    stop('The parameter alpha must be in [0,1].', call. = FALSE)
+  }
+  CPs <- CPs[CPs >0]
+  CPs <- CPs[CPs <ncol(X)]
+  if(length(CPs)==0){
+    stop('Must specify at least one change in 1, 2, ..., N in parameter CPs.', call. = FALSE)
+  }
+  X <- funts(X)
 
   CPs_ext <- c(0,CPs,ncol(X$data))
   r <- nrow(X$data)
@@ -67,14 +81,14 @@ compute_confidence_interval <- function(X, CPs, K=bartlett_kernel,
     X_k2 <- rowMeans(X$data[,idx2])
 
     e <- X_k2 - X_k1
-    e_l2norm <- dot_integrate_uneven(e^2, r = X$intraobs)
+    e_l2norm <- dot_integrate(e^2, r = X$intraobs)
     eps_hat <- matrix(ncol=N, nrow=r)
     eps_hat[,1:CP_simple] <- X$data[,idx1] - X_k1
     eps_hat[,(CP_simple+1):N] <- X$data[,idx2] - X_k2
 
     g <- rep(NA,N)
     for(j in 1:N){
-      g[j] <- dot_integrate_uneven(
+      g[j] <- dot_integrate(
         eps_hat[,j] * e / sqrt(e_l2norm),
         r = X$intraobs)
     }
@@ -109,9 +123,9 @@ compute_confidence_interval <- function(X, CPs, K=bartlett_kernel,
       m <- rep(0, length(double_t))
       for(t_idx in 1:length(m)){
         if(double_t[t_idx] < 0){
-          m[t_idx] <- (1 - kappa)*(1 - theta) + kappa*theta
+          m[t_idx] <- (1 - weighting)*(1 - theta) + weighting*theta
         }else if(double_t[t_idx] > 0){
-          m[t_idx] <- (1 - kappa)*theta + kappa*(1 - theta)
+          m[t_idx] <- (1 - weighting)*theta + weighting*(1 - theta)
         }
       }
 
@@ -138,30 +152,30 @@ compute_confidence_interval <- function(X, CPs, K=bartlett_kernel,
         2*x * (x+2*y) * (1- stats::pnorm( (x+2*y)*sqrt(u) )) *
           exp(2*y * (x+y) * u) - 2*x^2 * (1-stats::pnorm( x*sqrt(u) ))
       }
-      .f_distribution <- function(t, kappa, theta){
+      .f_distribution <- function(t, weighting, theta){
         ifelse(t<=0,
-          suppressWarnings(.h_func(-t, (1-kappa)*(1-theta)+kappa*theta, (1-kappa)*theta + kappa*(1-theta))),
-          suppressWarnings(.h_func(t, (1-kappa)*theta+kappa*(1-theta), (1-kappa)*(1-theta) + kappa*theta))
+          suppressWarnings(.h_func(-t, (1-weighting)*(1-theta)+weighting*theta, (1-weighting)*theta + weighting*(1-theta))),
+          suppressWarnings(.h_func(t, (1-weighting)*theta+weighting*(1-theta), (1-weighting)*(1-theta) + weighting*theta))
         )
       }
 
       thetas0 <- rep(NA,2)
-      f_CDF <- function(up, kappa, theta, alpha){
-        abs(stats::integrate(.f_distribution,-20,up, kappa=kappa, theta=theta)$value - alpha)
+      f_CDF <- function(up, weighting, theta, alpha){
+        abs(stats::integrate(.f_distribution,-20,up, weighting=weighting, theta=theta)$value - alpha)
       }
       # thetas0[1] <- -10.63
-      #   # dot_integrate_uneven(.f_distribution(seq(-25,-10.63,0.01),kappa,theta),
+      #   # dot_integrate(.f_distribution(seq(-25,-10.63,0.01),weighting,theta),
       #   #                      seq(-25,-10.63,0.01))
       # thetas0[2] <- 11.4
-      #   # dot_integrate_uneven(.f_distribution(seq(-25,11.4,0.01),kappa,theta),
+      #   # dot_integrate(.f_distribution(seq(-25,11.4,0.01),weighting,theta),
       #   #                      seq(-25,11.4,0.01))
 
       tmp <- stats::optimize(f_CDF, interval = c(-20,20),
-                      kappa=kappa, theta=theta, alpha=alpha/2)$minimum
-      thetas0[1] <- tmp#.f_distribution(tmp,kappa,theta)
+                      weighting=weighting, theta=theta, alpha=alpha/2)$minimum
+      thetas0[1] <- tmp#.f_distribution(tmp,weighting,theta)
       tmp <- stats::optimize(f_CDF, interval = c(-20,20),
-                      kappa=kappa, theta=theta, alpha=1-alpha/2)$minimum
-      thetas0[2] <- tmp#.f_distribution(tmp,kappa,theta)
+                      weighting=weighting, theta=theta, alpha=1-alpha/2)$minimum
+      thetas0[2] <- tmp#.f_distribution(tmp,weighting,theta)
 
     }else{
       stop('Method incorrectly specified',call. = FALSE)
