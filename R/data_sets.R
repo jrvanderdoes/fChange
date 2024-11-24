@@ -29,7 +29,16 @@
 #'
 #' Intraday prices for the S&P500 index (SPY) for 2019 to 2023.
 #'
-#' @format ## `temperature`
-#' A data.frame with columns being day and rows the resolution.
+#' @format ## `SPY500`
+#' A data.frame with columns being day and rows the intraday resolution.
 "SPYUS500"
 
+
+#' Breast Cancer
+#'
+#' Percentage of cause-specific deaths out of total deaths for female breast
+#'  cancer in the United States from 1950 to 2021.
+#'
+#' @format ## `cancer`
+#' A data.frame with columns being the year and rows the age groups (5 years)
+"cancer"
