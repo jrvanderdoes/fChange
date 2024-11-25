@@ -17,3 +17,9 @@ NULL
 #' @keywords internal
 #' @noRd
 NULL
+
+
+#' General Information for fChange
+#'
+#' @keywords internal
+"_PACKAGE"
