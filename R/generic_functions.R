@@ -1,18 +1,3 @@
-#' Generic ACF/PACF
-#'
-#' @param x Object for computation of (partial) autocorrelation function
-#'  (ACF/PACF)
-#' @param ... Additional parameters to function based on data
-#'
-#' @name acf
-#'
-#' @return ACF or PACF values and plots
-#' @export
-#'
-#' @examples
-#' acf(1:10)
-NULL
-
 #' Generic Centering of Data
 #'
 #' @param object Object for computation of centering
@@ -62,74 +47,36 @@ NULL
 
 #############################################
 
-#' @rdname acf
+
+#' Generic Center Data function
+#'
+#' @param object Data to be centered
+#' @param ... Additional parameters based on data
+#'
+#' @seealso
+#'  [center.default()], [center.data.frame()],
+#'  [center.matrix()], [center.funts()]
 #'
 #' @export
-acf <- function(x, ...) UseMethod("acf")
-#' @rdname acf
-#'
-#' @export
-acf.default <- function(x, ...) stats::acf(x)
-
-
-#' @rdname acf
-#'
-#' @export
-pacf <- function(x, ...) UseMethod("pacf")
-#' @rdname acf
-#'
-#' @export
-pacf.default <- function(x, ...) stats::pacf(x)
-
-
-#' ACF for Functional Data
-#'
-#' @inheritParams acf
-#'
-#' @return Functional ACF values
-#' @export
-#'
-#' @examples
-#' acf(funts(electricity))
-acf.funts <- function(x, ...){
-  invisible(.compute_FACF(x, ...))
-}
-
-
-#' PACF for Functional Data
-#'
-#' @inheritParams pacf
-#'
-#' @return Functional PACF values
-#' @export
-#'
-#' @examples
-#' pacf(funts(electricity))
-pacf.funts <- function(x, ...){
-  invisible(.compute_FPACF(x, ...))
-    # n_harm = NULL, lag.max = NULL, ci=0.95, figure = TRUE, ...)
-}
-
-
+center <- function(object, ...) UseMethod("center")
 #' @rdname center
 #' @export
-center <- function(x, ...) UseMethod("center")
+center.default <- function(object, ...) { object - mean(object) }
 #' @rdname center
 #' @export
-center.default <- function(x, ...) { x - mean(x) }
+center.data.frame <- function(object, ...) { object <- as.matrix(object); NextMethod("center") }
 #' @rdname center
 #' @export
-center.data.frame <- function(x, ...) { x <- as.matrix(x); NextMethod("center") }
-#' @rdname center
-#' @export
-center.matrix <- function(x, ...) { x - rowMeans(x) }
+center.matrix <- function(object, ...) { object - rowMeans(object) }
 
 #' Center funts data
 #'
 #' @rdname center
+#' @param CPs Change points for centering individual sections.
+#' @param type String of \code{mean} or \code{median} for method of centering.
 #'
 #' @export
-center.funts <- function(x, CPs=NULL, type='mean', ...) {
+center.funts <- function(object, CPs=NULL, type='mean', ...) {
   type <- .verify_input(type, c('mean','median'))
   if(type=='mean'){
     row_method <- rowMeans
@@ -139,33 +86,39 @@ center.funts <- function(x, CPs=NULL, type='mean', ...) {
 
 
   if(is.null(CPs)){
-    x$data <- x$data - row_method(x$data)
+    object$data <- object$data - row_method(object$data)
   }else{
-    CPs_use <- unique(c(0, CPs, ncol(x$data)))
+    CPs_use <- unique(c(0, CPs, ncol(object$data)))
     CPs_use <- CPs_use[order(CPs_use)]
-    for(i in 1:(length(CPs)-1)){
-      x$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE] <-
-        x$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE] -
-        row_method(x$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE])
+    for(i in 1:(length(CPs_use)-1)){
+      object$data[,(CPs_use[i]+1):CPs_use[i+1]] <-
+        object$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE] -
+        row_method(object$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE])
     }
   }
-  x
+
+  object
 }
 
 
 
+#' Generic function for PCA
+#'
+#' @param object Data to compute principal component analysis on
+#' @param ... Additional information for method
+#'
+#' @return PCA object
+#' @export
+pca <- function(object, ...) UseMethod("pca")
 #' @rdname pca
 #' @export
-pca <- function(x, ...) UseMethod("pca")
-#' @rdname pca
-#' @export
-pca.default <- function(x, ...) { stats::prcomp(x, ...) }
+pca.default <- function(object, ...) { stats::prcomp(object, ...) }
 
 
 #' Principal component analysis
 #'
 #' @inheritParams pca
-#' @param TVE Numeric in [0.1] for the total variance explained. Can use this to
+#' @param TVE Numeric in \[0,1\] for the total variance explained. Can use this to
 #'  select only the required components
 #' @param ... Additional parameters for \code{prcomp}.
 #'
@@ -174,10 +127,10 @@ pca.default <- function(x, ...) { stats::prcomp(x, ...) }
 #'
 #' @examples
 #' pca(funts(electricity))
-pca.funts <- function(x, TVE = 1, ...){
+pca.funts <- function(object, TVE = 1, ...){
   if(TVE > 1 || TVE < 0) stop('TVE must be in [0,1].',call. = FALSE)
 
-  pc <- stats::prcomp(x=t(x$data), ...)
+  pc <- stats::prcomp(x=t(object$data), ...)
   if(TVE==1){
     min_pc <- length(pc$sdev)
   } else{
@@ -185,7 +138,7 @@ pca.funts <- function(x, TVE = 1, ...){
   }
 
   ## TODO:: Check out
-  new_rot <- pc$rotation[,1:min_pc,drop=FALSE]*sqrt(nrow(x$data))
+  new_rot <- pc$rotation[,1:min_pc,drop=FALSE]*sqrt(nrow(object$data))
 
   # scores <- matrix(NA, nrow=ncol(x$data),ncol = min_pc)
   # for(i in 1:ncol(x$data)){
@@ -193,7 +146,7 @@ pca.funts <- function(x, TVE = 1, ...){
   #     scores[i,l] <- dot_integrate(x$data[,i] %*% t(new_rot[,l]))
   #   }
   # }
-  scores <- (t(x$data-pc$center) %*% new_rot)[,1:min_pc,drop=FALSE]/nrow(x$data)
+  scores <- (t(object$data-pc$center) %*% new_rot)[,1:min_pc,drop=FALSE]/nrow(object$data)
 
   # res = fda::pca.fd(fda::Data2fd(X$data))
   # pc$sdev^2
@@ -201,7 +154,7 @@ pca.funts <- function(x, TVE = 1, ...){
   # View(pc$x); View(res$scores)
   # View(pc$rotation); View(fda::eval.fd(seq(0,1,length.out=30),res$harmonics))
 
-  list(sdev = pc$sdev[1:min_pc]/sqrt(nrow(x$data)),
+  list(sdev = pc$sdev[1:min_pc]/sqrt(nrow(object$data)),
        rotation = new_rot,
        center = pc$center,
        scale = pc$scale,
@@ -210,12 +163,16 @@ pca.funts <- function(x, TVE = 1, ...){
 }
 
 
+#' Generic Variance Standard Deviation
+#'
+#' @param object Data to compute on
+#' @param ... Additional parameters based on the data
+#'
+#' @export
+sd <- function(object, ...) UseMethod("sd")
 #' @rdname sd
 #' @export
-sd <- function(x, ...) UseMethod("sd")
-#' @rdname sd
-#' @export
-sd.default <- function(x, ...) stats::sd(x, ...)
+sd.default <- function(object, ...) stats::sd(object, ...)
 
 #' SD for funts
 #'
@@ -229,11 +186,11 @@ sd.default <- function(x, ...) stats::sd(x, ...)
 #'
 #' @examples
 #' sd(funts(electricity),type='pointwise')
-sd.funts <- function(x, type='pointwise', ...) {
+sd.funts <- function(object, type='pointwise', ...) {
   type <- c('pointwise')[min(pmatch(type,c('pointwise')))]
 
   if(type=='pointwise'){
-    return( apply(x$data, MARGIN = 1, sd) )
+    return( apply(object$data, MARGIN = 1, sd) )
   } else{
     stop('Only type="pointwise" is implemented', call. = FALSE)
   }
@@ -243,10 +200,10 @@ sd.funts <- function(x, type='pointwise', ...) {
 
 #' @rdname sd
 #' @export
-var <- function(x, ...) UseMethod("var")
+var <- function(object, ...) UseMethod("var")
 #' @rdname sd
 #' @export
-var.default <- function(x, ...) stats::var(x, ...)
+var.default <- function(object, ...) stats::var(object, ...)
 
 #' Variance for funts
 #'
@@ -257,13 +214,15 @@ var.default <- function(x, ...) stats::var(x, ...)
 #'
 #' @examples
 #' var(funts(electricity),type='pointwise')
-var.funts <- function(x, type=c('operator','pointwise'), ...) {
+#' var(funts(electricity),type='operator')
+var.funts <- function(object, type=c('operator','pointwise'), ...) {
   type <- c('operator','pointwise')[min(pmatch(type,c('operator','pointwise')))]
 
   if(type=='operator'){
-    autocov_approx_h(X$data,0)
+    # autocov_approx_h(object$data,0)
+    autocovariance(object$data,0)
   } else if(type=='pointwise'){
-    apply(x$data, MARGIN = 1, var)
+    apply(object$data, MARGIN = 1, var)
   } else{
     stop('Type must be "operator" or "pointwise"', call. = FALSE)
   }
