@@ -1,14 +1,16 @@
 #' Imputation
 #'
-#' @param data funts object
+#' Impute missing values in functional data.
+#'
+#' @param X Funts object or data easily convertible. See [funts()]
 #' @param method String to indicate method of imputation.
 #'  \itemize{
-#'    zero: Fill missing with 0
-#'    mean_obs: Fill missing with mean of each observation
-#'    median_obs: Fill missing with median of each observation
-#'    mean_data: Fill missing with mean at time through all data
-#'    median_data: Fill missing with median at time through all data
-#'    linear: Linearly interpolate missing data
+#'    \item zero: Fill missing with 0
+#'    \item mean_obs: Fill missing with mean of each observation
+#'    \item median_obs: Fill missing with median of each observation
+#'    \item mean_data: Fill missing with mean at time through all data
+#'    \item median_data: Fill missing with median at time through all data
+#'    \item linear: Linearly interpolate missing data
 #'  }
 #' @param obs_share_data Boolean in linear interpolation that indicates if
 #'  data should be shared across observations. For example, is the end of
@@ -31,65 +33,75 @@
 #'                    stats::rnorm(10),
 #'                    c(NA,NA,3:9, NA))
 #' impute(temp, method='mean_obs')
-#' impute(temp, method='mean_data')
-#' impute(temp, method='linear')
 #' impute(temp, method='linear', obs_share_data=TRUE)
-impute <- function(data,
+impute <- function(X,
                    method = c('zero','mean_obs','median_obs',
                               'mean_data','median_data',
                               'linear','functional'),
-                   obs_share_data = FALSE, ...){
+                   obs_share_data = FALSE){
   # TODO:: Read https://onlinelibrary-wiley-com.proxy.lib.uwaterloo.ca/doi/pdf/10.1002%2Fsta4.331
   #   Modern multiple imputation with functional data
-  data <- .check_data(data,check.na = FALSE)
+  X <- funts(X, inc.warnings = F)
   method <- .verify_input(method,
                           c('zero','mean_obs','median_obs', 'mean_data',
                             'median_data', 'linear', 'functional') )
 
-  switch(method,
+  X_imp <- switch(method,
          zero = {
-           imputed_zero = replace(data$data, is.na(data$data), 0)
+           imputed_zero = replace(X$data, is.na(X$data), 0)
          },
          mean_obs = {
-           apply(data$data,MARGIN = 2,function(x){
+           apply(X$data,MARGIN = 2,function(x){
              tmp <- replace(x, is.na(x), mean(x, na.rm = TRUE))
              replace(tmp,is.nan(tmp),NA)
            })
          },
          median_obs = {
-           apply(data$data,MARGIN = 2,function(x){
+           apply(X$data,MARGIN = 2,function(x){
              tmp <- replace(x, is.na(x), stats::median(x, na.rm = TRUE))
              replace(tmp,is.nan(tmp),NA)
            })
          },
          mean_data = {
-           t(apply(data$data,MARGIN = 1,function(x){
+           t(apply(X$data,MARGIN = 1,function(x){
              tmp <- replace(x, is.na(x), mean(x, na.rm = TRUE))
              replace(tmp,is.nan(tmp),NA)
            }))
          },
          median_data = {
-           t(apply(data$data,MARGIN = 1,function(x){
+           t(apply(X$data,MARGIN = 1,function(x){
              tmp <- replace(x, is.na(x), stats::median(x, na.rm = TRUE))
              replace(tmp,is.nan(tmp),NA)
            }))
          },
          linear={
-           .linear_imputatation(data, obs_share_data)
+           .linear_imputatation(X, obs_share_data)
          },
          functional={
-           na_row <- rowSums(is.na(data$data))
-           data_tmp <- stats::na.omit(data$data)
+           if(!requireNamespace('fda',quietly = TRUE))
+             stop('Functional not possible without fda package. Install and re-run code', call. = FALSE)
 
-           data_fd <- fda::eval.fd(evalarg = data$intraobs,
+           na_row <- rowSums(is.na(X$data))
+           data_tmp <- stats::na.omit(X$data)
+
+           if(length(X$intraobs[na_row==0])==0){
+             stop("Need some evaluation points to be non-NA for all observations",call. = FALSE)
+           }
+
+           if(na_row[1]>0 || na_row[length(na_row)]>0){
+             warning('fda may fail with NAs in first or last evalation points',call. = FALSE)
+           }
+
+
+           data_fd <- fda::eval.fd(evalarg = X$intraobs,
                                    fda::Data2fd(
-                                     argvals = data$intraobs[na_row==0], y = data_tmp,
+                                     argvals = X$intraobs[na_row==0], y = data_tmp,
                                      basisobj = fda::create.bspline.basis(
-                                       rangeval = range(data$intraobs[na_row==0])) )
+                                       rangeval = range(X$intraobs[na_row==0])) )
            )
-           data$data <- ifelse(is.na(data$data),data_fd,data$data)
+           X$data <- ifelse(is.na(X$data),data_fd,X$data)
 
-           data
+           X
          },
          # pca={
          #
@@ -98,6 +110,8 @@ impute <- function(data,
            stop(paste0('Incorrect method selected. See documentation.'),
                 call. = FALSE)
          })
+
+  funts(X_imp,name=X$name,labels=X$labels, intraobs=X$intraobs, inc.warnings = F)
 }
 
 
@@ -108,9 +122,12 @@ impute <- function(data,
 #'  should inform the next. Default is FALSE.
 #'
 #' @return funts object with imputed values
+#'
+#' @keywords internal
+#' @noRd
 .linear_imputatation <- function(data, obs_share_data = FALSE) {
   ## TODO:: STUDY,  Modern multiple imputation with functional data
-  data <- .check_data(data,check.na = FALSE)
+  data <- funts(data, inc.warnings = FALSE)
   data_fill <- data$data
   n <- ncol(data$data)
   r <- nrow(data$data)
