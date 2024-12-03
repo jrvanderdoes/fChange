@@ -9,15 +9,22 @@
 #' @param X The functional time series being tested, inputted in a matrix form
 #'  with each row representing each observation of the functional data values
 #'  on equidistant points of any pre-specified interval.
-#' @param statistic description
-#' @param method description
-#' @param boot_method description
-#' @param M description
-#' @param h description
-#' @param TVE description
-#' @param replace description
+#' @param statistic String for test statistic. Options are \code{Tn} and
+#' \code{Mn}. Default is \code{Tn}.
+#' @param critical String for method of determining the critical values. Options are
+#'  \code{simulation} and \code{permutation}. Default is \code{simulation}.
+#' @param perm_method String for method of permutation. Options are \code{separate}
+#'  and \code{sliding}. Default is \code{separate}.
+#' @param M Numeric for number of simulation to use in determining the null
+#'  distribution. Default is 1000.
+#' @param blocksize Numeric for blocksize in permutation test. Default is 1.
+#' @param TVE Numeric for total variance explained when using PCA for
+#'  eigenvalues. Default is 1.
+#' @param replace Boolean if replacement should be used for permutation test.
+#'  Default is TRUE.
 #'
-#' @return The result of the test is presented with the value of test statistic and its p-value under the null hypothesis of local stationarity.
+#' @return List with (1) pvalue, (2) test statistic, and (3) test statistics
+#'  from simulating the null distribuion.
 #' @export
 #'
 #' @references Horvath, L., Kokoszka, P., & Rice, G. (2014). Testing
@@ -25,53 +32,53 @@
 #'  179(1), 66-82.
 #'
 #' @examples
-#' res <- compute_stationarity_test(
-#'   generate_brownian_motion(100,v=seq(0,1,length.out=20)))
-#' res <- compute_stationarity_test(
-#'   generate_brownian_motion(100,v=seq(0,1,length.out=20)),statistic='Mn')
-#' res1 <- compute_stationarity_test(
-#'   generate_brownian_motion(1000,v=seq(0,1,length.out=30)))
-#' res2 <- compute_stationarity_test(electricity)
-compute_stationarity_test <-
-  function(X, statistic = 'Tn', method="MC", boot_method='seperate',
-           M=1000, h = 3, TVE=0.95, replace=TRUE){
-  X <- .check_data(X)
+#' res <- stationarity_test(
+#'   generate_brownian_motion(100,v=seq(0,1,length.out=20)),
+#'   critical='permutation', statistic='Mn')
+#' res2 <- stationarity_test(electricity)
+stationarity_test <-
+  function(X, statistic = 'Tn', critical=c('simulation','permutation'),
+           perm_method='separate',  M=1000, blocksize = 3, TVE=1, replace=TRUE){
+    critical <- .verify_input(critical, c('simulation','permutation'))
+
+    X <- funts(X)
 
   N <- ncol(X$data)
   r <- nrow(X$data)
 
-  stat <- .compute_stationary_test_stat(X,statistic)
+  stat <- .compute_stationary_test_stat(X$data, X$intraobs, statistic)
 
-  if(method=="MC"){
+  if(critical=="simulation"){
     pca_X <- pca(X, TVE = TVE)
 
     if(statistic == 'Tn'){
-      # TODO: Uneven integration for Tn
       sim_stats <- sapply(1:M,function(m, eigs, v){
         sum(eigs *
-              dot_integrate_col(generate_brownian_bridge(length(eigs), v = v)$data^2) )
+              dot_integrate_col(
+                generate_brownian_bridge(length(eigs), v = v)$data^2, v) )
       },eigs=pca_X$sdev^2, v=X$intraobs)
     }else if(statistic=='Mn'){
       sim_stats <- sapply(1:M,function(m, eigs, v){
-        bbs <- generate_brownian_bridge(length(eigs), v = v)$data
+        vv <- v
+        bbs <- generate_brownian_bridge(length(eigs), v = vv)$data
         sum(eigs * dot_integrate_col(
-          (bbs - matrix(dot_integrate_col(bbs), nrow = length(v),
-                        ncol = length(eigs), byrow = TRUE))^2 ) )
+          (bbs - matrix(dot_integrate_col(bbs), nrow = length(vv),
+                        ncol = length(eigs), byrow = TRUE))^2, vv ) )
       },eigs=pca_X$sdev^2, v=X$intraobs)
-    }else{
+  }else{
       stop('Statistic is incorrect',call. = FALSE)
     }
 
-  } else if(method=="BS"){
-    boot_X <- .bootstrap(X, blockSize=h, M=M,
-                         type=boot_method, replace=replace)
-    sim_stats <- rep(NA, M)
-    for(i in 1:M){
-      sim_stats[i] <- .compute_stationary_test_stat(funts(boot_X[[i]]),statistic)
-    }
+  } else if(critical=="permutation"){
+    sim_stats <- .bootstrap(X$data, blocksize=blocksize, M=M,
+                            type=perm_method, replace=replace,
+                            fn=.compute_stationary_test_stat,
+                            statistic=statistic, v=X$intraobs)
   }
 
-  list('statistic' = stat, 'pvalue' = sum(stat <= sim_stats)/M)
+  list('pvalue' = sum(stat <= sim_stats)/M,
+       'statistic' = stat,
+       'simulations' = sim_stats)
 }
 
 
@@ -79,28 +86,27 @@ compute_stationarity_test <-
 #'
 #' Internal function to compute stationarity test statistic
 #'
-#' @inheritParams compute_stationarity_test
+#' @inheritParams stationarity_test
 #'
 #' @return Numeric test statistic
 #'
 #' @keywords internal
 #' @noRd
-.compute_stationary_test_stat <- function(X,statistic){
-  X <- .check_data(X)
-  N <- ncol(X$data)
-  r <- nrow(X$data)
+.compute_stationary_test_stat <- function(X, v, statistic){
+  N <- ncol(X)
+  r <- nrow(X)
 
   # Test Statistics
-  Zn <- 1/sqrt(N) * ( cumsum(X)$data -
-                        matrix((1:N)/N, nrow = r, ncol = N, byrow = TRUE) * rowSums(X$data) )
+  ## TODO:: CUsum with data.frame
+  Zn <- 1/sqrt(N) * ( cumsum(funts(X))$data -
+                        matrix((1:N)/N, nrow = r, ncol = N, byrow = TRUE) * rowSums(X) )
   if(statistic == 'Tn'){
-    # TODO: Uneven integration for Tn
-    stat <- dot_integrate(dot_integrate_col(Zn^2))
+    stat <- dot_integrate(dot_integrate_col(Zn^2, v))
   }else if(statistic=='Mn'){
-    # TODO:: Fix uneven integration
-    stat <- dot_integrate_uneven(dot_integrate_col(
-      t(Zn - matrix(dot_integrate_col(t(Zn)),nrow=r,ncol=N,byrow = FALSE) )^2),
-      r = X$intraobs )
+    stat <- dot_integrate(
+      dot_integrate_col( ( Zn -
+                           matrix(dot_integrate_col(t(Zn)), nrow = length(v),
+                                  ncol = N, byrow = FALSE))^2, v) )
   }else{
     stop('Statistic is incorrect',call. = FALSE)
   }
