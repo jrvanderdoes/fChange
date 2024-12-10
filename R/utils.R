@@ -11,6 +11,7 @@
 #'  specified number of decimals.
 #'
 #' @noRd
+#' @keywords internal
 .specify_decimal <- function(x, k) {
   trimws(format(round(x, k), nsmall = k))
 }
@@ -26,6 +27,7 @@
 #' @return Vector with the data selected at the given level n
 #'
 #' @noRd
+#' @keywords internal
 .select_n <- function(vals,n){
   vals[round(seq(1,length(vals),length.out=n))]
 }
@@ -43,11 +45,7 @@
 #'     of the original vector
 #'
 #' @noRd
-#'
-#' @examples
-#' .getChunks(1:100, 1)
-#' .getChunks(1:100, 2)
-#' .getChunks(1:100, 5)
+#' @keywords internal
 .getChunks <- function(x, chunksN) {
   chunksN <- round(chunksN)
 
@@ -57,79 +55,99 @@
   split(x, cut(x, chunksN, labels = FALSE))
 }
 
+
 #' Bootstrap Data
 #'
 #' @param X funts data object
-#' @param blockSize Numeric indicating size of blocks
+#' @param blocksize Numeric indicating size of blocks
 #' @param M Numeric indicating the number of iterations
-#' @param type String for 'overlapping' or 'seperate' block bootstrapping
+#' @param type String for 'overlapping' or 'separate' block bootstrapping
 #' @param replace Boolean if data should be sample with or without replacement
 #'
 #' @return List of permuted data
 #'
 #' @keywords internal
 #' @noRd
-.bootstrap <- function(X, blockSize, M=1000, type='overlapping', replace=TRUE){
-  X <- .check_data(X)
+.bootstrap <- function(X, blocksize, M=1000, type='overlapping', replace=TRUE,
+                       fn=NULL, ...){
+  X <- funts(X)
   N <- ncol(X$data)
 
   # Get groups
-  if(type=='seperate'){
-    idxGroups <- .getChunks(1:ncol(X$data), ncol(X$data) / blockSize)
+  if(type=='separate'){
+    idxGroups <- .getChunks(1:ncol(X$data), ncol(X$data) / blocksize)
   } else if(type=='overlapping'){
-    idxGroups <- sapply(0:(N-blockSize), function(x,blockSize){
-      x + 1:blockSize }, blockSize=blockSize, simplify = FALSE)
+    idxGroups <- sapply(0:(N-blocksize), function(x,blocksize){
+      x + 1:blocksize }, blocksize=blocksize, simplify = FALSE)
   }
 
   # Get BS sample indices
-  idxs <- sapply(1:M, function(i, m, indxs, replace,size,N) {
+  #   Early code to manage worst case of picking smallest group the entire time
+  #   Only can occur with replacement (otherwise will pick all)
+  min_len <- min(lengths(idxGroups))
+  size <- ceiling(ncol(X$data) / blocksize)
+  size_equal_len <- size + ceiling((ncol(X$data)-min_len*size)/min_len)*replace
+
+  idxs <- sapply(1:M, function(i, m, indxs, replace,size, N) {
     samps <- sample(x=1:m, size=size, replace = replace)
     unlist(indxs[samps], use.names = FALSE)[1:N]
   }, m = length(idxGroups), indxs = idxGroups, replace = replace,
-  size=ceiling(ncol(X$data) / blockSize), N=N)
+  size=size_equal_len, N=N)
 
-  if (!(is.matrix(idxs) | is.data.frame(idxs))) {
-    idxs <- .convertSamplesToDF(idxs)
-  }
 
-  ## Sample via bootstrap
+
+  # if (!(is.matrix(idxs) | is.data.frame(idxs))) {
+  #   stop('This is an internal error, please report', call. = FALSE)
+  #   idxs <- .convertSamplesToDF(idxs)
+  # }
+
+  ## Sample via bootstrap and return
   bssamples <- sapply(as.data.frame(idxs),
                       function(loop_iter, Xdata) {
                         Xdata[, stats::na.omit(loop_iter)]
                       }, Xdata=X$data,simplify = F
   )
 
-  bssamples
+  ## Apply fn if given
+  if(!is.null(fn)){
+    result <- unlist(lapply(bssamples,fn, ...))
+  } else{
+    result <- bssamples
+  }
+
+  result
 }
 
 
-#' Convert List of Samples into a Data Frame
-#'
-#' This (internal) function takes a list with differ length data.frames or
-#'  vectors and pads them all to make a clean data.frame.
-#'
-#' This is an internal function and will not be viewable to user. See
-#'  generalized_resampling for usage
-#' @param data_list List of elements to be combined to a data.frame.
-#'
-#' @return Data.frame of the data in data_list
-#'
-#' @noRd
-.convertSamplesToDF <- function(data_list) {
-  m <- length(data_list)
-  maxLen <- 0
-  for (ii in 1:m) {
-    maxLen <- max(maxLen, length(data_list[[ii]]))
-  }
-
-  data_df <- data.frame(matrix(nrow = maxLen, ncol = m))
-
-  for (ii in 1:length(data_list)) {
-    data_df[, ii] <- c(
-      data_list[[ii]],
-      rep(NA, maxLen - length(data_list[[ii]]))
-    )
-  }
-
-  data_df
-}
+# #' Convert List of Samples into a Data Frame
+# #'
+# #' This (internal) function takes a list with differ length data.frames or
+# #'  vectors and pads them all to make a clean data.frame.
+# #'
+# #' This is an internal function and will not be viewable to user. See
+# #'  generalized_resampling for usage
+# #' @param data_list List of elements to be combined to a data.frame.
+# #'
+# #' @return Data.frame of the data in data_list
+# #'
+# #' @keywords internal
+# #' @noRd
+# .convertSamplesToDF <- function(data_list) {
+#   ## TODO:: REMOVE USAGE
+#   m <- length(data_list)
+#   maxLen <- 0
+#   for (ii in 1:m) {
+#     maxLen <- max(maxLen, length(data_list[[ii]]))
+#   }
+#
+#   data_df <- data.frame(matrix(nrow = maxLen, ncol = m))
+#
+#   for (ii in 1:length(data_list)) {
+#     data_df[, ii] <- c(
+#       data_list[[ii]],
+#       rep(NA, maxLen - length(data_list[[ii]]))
+#     )
+#   }
+#
+#   data_df
+# }
