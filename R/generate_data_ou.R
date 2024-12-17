@@ -3,27 +3,28 @@
 #'
 #' @param resolution Numeric for data resolution
 #' @param N Numeric for data length
-#' @param burnin Numeric for number of burnin. Default is 500.
 #' @param rho Numeric for amount of dependence
 #'
 #' @return funts object of generated OU data
-#' @export
+#'
+#' @keywords internal
+#' @noRd
 #'
 #' @examples
 #' generate_ou(20,100)
-generate_ou <- function(resolution, N, burnin=500, rho=0){
-
-  times <- 1:resolution/resolution
+.generate_ou <- function(resolution, N, rho=0){
+  if(is.null(rho))
+    rho <- 0
+  r <- length(resolution)
 
   # Covariance structure (OU process Cov)
-  comat <- matrix(NA,resolution,resolution)
-  for (i in 1:resolution){
-    #comat[i,] <- exp(-times[i]/2-times/2) * pmin(exp(times[i]), exp(times))
-    comat[i,] <- exp(-abs(times[i]-times)/2)
+  comat <- matrix(NA, r, r)
+  for (i in 1:r){
+    comat[i,] <- exp(-abs(resolution[i]-resolution)/2)
   }
 
-  fiid <- MASS::mvrnorm(n = N+burnin,
-                        mu = c(rep(0,resolution)),
+  fiid <- MASS::mvrnorm(n = N,
+                        mu = rep(0,r),
                         Sigma = comat,
                         empirical = TRUE)
 
@@ -33,5 +34,5 @@ generate_ou <- function(resolution, N, burnin=500, rho=0){
     data[,i] <- rho*data[,i-1] + fiid[i,]
   }
 
-  funts(data[,(burnin+1):ncol(data)])
+  funts(data)
 }
