@@ -5,9 +5,9 @@
 \alias{SPYUS500}
 \title{S&P 500 Index Data}
 \format{
-\subsection{\code{temperature}}{
+\subsection{\code{SPY500}}{
 
-A data.frame with columns being day and rows the resolution.
+A data.frame with columns being day and rows the intraday resolution.
 }
 }
 \usage{
