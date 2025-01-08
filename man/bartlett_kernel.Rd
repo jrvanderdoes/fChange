@@ -24,7 +24,7 @@ Note, this function is vectorized.
 bartlett_kernel(-20:20/15)
 }
 \references{
-Horváth, L., & Rice, G. (2024). Change Point Analysis for Time
+Horv\'{a}th, L., & Rice, G. (2024). Change Point Analysis for Time
 Series (1st ed. 2024.). Springer Nature Switzerland.
 \url{https://doi.org/10.1007/978-3-031-51609-2}
 }
