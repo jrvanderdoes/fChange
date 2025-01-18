@@ -4,16 +4,16 @@
 \alias{computeSpaceMeasuringVectors}
 \title{Compute Spacing Measuring Vectors}
 \usage{
-computeSpaceMeasuringVectors(M, space, X)
+computeSpaceMeasuringVectors(X, M = 20, space = "BM")
 }
 \arguments{
+\item{X}{Data of interest. Used to know evaluation amount of vectors}
+
 \item{M}{Integer for the number of vectors to generate}
 
 \item{space}{String for the space of interest. Options are Brownian motion
 ('BM'), OU process ('OU'), principal components ('PC'), and a vectors in iid
 standard, random normals ('RN').}
-
-\item{X}{Data of interest. Used to know evaluation amount of vectors}
 }
 \value{
 Data.frame with columns of vectors describing the space. Columns are
