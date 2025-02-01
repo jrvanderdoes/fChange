@@ -19,9 +19,9 @@
 funts object with differenced values
 }
 \description{
-Difference funts
+Difference the functional data at some lag / to some degree.
 }
 \examples{
-# diff(funts(electricity), lag=1)
-# diff(funts(electricity), differences=2)
+result <- diff(funts(electricity), lag=1)
+result <- diff(funts(electricity), differences=2)
 }
