@@ -2,21 +2,21 @@
 % Please edit documentation in R/funts.R
 \name{dim.funts}
 \alias{dim.funts}
-\title{Dimension of funts}
+\title{Dimension of funts Object}
 \usage{
 \method{dim}{funts}(x, ...)
 }
 \arguments{
 \item{x}{funts object}
 
-\item{...}{Unused additional parameters}
+\item{...}{Additional parameters to stats function}
 }
 \value{
 Numerics indicating the dimension of the funts object
 }
 \description{
-Dimension of funts
+Retrieve the dimension of a funts object.
 }
 \examples{
-# dim(funts(electricity))
+results <- dim(funts(electricity))
 }
