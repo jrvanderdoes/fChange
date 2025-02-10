@@ -29,13 +29,13 @@ L. Horvath, P. Kokoszka, G. Rice (2014) "Testing stationarity of functional
 time series", Journal of Econometrics, 179(1), 66-82.
 
 Politis, D. N. (2003). Adaptive bandwidth choice. Journal of Nonparametric
-Statistics, 15(4–5), 517–533. \url{https://doi.org/10.1080/10485250310001604659}
+Statistics, 15(4-5), 517-533. \url{https://doi.org/10.1080/10485250310001604659}
 
 Politis, D. N. (2011). HIGHER-ORDER ACCURATE, POSITIVE SEMIDEFINITE
 ESTIMATION OF LARGE-SAMPLE COVARIANCE AND SPECTRAL DENSITY MATRICES.
-Econometric Theory, 27(4), 703–744. \url{http://www.jstor.org/stable/27975501}
+Econometric Theory, 27(4), 703-744. \url{http://www.jstor.org/stable/27975501}
 
-Horváth, L., & Rice, G. (2024). Change Point Analysis for Time
+Horv\'{a}th, L., & Rice, G. (2024). Change Point Analysis for Time
 Series (1st ed. 2024.). Springer Nature Switzerland.
 \url{https://doi.org/10.1007/978-3-031-51609-2}
 }
