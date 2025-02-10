@@ -4,21 +4,23 @@
 \alias{qqplot.funts}
 \title{Generic Function to Compute QQ plot for funts}
 \usage{
-\method{qqplot}{funts}(x, TVE = 0.95, max.d = 3, qq.sep = TRUE, alpha = 0.05, ...)
+\method{qqplot}{funts}(x, TVE = 0.95, d.max = 3, alpha = 0.05, CPs = NULL, legend = FALSE, ...)
 }
 \arguments{
 \item{x}{funts object}
 
-\item{TVE}{Numeric in \link{0,1} giving the total variance explained for selecting
+\item{TVE}{Numeric in [0,1] giving the total variance explained for selecting
 the number of principal components.}
 
-\item{max.d}{Max number of principal components}
+\item{d.max}{Max number of principal components}
 
-\item{qq.sep}{Boolean for if the QQ plots should be seperate or stacked}
+\item{alpha}{Significance level, alpha in [0,1]}
 
-\item{alpha}{Significant}
+\item{CPs}{Vector of change points}
 
-\item{...}{}
+\item{legend}{Boolean indicating if legend should be shown}
+
+\item{...}{Unused}
 }
 \value{
 ggplot2 for QQ plot
