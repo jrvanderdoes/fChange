@@ -5,17 +5,19 @@
 \alias{pca.default}
 \title{Generic pca of Data}
 \usage{
-pca(x, ...)
+pca(object, ...)
 
-\method{pca}{default}(x, ...)
+\method{pca}{default}(object, ...)
 }
 \arguments{
-\item{...}{Additional parameters to function based on data}
+\item{object}{Data to compute principal component analysis on}
 
-\item{object}{Object for computation of principle components analysis}
+\item{...}{Additional information for method}
 }
 \value{
 PCA data
+
+PCA object
 }
 \description{
 Build on \code{prcomp}.

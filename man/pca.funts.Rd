@@ -4,10 +4,12 @@
 \alias{pca.funts}
 \title{Principal component analysis}
 \usage{
-\method{pca}{funts}(x, TVE = 1, ...)
+\method{pca}{funts}(object, TVE = 1, ...)
 }
 \arguments{
-\item{TVE}{Numeric in \link{0.1} for the total variance explained. Can use this to
+\item{object}{Data to compute principal component analysis on}
+
+\item{TVE}{Numeric in [0,1] for the total variance explained. Can use this to
 select only the required components}
 
 \item{...}{Additional parameters for \code{prcomp}.}
