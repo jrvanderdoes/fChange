@@ -4,9 +4,11 @@
 \alias{var.funts}
 \title{Variance for funts}
 \usage{
-\method{var}{funts}(x, type = c("operator", "pointwise"), ...)
+\method{var}{funts}(object, type = c("operator", "pointwise"), ...)
 }
 \arguments{
+\item{object}{Data to compute on}
+
 \item{type}{Character to specify if an operator ('op') or pointwise ('pw')
 calculation is desired}
 
@@ -20,4 +22,5 @@ Variance for funts
 }
 \examples{
 var(funts(electricity),type='pointwise')
+var(funts(electricity),type='operator')
 }
