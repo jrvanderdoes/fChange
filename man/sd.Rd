@@ -7,25 +7,26 @@
 \alias{var.default}
 \title{Generic sd/var of Data}
 \usage{
-sd(x, ...)
+sd(object, ...)
 
-\method{sd}{default}(x, ...)
+\method{sd}{default}(object, ...)
 
-var(x, ...)
+var(object, ...)
 
-\method{var}{default}(x, ...)
+\method{var}{default}(object, ...)
 }
 \arguments{
-\item{...}{Additional parameters to function based on data}
+\item{object}{Data to compute on}
 
-\item{object}{Object for computation of standard deviation or variance of
-a given data set.}
+\item{...}{Additional parameters based on the data}
 }
 \value{
 Numeric(s) to explain the standard deviation / variance
 }
 \description{
 Generic sd/var of Data
+
+Generic Variance Standard Deviation
 }
 \examples{
 sd(1:10)

@@ -4,17 +4,21 @@
 \alias{summary.funts}
 \title{Summary for funts Object}
 \usage{
-\method{summary}{funts}(object, CPs = NULL, max.lag = 20, max.d = 2, demean = FALSE, ...)
+\method{summary}{funts}(object, CPs = NULL, lag.max = 20, d.max = 2, demean = FALSE, ...)
 }
 \arguments{
 \item{object}{funts object}
 
 \item{CPs}{CPs, if there are any. Default is NULL.}
 
-\item{max.lag}{Max lags to consider for ACF. Default is 20.}
+\item{lag.max}{Max lags to consider for ACF. Default is 20.}
 
-\item{rainbow}{Observations shown in rainbow plot. Defaults to subset,
-which summarizes the values rather than showing all observations.}
+\item{d.max}{Max number of dimensions for QQ-plot.}
+
+\item{demean}{Boolean if data should be demeaned based on changes and create
+plots based on these residuals.}
+
+\item{...}{Unused.}
 }
 \value{
 Plot (ggplot) summarizing the data
@@ -23,7 +27,7 @@ Plot (ggplot) summarizing the data
 Summary for funts Object
 }
 \examples{
-summary(funts(electricity[,1:20]), max.lag=3)
-# summary(funts(electricity[,1:50]), CPs=c(20,38), max.lag=3)
-# summary(funts(electricity), CPs=c(50,200,300), max.lag=5, demean = TRUE)
+res <- summary(funts(electricity[,1:20]), lag.max=2)
+res1 <- summary(funts(electricity[,1:20]), CPs=c(3), lag.max=2)
+# summary(funts(electricity), CPs=c(50,200,300), lag.max=5, demean = TRUE)
 }

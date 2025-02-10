@@ -4,9 +4,11 @@
 \alias{sd.funts}
 \title{SD for funts}
 \usage{
-\method{sd}{funts}(x, type = "pointwise", ...)
+\method{sd}{funts}(object, type = "pointwise", ...)
 }
 \arguments{
+\item{object}{Data to compute on}
+
 \item{type}{Character to specify if an operator ('op') or pointwise ('pw')
 calculation is desired}
 
