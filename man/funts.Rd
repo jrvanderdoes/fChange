@@ -2,32 +2,49 @@
 % Please edit documentation in R/funts.R
 \name{funts}
 \alias{funts}
-\title{Define funts Object}
+\alias{as.funts}
+\alias{is.funts}
+\title{Funts Objects}
 \usage{
-funts(
-  X,
-  name = NULL,
-  labels = colnames(as.data.frame(X)),
-  intraobs = seq(0, 1, length.out = nrow(X))
-)
+funts(X, name = NULL, labels = NULL, intraobs = NULL, inc.warnings = TRUE)
+
+as.funts(X)
+
+is.funts(X)
 }
 \arguments{
-\item{labels}{Labels for the observations. Defaults to the column names of
-\code{x}.}
+\item{X}{Data to convert into funts object. Options include: data.frame,
+matrix, array, fda::fd, fda.usc::fdata, rainbow::fts (used in ftsa),
+rainbow::fds (used in ftsa), funData::funData, and fChange::funts. For a
+matrix, each column is a unique observation, at the rows are the observed
+intra-observation (i.e. resolution) points.}
+
+\item{name}{String for the name of the object. Defaults to the name of the
+input variable.}
+
+\item{labels}{Labels for the observations. Defaults to the column names or
+names inside of the object X.}
 
 \item{intraobs}{Vector of numerics indicating the points for each
-observation. Defaults to even spacing on \link{0,1}, but may be uneven or
-for any real numbers.}
+observation. Defaults to even spacing on [0,1], or those included in the
+object. These may be unevenly spaced.}
 
-\item{x}{Data.frame to convert into data}
+\item{inc.warnings}{Boolean on if warnings should be given. Defaults to TRUE,}
 }
 \value{
-funts object
+funts / as.funts: funts object
+
+is.funts: Boolean indicating if \code{x} is a funts object or not
 }
 \description{
-Define funts Object
+Define data as, check data if, and convert data to funts object. The data
+may be from another popular implementation.
 }
 \examples{
-funts(electricity)
-funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
+bm <- funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
+
+# Electricity
+result <- funts(electricity)
+result <- as.funts(electricity)
+result <- is.funts(electricity)
 }
