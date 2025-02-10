@@ -5,24 +5,23 @@
 \title{Imputation}
 \usage{
 impute(
-  data,
+  X,
   method = c("zero", "mean_obs", "median_obs", "mean_data", "median_data", "linear",
     "functional"),
-  obs_share_data = FALSE,
-  ...
+  obs_share_data = FALSE
 )
 }
 \arguments{
-\item{data}{funts object}
+\item{X}{Funts object or data easily convertible. See \code{\link[=funts]{funts()}}}
 
 \item{method}{String to indicate method of imputation.
 \itemize{
-zero: Fill missing with 0
-mean_obs: Fill missing with mean of each observation
-median_obs: Fill missing with median of each observation
-mean_data: Fill missing with mean at time through all data
-median_data: Fill missing with median at time through all data
-linear: Linearly interpolate missing data
+\item zero: Fill missing with 0
+\item mean_obs: Fill missing with mean of each observation
+\item median_obs: Fill missing with median of each observation
+\item mean_data: Fill missing with mean at time through all data
+\item median_data: Fill missing with median at time through all data
+\item linear: Linearly interpolate missing data
 }}
 
 \item{obs_share_data}{Boolean in linear interpolation that indicates if
@@ -35,7 +34,7 @@ start of observations is taken to be the mean of the intraobs.}
 funts object with interpolated missing data
 }
 \description{
-Imputation
+Impute missing values in functional data.
 }
 \examples{
 temp <- data.frame(c(NA,NA,3:9,NA),
@@ -49,7 +48,5 @@ temp <- data.frame(c(NA,NA,3:9,NA),
                    stats::rnorm(10),
                    c(NA,NA,3:9, NA))
 impute(temp, method='mean_obs')
-impute(temp, method='mean_data')
-impute(temp, method='linear')
 impute(temp, method='linear', obs_share_data=TRUE)
 }
