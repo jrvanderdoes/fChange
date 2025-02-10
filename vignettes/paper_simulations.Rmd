@@ -285,15 +285,15 @@ function(data_path_start, path){
       set.seed(123456*l_idx+i)
       boot0 <- detect_changepoint_bootstrap(
         X=data[[i]], statistic='Tn',
-        blockSize=1,space='BM', 
+        blocksize=1,space='BM', 
         silent = T)
       boot13 <- detect_changepoint_bootstrap(
         X=data[[i]], statistic='Tn',
-        blockSize=lengths[l_idx]^(1/3),space='BM', 
+        blocksize=lengths[l_idx]^(1/3),space='BM', 
         silent = T)
       bootd13 <- detect_changepoint_bootstrap(
         X=data[[i]], statistic='Tn',
-        blockSize=2*lengths[l_idx]^(1/3),space='BM', 
+        blocksize=2*lengths[l_idx]^(1/3),space='BM', 
         silent = T)
       
       results[i, c('bootTnh0','bootTnh13','bootTnhd13')] <-
@@ -303,15 +303,15 @@ function(data_path_start, path){
       set.seed(123456*l_idx+i)
       boot0 <- detect_changepoint_bootstrap(
         X=data[[i]], statistic='Mn',
-        blockSize=1,space='BM', 
+        blocksize=1,space='BM', 
         silent = T)
       boot13 <- detect_changepoint_bootstrap(
         X=data[[i]], statistic='Mn',
-        blockSize=lengths[l_idx]^(1/3),space='BM', 
+        blocksize=lengths[l_idx]^(1/3),space='BM', 
         silent = T)
       bootd13 <- detect_changepoint_bootstrap(
         X=data[[i]], statistic='Mn',
-        blockSize=2*lengths[l_idx]^(1/3),space='BM', 
+        blocksize=2*lengths[l_idx]^(1/3),space='BM', 
         silent = T)
       
       results[i, c('bootMnh0','bootMnh13','bootMnhd13')] <-
@@ -399,13 +399,13 @@ for(l_idx in 1:length(lengths)){
     set.seed(123456*l_idx+i)
     tn0 <- detect_changepoint_bootstrap(
       X=data[[i]], statistic='Tn',
-      blockSize=1,space='BM', silent = T)
+      blocksize=1,space='BM', silent = T)
     tn13 <- detect_changepoint_bootstrap(
       X=data[[i]], statistic='Tn',
-      blockSize=lengths[l_idx]^(1/3),space='BM', silent = T)
+      blocksize=lengths[l_idx]^(1/3),space='BM', silent = T)
     tnd13 <- detect_changepoint_bootstrap(
       X=data[[i]], statistic='Tn',
-      blockSize=2*lengths[l_idx]^(1/3),space='BM', silent = T)
+      blocksize=2*lengths[l_idx]^(1/3),space='BM', silent = T)
 
     results[i,] <- c(lengths[l_idx],
                      tn0$pval, tn13$pval, tnd13$pval)
@@ -414,13 +414,13 @@ for(l_idx in 1:length(lengths)){
     set.seed(123456*l_idx+i)
     mn0 <- detect_changepoint_bootstrap(
       X=data[[i]], statistic='Mn',
-      blockSize=1,space='BM', silent = T)
+      blocksize=1,space='BM', silent = T)
     mn13 <- detect_changepoint_bootstrap(
       X=data[[i]], statistic='Mn',
-      blockSize=lengths[l_idx]^(1/3),space='BM', silent = T)
+      blocksize=lengths[l_idx]^(1/3),space='BM', silent = T)
     mnd13 <- detect_changepoint_bootstrap(
       X=data[[i]], statistic='Mn',
-      blockSize=2*lengths[l_idx]^(1/3),space='BM', silent = T)
+      blocksize=2*lengths[l_idx]^(1/3),space='BM', silent = T)
 
     results[i,] <- c(lengths[l_idx],
                      mn0$pval, mn13$pval, mnd13$pval)

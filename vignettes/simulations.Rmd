@@ -80,8 +80,8 @@ for(c in 1:length(locs)){
       set.seed(123*c+123^2*l+s)
       
       TnMn_sim <- characteristic_change_sim(data[[s]]$data,h=0,space='BM', silent=T)
-      mean_val <- mean_change(data[[s]])
-      mean_val_Tn <-mean_change_Tn(data[[s]])
+      mean_val <- .change_mean(data[[s]])
+      mean_val_Tn <- .change_mean(data[[s]],statistic = 'Tn')
       tmp_results[s,] <- c(TnMn_sim$Tn$pval,
                            TnMn_sim$Mn$pval,
                            mean_val$pvalue,
