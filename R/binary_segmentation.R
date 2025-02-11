@@ -107,7 +107,8 @@
   return(
     rbind(
     .detect_changes(
-      X = funts(X$data[, 1:potential$location],labels = X$labels[1:potential$location],
+      X = funts(X$data[, 1:potential$location,drop=FALSE],
+                labels = X$labels[1:potential$location],
                 intraobs = X$intraobs,inc.warnings = FALSE),
       method = method,
       trim_function = trim_function,

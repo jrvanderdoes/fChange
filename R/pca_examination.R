@@ -144,11 +144,15 @@ model_pca <- function(X, TVE = 0.95, model=c('ets','arima'),
   }
 
   # Check CPs
-  ## TODO:: Ensure get right CPs
   if(check.cp){
     res <- change(funts(errors), type='segmentation', ...)
-    errors_use <- funts(errors[,(max(res$location)+1):ncol(X)])
-    CPs <- res$location
+    if(!is.null(res)){
+      CPs <- res$location
+      errors_use <- funts(errors[,(max(res$location)+1):ncol(X),drop=FALSE])
+    }else{
+      errors_use <- funts(errors)
+      CPs <- NULL
+    }
   } else{
     errors_use <- funts(errors)
     CPs <- NULL

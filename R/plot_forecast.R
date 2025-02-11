@@ -17,8 +17,6 @@
                            eye = list(x = -1.5, y = -1.5, z = 1.5),
                            aspectratio = NULL,
                            showticklabels = TRUE){
-  ## TODO:: Add to plot
-
   # Get Sizes
   pred_n <- max(ncol(lower),ncol(upper))
   CPs <- unique(c(CPs, ncol(X)-pred_n))
@@ -110,7 +108,7 @@
     }
 
     plot_colors <- c(plot_colors,'black')
-    names(plot_colors) <- 1:(length(CPs)+1)
+    names(plot_colors) <- c(1:(length(CPs)),CPs[length(CPs)]+1)
   } else{
     plot_colors <- RColorBrewer::brewer.pal(11, "Spectral")
     plot_colors[6] <- "yellow"
