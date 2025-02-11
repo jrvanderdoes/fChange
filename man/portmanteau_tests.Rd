@@ -134,7 +134,7 @@ res1 <- portmanteau_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
 res2 <- portmanteau_tests(b, test = 'spectral', kernel = 'Bartlett', bandwidth = 'static', alpha = 0.05)
 res3 <- portmanteau_tests(b, test = 'spectral', alpha = 0.1, kernel = 'Parzen', bandwidth = 'adaptive')
 res4 <- portmanteau_tests(b, test = 'independence', components = 3, lag = 3)
-res5 <- portmanteau_tests(b, test = 'single-lag', lag = 1, M = 250, method = 'lowdiscrepancy')
+res5 <- portmanteau_tests(b, test = 'single-lag', lag = 1, M = 250)
 }
 \references{
 Kim, M., Kokoszka P., & Rice G. (2023) White noise testing for functional

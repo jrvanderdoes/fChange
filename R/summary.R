@@ -13,7 +13,7 @@
 #'
 #' @examples
 #' res <- summary(funts(electricity[,1:20]), lag.max=2)
-#' res1 <- summary(funts(electricity[,1:20]), CPs=c(3), lag.max=2)
+#' # res1 <- summary(funts(electricity[,1:20]), CPs=c(3), lag.max=2)
 #' # summary(funts(electricity), CPs=c(50,200,300), lag.max=5, demean = TRUE)
 summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, ...){
   object <- funts(object)

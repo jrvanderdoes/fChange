@@ -7,8 +7,8 @@ Authors@R: c(
     person("Gregory", "Rice", role = "aut"),
     person("Martin", "Wendler", role = "aut") )
 Description: Change point detection for discretely observed, yet innately 
-  functional data. Includes methods to process and investigate such data, including 
-  functional ACF, smoothing, change point detection, plotting, and so forth.
+    functional data. Includes methods to process and investigate such data, including 
+    functional ACF, smoothing, change point detection, plotting, and so forth.
 License: GPL (>= 3)
 Encoding: UTF-8
 Imports: 
