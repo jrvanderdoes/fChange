@@ -1,7 +1,9 @@
 #' Generic Centering of Data
 #'
 #' @param object Object for computation of centering
-#' @param ... Additional parameters to function based on data
+#' @param CPs Change points for centering individual sections.
+#' @param type String of \code{mean} or \code{median} for method of centering.
+#' @param ... Unused
 #'
 #' @name center
 #'
@@ -48,33 +50,68 @@ NULL
 #############################################
 
 
-#' Generic Center Data function
-#'
-#' @param object Data to be centered
-#' @param ... Additional parameters based on data
+#' @rdname center
 #'
 #' @seealso
 #'  [center.default()], [center.data.frame()],
 #'  [center.matrix()], [center.funts()]
 #'
 #' @export
-center <- function(object, ...) UseMethod("center")
+center <- function(object, CPs=NULL, type='mean', ...) UseMethod("center")
 #' @rdname center
 #' @export
-center.default <- function(object, ...) { object - mean(object) }
-#' @rdname center
-#' @export
-center.data.frame <- function(object, ...) { object <- as.matrix(object); NextMethod("center") }
-#' @rdname center
-#' @export
-center.matrix <- function(object, ...) { object - rowMeans(object) }
+center.default <- function(object, CPs=NULL, type='mean', ...) {
+  type <- .verify_input(type, c('mean','median'))
+  if(type=='mean'){
+    method <- mean
+  }else if(type=='median'){
+    method <- stats::median
+  }
 
-#' Center funts data
-#'
+
+  if(is.null(CPs)){
+    object <- object - method(object)
+  }else{
+    CPs_use <- unique(c(0, CPs, length(object)))
+    CPs_use <- CPs_use[order(CPs_use)]
+    for(i in 1:(length(CPs_use)-1)){
+      object[(CPs_use[i]+1):CPs_use[i+1]] <-
+        object[(CPs_use[i]+1):CPs_use[i+1]] -
+        method(object[(CPs_use[i]+1):CPs_use[i+1]])
+    }
+  }
+
+  object
+}
 #' @rdname center
-#' @param CPs Change points for centering individual sections.
-#' @param type String of \code{mean} or \code{median} for method of centering.
-#'
+#' @export
+center.data.frame <- function(object, CPs=NULL, type='mean', ...) { object <- as.matrix(object); NextMethod("center") }
+#' @rdname center
+#' @export
+center.matrix <- function(object, CPs=NULL, type='mean', ...) {
+  type <- .verify_input(type, c('mean','median'))
+  if(type=='mean'){
+    row_method <- rowMeans
+  }else if(type=='median'){
+    row_method <- function(y){apply(y, MARGIN = 1, stats::median)}
+  }
+
+
+  if(is.null(CPs)){
+    object <- object - row_method(object)
+  }else{
+    CPs_use <- unique(c(0, CPs, ncol(object)))
+    CPs_use <- CPs_use[order(CPs_use)]
+    for(i in 1:(length(CPs_use)-1)){
+      object[,(CPs_use[i]+1):CPs_use[i+1]] <-
+        object[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE] -
+        row_method(object[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE])
+    }
+  }
+
+  object
+}
+#' @rdname center
 #' @export
 center.funts <- function(object, CPs=NULL, type='mean', ...) {
   type <- .verify_input(type, c('mean','median'))
@@ -105,24 +142,21 @@ center.funts <- function(object, CPs=NULL, type='mean', ...) {
 #' Generic function for PCA
 #'
 #' @param object Data to compute principal component analysis on
-#' @param ... Additional information for method
+#' @param TVE Numeric in \[0,1\] for the total variance explained. Can use this to
+#'  select only the required components.
+#' @param ... Additional information for \code{prcomp}.
 #'
-#' @return PCA object
+#' @return Principal component data
+#'
 #' @export
-pca <- function(object, ...) UseMethod("pca")
+pca <- function(object, TVE = 1,...) UseMethod("pca")
 #' @rdname pca
 #' @export
 pca.default <- function(object, ...) { stats::prcomp(object, ...) }
 
 
-#' Principal component analysis
+#' @rdname pca
 #'
-#' @inheritParams pca
-#' @param TVE Numeric in \[0,1\] for the total variance explained. Can use this to
-#'  select only the required components
-#' @param ... Additional parameters for \code{prcomp}.
-#'
-#' @return Principal component data
 #' @export
 #'
 #' @examples
@@ -168,20 +202,17 @@ pca.funts <- function(object, TVE = 1, ...){
 #' @param object Data to compute on
 #' @param ... Additional parameters based on the data
 #'
+#' @return Standard Deviation/Variance
 #' @export
 sd <- function(object, ...) UseMethod("sd")
 #' @rdname sd
 #' @export
 sd.default <- function(object, ...) stats::sd(object, ...)
 
-#' SD for funts
-#'
-#' @inheritParams sd
+#' @rdname sd
 #' @param type Character to specify if an operator ('op') or pointwise ('pw')
 #'  calculation is desired
-#' @param ... Unused parameters
 #'
-#' @return Vector for pointwise sd
 #' @export
 #'
 #' @examples
@@ -205,11 +236,9 @@ var <- function(object, ...) UseMethod("var")
 #' @export
 var.default <- function(object, ...) stats::var(object, ...)
 
-#' Variance for funts
+
+#' @rdname sd
 #'
-#' @inheritParams sd.funts
-#'
-#' @return Vector for matrix for pointwise or operator variance
 #' @export
 #'
 #' @examples
