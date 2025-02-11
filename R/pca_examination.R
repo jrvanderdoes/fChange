@@ -100,7 +100,7 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
 #'  https://doi.org/10.1016/j.csda.2006.07.028
 #'
 #' @examples
-#' result <- model_pca(funts(electricity), n.ahead=10)
+#' result <- model_pca(funts(electricity)[,50:150], n.ahead=10)
 model_pca <- function(X, TVE = 0.95, model=c('ets','arima'),
                     n.ahead=0, alpha=0.05, check.cp=TRUE, ...){
   if(!requireNamespace('forecast',quietly = TRUE))
