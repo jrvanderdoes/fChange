@@ -32,7 +32,7 @@
 #' @noRd
 #' @keywords internal
 #'
-#' @references Aue, A., Rice, G., & S\"{o}nmez, O. (2020). Structural break
+#' @references Aue, A., Rice, G., & Sonmez, O. (2020). Structural break
 #'  analysis for spectrum and trace of covariance operators. Environmetrics
 #'  (London, Ont.), 31(1)
 #'

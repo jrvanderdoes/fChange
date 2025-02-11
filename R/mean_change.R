@@ -21,7 +21,7 @@
 #' @return If inc.pval is false, Numeric of CP location or NA, otherwise
 #'     location or NA and the p-value
 #'
-#' @references Aue, A., Rice, G., & S\"{o}nmez, O. (2018). Detecting and dating structural
+#' @references Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural
 #'  breaks in functional data without dimension reduction. Journal of the Royal
 #'  Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
 #'  \url{https://doi.org/10.1111/rssb.12257}

@@ -57,7 +57,7 @@
 #'
 #' @export
 #'
-#' @references Aue, A., Rice, G., & S\"{o}nmez, O. (2018). Detecting and dating structural
+#' @references Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural
 #'  breaks in functional data without dimension reduction. Journal of the Royal
 #'  Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
 #'  \url{https://doi.org/10.1111/rssb.12257}
@@ -66,7 +66,7 @@
 #'  functional time series based on U-statistics and dependent wild bootstrap.
 #'  Stat Papers (2024).
 #'
-#' @references Aue, A., Rice, G., & S\"{o}nmez, O. (2020). Structural break
+#' @references Aue, A., Rice, G., & Sonmez, O. (2020). Structural break
 #'  analysis for spectrum and trace of covariance operators. Environmetrics
 #'  (London, Ont.), 31(1)
 #'
@@ -93,7 +93,7 @@ change <- function(X,
                             'covariance','pcamean','pcadistribution'),
                    statistic=c('Tn','Mn'),
                    critical=c('simulation','permutation','welch'),
-                   type=c('Single','Binary','Elbow'),
+                   type=c('single','segmentation','elbow'),
                    perm_type = 'separate', replace=TRUE,
                    max_changes=min(ncol(X),20),
                    CPs=NULL,
@@ -116,11 +116,11 @@ change <- function(X,
                             'covariance','pcamean','pcadistribution'))
   statistic <- .verify_input(statistic, c('Tn','Mn'))
   critical <- .verify_input(critical, c('simulation','permutation','welch'))
-  type <- .verify_input(type, c('Single','Binary','Elbow'))
+  type <- .verify_input(type, c('single','segmentation','elbow'))
   max_changes <- round(max_changes)
 
   # Detect Changes
-  if(type=='Single'){
+  if(type=='single'){
     result <- switch(method,
                      characteristic={
                        # TODO:: Add if multiple test statistics given..
@@ -211,7 +211,7 @@ change <- function(X,
                        # Default
                      }
     )
-  } else if(type=='Binary'){
+  } else if(type=='segmentation'){
     result <-
       .binary_segmentation(X=X, method=method,
                            statistic=statistic, critical=critical,
@@ -223,7 +223,7 @@ change <- function(X,
                            silent = silent.binary)
 
 
-  } else if(type=='Elbow'){
+  } else if(type=='elbow'){
 
     result <-
       .elbow_method(X, method=method, W=W,

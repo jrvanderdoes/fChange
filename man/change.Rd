@@ -10,7 +10,7 @@ change(
     "covariance", "pcamean", "pcadistribution"),
   statistic = c("Tn", "Mn"),
   critical = c("simulation", "permutation", "welch"),
-  type = c("Single", "Binary", "Elbow"),
+  type = c("single", "segmentation", "elbow"),
   perm_type = "separate",
   replace = TRUE,
   max_changes = min(ncol(X), 20),
@@ -123,7 +123,7 @@ Change Function for funts Objects
 res <- change(electricity[,1:20],method='characteristic',critical = 'welch')
 }
 \references{
-Aue, A., Rice, G., & S\"{o}nmez, O. (2018). Detecting and dating structural
+Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural
 breaks in functional data without dimension reduction. Journal of the Royal
 Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
 \url{https://doi.org/10.1111/rssb.12257}
@@ -132,7 +132,7 @@ Wegner, L., Wendler, M. Robust change-point detection for
 functional time series based on U-statistics and dependent wild bootstrap.
 Stat Papers (2024).
 
-Aue, A., Rice, G., & S\"{o}nmez, O. (2020). Structural break
+Aue, A., Rice, G., & Sonmez, O. (2020). Structural break
 analysis for spectrum and trace of covariance operators. Environmetrics
 (London, Ont.), 31(1)
 

@@ -15,7 +15,7 @@
 #' @references Horvath, L., & Rice, G. (2024). Change Point Analysis for Time
 #'  Series (First edition.). Springer. \url{https://doi.org/10.1007/978-3-031-51609-2}
 #'
-#' @references Aue, A., Rice, G., & S\"{o}nmez, O. (2018). Detecting and dating structural
+#' @references Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural
 #'  breaks in functional data without dimension reduction. Journal of the Royal
 #'  Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
 #'  \url{https://doi.org/10.1111/rssb.12257}
