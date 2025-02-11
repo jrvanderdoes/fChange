@@ -3,25 +3,32 @@
 \name{pca}
 \alias{pca}
 \alias{pca.default}
+\alias{pca.funts}
 \title{Generic pca of Data}
 \usage{
-pca(object, ...)
+pca(object, TVE = 1, ...)
 
 \method{pca}{default}(object, ...)
+
+\method{pca}{funts}(object, TVE = 1, ...)
 }
 \arguments{
 \item{object}{Data to compute principal component analysis on}
 
-\item{...}{Additional information for method}
+\item{TVE}{Numeric in [0,1] for the total variance explained. Can use this to
+select only the required components.}
+
+\item{...}{Additional information for \code{prcomp}.}
 }
 \value{
 PCA data
 
-PCA object
+Principal component data
 }
 \description{
 Build on \code{prcomp}.
 }
 \examples{
 pca(1:10)
+pca(funts(electricity))
 }

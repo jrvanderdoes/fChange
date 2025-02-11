@@ -3,25 +3,36 @@
 \name{sd}
 \alias{sd}
 \alias{sd.default}
+\alias{sd.funts}
 \alias{var}
 \alias{var.default}
+\alias{var.funts}
 \title{Generic sd/var of Data}
 \usage{
 sd(object, ...)
 
 \method{sd}{default}(object, ...)
 
+\method{sd}{funts}(object, type = "pointwise", ...)
+
 var(object, ...)
 
 \method{var}{default}(object, ...)
+
+\method{var}{funts}(object, type = c("operator", "pointwise"), ...)
 }
 \arguments{
 \item{object}{Data to compute on}
 
 \item{...}{Additional parameters based on the data}
+
+\item{type}{Character to specify if an operator ('op') or pointwise ('pw')
+calculation is desired}
 }
 \value{
 Numeric(s) to explain the standard deviation / variance
+
+Standard Deviation/Variance
 }
 \description{
 Generic sd/var of Data
@@ -31,4 +42,7 @@ Generic Variance Standard Deviation
 \examples{
 sd(1:10)
 var(1:10)
+sd(funts(electricity),type='pointwise')
+var(funts(electricity),type='pointwise')
+var(funts(electricity),type='operator')
 }

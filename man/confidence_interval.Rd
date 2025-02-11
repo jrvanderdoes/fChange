@@ -67,7 +67,7 @@ confidence_interval(X,c(200,300))
 confidence_interval(X = electricity, CPs = c(66, 144, 204, 243, 305),alpha = 0.1)
 }
 \references{
-Horv\'{a}th, L., & Rice, G. (2024). Change Point Analysis for Time
+Horvath, L., & Rice, G. (2024). Change Point Analysis for Time
 Series (First edition.). Springer. \url{https://doi.org/10.1007/978-3-031-51609-2}
 
 Aue, A., Rice, G., & S\"{o}nmez, O. (2018). Detecting and dating structural

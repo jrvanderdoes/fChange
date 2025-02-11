@@ -30,8 +30,6 @@
 )
 }
 \arguments{
-\item{x}{Funts object of data}
-
 \item{CPs}{Vector of change points. Can be NULL.}
 
 \item{type}{Choice of plotting method. Options include: 'spaghetti', 'highdim',
@@ -73,6 +71,8 @@ or confidence interval be solid gray or gradual colors in change plot}
 plot. See \code{\link[=confidence_interval]{confidence_interval()}}.}
 
 \item{...}{Details for plotting in acf/pacf, summary, or distribution function}
+
+\item{X}{Funts object or data easily convertible. See \code{\link[=funts]{funts()}}.}
 }
 \value{
 Plot of varying types

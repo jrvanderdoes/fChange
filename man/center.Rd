@@ -8,34 +8,30 @@
 \alias{center.funts}
 \title{Generic Centering of Data}
 \usage{
-center(object, ...)
+center(object, CPs = NULL, type = "mean", ...)
 
-\method{center}{default}(object, ...)
+\method{center}{default}(object, CPs = NULL, type = "mean", ...)
 
-\method{center}{data.frame}(object, ...)
+\method{center}{data.frame}(object, CPs = NULL, type = "mean", ...)
 
-\method{center}{matrix}(object, ...)
+\method{center}{matrix}(object, CPs = NULL, type = "mean", ...)
 
 \method{center}{funts}(object, CPs = NULL, type = "mean", ...)
 }
 \arguments{
-\item{object}{Data to be centered}
-
-\item{...}{Additional parameters based on data}
+\item{object}{Object for computation of centering}
 
 \item{CPs}{Change points for centering individual sections.}
 
 \item{type}{String of \code{mean} or \code{median} for method of centering.}
+
+\item{...}{Unused}
 }
 \value{
 Centered data of the same format as the given data
 }
 \description{
 Generic Centering of Data
-
-Generic Center Data function
-
-Center funts data
 }
 \examples{
 center(1:10)

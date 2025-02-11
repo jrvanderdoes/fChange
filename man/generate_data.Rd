@@ -41,7 +41,7 @@ data. Options are the name for each: \code{bmotion}, \code{bbridge},
 \item \strong{sd}: Numeric for the standard deviation of the Brownian motion
 used to build the data.
 }
-\item \strong{kl}: Karhunen-Lo\'{e}ve expansion contains:
+\item \strong{kl}: Karhunen-Loeve expansion contains:
 \itemize{
 \item \strong{distribution}: Distribution of the errors. Options include:
 \code{binomial}, \code{exponential}, \code{laplace}, \code{normal},

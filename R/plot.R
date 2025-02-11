@@ -2,7 +2,7 @@
 #'
 #' A function to plot funts objects in many ways.
 #'
-#' @param x Funts object of data
+#' @param X Funts object or data easily convertible. See [funts()].
 #' @param CPs Vector of change points. Can be NULL.
 #' @param type Choice of plotting method. Options include: 'spaghetti', 'highdim',
 #'  'rainbow','banded','acf', 'pacf', 'summary', 'qq', 'distribution', 'change',

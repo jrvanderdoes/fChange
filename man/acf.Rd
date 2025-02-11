@@ -13,12 +13,12 @@ acf(x, lag.max = NULL, ...)
 
 \method{acf}{default}(x, lag.max = NULL, ...)
 
-pacf(x, ...)
+pacf(x, lag.max = NULL, ...)
 
-\method{pacf}{default}(x, ...)
+\method{pacf}{default}(x, lag.max = NULL, ...)
 
 \method{acf}{funts}(
-  X,
+  x,
   lag.max = NULL,
   alpha = 0.05,
   method = c("Welch", "MC", "Imhof"),
@@ -27,7 +27,7 @@ pacf(x, ...)
   ...
 )
 
-\method{pacf}{funts}(X, n_pcs = NULL, lag.max = NULL, alpha = 0.95, figure = TRUE, ...)
+\method{pacf}{funts}(x, lag.max = NULL, n_pcs = NULL, alpha = 0.95, figure = TRUE, ...)
 }
 \arguments{
 \item{x}{Object for computation of (partial) autocorrelation function
@@ -36,12 +36,13 @@ pacf(x, ...)
 \item{lag.max}{Number of lagged covariance estimators for the time series
 that will be used to estimate the (partial) autocorrelation function.}
 
-\item{...}{Further arguments passed to the \code{plot_FACF}
+\item{...}{Further arguments passed to the \code{\link[=acf.funts]{acf.funts()}}
 function.}
 
-\item{alpha}{A value between 0 and 1 that indicates significant level for
-the confidence interval for the i.i.d. bounds of the autocorrelation
-function. By default \code{alpha = 0.95}.}
+\item{alpha}{A value between 0 and 1 that indicates
+the confidence interval for the i.i.d. bounds
+of the partial autocorrelation function. By default
+\code{ci = 0.95}.}
 
 \item{method}{Character specifying the method to be used when estimating the
 distribution under the hypothesis of functional white noise.
@@ -61,21 +62,6 @@ specified i.i.d. bound.}
 
 \item{n_pcs}{Number of principal components
 that will be used to fit the ARH(p) models.}
-
-\item{ci}{A value between 0 and 1 that indicates
-the confidence interval for the i.i.d. bounds
-of the partial autocorrelation function. By default
-\code{ci = 0.95}.}
-
-\item{estimation}{Character specifying the
-method to be used when estimating the distribution
-under the hypothesis of functional white noise.
-Accepted values are:
-\itemize{
-\item "MC": Monte-Carlo estimation.
-\item "Imhof": Estimation using Imhof's method.
-}
-By default, \code{estimation = "MC"}.}
 }
 \value{
 ACF or PACF values and plots
@@ -117,22 +103,21 @@ functional white noise.
 }
 \examples{
 acf(1:10)
-pacf(1:10)
-X <- generate_brownian_bridge(100, Seq(0,1,length.out=20))
-acf.funts(X,20)
+x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
+acf(x,20)
 
-X <- generate_brownian_bridge(100, seq(0,1,length.out=20))
-pacf.funts(X,lag.max = 10, n_pcs = 2)
+x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
+pacf(x,lag.max = 10, n_pcs = 2)
 
 }
 \references{
-Mestre G., Portela J., Rice G., Mu\~{n}oz San Roque A., Alonso E. (2021).
+Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
 \emph{Functional time series model identification and diagnosis by
 means of auto- and partial autocorrelation analysis.}
 Computational Statistics & Data Analysis, 155, 107108.
 \url{https://doi.org/10.1016/j.csda.2020.107108}
 
-Mestre, G., Portela, J., Mu\~{n}oz-San Roque, A., Alonso, E. (2020).
+Mestre, G., Portela, J., Munoz San Roque, A., Alonso, E. (2020).
 \emph{Forecasting hourly supply curves in the Italian Day-Ahead
 electricity market with a double-seasonal SARMAHX model.}
 International Journal of Electrical Power & Energy Systems,
@@ -144,7 +129,7 @@ time series under conditional heteroscedasticity}
 Journal of Multivariate Analysis,
 162, 32--50. \url{https://doi.org/10.1016/j.jmva.2017.08.004}
 
-Mestre G., Portela J., Rice G., Mu\~{n}oz San Roque A., Alonso E. (2021).
+Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
 \emph{Functional time series model identification and diagnosis by
 means of auto- and partial autocorrelation analysis.}
 Computational Statistics & Data Analysis, 155, 107108.

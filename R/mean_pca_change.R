@@ -44,10 +44,10 @@
 #' Estimated change function
 #'}
 #'
-#' @references Berkes, I., Gabrys, R.,Horv\'{a}th, L. & P. Kokoszka (2009).,
+#' @references Berkes, I., Gabrys, R.,Horvath, L. & P. Kokoszka (2009).,
 #'  \emph{Detecting changes in the mean of functional observations}
 #'  Journal of the Royal Statistical Society, Series B 71, 927-946
-#' @references Aue, A., Gabrys, R.,Horv\'{a}th, L. & P. Kokoszka (2009).,
+#' @references Aue, A., Gabrys, R.,Horvath, L. & P. Kokoszka (2009).,
 #'  \emph{Estimation of a change-point in the mean function of functional data}
 #'  Journal of Multivariate Analysis 100, 2254-2269.
 #'
