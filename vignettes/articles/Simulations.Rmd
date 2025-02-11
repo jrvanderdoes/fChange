@@ -1,21 +1,336 @@
 ---
-title: "paper_simulations"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{paper_simulations}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+title: "Simulations"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
 ```
 
-```{r load_package}
+```{r setup}
 library(fChange)
-# library(devtools);load_all()
 ```
 
+# Known Simulations
+THIS IS THE KNOWN USED AND COMPLETE SIMULATIONS
+
+# Null Simulations
+
+
+# Single Change Simulations
+
+```{r loc_choice, eval=FALSE}
+################
+# Parameters
+################
+change <- 0.15
+locs <- c(0.5,0.75,0.8,0.9,0.95)
+lengths <- c(100,500)
+nSims <- 1000
+dat_res <- 50
+alpha_val <- 0.05
+path <- 'C:\\Users\\j53vande\\Desktop\\New folder (2)\\'
+
+################
+# Generate and Model Data
+################
+results <- cbind(expand.grid(locs,lengths),matrix(ncol=4))
+colnames(results) <- c('loc','length','Tn','Mn','MeanMn','MeanTn')
+for(c in 1:length(locs)){
+  cat(paste0('\n - Loc ',locs[c],' - '))
+  
+  for(l in 1:length(lengths)){
+    cat(paste0('\nLength ',lengths[l],': '))
+    data <- list()
+    
+    tmp_results <- data.frame('Tn'=rep(NA,nSims),
+                              'Mn'=NA,
+                              'MeanMn'=NA,'MeanTn'=NA)
+    
+    for(s in 1:nSims){
+      cat(paste0(s,','))
+      
+      # Generate Data
+      set.seed(123*c+123^2*l+s+1)
+      
+      data[[s]] <- generate_kl(
+        ns = c(lengths[l]*locs[c], lengths[l]-(lengths[l]*locs[c])),
+        eigsList = list(c(1/sqrt(1:5)),
+                        c(1/sqrt(1:5))),
+        basesList = list(
+          fda::create.bspline.basis(nbasis = 5, norder = 4)
+        ),
+        meansList = c(0,change),
+        distsArray = c("Normal",'Normal'),
+        evals = seq(0, 1, length.out=dat_res),
+        kappasArray = c(0),
+        silent = T
+      )
+      
+      # Analyze 
+      set.seed(123*c+123^2*l+s)
+      
+      TnMn_sim <- characteristic_change_sim(data[[s]]$data,h=0,space='BM', silent=T)
+      mean_val <- .change_mean(data[[s]])
+      mean_val_Tn <- .change_mean(data[[s]],statistic = 'Tn')
+      tmp_results[s,] <- c(TnMn_sim$Tn$pval,
+                           TnMn_sim$Mn$pval,
+                           mean_val$pvalue,
+                           mean_val_Tn$pvalue)
+    }
+    
+    results[results$loc==locs[c] &
+              results$length==lengths[l], -c(1:2)] <- colMeans(tmp_results<=alpha_val)
+  }
+}
+
+################
+# Plot
+################
+data_plot <- results %>% na.omit %>% pivot_longer(cols = Tn:MeanTn)
+
+results_plot100 <- data_plot[data_plot$length==100,]
+results_plot500 <- data_plot[data_plot$length==500,]
+
+cols <- scales::hue_pal()(4)
+
+ggplot(mapping=aes(x=loc,
+                     y=value,
+                     group=name,
+                     color=name)) +
+  geom_line(data=results_plot100,linewidth=1) +
+  geom_line(data=results_plot500,linewidth=1,
+            linetype='dashed') +
+  geom_hline(aes(yintercept=0.05),linewidth=1.5,
+             linetype='dotted',color='gray') +
+  geom_point(data=results_plot100,size=4) +
+  geom_point(data=results_plot500,size=4) +
+  theme_bw() +
+  theme(axis.title = element_text(size=24),
+        axis.text = element_text(size=20),
+        legend.justification = c(0, 0),
+        legend.position = c(0.67, 0.75),
+        legend.text =  element_text(size=20),
+        legend.title = element_blank()) +
+  xlab(expression(tau)) +
+  ylab('Rejection Rate') +
+  scale_color_manual(values = c(cols[c(1,3)], 'black',cols[4]),
+                     labels=c('Tn','Mn','ARS-18', 'mARS-18'),
+                     breaks=c('Tn','Mn','MeanTn', 'MeanMn'))
+```
+
+# Appendix Simulations
+
+```{r B_choice, eval=FALSE}
+nSims <- 1000
+length <- 100
+Bs <- c(5,10,20,30,35)
+data <- list()
+
+data <- data.frame('Bs'=Bs,
+                   'Tn'=NA,'TnQuant'=NA,
+                   'Mn'=NA, 'MnQuant'=NA)
+
+for(B in 1:length(Bs)){
+  results_tmp <- data.frame('Tn'=rep(NA,nSims),'Tn95'=NA,
+                            'Mn'=NA,'Mn95'=NA)
+  for(s in nSims:1){
+    cat(paste0(s,','))
+    set.seed(12345*B+s+1)
+
+    data[[s]] <- generate_data_fd(
+      ns = c(length),
+      eigsList = list(c(1/sqrt(1:5))),
+      basesList = list(
+        fda::create.bspline.basis(nbasis = 5, norder = 4)
+      ),
+      meansList = c(0),
+      distsArray = c("Normal"),
+      evals = seq(0, 1, length.out=50),
+      kappasArray = c(0),
+      silent = T
+    )
+    # Tn
+    tmp <- detect_changepoint_final_TnAndMn(
+      X = data[[s]], B=Bs[B], J=50, h=0)
+
+    results_tmp[s,] <- c(tmp$Tn$value,stats::quantile(tmp$Tn$gamProcess,probs = 0.95)[[1]],
+                         tmp$Mn$value,stats::quantile(tmp$Mn$gamProcess,probs = 0.95)[[1]])
+  }
+
+  data[B,-1] <- colMeans(results_tmp)
+}
+
+
+# Tweak following for each image
+data_plot <- data %>%
+  pivot_longer(cols = Tn:MnQuant) %>%
+  mutate('Bname'=paste0(Bs,name))
+
+ggplot(data_plot,
+       aes(x=res,y=value,color=name,fill=name,group=Bname)) +
+  geom_boxplot(alpha=0.25) +
+  theme_bw() +
+  #ylim(c(0,50)) +
+  scale_y_log10() +
+  ggplot2::scale_color_manual(
+    values=c(scales::hue_pal()(7))) +
+  ggplot2::scale_fill_manual(
+    values=scales::hue_pal()(7)) +
+  ylab('Log Errors') +
+  xlab(NULL) +
+  guides(fill=guide_legend(title="Metric"),
+         color=guide_legend(title="Metric"))
+```
+
+
+```{r res_choice,eval=FALSE}
+nSims <- 1000
+length <- 100
+dat_res <- c(20,30,40,50,60)
+data <- list()
+
+data <- data.frame('res'=dat_res,
+                   'Tn'=NA,'TnQuant'=NA,
+                   'Mn'=NA, 'MnQuant'=NA)
+
+for(res in 1:length(dat_res)){
+  results_tmp <- data.frame('Tn'=rep(NA,nSims),'Tn95'=NA,
+                            'Mn'=NA,'Mn95'=NA)
+  for(s in 1:nSims){
+    cat(paste0(s,','))
+    set.seed(12345*res+s+1)
+
+    data[[s]] <- generate_data_fd(
+      ns = c(length),
+      eigsList = list(c(1/sqrt(1:5))),
+      basesList = list(
+        fda::create.bspline.basis(nbasis = 5, norder = 4)
+      ),
+      meansList = c(0),
+      distsArray = c("Normal"),
+      evals = seq(0, 1, length.out=dat_res[res]),
+      kappasArray = c(0),
+      silent = T
+    )
+    # Tn
+    tmp <- detect_changepoint_final_TnAndMn(
+      X = data[[s]], M=20, J=dat_res[res], h=0)
+
+    results_tmp[s,] <- c(tmp$Tn$value,quantile(tmp$Tn$gamProcess,probs = 0.95)[[1]],
+                         tmp$Mn$value,quantile(tmp$Mn$gamProcess,probs = 0.95)[[1]])
+  }
+
+  data[res,-1] <- colMeans(results_tmp)
+}
+
+# Tweak following for each image
+data_plot <- data %>%
+  pivot_longer(cols = Tn:MnQuant) %>%
+  mutate('resname'=paste0(res,name))
+ggplot(data_plot,
+       aes(x=res,y=value,color=name,fill=name,group=resname)) +
+  geom_boxplot(alpha=0.25) +
+  theme_bw() +
+  #ylim(c(0,50)) +
+  scale_y_log10() +
+  ggplot2::scale_color_manual(
+    values=c(scales::hue_pal()(7))) +
+  ggplot2::scale_fill_manual(
+    values=scales::hue_pal()(7)) +
+  ylab('Log Errors') +
+  xlab(NULL) +
+  guides(fill=guide_legend(title="Metric"),
+         color=guide_legend(title="Metric"))
+```
+
+
+```{r B_power,eval=FALSE}
+nSims <- 1000
+length_val <- 100
+B_opts <- c(1, 5, 10, 20, 30)
+changes <- c(0, 0.1, 0.2)
+
+Tn_data <- Mn_data <-  data.frame('changes'=changes,
+                                  'B1'=NA,'B5'=NA,
+                                  'B10'=NA,'B20'=NA,
+                                  'B30'=NA)
+
+for(c_i in 1:length(changes)){
+  results_Tn <- results_Mn <- 
+    data.frame(matrix(nrow=nSims,ncol = length(B_opts)))
+  colnames(results_Tn) <- colnames(results_Mn) <- 
+    paste0('B',B_opts)
+  for(i in 1:nSims){
+    cat(paste0(i,', '))
+    set.seed(123*i+1)
+    
+    data <- generate_kl(
+      ns = c(length_val/2, length_val/2),
+      eigsList = list(c(1/sqrt(1:5)),
+                      c(1/sqrt(1:5))),
+      basesList = list(
+        fda::create.bspline.basis(nbasis = 5, norder = 4)
+      ),
+      meansList = c(0,changes[c_i]),
+      distsArray = c("Normal",'Normal'),
+      evals = seq(0, 1, length.out=50),
+      kappasArray = c(0),
+      silent = T
+    )
+    
+    for(B_idx in 1:length(B_opts)){
+      
+      tmp <- characteristic_change_sim(
+        X = data$data, M = B_opts[B_idx],
+        J = 50, nSims = 1000, K = bartlett_kernel,
+        h=1, space='BM', silent = TRUE)
+      
+      results_Tn[i,B_idx] <- tmp$Tn$pval
+      results_Mn[i,B_idx] <- tmp$Mn$pval
+    }
+  }
+  
+  Tn_data[c_i,] <- c(changes[c_i],colMeans(results_Tn<=0.05))
+  Mn_data[c_i,] <- c(changes[c_i],colMeans(results_Mn<=0.05))
+}
+
+## PLOTTING
+Tn_plot <- Tn_data %>% na.omit %>% pivot_longer(cols = B1:B30)
+Mn_plot <- Mn_data %>% na.omit %>% pivot_longer(cols = B1:B30)
+Tn_plot$name <- factor(Tn_plot$name,levels = c('B1','B5','B10','B20','B30'))
+Mn_plot$name <- factor(Mn_plot$name,levels = c('B1','B5','B10','B20','B30'))
+
+ggplot(mapping=aes(x=changes,
+                     y=value,
+                     group=name,
+                     color=name)) +
+  geom_line(data=Tn_plot,linewidth=1) +
+  geom_line(data=Mn_plot,linewidth=1,
+            linetype='dotdash') +
+  geom_hline(aes(yintercept=0.05),linewidth=1.5,
+             linetype='dotted',color='gray') +
+  geom_point(data=Tn_plot,size=4) +
+  geom_point(data=Mn_plot,size=4) +
+  theme_bw() +
+  theme(axis.title = element_text(size=24),
+        axis.text = element_text(size=20),
+        legend.justification = c(0, 0),
+        legend.position = c(0.75, 0.16),
+        legend.text =  element_text(size=20),
+        legend.title = element_blank()) +
+  xlab(expression(delta)) +
+  ylab('Rejection Rate') +
+  scale_color_discrete(
+    labels=c('B=1','B=5','B=10','B=20','B=30'),
+    breaks=c('B1','B5','B10','B20','B30'))
+```
+
+
+
+# Possible Simulations
 In the code below, we generate all data for the null tables.
 ```{r generate_null_data, eval=FALSE}
 path <- getwd()
