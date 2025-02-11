@@ -36,7 +36,7 @@
 #'        \item **sd**: Numeric for the standard deviation of the Brownian motion
 #'          used to build the data.
 #'      }
-#'    \item **kl**: Karhunen-Lo\'{e}ve expansion contains:
+#'    \item **kl**: Karhunen-Loeve expansion contains:
 #'      \itemize{
 #'        \item **distribution**: Distribution of the errors. Options include:
 #'          \code{binomial}, \code{exponential}, \code{laplace}, \code{normal},

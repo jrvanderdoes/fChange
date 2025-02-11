@@ -1,6 +1,6 @@
 #' Change Function for funts Objects
 #'
-#' @param X Funts object or data easily convertible. See [funts()]
+#' @param X Funts object or data easily convertible. See [funts()].
 #' @param method Method to compute change point. Options include:
 #'  'characteristic', 'mean', 'robust', 'eigenjoint', 'eigensingle', 'trace', 'covariance',
 #'  'pcamean', and 'pcadistribution'.
@@ -70,15 +70,15 @@
 #'  analysis for spectrum and trace of covariance operators. Environmetrics
 #'  (London, Ont.), 31(1)
 #'
-#' @references Horv\'{a}th, L., Rice, G., & Zhao, Y. (2022). Change point analysis
+#' @references Horvath, L., Rice, G., & Zhao, Y. (2022). Change point analysis
 #'  of covariance functions: A weighted cumulative sum approach. Journal of
 #'  Multivariate Analysis, 189, 104877-.
 #'
-#' @references Berkes, I., Gabrys, R.,Horv\'{a}th, L. & P. Kokoszka (2009).,
+#' @references Berkes, I., Gabrys, R.,Horvath, L. & P. Kokoszka (2009).,
 #'  \emph{Detecting changes in the mean of functional observations}
 #'  Journal of the Royal Statistical Society, Series B 71, 927-946
 #'
-#' @references Aue, A., Gabrys, R.,Horv\'{a}th, L. & P. Kokoszka (2009).,
+#' @references Aue, A., Gabrys, R.,Horvath, L. & P. Kokoszka (2009).,
 #'  \emph{Estimation of a change-point in the mean function of functional data}
 #'  Journal of Multivariate Analysis 100, 2254-2269.
 #'

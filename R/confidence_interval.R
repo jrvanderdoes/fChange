@@ -12,7 +12,7 @@
 #' @param method String to indicate the method for computing the confidence
 #'  interval. The options are 'distribution' and 'simulation'. Default is 'distribution'.
 #'
-#' @references Horv\'{a}th, L., & Rice, G. (2024). Change Point Analysis for Time
+#' @references Horvath, L., & Rice, G. (2024). Change Point Analysis for Time
 #'  Series (First edition.). Springer. \url{https://doi.org/10.1007/978-3-031-51609-2}
 #'
 #' @references Aue, A., Rice, G., & S\"{o}nmez, O. (2018). Detecting and dating structural

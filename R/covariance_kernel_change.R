@@ -17,7 +17,7 @@
 #' @keywords internal
 #' @noRd
 #'
-#' @references Horv\'{a}th, L., Rice, G., & Zhao, Y. (2022). Change point analysis
+#' @references Horvath, L., Rice, G., & Zhao, Y. (2022). Change point analysis
 #'  of covariance functions: A weighted cumulative sum approach. Journal of
 #'  Multivariate Analysis, 189, 104877-.
 #'  \url{https://doi.org/10.1016/j.jmva.2021.104877}
