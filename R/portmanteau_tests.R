@@ -65,10 +65,6 @@
 #'    \item **bootstrap**: Only used for the "single-lag" test. The hypothesis
 #'      test is evaluated by approximating the limiting distribution of the test
 #'      statistic via a block bootstrapping process.
-#'    \item **lowdiscrepancy**: Only used for the "single-lag" and "multi-lag"
-#'      tests. Uses low-discrepancy sampling in the Monte-Carlo method. Note,
-#'      low-discrepancy sampling will yield deterministic results. Requires the
-#'      'fOptions' package.
 #'  }
 #' @param kernel Only used for the "spectral" test. A String, 'Bartlett' by default. Specifies the kernel to be
 #'  used in the "spectral" test. Currently supported kernels are the 'Bartlett' and 'Parzen' kernels.
@@ -118,18 +114,16 @@
 #'
 #' @examples
 #' b <- generate_brownian_motion(250)
-#' portmanteau_tests(b, test = 'single-lag', lag = 10)
-#' portmanteau_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
-#' portmanteau_tests(b, test = 'spectral', kernel = 'Bartlett', bandwidth = 'static', alpha = 0.05)
-#' portmanteau_tests(b, test = 'spectral', alpha = 0.1, kernel = 'Parzen', bandwidth = 'adaptive')
-#' portmanteau_tests(b, test = 'independence', components = 3, lag = 3)
-#'
-#' ## Below works if you have 'fOptions'
-#' # portmanteau_tests(b, test = 'single-lag', lag = 1, M = 250, method = 'lowdiscrepancy')
+#' res0 <- portmanteau_tests(b, test = 'single-lag', lag = 10)
+#' res1 <- portmanteau_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
+#' res2 <- portmanteau_tests(b, test = 'spectral', kernel = 'Bartlett', bandwidth = 'static', alpha = 0.05)
+#' res3 <- portmanteau_tests(b, test = 'spectral', alpha = 0.1, kernel = 'Parzen', bandwidth = 'adaptive')
+#' res4 <- portmanteau_tests(b, test = 'independence', components = 3, lag = 3)
+#' res5 <- portmanteau_tests(b, test = 'single-lag', lag = 1, M = 250, method = 'lowdiscrepancy')
 portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag',
                                       'spectral', 'independence', 'imhof'),
                        lag=NULL, M=NULL,
-                       method = c('iid','bootstrap','lowdiscrepancy'),
+                       method = c('iid','bootstrap'),
                        kernel = "Bartlett", bandwidth = "adaptive",
                        components = 3, block_size = "adaptive", moving=FALSE,
                        B = 500, alpha=0.05) {
@@ -137,6 +131,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   poss_tests <- c('variety', 'single-lag', 'multi-lag', 'spectral',
                     'independence', 'imhof')
   test <- .verify_input(test,poss_tests)
+  method <- .verify_input(method, c('iid','bootstrap'))
 
   # Alpha
   if (alpha < 0 | alpha > 1) {
@@ -240,8 +235,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #'      noise assumption (instead of a weak-white noise assumption).
 #'    \item **lowdiscrepancy**: The hypothesis test will usea
 #'      low-discrepancy sampling in the Monte-Carlo method. Note,
-#'      low-discrepancy sampling will yield deterministic results. Requires the
-#'      'fOptions' package.
+#'      low-discrepancy sampling will yield deterministic results.
 #'    \item **bootstrap**: The hypothesis test is done by approximating the
 #'      limiting distribution of the test statistic via a block bootstrap
 #'      process.
@@ -324,7 +318,6 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #'      assumption (instead of a weak-white noise assumption).
 #'    \item **lowdiscrepancy**: Uses low-discrepancy sampling in the Monte-Carlo
 #'      method. Note, low-discrepancy sampling will yield deterministic results.
-#'      Requires the 'fOptions' package.
 #'  }
 #' @param alpha Numeric value between 0 and 1 specifying the significance level to be used in the specified
 #' hypothesis test. The default value is 0.05. Note, the significance value is only ever used to compute the

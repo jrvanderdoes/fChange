@@ -41,7 +41,6 @@ RoxygenNote: 7.2.3
 Suggests: 
     CompQuadForm,
     fda.usc,
-    fOptions,
     forecast,
     funData,
     jmuOutlier,

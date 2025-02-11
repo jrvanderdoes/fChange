@@ -42,14 +42,3 @@ test_that("Electricity statistics in White Noise Tests", {
   res <- portmanteau_tests(b, test = 'independence', components = 3, lag = 3)
   expect_equal(round(res$statistic,7), 753.08642)
 })
-
-test_that("Check Low discrapancy if possible", {
-  if(requireNamespace('fOptions',quietly = TRUE)){
-    set.seed(123)
-    stat <- .single_lag_test(electricity, lag = 1, method='lowdiscrepancy')$statistic
-    expect_equal(stat, 14539596)
-
-    stat <- .multi_lag_test(data = electricity, lag = 10, method='lowdiscrepancy')$statistic
-    expect_equal(stat, 86336179)
-  }
-})

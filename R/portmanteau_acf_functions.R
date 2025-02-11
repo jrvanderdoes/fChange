@@ -146,12 +146,10 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
   }
 
   if (low_disc == TRUE) {
-    if (requireNamespace('fOptions', quietly = TRUE)) {
-      rand_samp_mat <- apply(J * fOptions::runif.sobol(M, 4, scrambling = 3), 2, floor)
-      rand_samp_mat[which(rand_samp_mat == 0)] <- 1
-    } else {
-      stop("Please install the 'fOptions' package for low discrepancy sampling.")
-    }
+    stop('Low Discrepancy under work')
+    # https://github.com/cran/fOptions/blob/master/R/LowDiscrepancy.R
+    # rand_samp_mat <- apply(J * fOptions::runif.sobol(M, 4, scrambling = 3), 2, floor)
+    # rand_samp_mat[which(rand_samp_mat == 0)] <- 1
   } else {
     rand_samp_mat <- matrix(nrow=M, ncol=4)
     for (k in 1:4) {

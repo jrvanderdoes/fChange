@@ -9,7 +9,7 @@ portmanteau_tests(
   test = c("variety", "single-lag", "multi-lag", "spectral", "independence", "imhof"),
   lag = NULL,
   M = NULL,
-  method = c("iid", "bootstrap", "lowdiscrepancy"),
+  method = c("iid", "bootstrap"),
   kernel = "Bartlett",
   bandwidth = "adaptive",
   components = 3,
@@ -42,10 +42,6 @@ weak-white noise assumption).
 \item \strong{bootstrap}: Only used for the "single-lag" test. The hypothesis
 test is evaluated by approximating the limiting distribution of the test
 statistic via a block bootstrapping process.
-\item \strong{lowdiscrepancy}: Only used for the "single-lag" and "multi-lag"
-tests. Uses low-discrepancy sampling in the Monte-Carlo method. Note,
-low-discrepancy sampling will yield deterministic results. Requires the
-'fOptions' package.
 }}
 
 \item{kernel}{Only used for the "spectral" test. A String, 'Bartlett' by default. Specifies the kernel to be
@@ -133,14 +129,12 @@ return a statistic, and thus returns a list with only 2 elements if suppress_raw
 }
 \examples{
 b <- generate_brownian_motion(250)
-portmanteau_tests(b, test = 'single-lag', lag = 10)
-portmanteau_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
-portmanteau_tests(b, test = 'spectral', kernel = 'Bartlett', bandwidth = 'static', alpha = 0.05)
-portmanteau_tests(b, test = 'spectral', alpha = 0.1, kernel = 'Parzen', bandwidth = 'adaptive')
-portmanteau_tests(b, test = 'independence', components = 3, lag = 3)
-
-## Below works if you have 'fOptions'
-# portmanteau_tests(b, test = 'single-lag', lag = 1, M = 250, method = 'lowdiscrepancy')
+res0 <- portmanteau_tests(b, test = 'single-lag', lag = 10)
+res1 <- portmanteau_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
+res2 <- portmanteau_tests(b, test = 'spectral', kernel = 'Bartlett', bandwidth = 'static', alpha = 0.05)
+res3 <- portmanteau_tests(b, test = 'spectral', alpha = 0.1, kernel = 'Parzen', bandwidth = 'adaptive')
+res4 <- portmanteau_tests(b, test = 'independence', components = 3, lag = 3)
+res5 <- portmanteau_tests(b, test = 'single-lag', lag = 1, M = 250, method = 'lowdiscrepancy')
 }
 \references{
 Kim, M., Kokoszka P., & Rice G. (2023) White noise testing for functional
