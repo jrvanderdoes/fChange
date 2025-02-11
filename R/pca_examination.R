@@ -24,7 +24,7 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
   num_pcs <- min(length(pc_data$sdev),d.max)
   pc_data$sdev <- pc_data$sdev[1:num_pcs,drop=FALSE]
   pc_data$rotation <- pc_data$rotation[,1:num_pcs,drop=FALSE]
-  pc_data$x[,1:num_pcs,drop=FALSE]
+  pc_data$x <- pc_data$x[,1:num_pcs,drop=FALSE]
 
 
   results <- array(dim=c(dim(X$data),num_pcs))
@@ -145,7 +145,6 @@ model_pca <- function(X, TVE = 0.95, model=c('ets','arima'),
 
   # Check CPs
   ## TODO:: Ensure get right CPs
-  return(1)
   if(check.cp){
     res <- change(funts(errors), type='segmentation', ...)
     errors_use <- funts(errors[,(max(res$location)+1):ncol(X)])
@@ -173,6 +172,7 @@ model_pca <- function(X, TVE = 0.95, model=c('ets','arima'),
   list(fit = fit_prep,
        plot = plt,
        errors = funts(errors, labels=X$labels, name='Errors', intraobs=X$intraobs),
+       CPs = CPs,
        parameters = list(
          pcs = length(pc_data$sdev),
          TVE = TVE,
