@@ -15,65 +15,30 @@
 #'
 #' @return ACF or PACF values and plots
 #' @export
+#'
+#' @examples
+#' acf(1:10)
 NULL
 
 
 #' @rdname acf
 #'
 #' @export
-acf <- function(x, lag.max=NULL, ...) UseMethod("acf")
+acf <- function(x, lag.max = NULL, ...) UseMethod("acf")
 #' @rdname acf
 #'
 #' @export
-#'
-#' @examples
-#' acf(1:10)
-acf.default <- function(x, lag.max=NULL, ...) stats::acf(x,lag.max)
+acf.default <- function(x, lag.max = NULL, ...) stats::acf(x)
 
 
 #' @rdname acf
 #'
 #' @export
-pacf <- function(x, ...) UseMethod("pacf")
+pacf <- function(x, lag.max = NULL, ...) UseMethod("pacf")
 #' @rdname acf
 #'
 #' @export
-#'
-#' @examples
-#' pacf(1:10)
-pacf.default <- function(x, ...) stats::pacf(x)
-
-
-# #' @rdname acf
-# #'
-# #' @export
-# #'
-# #' @examples
-# #' acf(funts(electricity))
-# acf.funts <- function(x, ...){
-#   # TODO:: Get options in docs
-#   invisible(.compute_FACF(x, ...))
-# }
-
-
-# #' PACF for Functional Data
-# #'
-# #' @inheritParams pacf
-# #'
-# #' @return Functional PACF values
-# #' @export
-# #'
-# #' @examples
-# #' pacf(funts(electricity))
-# pacf.funts <- function(x, ...){
-#   # TODO:: Get options in docs
-#   invisible(.compute_FPACF(x, ...))
-#   # n_harm = NULL, lag.max = NULL, ci=0.95, figure = TRUE, ...)
-# }
-
-
-################################################################################
-
+pacf.default <- function(x, lag.max = NULL, ...) stats::pacf(x)
 
 
 #' Obtain the autocorrelation function for a given functional time series.
@@ -113,13 +78,13 @@ pacf.default <- function(x, ...) stats::pacf(x)
 #'     each lag of the functional time series.
 #' }
 #'
-#' @references Mestre G., Portela J., Rice G., Mu\~{n}oz San Roque A., Alonso E. (2021).
+#' @references Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
 #'  \emph{Functional time series model identification and diagnosis by
 #'  means of auto- and partial autocorrelation analysis.}
 #'  Computational Statistics & Data Analysis, 155, 107108.
 #'  \url{https://doi.org/10.1016/j.csda.2020.107108}
 #'
-#' @references Mestre, G., Portela, J., Mu\~{n}oz-San Roque, A., Alonso, E. (2020).
+#' @references Mestre, G., Portela, J., Munoz San Roque, A., Alonso, E. (2020).
 #'  \emph{Forecasting hourly supply curves in the Italian Day-Ahead
 #'  electricity market with a double-seasonal SARMAHX model.}
 #'  International Journal of Electrical Power & Energy Systems,
@@ -132,37 +97,37 @@ pacf.default <- function(x, ...) stats::pacf(x)
 #'  162, 32--50. \url{https://doi.org/10.1016/j.jmva.2017.08.004}
 #'
 #' @examples
-#' X <- generate_brownian_bridge(100, Seq(0,1,length.out=20))
-#' acf.funts(X,20)
+#' x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
+#' acf(x,20)
 #'
 #' @export
 #' @rdname acf
-acf.funts <- function(X, lag.max = NULL, alpha=0.05,
-                          method = c('Welch','MC','Imhof'),
-                          WWN = TRUE, figure = TRUE, ...){
-  X <- funts(X)
+acf.funts <- function(x, lag.max = NULL, alpha=0.05,
+                      method = c('Welch','MC','Imhof'),
+                      WWN = TRUE, figure = TRUE, ...){
+  x <- funts(x)
 
   if(is.null(lag.max))
-    lag.max <- 20 # 10 * log(ncol(X)/, base=10)
+    lag.max <- 20 # 10 * log(ncol(x)/, base=10)
   if(lag.max<1) stop('Increase lag.max to be greater than 0.',call. = FALSE)
-  lag.max <- min(lag.max, ncol(X$data)-1)
+  lag.max <- min(lag.max, ncol(x$data)-1)
 
   # Autocov surfaces
-  # autocovs <- .compute_autocovariance(X, lag.max)
-  autocovs <- autocovariance(X, 0:lag.max)
+  # autocovs <- .compute_autocovariance(x, lag.max)
+  autocovs <- autocovariance(x, 0:lag.max)
 
   # L2 norm autocov surfaces
-  # l2norms <- .obtain_suface_L2_norm(X$intraobs, autocovs)
+  # l2norms <- .obtain_suface_L2_norm(x$intraobs, autocovs)
   # l2norms <- l2norms[-1] # Drop Lag 0
   l2norms <- sapply(1:lag.max, function(idx,autocovs,res){
     dot_integrate(
       dot_integrate_col(v=t(autocovs[[idx+1]]^2),r=res),
       r=res)
-  },autocovs=autocovs,res=X$intraobs)
+  },autocovs=autocovs,res=x$intraobs)
 
   # Obtain autocorrelation estimates
   normalization.value <-
-    dot_integrate(r = X$intraobs, v = diag(autocovs$Lag0))
+    dot_integrate(r = x$intraobs, v = diag(autocovs$Lag0))
   rho <- sqrt(l2norms) / normalization.value
 
   # Estimate distribution of SWN (iid) bound
@@ -172,14 +137,14 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
     SWN_bound <- rep(NA,length(alpha))
     for(ii in 1:length(alpha)){
       SWN_bound[ii] <-
-        sqrt(Q_WS_quantile_iid(X$data, alpha=alpha)$quantile) /
-        ( sqrt(NCOL(X$data)) * normalization.value )
+        sqrt(Q_WS_quantile_iid(x$data, alpha=alpha)$quantile) /
+        ( sqrt(NCOL(x$data)) * normalization.value )
     }
   } else{
     if(method=='MC'){
-      iid.distribution <- .estimate_iid_distr_MC(X, autocovs, l2norms)
+      iid.distribution <- .estimate_iid_distr_MC(x, autocovs, l2norms)
     } else if(method=='Imhof'){
-      iid.distribution <- .estimate_iid_distr_Imhof(X, autocovs, l2norms)
+      iid.distribution <- .estimate_iid_distr_Imhof(x, autocovs, l2norms)
     }
 
     # Obtain SWN bound for specified confidence value
@@ -197,9 +162,9 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
   lags <- 1:lag.max
 
   if(WWN){
-    quantile <- Q_WS_quantile(X$data, lags, alpha=alpha, M=NULL, low_disc=FALSE)$quantile
+    quantile <- Q_WS_quantile(x$data, lags, alpha=alpha, M=NULL, low_disc=FALSE)$quantile
     WWN_bound <- sqrt(quantile) /
-      ( sqrt(ncol(X$data)) * normalization.value )
+      ( sqrt(ncol(x$data)) * normalization.value )
   }
 
   # Plot
@@ -209,60 +174,6 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
 
   invisible( list('SWN_bound'=SWN_bound, 'WWN_bound'=WWN_bound, 'acfs'=rho) )
 }
-
-
-# #' Obtain L2 norm of the autocovariance functions
-# #'
-# #' Returns the L2 norm of the lagged autocovariance functions
-# #'  \eqn{\hat{C}_{h}}. The L2 norm of these functions is defined as
-# #'  \deqn{\sqrt(\int \int \hat{C}^{2}_{h}(u,v)du dv)}.
-# #'
-# #' @param intraobs Discretization points of the curves.
-# #' @param autocovs An \eqn{(m x m)} matrix with the discretized
-# #'  values of the autocovariance operator \eqn{\hat{C}_{0}}, obtained by
-# #'  calling the function \code{obtain_autocovariance}. The value
-# #'  \eqn{m} indicates the number of points observed in each curve.
-# #'
-# #' @return A vector containing the L2 norm of the
-# #' lagged autocovariance functions \code{autocovs}.
-# #' @export
-# #'
-# #' @examples
-# #' # Example 1
-# #'
-# #' #N <- 100
-# #' #v <- seq(from = 0, to = 1, length.out = 10)
-# #' #sd <- 2
-# #' #X <- generate_brownian_bridge(N, v, sd)
-# #' #lag.max <- 1
-# #' #autocovSurface <- obtain_autocovariance(X=X,nlags = lag.max)
-# #' #norms <- .obtain_suface_L2_norm(intraobs = v,autocovs = autocovSurface)
-# #' #plot_autocovariance(fun.autocovariance = autocovSurface,lag = 1)
-# #' #title(sub = paste0("Lag ",1," - L2 Norm: ",norms[2]))
-# #'
-# #'
-# #' @keywords internal
-# #' @noRd
-# .obtain_suface_L2_norm <- function(intraobs, autocovs){
-#   lag.max <- length(autocovs)
-#   matindex <- rep(NA, lag.max)
-#   res <- nrow(autocovs[[1]])
-#
-#   # L2 norm of squared autocov surfaces
-#   for(rr in 1:length(autocovs)){
-#     autocov2 <- autocovs[[rr]]^2
-#
-#     norm.vec <- matrix(NA, nrow = res, ncol = 1)
-#     for(ii in 1:res){
-#       norm.vec[ii] <- dot_integrate(r = intraobs, v = autocov2[,ii])
-#     }
-#
-#     norm.aux <- dot_integrate(r = intraobs, v = norm.vec)
-#     matindex[rr] <- norm.aux
-#   }
-#
-#   matindex
-# }
 
 
 #' Estimate distribution of the fACF under the iid hypothesis using MC method
@@ -326,15 +237,15 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
 #' @keywords internal
 #' @noRd
 .estimate_iid_distr_MC <-
-  function(X, autocovSurface, matindex, nsims= 10000){
-    X <- funts(X)
+  function(x, autocovSurface, matindex, nsims= 10000){
+    x <- funts(x)
 
     # TODO:: Update Means
     # # mat.means <- matrix(rep(colMeans(Y),nrow(Y)),ncol=ncol(Y),byrow = TRUE)
     # # l <- obtain_autocov_eigenvalues(v,Y - mat.means)
-    # means <- matrix(rep(rowMeans(X$data),ncol(X$data)), nrow=nrow(X$data))
-    # l <- .obtain_autocov_eigenvalues(X$data - means,X$intraobs)
-    l <- .obtain_autocov_eigenvalues(center(X))
+    # means <- matrix(rep(rowMeans(x$data),ncol(x$data)), nrow=nrow(x$data))
+    # l <- .obtain_autocov_eigenvalues(x$data - means,x$intraobs)
+    l <- .obtain_autocov_eigenvalues(center(x))
 
     neig <- length(l)
     Reig <- rep(0,nsims)
@@ -346,7 +257,7 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
       }
     }
     #Reig=Reig/nrow(Y)
-    Reig <- Reig / ncol(X$data)
+    Reig <- Reig / ncol(x$data)
 
     ecdf.aux <- stats::ecdf(Reig)
     ex <- stats::knots(ecdf.aux)
@@ -385,24 +296,24 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
 #' #v <- seq(from = 0, to = 1, length.out = 10)
 #' #sig <- 2
 #' #Y <- generate_brownian_bridge(N, v, sig)
-#' #lambda <- .obtain_autocov_eigenvalues(X = Y)
+#' #lambda <- .obtain_autocov_eigenvalues(x = Y)
 #'
 #' @keywords internal
 #' @noRd
-.obtain_autocov_eigenvalues <- function(X, epsilon = 0.0001){
-  X <- funts(X)
+.obtain_autocov_eigenvalues <- function(x, epsilon = 0.0001){
+  x <- funts(x)
 
-  nobs <- ncol(X$data) # nt
-  res <- nrow(X$data) # nv
+  nobs <- ncol(x$data) # nt
+  res <- nrow(x$data) # nv
 
   # w(i,j) = integral of the product of the curves i and j
   W <- matrix(0,nrow = nobs,ncol = nobs)
 
   for(ii in 1:nobs){
-    mat.aux <- matrix(rep(X$data[,ii],each = nobs),
-                      nrow = nobs, ncol = res)*t(X$data)
+    mat.aux <- matrix(rep(x$data[,ii],each = nobs),
+                      nrow = nobs, ncol = res)*t(x$data)
     for(jj in 1:nobs){
-      W[ii,jj] <- dot_integrate(r = X$intraobs, v = mat.aux[jj,])
+      W[ii,jj] <- dot_integrate(r = x$intraobs, v = mat.aux[jj,])
     }
   }
 
@@ -466,21 +377,21 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
 #'
 #' @keywords internal
 #' @noRd
-.estimate_iid_distr_Imhof <- function(X, autocovs, l2norms){
-  X <- funts(X)
+.estimate_iid_distr_Imhof <- function(x, autocovs, l2norms){
+  x <- funts(x)
 
   if(!requireNamespace('CompQuadForm')) stop('Install `CompQuadForm` to run Imhof.')
 
   # # mat.means <- matrix(rep(colMeans(Y),nrow(Y)),ncol=ncol(Y),byrow = TRUE)
   # # l <- obtain_autocov_eigenvalues(v,Y - mat.means)
-  # means <- matrix(rep(rowMeans(X$data),ncol(X$data)), nrow=nrow(X$data))
-  # l <- .obtain_autocov_eigenvalues(X$data - means,X$intraobs)
-  l <- .obtain_autocov_eigenvalues(center(X))
+  # means <- matrix(rep(rowMeans(x$data),ncol(x$data)), nrow=nrow(x$data))
+  # l <- .obtain_autocov_eigenvalues(x$data - means,x$intraobs)
+  l <- .obtain_autocov_eigenvalues(center(x))
 
   nl <- length(l)
-  Reig <- .estimate_iid_distr_MC(X, autocovs, l2norms)$Reig
+  Reig <- .estimate_iid_distr_MC(x, autocovs, l2norms)$Reig
   ex <- seq(from = 0, to = max(Reig), length.out = 250)
-  x <- ex * ncol(X$data)
+  x <- ex * ncol(x$data)
   nx <- length(x)
 
   # Compute products of eigenvalues
@@ -537,7 +448,7 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
 #' #bbridge <- generate_brownian_bridge(N, v, sig)
 #' #lag.max <- 15
 #' #upper_bound <- 0.95
-#' #fACF <- acf.funts(X = bbridge, lag.max = lag.max,
+#' #fACF <- acf.funts(x = bbridge, lag.max = lag.max,
 #' #                      alpha=upper_bound, figure = FALSE)
 #' #.plot_FACF(rho = fACF$acfs,SWN = fACF$SWN_bound, WWN = fACF$WWN_bound)
 #'
@@ -548,7 +459,7 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
 #' #bbridge <- generate_brownian_bridge(N, v, sig)
 #' #lag.max <- 15
 #' #upper_bound <- 0.95
-#' #fACF <- acf.funts(X = bbridge, lag.max = lag.max,
+#' #fACF <- acf.funts(x = bbridge, lag.max = lag.max,
 #' #                      alpha = upper_bound, figure = FALSE)
 #' #.plot_FACF(rho = fACF$acfs,SWN = fACF$SWN_bound,WWN = fACF$WWN_bound)
 #' }
@@ -661,23 +572,14 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
 #'
 #' @param n_pcs Number of principal components
 #' that will be used to fit the ARH(p) models.
-#' @param ci A value between 0 and 1 that indicates
+#' @param alpha A value between 0 and 1 that indicates
 #' the confidence interval for the i.i.d. bounds
 #' of the partial autocorrelation function. By default
 #' \code{ci = 0.95}.
-#' @param estimation Character specifying the
-#' method to be used when estimating the distribution
-#' under the hypothesis of functional white noise.
-#' Accepted values are:
-#' \itemize{
-#'    \item "MC": Monte-Carlo estimation.
-#'    \item "Imhof": Estimation using Imhof's method.
-#' }
-#' By default, \code{estimation = "MC"}.
 #' @param figure Logical. If \code{TRUE}, plots the
 #' estimated partial autocorrelation function with the
 #' specified i.i.d. bound.
-#' @param ... Further arguments passed to the \code{plot_FACF}
+#' @param ... Further arguments passed to the [acf.funts()]
 #' function.
 #'
 #' @return Return a list with:
@@ -690,33 +592,33 @@ acf.funts <- function(X, lag.max = NULL, alpha=0.05,
 #' }
 #'
 #' @references
-#' Mestre G., Portela J., Rice G., Mu\~{n}oz San Roque A., Alonso E. (2021).
+#' Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
 #' \emph{Functional time series model identification and diagnosis by
 #' means of auto- and partial autocorrelation analysis.}
 #' Computational Statistics & Data Analysis, 155, 107108.
 #' \url{https://doi.org/10.1016/j.csda.2020.107108}
 #'
 #' @examples
-#' X <- generate_brownian_bridge(100, seq(0,1,length.out=20))
-#' pacf.funts(X,lag.max = 10, n_pcs = 2)
+#' x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
+#' pacf(x,lag.max = 10, n_pcs = 2)
 #'
 #' @export
 #' @rdname acf
-pacf.funts <- function(X, n_pcs = NULL, lag.max = NULL,
-                           alpha=0.95, figure = TRUE, ...){
-  X <- funts(X)
+pacf.funts <- function(x, lag.max = NULL, n_pcs = NULL,
+                       alpha=0.95, figure = TRUE, ...){
+  x <- funts(x)
 
-  res <- nrow(X$data) #dv <- length(v)
-  nobs <- ncol(X$data) #dt <- nrow(y)
+  res <- nrow(x$data) #dv <- length(v)
+  nobs <- ncol(x$data) #dt <- nrow(y)
 
   # Allow TVE
   if(is.null(n_pcs)){
     max_pc <- 20
 
     # If there are less discretization points than max_pc, use the disc points
-    num_fpc <- min(c(length(X$intraobs), max_pc))
+    num_fpc <- min(c(length(x$intraobs), max_pc))
 
-    pca <- stats::princomp(t(X$data))#$scores[,1:num_fpc]
+    pca <- stats::princomp(t(x$data))#$scores[,1:num_fpc]
     eigs <- pca$sdev^2
     varprop <- as.numeric(cumsum(eigs[1:num_fpc]) / sum(eigs))
 
@@ -738,7 +640,7 @@ pacf.funts <- function(X, n_pcs = NULL, lag.max = NULL,
   FPACF <- rep(NA, lag.max)
 
   FACF <- acf.funts(
-    X = X, lag.max = 1,
+    x = x, lag.max = 1,
     alpha = alpha, figure = FALSE, WWN = FALSE, ...)
 
   FPACF[1] <- FACF$acfs[1]
@@ -754,30 +656,30 @@ pacf.funts <- function(X, n_pcs = NULL, lag.max = NULL,
     # 1 - Fit ARH(1) to the series
     if(show_varprop){
       Xest_ARIMA <-
-        .fit_ARHp_FPCA(X=X, p = lag_PACF-1,
+        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
                        n_pcs = n_pcs)$x_est
       show_varprop <- FALSE
     }else{
       Xest_ARIMA <-
-        .fit_ARHp_FPCA(X=X, p = lag_PACF-1,
+        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
                        n_pcs = n_pcs, show_varprop = FALSE)$x_est
     }
 
     # 2 - Fit ARH(1) to the REVERSED series
-    x_rev <- X
-    x_rev$data <- X$data[,seq(from = ncol(X$data), to = 1, by = -1)]
+    x_rev <- x
+    x_rev$data <- x$data[,seq(from = ncol(x$data), to = 1, by = -1)]
 
     Xest_ARIMA_REV <- .fit_ARHp_FPCA(
-      X = x_rev, p = lag_PACF-1,
+      x = x_rev, p = lag_PACF-1,
       n_pcs = n_pcs, show_varprop = FALSE)$x_est
 
     # 3 - Estimate covariance surface for PACF
     Xest_1 <- Xest_ARIMA
     Xest_2 <-
-      Xest_ARIMA_REV[,seq(from = ncol(X$data), to = 1, by = -1)]
+      Xest_ARIMA_REV[,seq(from = ncol(x$data), to = 1, by = -1)]
 
-    res_filt_1 <- X$data - Xest_1
-    res_filt_2 <- X$data - Xest_2
+    res_filt_1 <- x$data - Xest_1
+    res_filt_2 <- x$data - Xest_2
 
     # Cross-covariance surface
     sup_cov <- matrix(0, res, res)
@@ -807,7 +709,7 @@ pacf.funts <- function(X, n_pcs = NULL, lag.max = NULL,
     }
     var_1 <- var_1 / count
 
-    traza_1 <- dot_integrate(r = X$intraobs, v = diag(var_1))
+    traza_1 <- dot_integrate(r = x$intraobs, v = diag(var_1))
 
     var_2 <- matrix(0, res, res)
     count <- 0
@@ -821,18 +723,18 @@ pacf.funts <- function(X, n_pcs = NULL, lag.max = NULL,
     }
     var_2 <- var_2 / count
 
-    traza_2 <- dot_integrate(r = X$intraobs, v = diag(var_2))
+    traza_2 <- dot_integrate(r = x$intraobs, v = diag(var_2))
 
     sup_corr <- sup_cov / ( sqrt(traza_1)*sqrt(traza_2) )
 
     # Check - L2 surface norm
     vector_PACF[lag_PACF] <-
       dot_integrate(
-        dot_integrate_col(v=t(sup_corr^2),r=X$intraobs),
-        r=X$intraobs)
+        dot_integrate_col(v=t(sup_corr^2),r=x$intraobs),
+        r=x$intraobs)
 
     # vector_PACF[lag_PACF] <-
-    #   sqrt( .obtain_suface_L2_norm(X$intraobs, list(Lag0 = sup_corr)) )
+    #   sqrt( .obtain_suface_L2_norm(x$intraobs, list(Lag0 = sup_corr)) )
   }
 
   if(figure){
@@ -850,7 +752,7 @@ pacf.funts <- function(X, n_pcs = NULL, lag.max = NULL,
 #'   decomposing the original functional observations into a vector time series
 #'   of \code{n_pcs} FPCA scores, and then fitting a vector autoregressive
 #'   model of order \eqn{p} (\eqn{VAR(p)}) to the time series of the scores.
-#'   Once fitted, the Karhunen-Lo\'{e}ve expansion is used to re-transform the
+#'   Once fitted, the Karhunen-Loeve expansion is used to re-transform the
 #'   fitted values into functional observations.
 #'
 #' @inheritParams pacf.funts
@@ -888,7 +790,7 @@ pacf.funts <- function(X, n_pcs = NULL, lag.max = NULL,
 #' # }
 #' #
 #' # # Fit an ARH(1) model
-#' # mod <- .fit_ARHp_FPCA(X = funts(y,intraobs = v), p = 1, n_pcs = 5)
+#' # mod <- .fit_ARHp_FPCA(x = funts(y,intraobs = v), p = 1, n_pcs = 5)
 #'
 #' # Plot results
 #' # plot(v, y[,50], type = "l", lty = 1, ylab = "")
@@ -903,14 +805,14 @@ pacf.funts <- function(X, n_pcs = NULL, lag.max = NULL,
 #'
 #' @keywords internal
 #' @noRd
-.fit_ARHp_FPCA <- function(X, p, n_pcs, show_varprop = TRUE){
-  X <- funts(X)
+.fit_ARHp_FPCA <- function(x, p, n_pcs, show_varprop = TRUE){
+  x <- funts(x)
 
-  nobs <- ncol(X$data) #dt <- nrow(y)
-  res <- nrow(X$data) #dv <- length(v)
+  nobs <- ncol(x$data) #dt <- nrow(y)
+  res <- nrow(x$data) #dv <- length(v)
 
   # Step 1: FPCA decomposition of the curves
-  pca <- stats::princomp(t(X$data))
+  pca <- stats::princomp(t(x$data))
   eigs <- pca$sdev^2
   varprop <- as.numeric(cumsum(eigs[1:n_pcs]) / sum(eigs))
 
@@ -950,48 +852,5 @@ pacf.funts <- function(X, n_pcs = NULL, lag.max = NULL,
   }
 
   list(x_est = x_rec, mod = mod, fpca = pca,
-       fitted_vals = fitted_vals, X = X)
+       fitted_vals = fitted_vals, x = x)
 }
-
-
-# #' Integral transformation of a curve using an integral operator
-# #'
-# #' Compute the integral transform of the curve \eqn{Y_i} with respect to
-# #'  a given integral operator \eqn{\Psi}. The transformation is given by
-# #'  \deqn{\Psi(Y_{i})(v) = \int \psi(u,v)Y_{i}(u)du}
-# #'
-# #' @param operator_kernel Matrix with the values of the kernel surface of
-# #'  the integral operator. The dimension of the matrix is \eqn{(g x m)},
-# #'  where \eqn{g} is the number of discretization points of the input curve
-# #'  and \eqn{m} is the number of discretization points of the output curve.
-# #' @param curve Vector containing the discretized values of a functional
-# #'  observation. The dimension of the matrix is \eqn{(1 x m)}, where
-# #'  \eqn{m} is the number of points observed in the curve.
-# #' @param v Numerical vector specifying the discretization points of the curves.
-# #'
-# #' @return Returns a matrix the same size as \code{curve} with the transformed
-# #'  values.
-# #'
-# #' @examples
-# #' ## Example 1
-# #'
-# #' #v <- seq(from = 0, to = 1, length.out = 20)
-# #' #set.seed(10)
-# #' #curve <- sin(v) + stats::rnorm(length(v))
-# #' #operator_kernel <- 0.6*(v %*% t(v))
-# #' #hat_curve <- integral_operator(operator_kernel,curve,v)
-# #'
-# #' @keywords internal
-# #' @noRd
-# integral_operator <- function(operator_kernel, curve, v){
-#
-#   # Initialize output
-#   yhat <- rep(0, times = ncol(operator_kernel))
-#
-#  # Perform the integral transformation
-#   for(ind_v in 1:ncol(operator_kernel)){
-#     yhat[ind_v] <- pracma::trapz(y = operator_kernel[,ind_v]*curve, x = v)
-#   }
-#
-#   yhat
-# }
