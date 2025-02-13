@@ -9,7 +9,8 @@
 #'    \eqn{ \overline{Y}_{T}(u) = \frac{1}{T} \sum_{i = 1}^{T} Y_{i}(t)}
 #'  denotes the sample mean function.
 #'
-#' @param X funts object of data of interest
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param lags Numeric(s) for the lags to estimate the lagged autocovariance / autocorrelation
 #'  operators.
 #' @param center Boolean if the data should be centered. Default is true.
@@ -26,9 +27,9 @@
 #'   lags = 1)
 #' image(x = v, y = v, z = lagged_autocov)
 autocovariance <- function(X, lags=0:1, center=TRUE){
-  X <- funts(X)
-  if(center) X <- center.funts(X)
-  res <- length(X$intraobs)
+  X <- dfts(X)
+  if(center) X <- center.dfts(X)
+  res <- length(X$intratime)
   obs <- length(X$labels)
 
   autocovs <- list()
@@ -79,7 +80,7 @@ autocovariance <- function(X, lags=0:1, center=TRUE){
 #' lagged_autocor1 <- autocorrelation(X = bbridge, lags = 1)
 #' image(x = v, y = v, z = lagged_autocor1)
 autocorrelation <- function(X, lags){
-  X <- funts(X)
+  X <- dfts(X)
 
   lags_use <- unique(c(0,lags))
 
@@ -87,19 +88,19 @@ autocorrelation <- function(X, lags){
 
   if(length(lags_use)==1){
     normalization.value <-
-      dot_integrate(r = X$intraobs, v = diag(autocov))
+      dot_integrate(r = X$intratime, v = diag(autocov))
 
     autocor <- autocov / normalization.value
 
   } else if(length(lags)==1){
     normalization.value <-
-      dot_integrate(r = X$intraobs, v = diag(autocov$Lag0))
+      dot_integrate(r = X$intratime, v = diag(autocov$Lag0))
 
     autocor <- autocov[[paste("Lag",lags,sep = "")]] / normalization.value
 
   }else {
     normalization.value <-
-      dot_integrate(r = X$intraobs, v = diag(autocov$Lag0))
+      dot_integrate(r = X$intratime, v = diag(autocov$Lag0))
 
     autocor <- list()
     for(kk in lags){
