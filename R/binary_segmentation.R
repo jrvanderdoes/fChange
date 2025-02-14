@@ -4,8 +4,8 @@
 #'     for general functions. Change points are recursively found until no
 #'     more change points are detected.
 #'
-#' @param X funts object or numeric data.frame with rows for evaluated values and columns
-#'    indicating functional observations
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param test_statistic_function XXXXXXXXXXXXXXXXX.
 #' @param cutoff_function XXXXXX
 #' @param trim_function XXXXXX
@@ -28,16 +28,16 @@
 #' @keywords internal
 .binary_segmentation <- function(X, method,
                                  trim_function = function(X) {
-                                   max(10, floor(log(ncol(as.data.frame(X)))),
+                                   max(10, floor(log(ncol(X))),
                                        na.rm = TRUE
                                    )
                                  },
                                  alpha = 0.05, silent = FALSE, ...) {
   ## Setup
-  X <- funts(X)
+  X <- dfts(X)
 
   ## Get change points
-  CPsVals <- .detect_changes(
+  changes_info <- .detect_changes(
     X = X, method = method,
     trim_function = trim_function,
     alpha = alpha,
@@ -47,14 +47,14 @@
   )
 
   ## Verify
-  CPsVals <- .binary_verification(
-    CPsVals = CPsVals, X = X, method = method,
+  changes1 <- .binary_verification(
+    changes_info = changes_info, X = X, method = method,
     trim_function = trim_function, alpha = alpha,
     silent = silent, ...
   )
 
   ## Return Results
-  CPsVals
+  changes_info
 }
 
 
@@ -91,9 +91,17 @@
   potential <- .single_segment(X = X, method = method, trim_function = trim_function, ... )
 
   # No Change Point Detected
-  if (potential$pvalue > alpha) {
-    return()
-  }
+  return_now <- tryCatch({
+    rval <- FALSE
+    if (potential$pvalue > alpha) rval <- TRUE
+
+    rval
+  }, error = function(e){
+    if (is.na(potential) || is.null(potential)) {
+      TRUE
+    }
+  })
+  if(return_now) return()
 
   # Display progress
   if (!silent) {
@@ -107,9 +115,9 @@
   return(
     rbind(
     .detect_changes(
-      X = funts(X$data[, 1:potential$location,drop=FALSE],
+      X = dfts(X$data[, 1:potential$location,drop=FALSE],
                 labels = X$labels[1:potential$location],
-                intraobs = X$intraobs,inc.warnings = FALSE),
+                intratime = X$intratime,inc.warnings = FALSE),
       method = method,
       trim_function = trim_function,
       alpha = alpha,
@@ -119,8 +127,8 @@
     ),
     data.frame('location'=potential$location + addAmt, 'pvalue'=potential$pvalue),
     .detect_changes(
-      X = funts(X$data[, (potential$location + 1):ncol(X)],labels = X$labels[(potential$location + 1):ncol(X)],
-                        intraobs = X$intraobs,inc.warnings = FALSE),
+      X = dfts(X$data[, (potential$location + 1):ncol(X),drop=FALSE],labels = X$labels[(potential$location + 1):ncol(X)],
+               intratime = X$intratime,inc.warnings = FALSE),
       method = method,
       trim_function = trim_function,
       alpha = alpha,
@@ -166,9 +174,9 @@
 #'
 #' This (internal) function is used to verify change points.
 #'
-#' @param data funts object or numeric data.frame with rows for evaluated values and columns
+#' @param data dfts object or numeric data.frame with rows for evaluated values and columns
 #'    indicating FD
-#' @param CPsVals Numeric vector indicating change point locations (empty vector
+#' @param changes_info Numeric vector indicating change point locations (empty vector
 #'     used if no change point detected)
 #' @param test_statistic_function Function with the first argument being data
 #'     and the second argument optional argument for candidate change points.
@@ -183,43 +191,43 @@
 #' @param silent Boolean to indicate if progress output should be printed
 #' @param ... Additional inputs to pass to the given functions
 #'
-#' @return CPsVals Numeric vector indicating change point locations (NA if no
+#' @return changes_info Numeric vector indicating change point locations (NA if no
 #'     change points are detected)
 #'
 #' @noRd
 #' @keywords internal
-.binary_verification <- function(CPsVals, X, method, trim_function,
+.binary_verification <- function(changes_info, X, method, trim_function,
                                  alpha, silent, ... ) {
-  X <- funts(X)
+  X <- dfts(X)
   if (!silent) cat("-- Verify Step --\n")
 
-  if (!is.null(CPsVals)) { # If there was at least one detected
-    tmp_cps <- c(0, CPsVals$location, ncol(X$data))
-    CPsVals_new <- data.frame()
-    for (i in 2:(length(tmp_cps) - 1)) {
+  if (!is.null(changes_info)) { # If there was at least one detected
+    tmp_changes <- c(0, changes_info$location, ncol(X$data))
+    changes_new <- data.frame()
+    for (i in 2:(length(tmp_changes) - 1)) {
       ## Get CP
       potential_cp <-
-        .single_segment(X=funts(X=X$data[, (tmp_cps[i - 1] + 1):tmp_cps[i + 1]],
-                                labels = X$labels[(tmp_cps[i - 1] + 1):tmp_cps[i + 1]],
-                                intraobs = X$intraobs, inc.warnings = FALSE),
+        .single_segment(X=dfts(X=X$data[, (tmp_changes[i - 1] + 1):tmp_changes[i + 1]],
+                                labels = X$labels[(tmp_changes[i - 1] + 1):tmp_changes[i + 1]],
+                               intratime = X$intratime, inc.warnings = FALSE),
                         method=method, trim_function=trim_function, ...)
       if(potential_cp$pvalue<=alpha){
-        CPsVals_new <- rbind(CPsVals_new,
-                         data.frame('location'=potential_cp$location+tmp_cps[i - 1],
+        changes_new <- rbind(changes_new,
+                         data.frame('location'=potential_cp$location+tmp_changes[i - 1],
                                     'pvalue'=potential_cp$pvalue))
       }
     }
   } else {
 
     ## Get CP
-    CPsVals_new <-
+    changes_new <-
       .single_segment(X=X, method=method, trim_function=trim_function, ...)
 
-    if(CPsVals_new$pvalue>alpha) return()
+    if(changes_new$pvalue>alpha) return()
   }
 
   # Order and return
-  if(nrow(CPsVals_new)<=1) return(CPsVals_new)
+  if(nrow(changes_new)<=1) return(changes_new)
 
-  CPsVals_new[order(CPsVals_new$location),]
+  changes_new[order(changes_new$location),]
 }
