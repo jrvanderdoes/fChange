@@ -12,7 +12,7 @@
 #' @param d Number of eigenvalues to include in testing.
 #' @param h The window parameter for the estimation of the long run covariance matrix. The default
 #'  value is \code{h=2}.
-#' @param CPs Vector to use in order to demean the data
+#' @param changes Vector to use in order to demean the data
 #' @param test String if testing single or joint eigenvalues
 #' @param M Number of monte carlo simulations used to get the critical values.
 #' The default value is \code{M=1000}; however, simulations have shown this can
@@ -41,15 +41,15 @@
 #'  (London, Ont.), 31(1)
 #'
 #' @examples
-#' #.change_eigen(funts(electricity), 2, test='joint')
-#' #.change_eigen(funts(electricity), 2, test='individual')
+#' #.change_eigen(electricity, 2, test='joint')
+#' #.change_eigen(electricity, 2, test='individual')
 #'
 #' #\donttest{
 #' #bm <- generate_brownian_motion(200,v=seq(0,1,length.out=20))
 #' #.change_eigen(bm, 3, test='joint')
 #' #.change_eigen(bm, 3, test='individual')
 #' #}
-.change_eigen <- function(X, d, h=2, CPs = NULL,
+.change_eigen <- function(X, d, h=2, changes = NULL,
                           statistic = c('Tn','Mn'),
                           test = c('joint', 'individual'),
                           critical = c('simulation','permutation'),
@@ -61,7 +61,7 @@
   test <- .verify_input(test,poss_tests)
 
   # Setup Data
-  X <- center(funts(X), CPs=CPs)
+  X <- center(dfts(X), changes=changes)
 
   N <- ncol(X$data)
   D <- nrow(X$data)
@@ -84,7 +84,7 @@
   # }
 
   if(test=='joint'){
-    # Sigma_d <- .long_run_cov(data = t(thetas[,1:d]),h=h,K = K)
+    # Sigma_d <- long_run_covariance(X = t(thetas[,1:d]),h=h,K = K)
 
     # Values <- sapply(1:M,
     #                  function(i,N,d) .asymp_joint(N,d),
@@ -206,7 +206,7 @@
     }
   }
 
-  Sigma_d <- .long_run_cov(data = t(thetas[,1:d]), h = h, K = K)
+  Sigma_d <- long_run_covariance(X = t(thetas[,1:d]), h = h, K = K)
   # Moore Penrose solve if non-invertable
   Sigma_d_inv <- tryCatch({
     solve(Sigma_d)
@@ -277,7 +277,7 @@
     }
   }
 
-  Sigma_d <- .long_run_cov(data = t(thetas[,d]), h = h, K = K)
+  Sigma_d <- long_run_covariance(X = t(thetas[,d]), h = h, K = K)
 
   Tns <- rep(0,N)
   for (k in 1:N){

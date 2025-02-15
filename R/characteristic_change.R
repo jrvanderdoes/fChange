@@ -10,21 +10,21 @@
 .change_characteristic <- function(X, statistic, critical,
                                    M = 20, J=50,
                                    nSims = 1000, h = 3,
-                                   W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                                   W = space_measuring_vectors(X = X, M = 20, space='BM'),
                                    K = bartlett_kernel, #space = "BM",
                                    blocksize=1,
                                    perm_type = 'separate', replace = TRUE,
                                    alpha=0.05, ...) {
-  X <- funts(X)
+  X <- dfts(X)
 
   # Generate Noise
   if(is.null(W)){
-    W <- computeSpaceMeasuringVectors(X = X, M = 20, ...)
+    W <- space_measuring_vectors(X = X, M = 20, ...)
   }
   M <- ncol(W)
 
   # Test Statistic
-  tmp <- .characteristic_statistic(X = X$data,v=X$intraobs,
+  tmp <- .characteristic_statistic(X = X$data,v=X$intratime,
                                     statistic=statistic, W = W, J = J,
                                     location = TRUE)
   stat <- tmp[1]
@@ -65,7 +65,7 @@
     simulations <- .bootstrap(X = X$data, blocksize = blocksize, M = nSims,
                          type = perm_type, replace = replace,
                          fn = .characteristic_statistic,
-                         statistic=statistic, v=X$intraobs, W = W, J = J)
+                         statistic=statistic, v=X$intratime, W = W, J = J)
 
   } else if(critical=='welch'){
 
@@ -144,7 +144,7 @@
 #' @keywords internal
 .characteristic_statistic <- function(
     X, statistic='Tn', v=seq(0,1,length.out=nrow(X)),
-    W = computeSpaceMeasuringVectors(M = 20, X = X, space = 'BM'), J = 50,
+    W = space_measuring_vectors(M = 20, X = X, space = 'BM'), J = 50,
     location = FALSE, all.stats=FALSE){
 
   n <- ncol(X)
@@ -157,7 +157,7 @@
   Zn <- Zn[ns,,drop=FALSE]
 
   # Integrate out W
-  noW <- dot_integrate_col(t(abs(Zn)^2), v)
+  noW <- dot_integrate_col(t(abs(Zn)^2))
 
   if(statistic=='Tn'){
     statistic <- dot_integrate(noW)

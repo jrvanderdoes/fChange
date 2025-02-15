@@ -6,7 +6,8 @@
 #'     and hence does not depend on any dimension reduction technique such as
 #'     fPCA.
 #'
-#' @param data funts object or numeric data.frame with evaled points on rows and fd objects in columns
+#' @param data A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param statistic String \code{Tn} or \code{Mn}, for integrated or maximum test statistic
 #' @param M (Optional) Number of Monte Carlo simulations used to get the critical
 #'     values. The default value is \code{M=1000}
@@ -33,11 +34,11 @@
                          M = 1000, h = 0, K = bartlett_kernel,
                          blocksize=1, type = 'separate',replace = TRUE) {
   statistic <- .verify_input(statistic, c('Tn','Mn'))
-  data <- funts(data)
+  data <- dfts(data)
   data <- center(data)
 
   ## Estimate eigenvalues (lambda_i, 1<=i<=d)
-  Ceps <- .long_run_cov(data, h, K) # data1
+  Ceps <- long_run_covariance(data, h, K) # data1
   lambda <- eigen(Ceps)$values
 
   tmp <- .mean_statistic(data$data, statistic,location=TRUE)
@@ -153,7 +154,7 @@
 # #' This function is used to compute the CUSUM statistic for a mean change of
 # #'     FD observations.
 # #'
-# #' @param data funts object or numeric data.frame with evaled points on rows and fd objects in columns
+# #' @param data dfts object or numeric data.frame with evaled points on rows and fd objects in columns
 # #' @param k Numeric indicating the change point of interest
 # #' @param ... Unused, just for use in other functions
 # #'
@@ -163,7 +164,7 @@
 # #' @keywords internal
 # .compute_mean_stat <- function(data, k, weight = 0.5) {
 #   # TODO:: IMPLEMENT THIS
-#   data <- funts(data)
+#   data <- dfts(data)
 #   n <- ncol(data$data)
 #   stop('Not tested with weights')
 #   normalizer <- ( (k/n) * ((n-k) / n) )^(-weight)

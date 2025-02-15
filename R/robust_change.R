@@ -1,6 +1,7 @@
 #' Robust Change Point Detection
 #'
-#' @param X data of interest (funts)
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param m Number of interations for permutation
 #' @param statistic Test statistic of interest. Either Integrated (\code{Tn}) or
 #'  maximized (\code{Mn}). Default is \code{Tn}
@@ -24,13 +25,14 @@
 #'  Stat Papers (2024). \url{https://doi.org/10.1007/s00362-024-01577-7}
 #'
 #' @examples
-#' #result <- .change_robust(funts(electricity[,1:100]),m=10)
+#' #result <- .change_robust(dfts(electricity$data[,1:100]),m=10)
 .change_robust <- function(X, m, statistic=c('Tn','Mn'),
                           threshold=c('simulation','permutation'),
                           bandwidth = NA){
   # Setup variables
   statistic <- .verify_input(statistic, c('Tn','Mn'))
   threshold <- .verify_input(threshold, c('simulation','permutation'))
+  X <- dfts(X)
 
   # Create Proper Data and Bandwidths
   Obs <- X$data
@@ -235,7 +237,7 @@
 
   if(threshold=='simulation'){
     ## TODO: Set this to use same kernel
-    cov_mat <- .long_run_cov(data = Obs_tilde_h, h = bw_h, K = bartlett_kernel)
+    cov_mat <- long_run_covariance(X = Obs_tilde_h, h = bw_h, K = bartlett_kernel)
     lambda <- eigen(cov_mat)$values
 
     sims <- rep(NA, m)

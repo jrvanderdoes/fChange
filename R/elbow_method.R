@@ -4,8 +4,8 @@
 #'     cascading change points are not considered to allow for every possible
 #'     number of change points to be selectable.
 #'
-#' @param X funts object or Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param method Method of detecting changes. See [change()].
 #' @param W Basis to measure the space with when using a characteristic-based
 #'  approach.
@@ -41,7 +41,7 @@
 #'
 #' @examples
 #' #results <- .elbow_method(
-#' #  X = electricity[, 1:50],
+#' #  X = electricity$data[, 1:50],
 #' #  trim_function = function(...) {
 #' #   10
 #' #  },
@@ -54,11 +54,11 @@
                          K=bartlett_kernel,
                          d=NULL, h=0, weighting=0,
                          recommendation_change_points = 2,
-                         recommendation_improvement = 0.1,
+                         recommendation_improvement = 0.15,
                          TVE=0.95) {
 
   ## Setup
-  X <- funts(X)
+  X <- dfts(X)
   max_changes <- min(max_changes, ncol(X))
 
   n <- ncol(X$data)
@@ -84,21 +84,21 @@
 
   ## Total Var Remaining
   return_data[1, ] <- c(location,
-                        .compute_total_var(X = X, CPs = location,
+                        .compute_total_var(X = X, changes = location,
                                            errors = errors, K=K,
                                            W=W))
 
   ## Iteratively Search
   while (nrow(return_data) < max_changes) {
     ## Setup
-    CPs <- c(0, return_data$CP, n)
-    CPs <- CPs[order(CPs)]
+    changes <- c(0, return_data$CP, n)
+    changes <- changes[order(changes)]
     prev_CP <- return_data[nrow(return_data), "CP"]
-    prev_CP_loc <- which(CPs == prev_CP)
+    prev_CP_loc <- which(changes == prev_CP)
 
     ## We only need to recompute for the interval changed by last CP!
     # Before
-    beforePrevCP <- (CPs[prev_CP_loc - 1] + 1):(CPs[prev_CP_loc])
+    beforePrevCP <- (changes[prev_CP_loc - 1] + 1):(changes[prev_CP_loc])
     trim_amt <- trim_function(X$data[, beforePrevCP])#, ...)
     test_stats[beforePrevCP] <- 0
 
@@ -116,7 +116,7 @@
     }
 
     # After
-    afterPrevCP <- (CPs[prev_CP_loc] + 1):CPs[prev_CP_loc + 1]
+    afterPrevCP <- (changes[prev_CP_loc] + 1):changes[prev_CP_loc + 1]
     trim_amt <- trim_function(X$data[, afterPrevCP])#, ...)
     test_stats[afterPrevCP] <- 0
 
@@ -127,12 +127,12 @@
                                  W=W, d=d, h=h, K=K, weighting=weighting, TVE=TVE)
 
       # Set next CP to 0 if include (i.e. not trimmed)
-      if(max(afterPrevCP[fill_idx])==CPs[prev_CP_loc + 1]) stats_tmp[length(stats_tmp)] <- 0
+      if(max(afterPrevCP[fill_idx])==changes[prev_CP_loc + 1]) stats_tmp[length(stats_tmp)] <- 0
 
       test_stats[afterPrevCP[fill_idx]] <- stats_tmp
     }
 
-    #### Split based on 0s (CPs and trimmings)
+    #### Split based on 0s (changes and trimmings)
     is.sep <- test_stats==0
     data_segments <- split(test_stats[!is.sep], cumsum(is.sep)[!is.sep])
 
@@ -143,11 +143,11 @@
       ## Find max in section
       value_max <- max(data_segments[[k]])
       section_max <- min(which(test_stats == value_max))
-      CPs_proposed <- c(section_max, return_data$CP)
+      changes_proposed <- c(section_max, return_data$CP)
 
       return_data_tmp[k, ] <- c(
         section_max,
-        .compute_total_var(X = X, CPs = CPs_proposed, errors = errors, W=W, K=K)
+        .compute_total_var(X = X, changes = changes_proposed, errors = errors, W=W, K=K)
       )
     }
 
@@ -160,13 +160,13 @@
 
   ## Add No Change option and compute percent change
   return_data <- rbind(
-    c(NA, .compute_total_var(X=X, CPs=c(), errors=errors, W=W, K=K)),
+    c(NA, .compute_total_var(X=X, changes=c(), errors=errors, W=W, K=K)),
     return_data
   )
   return_data$Percent <- 1 - return_data$Var / max(return_data$Var)
   return_data$Improvement <- c(NA,1-return_data$Var[-1] /return_data$Var[-nrow(return_data)])
 
-  ## Recommended Number of CPs
+  ## Recommended Number of changes
   #   Look ahead at the next recommendation_change_points changes
   #   Determine if the reduction in variance is less than requested
   #   If so, select. Otherwise look at next point
@@ -178,10 +178,10 @@
   }
   recommended_cp <- which.max(apply(data_change, MARGIN = 1, prod)) - 1
   if(recommended_cp==0){
-    recommended_cps <- NA
+    recommended_changes <- NA
   } else{
-    recommended_cps <- return_data$CP[1:(recommended_cp+1)]
-    recommended_cps <- recommended_cps[!is.na(recommended_cps)]
+    recommended_changes <- return_data$CP[1:(recommended_cp+1)]
+    recommended_changes <- recommended_changes[!is.na(recommended_changes)]
   }
 
 
@@ -242,7 +242,7 @@
          ),
        "suggestion" = list(
          'plot'=recommend_plot,
-         'changes'=recommended_cps)
+         'changes'=recommended_changes)
        )
 }
 
@@ -281,7 +281,7 @@
                        (k / n) * rowSums(X))^2)
     }
     stats <- stats / n
-  }  else if(method=='robust'){
+  }  else if(method=='robustmean'){
     # U_N(x) stacked
     hC_Obs <- make_hC_Obs(X)
 
@@ -306,7 +306,7 @@
       }
     }
 
-    Sigma_d <- .long_run_cov(data = t(thetas[,1:d]), h = h, K = K)
+    Sigma_d <- long_run_covariance(X = t(thetas[,1:d]), h = h, K = K)
     # Moore Penrose solve if non-invertable
     Sigma_d_inv <- tryCatch({
       solve(Sigma_d)
@@ -351,7 +351,7 @@
       }
     }
 
-    Sigma_d <- .long_run_cov(data = t(thetas[,d]), h = h, K = K)
+    Sigma_d <- long_run_covariance(X = t(thetas[,d]), h = h, K = K)
 
     stats <- rep(0,n)
     for (k in 1:n){
@@ -381,7 +381,7 @@
     }
   }else if(method=='covariance'){
 
-    xdm <- center(funts(X))$data
+    xdm <- center(dfts(X))$data
 
     uind <- seq(0, 1, length = n + 1)[2:(n + 1)]
     zn2 <- list()
@@ -393,9 +393,9 @@
         dot_integrate(dot_integrate_col( Zn_stat^2))
     }
 
-  }else if(method=='pcamean'){
+  }else if(method=='projmean'){
 
-    pca_X <- pca(funts(X), TVE=TVE)
+    pca_X <- pca(dfts(X), TVE=TVE)
     d <- length(pca_X$sdev)
 
     eta.hat <- as.matrix(pca_X$x)
@@ -413,9 +413,9 @@
     }else{
       stats <-  diag( 1/n * ( t(kappa) %*% (1/pca_X$sdev^2) %*% kappa ) )
     }
-  }else if(method=='pcadistribution'){
+  }else if(method=='projdistribution'){
 
-    pca_X <- pca(funts(X), TVE=TVE)
+    pca_X <- pca(dfts(X), TVE=TVE)
     d <- length(pca_X$sdev)
 
     kappa <- matrix(nrow=d, ncol=n-1)
@@ -449,7 +449,7 @@
 #' Compute Total Variance
 #'
 #' This (internal) function computes the total variance in the data with given
-#'  CPs.
+#'  changes.
 #'
 #' @inheritParams .elbow_method
 #'
@@ -457,13 +457,13 @@
 #'
 #' @noRd
 #' @keywords internal
-.compute_total_var <- function(X, CPs, errors = "L2", K=bartlett_kernel,
-                               W=generate_brownian_motion(100, v=X$intraobs )$data) {
+.compute_total_var <- function(X, changes, errors = "L2", K=bartlett_kernel,
+                               W=generate_brownian_motion(100, v=X$intratime )$data) {
   # Get Information
   if (tolower(errors) == "l2" || tolower(errors) == "trace") {
 
-    X_std <- center(X, CPs=CPs)$data
-    covMatrix <- .long_run_cov(X_std, h=0, K=K)
+    X_std <- center(X, changes=changes)$data
+    covMatrix <- long_run_covariance(X_std, h=0, K=K)
 
   }
   # else if (tolower(errors) == "ce") {
@@ -479,8 +479,8 @@
   #     )
   #   }
   #
-  #   CE_std <- center(funts(CE),CPs=CPs)$data
-  #   covMatrix <- .long_run_cov(t(CE_std) %*% CE_std, h=0, K=K)
+  #   CE_std <- center(dfts(CE),changes=changes)$data
+  #   covMatrix <- long_run_covariance(t(CE_std) %*% CE_std, h=0, K=K)
   #
   #
   # }

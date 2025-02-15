@@ -10,8 +10,9 @@
 #'  of basis functions that defines the functional data at hand. The critical
 #'  values are approximated via \code{M} Monte Carlo simulations.
 #'
-#' @param X A functional data object of class '\code{fd}'
-#' @param CPs If not NULL then the data is centered considering the changes.
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
+#' @param changes If not NULL then the data is centered considering the changes.
 #' @param M Number of monte carlo simulations used to get the critical values. The default value is \code{M=1000}
 #'  value is \code{h=2}.
 #'
@@ -39,10 +40,10 @@
 #' @examples
 #' #.change_trace(generate_brownian_motion(200,v=seq(0,1,0.05)))
 #' #.change_trace(electricity)
-.change_trace <- function(X, CPs = NULL, M = 1000,
+.change_trace <- function(X, changes = NULL, M = 1000,
                           statistic = 'Tn', critical='simulation',
                           blocksize=1, replace=TRUE, type='separate'){
-  X <- center(funts(X), CPs=CPs)
+  X <- center(dfts(X), changes=changes)
 
   N <- ncol(X$data)
   D <- nrow(X$data)
@@ -74,8 +75,8 @@
   p <- sum(Sn <= Values) / M # Compute p-value
   # k_star <- min(which.max(Tn))
 
-  # data1_pca <- pca(funts(X$data[,1:k_star]),TVE=1)
-  # data2_pca <- pca(funts(X$data[,(k_star+1):N]),TVE=1)
+  # data1_pca <- pca(dfts(X$data[,1:k_star]),TVE=1)
+  # data2_pca <- pca(dfts(X$data[,(k_star+1):N]),TVE=1)
   # tr_before <- sum(data1_pca$sdev)
   # tr_after <- sum(data2_pca$sdev)
   list('pvalue' = p,
@@ -162,7 +163,7 @@
 #' ## Estimated eigenvalues
 #'
 #' #e1 = eigen(autocovariance(electricity,0))
-#' #e2 = .partial_cov(funts(electricity),x=1)
+#' #e2 = .partial_cov(electricity,x=1)
 #' #sum(round(e1$values,4) != round(e2$eigen_val,4) )
 #' #sum(round(e1$vectors,4) != round(e2$eigen_fun,4) )
 #' #sum(round(autocovariance(electricity,0),4) != round(e2$coef_matrix,4) )
@@ -172,7 +173,7 @@
 #' ## estimates using only 90% of the data
 #' #Cov = .partial_cov(electricity, 0.9)
 .partial_cov <- function(X, x = NULL){
-  X <- funts(X)
+  X <- dfts(X)
   if (is.null(x)) x <- 1
   if (x>1 | x<=0) stop("x should be in (0,1]")
 

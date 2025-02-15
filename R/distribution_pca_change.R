@@ -49,7 +49,7 @@
 #' @keywords internal
 .pca_distribution_statistic <- function(X, statistic, TVE, gam, location=FALSE){
 
-  X_pca <- pca(funts(X), TVE=TVE)
+  X_pca <- pca(dfts(X), TVE=TVE)
   n <- ncol(X)
 
   kappa <- matrix(nrow=length(X_pca$sdev),ncol=nrow(X_pca$x)-1)

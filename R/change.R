@@ -1,9 +1,10 @@
-#' Change Function for funts Objects
+#' Change Function for dfts Objects
 #'
-#' @param X Funts object or data easily convertible. See [funts()].
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param method Method to compute change point. Options include:
-#'  'characteristic', 'mean', 'robust', 'eigenjoint', 'eigensingle', 'trace', 'covariance',
-#'  'pcamean', and 'pcadistribution'.
+#'  'characteristic', 'mean', 'robustmean', 'eigenjoint', 'eigensingle', 'trace', 'covariance',
+#'  'projmean', and 'projdistribution'.
 #' @param statistic String for the Statistic. The integrated, \code{Tn}, or the
 #'  maximal, \code{Mn}.
 #' @param critical String for method of computing threshold. Options are
@@ -19,11 +20,11 @@
 #'  \code{critical='permutation'}.
 #' @param max_changes Integer as the max number of changes to search when using
 #'  type is \code{elbow}.
-#' @param CPs Vector of change points to be given to the eigen test if the data
+#' @param changes Vector of change points to be given to the eigen test if the data
 #'  should be centered on these values first.
 #' @param blocksize Integer for the width of the blocks when using a permutation
 #'  test. Can use [adaptive_bandwidth()] is additional guidance is desired.
-#' @param d Which eigenvalue or the number of eigenvalues which should be checked
+#' @param eigen_number Which eigenvalue or the number of eigenvalues which should be checked
 #'  in the eigenvalue tests.
 #' @param h Number of lags used when computing long run covariance estimates. Used in
 #'  mean, characteristic, and eigenvalue tests.
@@ -32,11 +33,11 @@
 #'  is defined by \code{W}.
 #' @param W Space measuring vectors in characteristic method
 #' @param K Kernel function for use in characteristic, mean, eigen, covariance
-#'  and pcamean
+#'  and projmean
 #' @param alpha Significance for Welch approximation
 #' @param cov.res Resolution to use when computing covariance kernel changes
 #' @param weighting Weights used in covariance kernel method and pcadistribution
-#' @param TVE Total variance explained for pcamean
+#' @param TVE Total variance explained for projmean and projdistribution
 #' @param trim_function Trimming to be used in elbow plot
 #' @param errors Type of errors used in elbow plot. Options are L2 and Trace
 #' @param recommendation_change_points Number of lags forward to examine in deciding automated
@@ -86,21 +87,21 @@
 #'  based on Empirical Characteristic Functions. Metrika, 63, 145-168.
 #'
 #' @examples
-#' res <- change(electricity[,1:20],method='characteristic',critical = 'welch')
+#' res <- change(electricity$data[,1:20],method='characteristic',critical = 'welch')
 change <- function(X,
-                   method=c('characteristic','mean','robust','eigenjoint',
+                   method=c('characteristic','mean','robustmean','eigenjoint',
                             'eigensingle','trace',
-                            'covariance','pcamean','pcadistribution'),
+                            'covariance','projmean','projdistribution'),
                    statistic=c('Tn','Mn'),
                    critical=c('simulation','permutation','welch'),
                    type=c('single','segmentation','elbow'),
                    perm_type = 'separate', replace=TRUE,
                    max_changes=min(ncol(X),20),
-                   CPs=NULL,
+                   changes=NULL,
                    blocksize = 1,
-                   d=3, h=3,
+                   eigen_number=3, h=3,
                    M = 1000, J=50,
-                   W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                   W = space_measuring_vectors(X = X, M = 20, space='BM'),
                    K = bartlett_kernel,
                    alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                    trim_function = function(X) { 0 },
@@ -109,11 +110,11 @@ change <- function(X,
                    silent.binary = TRUE){
 
   # Check Data
-  X <- funts(X)
+  X <- dfts(X)
   method <- .verify_input(method,
-                          c('characteristic','mean','robust','eigenjoint',
+                          c('characteristic','mean','robustmean','eigenjoint',
                             'eigensingle','trace',
-                            'covariance','pcamean','pcadistribution'))
+                            'covariance','projmean','projdistribution'))
   statistic <- .verify_input(statistic, c('Tn','Mn'))
   critical <- .verify_input(critical, c('simulation','permutation','welch'))
   type <- .verify_input(type, c('single','segmentation','elbow'))
@@ -139,7 +140,7 @@ change <- function(X,
                                               K = K, blocksize=blocksize,
                                               type = perm_type, replace = replace)
                      },
-                     robust={
+                     robustmean={
                        # TODO:: Welch check
                        # TODO:: bandwidth
                        .change_robust(X, statistic = statistic,
@@ -148,8 +149,8 @@ change <- function(X,
                      },
                      eigenjoint={
                        # TODO:: Welch check
-                       .change_eigen(X = X, d = d, h = h,
-                                     CPs = CPs,
+                       .change_eigen(X = X, d = eigen_number, h = h,
+                                     changes = changes,
                                      statistic = statistic,
                                      test='joint',
                                      critical = critical,
@@ -160,8 +161,8 @@ change <- function(X,
                      },
                      eigensingle={
                        # TODO:: Welch check
-                       .change_eigen(X = X, d = d, h = h,
-                                     CPs = CPs,
+                       .change_eigen(X = X, d = eigen_number, h = h,
+                                     changes = changes,
                                      statistic = statistic,
                                      test='individual',
                                      critical = critical,
@@ -172,7 +173,7 @@ change <- function(X,
                      },
                      trace={
                        # TODO:: Welch check
-                       .change_trace(X = X, CPs = CPs, M = M,
+                       .change_trace(X = X, changes = changes, M = M,
                                      statistic = statistic,
                                      critical = critical,
                                      blocksize = blocksize,
@@ -190,7 +191,7 @@ change <- function(X,
                                                  replace=replace,
                                                  K=K)
                      },
-                     pcamean={
+                     projmean={
                        # TODO:: Welch check
                        .change_pca_mean(X=X, statistic=statistic,
                                         critical=critical,
@@ -199,7 +200,7 @@ change <- function(X,
                                         perm_type=perm_type,
                                         replace=replace )
                      },
-                     pcadistribution={
+                     projdistribution={
                        if(critical != 'permutation')
                          stop('Only permutation setup for this method currently',call. = FALSE)
                        .change_pca_distribution(X=X, statistic=statistic, critical=critical,
@@ -216,8 +217,8 @@ change <- function(X,
       .binary_segmentation(X=X, method=method,
                            statistic=statistic, critical=critical,
                            perm_type = perm_type, replace=replace,
-                           CPs=CPs, blocksize = blocksize,
-                           d=d, h=h, M = M, J=J, W = W, K = K,
+                           changes=changes, blocksize = blocksize,
+                           eigen_number=eigen_number, h=h, M = M, J=J, W = W, K = K,
                            alpha=alpha, cov.res = cov.res, weighting = weighting,
                            TVE=TVE, trim_function = trim_function,
                            silent = silent.binary)
@@ -230,7 +231,7 @@ change <- function(X,
                    trim_function = trim_function,
                    max_changes = max_changes,
                    errors = errors,
-                   K=K, d=d, h=h, weighting=weighting,
+                   K=K, d=eigen_number, h=h, weighting=weighting,
                    recommendation_change_points = recommendation_change_points,
                    recommendation_improvement = recommendation_improvement,
                    TVE=TVE)

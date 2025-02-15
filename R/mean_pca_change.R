@@ -57,13 +57,13 @@
 #' @examples
 #' #res <- .change_pca_mean(generate_brownian_bridge(200,seq(0,1,length.out=10)))
 #' #res1 <- .change_pca_mean(generate_ou(20,200))
-#' #res2 <- .change_pca_mean(funts(electricity))
+#' #res2 <- .change_pca_mean(electricity)
 .change_pca_mean <- function(X, statistic, critical, TVE=0.95,
                             M=1000, K=bartlett_kernel,
                             blocksize=1, perm_type='separate', replace = TRUE){
-  X <- center(funts(X))
+  X <- center(dfts(X))
 
-  pca_X <- pca(funts(X), TVE=TVE)
+  pca_X <- pca(dfts(X), TVE=TVE)
   d <- length(pca_X$sdev)
 
   D <- nrow(X$data)
@@ -121,7 +121,8 @@
 #' Title
 #'
 #' @inheritParams .change_pca_mean
-#' @param X Data to investigate
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param location Boolean if location should be returned or not
 #'
 #' @returns Test statistic and location (if requested)
@@ -130,7 +131,7 @@
 #' @keywords internal
 .pca_mean_statistic <- function(X, TVE, statistic, location=FALSE){
 
-  pca_X <- pca(funts(X), TVE=TVE)
+  pca_X <- pca(dfts(X), TVE=TVE)
 
   n <- ncol(X)
   d <- length(pca_X$sdev)

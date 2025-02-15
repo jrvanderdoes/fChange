@@ -25,7 +25,7 @@
 #'  https://github.com/yzhao7322/CovFun_Change
 #'
 #' @examples
-#' #result <- .change_covariance_kernel(electricity[,1:18], len=20)
+#' #result <- .change_covariance_kernel(electricity$data[,1:18], len=20)
 .change_covariance_kernel <- function(X, statistic, critical,
                                       kappa = 1 / 4, len = 30,
                                       blocksize=1, M=1000, perm_type='separate',
@@ -61,8 +61,8 @@
   #   # changetau = tau_est(dh1, kstar, len=20)
   #   # cbar = changetau[[1]]
   #   # tau = changetau[[2]]
-  #   # cpstat=l2norm(cbar)^2/tau*((kstar/samplesize)-truek)
-  #   # stat_vec[i]=cpstat
+  #   # changestat=l2norm(cbar)^2/tau*((kstar/samplesize)-truek)
+  #   # stat_vec[i]=changestat
   # }
   #
   # return(NA)
