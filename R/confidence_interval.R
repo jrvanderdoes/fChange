@@ -1,7 +1,8 @@
 #' Change Point Confidence Intervals
 #'
-#' @param X Funts object or data easily convertible. See [funts()].
-#' @param CPs Numeric vector for detected change points.
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
+#' @param changes Numeric vector for detected change points.
 #' @param K Function for the Kernel. Default is bartlett_kernel.
 #' @param h Numeric for bandwidth in computation of long run variance.
 #' @param weighting Weighting for the interval computation, value in \[0,1\].
@@ -27,13 +28,13 @@
 #' @examples
 #' X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
 #'            generate_brownian_motion(100,v=seq(0,1,0.05))$data+1000)
-#' confidence_interval(X,CPs = 100)
-#' confidence_interval(X,CPs=100,method = 'simulation')
+#' confidence_interval(X,changes = 100)
+#' confidence_interval(X,changes=100,method = 'simulation')
 #'
 #' X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
 #'            generate_brownian_motion(100,v=seq(0,1,0.05))$data+0.5)
 #' confidence_interval(X,100,alpha = 0.1)
-#' confidence_interval(X,CPs=100,alpha = 0.1,method = 'simulation')
+#' confidence_interval(X,changes=100,alpha = 0.1,method = 'simulation')
 #'
 #' X <- generate_brownian_motion(200,v=seq(0,1,0.05))
 #' confidence_interval(X,100)
@@ -46,8 +47,8 @@
 #'
 #' # set.seed(12345)
 #' # bs <- binary_segmentation(electricity,statistic = 'Tn',method = 'Boot')
-#' confidence_interval(X = electricity, CPs = c(66, 144, 204, 243, 305),alpha = 0.1)
-confidence_interval <- function(X, CPs, K=bartlett_kernel,
+#' confidence_interval(X = electricity, changes = c(66, 144, 204, 243, 305),alpha = 0.1)
+confidence_interval <- function(X, changes, K=bartlett_kernel,
                                 h=3, weighting=0.5, M=5000,
                                 alpha=0.1, method='distribution'){
   ## Verify Inputs
@@ -58,30 +59,31 @@ confidence_interval <- function(X, CPs, K=bartlett_kernel,
   if(alpha>1 || alpha<0){
     stop('The parameter alpha must be in [0,1].', call. = FALSE)
   }
-  CPs <- CPs[CPs >0]
-  CPs <- CPs[CPs <ncol(X)]
-  if(length(CPs)==0){
-    stop('Must specify at least one change in 1, 2, ..., N in parameter CPs.', call. = FALSE)
+  changes <- changes[changes >0]
+  changes <- changes[changes <ncol(X)]
+  if(length(changes)==0){
+    stop('Must specify at least one change in 1, 2, ..., N in parameter changes.', call. = FALSE)
   }
-  X <- funts(X)
+  changes <- changes[order(changes)]
+  X <- dfts(X)
 
-  CPs_ext <- c(0,CPs,ncol(X$data))
+  changes_ext <- c(0,changes,ncol(X$data))
   r <- nrow(X$data)
-  results <- data.frame('change' = rep(NA,length(CPs)),
+  results <- data.frame('change' = rep(NA,length(changes)),
                         'lower' =  NA, 'upper' = NA)
 
-  for(i in 1:length(CPs)){
-    CP <- CPs[i]
-    CP_simple <- CP-CPs_ext[i]
-    idx1 <- (CPs_ext[i]+1):CP
-    idx2 <- (CP+1):CPs_ext[i+2]
+  for(i in 1:length(changes)){
+    CP <- changes[i]
+    CP_simple <- CP-changes_ext[i]
+    idx1 <- (changes_ext[i]+1):CP
+    idx2 <- (CP+1):changes_ext[i+2]
     N <- length( c(idx1,idx2) )
 
     X_k1 <- rowMeans(X$data[,idx1])
     X_k2 <- rowMeans(X$data[,idx2])
 
     e <- X_k2 - X_k1
-    e_l2norm <- dot_integrate(e^2, r = X$intraobs)
+    e_l2norm <- dot_integrate(e^2, r = X$intratime)
     eps_hat <- matrix(ncol=N, nrow=r)
     eps_hat[,1:CP_simple] <- X$data[,idx1] - X_k1
     eps_hat[,(CP_simple+1):N] <- X$data[,idx2] - X_k2
@@ -90,7 +92,7 @@ confidence_interval <- function(X, CPs, K=bartlett_kernel,
     for(j in 1:N){
       g[j] <- dot_integrate(
         eps_hat[,j] * e / sqrt(e_l2norm),
-        r = X$intraobs)
+        r = X$intratime)
     }
 
     ## LRV
