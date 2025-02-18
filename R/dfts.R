@@ -1,42 +1,42 @@
-#' Funts Objects
+#' dfts Objects
 #'
-#' Define data as, check data if, and convert data to funts object. The data
+#' Define data as, check data if, and convert data to dfts object. The data
 #'  may be from another popular implementation.
 #'
-#' @param X Data to convert into funts object. Options include: data.frame,
+#' @param X Data to convert into dfts object. Options include: data.frame,
 #'  matrix, array, fda::fd, fda.usc::fdata, rainbow::fts (used in ftsa),
-#'  rainbow::fds (used in ftsa), funData::funData, and fChange::funts. For a
+#'  rainbow::fds (used in ftsa), funData::funData, and fChange::dfts. For a
 #'  matrix, each column is a unique observation, at the rows are the observed
 #'  intra-observation (i.e. resolution) points.
 #' @param name String for the name of the object. Defaults to the name of the
 #'  input variable.
 #' @param labels Labels for the observations. Defaults to the column names or
 #'  names inside of the object X.
-#' @param intraobs Vector of numerics indicating the points for each
+#' @param intratime Vector of numerics indicating the points for each
 #'  observation. Defaults to even spacing on \[0,1\], or those included in the
 #'  object. These may be unevenly spaced.
 #' @param inc.warnings Boolean on if warnings should be given. Defaults to TRUE,
 #'
-#' @name funts
+#' @name dfts
 #'
-#' @return funts / as.funts: funts object
+#' @return dfts / as.dfts: dfts object
 #' @export
 #'
 #' @examples
-#' bm <- funts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
+#' bm <- dfts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
 #'
 #' # Electricity
-#' result <- funts(electricity)
-funts <- function(X, name=NULL,
+#' result <- dfts(electricity)
+dfts <- function(X, name=NULL,
                   labels=NULL,
-                  intraobs=NULL,
+                  intratime=NULL,
                   inc.warnings=TRUE){
   ## Return if already right object
-  if(is.funts(X)) {
+  if(is.dfts(X)) {
     if(inc.warnings & sum(is.na(X$data))>0)
       warning('NA values in data may affect some methods',call. = FALSE)
 
-    return(.validate.funts(X))
+    return(.validate.dfts(X))
   }
 
   ## Fill-in Data
@@ -50,30 +50,30 @@ funts <- function(X, name=NULL,
      fda::is.fd(X)){
     if(is.null(labels))
       labels <- X$fdnames$reps
-    if(is.null(intraobs)){
+    if(is.null(intratime)){
       ran_vals <- X$basis$rangeval
-      intraobs <- seq(ran_vals[1],ran_vals[2],
+      intratime <- seq(ran_vals[1],ran_vals[2],
                       length.out=length(X$fdnames$time))
     }
 
-    funts_obj <- list(
-      'data' = as.matrix(fda::eval.fd(intraobs, fdobj = X)),
+    dfts_obj <- list(
+      'data' = as.matrix(fda::eval.fd(intratime, fdobj = X)),
       'name' = name,
       'labels' = labels,
-      'intraobs' = intraobs
+      'intratime' = intratime
     )
   } else if(requireNamespace("fda.usc", quietly = TRUE) &&
             fda.usc::is.fdata(X)){
     if(is.null(labels))
       labels <- rownames(X$data)
-    if(is.null(intraobs))
-      intraobs <- X$argvals
+    if(is.null(intratime))
+      intratime <- X$argvals
 
-    funts_obj <- list(
+    dfts_obj <- list(
       'data' = as.matrix(t(X$data)),
       'name' = name,
       'labels' = labels,
-      'intraobs' = intraobs
+      'intratime' = intratime
     )
   } else if(requireNamespace('rainbow', quietly = TRUE) &&
             (inherits(X, "fts") || inherits(X, "fds"))){
@@ -83,45 +83,45 @@ funts <- function(X, name=NULL,
       if(inherits(X, "fds"))
         labels <- colnames(X$y)
     }
-    if(is.null(intraobs))
-      intraobs <- X$x
+    if(is.null(intratime))
+      intratime <- X$x
 
-    funts_obj <- list(
+    dfts_obj <- list(
       'data' = as.matrix(X$y),
       'name' = name,
       'labels' = labels,
-      'intraobs' = intraobs
+      'intratime' = intratime
     )
   } else if(requireNamespace('funData', quietly = TRUE) &&
             inherits(X, "funData")){
     if(is.null(labels))
       labels <- rownames(X@X)
-    if(is.null(intraobs))
-      intraobs <- X@argvals[[1]]
+    if(is.null(intratime))
+      intratime <- X@argvals[[1]]
 
-    funts_obj <- list(
+    dfts_obj <- list(
       'data' = as.matrix(t(X@X)),
       'name' = name,
       'labels' = labels,
-      'intraobs' = intraobs
+      'intratime' = intratime
     )
   } else if(inherits(X, "matrix") ||
             inherits(X, "data.frame") ||
             inherits(X, "array")){
-    if(is.null(intraobs))
-      intraobs <- seq(0,1,length.out=nrow(X))
+    if(is.null(intratime))
+      intratime <- seq(0,1,length.out=nrow(X))
     if(is.null(labels))
       labels <- colnames(as.data.frame(X))
 
-    funts_obj <- list(
+    dfts_obj <- list(
       'data' = as.matrix(X),
       'name' = name,
       'labels' = labels,
-      'intraobs' = intraobs
+      'intratime' = intratime
     )
   } else if(inherits(X, "numeric")){
-    if(is.null(intraobs))
-      intraobs <- seq(0,1,length.out=1)
+    if(is.null(intratime))
+      intratime <- seq(0,1,length.out=1)
     if(is.null(labels)){
       if(is.null(names(X))){
         labels <- 1:length(X)
@@ -129,78 +129,78 @@ funts <- function(X, name=NULL,
         labels <- names(X)
       }
     }
-    funts_obj <- list(
+    dfts_obj <- list(
       'data' = matrix(X,nrow=1),
       'name' = name,
       'labels' = labels,
-      'intraobs' = intraobs
+      'intratime' = intratime
     )
   } else{
     stop('Data type not supported.',call. = FALSE)
   }
 
   ## Clean-up
-  #   Old: structure(x, 'labels' = labels, class = "funts")
-  colnames(funts_obj$data) <- NULL
-  rownames(funts_obj$data) <- NULL
-  class(funts_obj) <- 'funts'
+  #   Old: structure(x, 'labels' = labels, class = "dfts")
+  colnames(dfts_obj$data) <- NULL
+  rownames(dfts_obj$data) <- NULL
+  class(dfts_obj) <- 'dfts'
 
   ## Verification
   # Note if NAs are present
-  if(length(funts_obj$intraobs)!=nrow(funts_obj$data))
+  if(length(dfts_obj$intratime)!=nrow(dfts_obj$data))
     stop('Resolution does not match data (rows)',call. = FALSE)
-  if(length(funts_obj$labels)!=ncol(funts_obj$data))
+  if(length(dfts_obj$labels)!=ncol(dfts_obj$data))
     warning('Labels do not match data (cols)',call. = FALSE)
 
-  if(inc.warnings & sum(is.na(funts_obj$data))>0)
+  if(inc.warnings & sum(is.na(dfts_obj$data))>0)
     warning('NA values in data may affect some methods',call. = FALSE)
 
-  .validate.funts(funts_obj)
+  .validate.dfts(dfts_obj)
 }
 
 
-#' @rdname funts
+#' @rdname dfts
 #' @export
 #'
 #' @examples
-#' result <- as.funts(electricity)
-as.funts <- function(X){
-  funts(X)
+#' result <- as.dfts(electricity)
+as.dfts <- function(X){
+  dfts(X)
 }
 
 
-#' @rdname funts
+#' @rdname dfts
 #' @export
 #'
-#' @return is.funts: Boolean indicating if \code{x} is a funts object or not
+#' @return is.dfts: Boolean indicating if \code{x} is a dfts object or not
 #'
 #' @examples
-#' result <- is.funts(electricity)
-is.funts <- function(X){
-  inherits(X, "funts")
+#' result <- is.dfts(electricity)
+is.dfts <- function(X){
+  inherits(X, "dfts")
 }
 
 
 
-#' Validate funts
+#' Validate dfts
 #'
 #' Internal function to check lengths and data information is right
 #'
-#' @param X funts object to verify for any violations
+#' @param X dfts object to verify for any violations
 #'
 #' @return Silently returns the data if there are no violations
 #'
 #' @keywords internal
 #' @noRd
-.validate.funts <- function(X){
+.validate.dfts <- function(X){
   # Class
-  if (!inherits(X, "funts")) stop("Objects must be of class funts")
+  if (!inherits(X, "dfts")) stop("Objects must be of class dfts")
 
   # Sizes
   if(ncol(X) != length(X$labels))
     stop("Data must have the same number of columns as the length of labels")
-  if(nrow(X) != length(X$intraobs))
-    stop("Data must have the same number of rows as the length of intraobs")
+  if(nrow(X) != length(X$intratime))
+    stop("Data must have the same number of rows as the length of intratime")
 
   X
 }
@@ -211,30 +211,30 @@ is.funts <- function(X){
 #'
 #' Group generic methods defined for things like Math, Ops, and so forth.
 #'
-#' @param x,e1,e2 funts object
+#' @param x,e1,e2 dfts object
 #' @param ... Further arguments passed to the methods
 #'
-#' @return funts object
+#' @return dfts object
 #' @export
 #'
-#' @name funts_group
+#' @name dfts_group
 #'
 #' @examples
-#' result <- sqrt( funts(electricity) )
-Math.funts <- function (x, ...) {
+#' result <- sqrt( electricity )
+Math.dfts <- function (x, ...) {
   x$data <- methods::callGeneric(x$data,...)
 
   x
 }
 
 
-#' @rdname funts_group
+#' @rdname dfts_group
 #' @export
 #'
 #' @examples
-#' result <- funts(electricity) + funts(electricity)
-#' result <- funts(electricity) * funts(electricity)
-Ops.funts <- function (e1, e2) {
+#' result <- electricity + electricity
+#' result1 <- electricity * electricity
+Ops.dfts <- function (e1, e2) {
   # Combines the columns that are the same
   # TODO: Figure out for non-intersections.
 
@@ -245,17 +245,17 @@ Ops.funts <- function (e1, e2) {
     c.e1 <- class(e1)
     c.e2 <- class(e2)
 
-    if("funts" %in% c.e1 && "funts" %in% c.e2) {
+    if("dfts" %in% c.e1 && "dfts" %in% c.e2) {
       nce1 <- NCOL(e1$data)
       nce2 <- NCOL(e2$data)
 
       if(nce1 != nce2){#} && nce1 != 1 && nce2 != 1) {
-        stop("Ops.funts: non conformable data.")
+        stop("Ops.dfts: non conformable data.")
       }
       stopifnot( all.equal(class(e1$labels),
                            class(e2$labels)) )
-      stopifnot( all.equal(class(e1$intraobs),
-                           class(e2$intraobs)) )
+      stopifnot( all.equal(class(e1$intratime),
+                           class(e2$intratime)) )
 
       i.cols <- intersect( e1$labels, e2$labels )
 
@@ -263,7 +263,7 @@ Ops.funts <- function (e1, e2) {
 
       ## if there is an intersection, the do the Op
       if(length(i.cols)) {
-        io <- e1$intraobs
+        io <- e1$intratime
         e1 <- e1$data[,e1$labels==i.cols]
         e2 <- e2$data[,e2$labels==i.cols]
         # e1 <- e1[i.dates,]
@@ -279,7 +279,7 @@ Ops.funts <- function (e1, e2) {
         ans <- NextMethod()
 
         #colnames(ans) <- i.cols
-        ans <- funts(ans,labels = i.cols,intraobs = io)
+        ans <- dfts(ans,labels = i.cols,intratime = io)
       } else {
         ## no matching cols, return NULL
         ans <- NULL
@@ -288,37 +288,38 @@ Ops.funts <- function (e1, e2) {
       .Class <- "matrix"
       ans <- NextMethod()
       colnames(ans) <- i.cols
-      ans <- funts(ans,labels = i.cols)
+      ans <- dfts(ans,labels = i.cols)
 
-      # if("funts" %in% c.e1) {
+      # if("dfts" %in% c.e1) {
       #   ans.dates <- attr(e1,"index")
       # } else {
       #   ans.dates <- attr(e2,"index")
       # }
       # attr(ans,"index") <- ans.dates
-      # class(ans) <- c("funts","zoo")
+      # class(ans) <- c("dfts","zoo")
     }
     ans
   }
 }
 
 
-#' Difference funts
+#' Difference dfts
 #'
 #' Difference the functional data at some lag / to some degree.
 #'
-#' @param x funts object
+#' @param x A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param lag An integer indicating which lag to use.
 #' @param differences	An integer indicating the order of the difference.
 #' @param ... Further arguments to be passed to or from methods.
 #'
-#' @return funts object with differenced values
+#' @return dfts object with differenced values
 #' @export
 #'
 #' @examples
-#' result <- diff(funts(electricity), lag=1)
-#' result <- diff(funts(electricity), differences=2)
-diff.funts <- function(x, lag = 1L, differences = 1L, ...) {
+#' result <- diff(electricity, lag=1)
+#' result1 <- diff(electricity, differences=2)
+diff.dfts <- function(x, lag = 1L, differences = 1L, ...) {
   if(differences==0) return(x)
 
   # Data check
@@ -336,43 +337,45 @@ diff.funts <- function(x, lag = 1L, differences = 1L, ...) {
     dat1[,i] <- x$data[,i+lag]-x$data[,i]
   }
 
-  diff.funts(x=funts(dat1),lag=lag, differences=differences-1)
+  diff.dfts(x=dfts(dat1),lag=lag, differences=differences-1)
 }
 
 
-#' Max / Min for funts Objects
+#' Max / Min for dfts Objects
 #'
 #' Get the observation(s) with the min / max values. Selected as the observation
 #'  with the largest / smallest mean or the pointwise values.
 #'
-#' @param x funts object
+#' @param x A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param type String indicating if finding for observation ('Obs', default),
-#'  or for pointwise values ('Intraobs').
+#'  or for pointwise values ('intratime').
 #' @param na.rm Boolean if NA values should be removed. Defaults to TRUE.
 #' @param ... Additional parameters to stats function
 #'
-#' @return A funts object
+#' @return A dfts object
 #' @export
 #'
 #' @name minmax
 #'
 #' @examples
-#' results <- max(funts(electricity))
-max.funts <- function(x, type=c('Obs','Intraobs'), na.rm=TRUE, ...){
-  poss_types <- c('Obs','Intraobs')
+#' results <- max(electricity)
+max.dfts <- function(x, type=c('Obs','intratime'), na.rm=TRUE, ...){
+  poss_types <- c('Obs','intratime')
   type <- .verify_input(type, poss_types)
+  x <- dfts(x)
 
   if(type == 'Obs'){
     idx <- which.max(colMeans(x$data,na.rm = na.rm))
-    return_dat <- funts(x$data[,idx,drop=FALSE],
+    return_dat <- dfts(x$data[,idx,drop=FALSE],
                         name = x$name,
-                        intraobs = x$intraobs,
+                        intratime = x$intratime,
                         labels = x$labels[idx])
-  }else if(type=='Intraobs'){
+  }else if(type=='intratime'){
     dat <- apply(x$data,MARGIN = 1, max, na.rm=na.rm, ...)
-    return_dat <- funts(matrix(dat),
+    return_dat <- dfts(matrix(dat),
                         name = x$name,
-                        intraobs = x$intraobs)
+                        intratime = x$intratime)
 
   }
 
@@ -384,22 +387,22 @@ max.funts <- function(x, type=c('Obs','Intraobs'), na.rm=TRUE, ...){
 #' @export
 #'
 #' @examples
-#' results <- min(funts(electricity))
-min.funts <- function(x, type=c('Obs','Intraobs'), na.rm=TRUE, ...){
-  poss_types <- c('Obs','Intraobs')
+#' results <- min(electricity)
+min.dfts <- function(x, type=c('Obs','intratime'), na.rm=TRUE, ...){
+  poss_types <- c('Obs','intratime')
   type <- .verify_input(type, poss_types)
 
   if(type == 'Obs'){
     idx <- which.min(colMeans(x$data,na.rm=na.rm))
-    return_dat <- funts(x$data[,idx,drop=FALSE],
+    return_dat <- dfts(x$data[,idx,drop=FALSE],
                         name = x$name,
-                        intraobs = x$intraobs,
+                        intratime = x$intratime,
                         labels = x$labels[idx])
-  }else if(type=='Intraobs'){
+  }else if(type=='intratime'){
     dat <- apply(x$data,MARGIN = 1, min, na.rm=na.rm, ...)
-    return_dat <- funts(matrix(dat),
+    return_dat <- dfts(matrix(dat),
                         name = x$name,
-                        intraobs = x$intraobs)
+                        intratime = x$intratime)
 
   }
 
@@ -407,9 +410,9 @@ min.funts <- function(x, type=c('Obs','Intraobs'), na.rm=TRUE, ...){
 }
 
 
-#' Average Functions for funts Objects
+#' Average Functions for dfts Objects
 #'
-#' Compute the average values for funts objects
+#' Compute the average values for dfts objects
 #'
 #' @inheritParams minmax
 #'
@@ -419,8 +422,8 @@ min.funts <- function(x, type=c('Obs','Intraobs'), na.rm=TRUE, ...){
 #' @name average
 #'
 #' @examples
-#' results <- mean(funts(electricity))
-mean.funts <- function(x, na.rm=TRUE, ...) {
+#' results <- mean(electricity)
+mean.dfts <- function(x, na.rm=TRUE, ...) {
   rowMeans(x$data,na.rm = na.rm, ...)
 }
 
@@ -431,17 +434,17 @@ mean.funts <- function(x, na.rm=TRUE, ...) {
 #' @importFrom stats median
 #'
 #' @examples
-#' results <- median(funts(electricity))
-median.funts <- function(x, na.rm=TRUE, ...) {
+#' results <- median(electricity)
+median.dfts <- function(x, na.rm=TRUE, ...) {
   apply(x$data,MARGIN = 1, stats::median, na.rm=na.rm, ...)
 }
 
 
-#' Quantile funts
+#' Quantile dfts
 #'
-#' Obtain the pointwise quantile information of funts objects
+#' Obtain the pointwise quantile information of dfts objects
 #'
-#' @param x A funts object
+#' @param x A dfts object
 #' @param probs Numerics in \[0,1\] indicating the probabilities of interest
 #' @param ... Additional parameters to pass into quantile function
 #'
@@ -451,9 +454,9 @@ median.funts <- function(x, na.rm=TRUE, ...) {
 #' @importFrom stats quantile
 #'
 #' @examples
-#' result <- quantile(funts(electricity))
-#' result <- quantile(funts(electricity),probs = 0.95)
-quantile.funts <- function(x, probs = seq(0, 1, 0.25), ...){
+#' result <- quantile(electricity)
+#' result1 <- quantile(electricity,probs = 0.95)
+quantile.dfts <- function(x, probs = seq(0, 1, 0.25), ...){
   if(length(probs)>1){
     output <- t(apply(x$data, MARGIN = 1, stats::quantile, probs=probs, ...))
   } else{
@@ -465,40 +468,42 @@ quantile.funts <- function(x, probs = seq(0, 1, 0.25), ...){
 }
 
 
-#' Lag funts
+#' Lag dfts
 #'
-#' @param x funts object
+#' @param x A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param k integer indicating the number of lags for the data
 #' @param ... Unused additional parameters
 #'
-#' @return A funts object
+#' @return A dfts object
 #' @export
 #'
 #' @importFrom stats lag
 #'
 #' @examples
-#' result <- lag(funts(electricity))
-lag.funts <- function(x, k=1, ...) {
+#' result <- lag(electricity)
+lag.dfts <- function(x, k=1, ...) {
   stopifnot(k >= 0)
   #ans <- .Call("lag", x, as.integer(k),PACKAGE="fts")
+  x <- dfts(x)
 
   dat1 <- x$data[,-c(1:round(k))]
-  funts(dat1, labels = x$labels[-c(1:round(k))])
+  dfts(dat1, labels = x$labels[-c(1:round(k))])
 }
 
 
-#' Dimension of funts Object
+#' Dimension of dfts Object
 #'
-#' Retrieve the dimension of a funts object.
+#' Retrieve the dimension of a dfts object.
 #'
 #' @inheritParams minmax
 #'
-#' @return Numerics indicating the dimension of the funts object
+#' @return Numerics indicating the dimension of the dfts object
 #' @export
 #'
 #' @examples
-#' results <- dim(funts(electricity))
-dim.funts <- function(x, ...) {
+#' results <- dim(electricity)
+dim.dfts <- function(x, ...) {
   dim(x$data)
 }
 
