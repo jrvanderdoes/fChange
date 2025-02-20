@@ -1,11 +1,9 @@
 #' Spanish Spot Electricity Data
 #'
-#' A fChange ready data set containing the hourly electricity spot prices from
-#'  Spain in 2014.
+#' The hourly electricity spot prices from Spain in 2014.
 #'
 #' @format ## `electricity`
-#' A data frame with 24 rows and 365 columns, representing the hourly (row)
-#'  electricity spot values for each day (column) of the year in 2014.
+#' A dfts object
 #'
 #' @source <www.omie.es>
 "electricity"
@@ -27,10 +25,11 @@
 
 #' S&P 500 Index Data
 #'
-#' Intraday prices for the S&P500 index (SPY) for 2019 to 2023.
+#' Intraday prices for the S&P500 index (SPY) for 2019 to 2023. Minutely
+#'  resolution and daily observations.
 #'
 #' @format ## `SPY500`
-#' A data.frame with columns being day and rows the intraday resolution.
+#' A dfts object
 "SPYUS500"
 
 
@@ -42,3 +41,13 @@
 #' @format ## `cancer`
 #' A data.frame with columns being the year and rows the age groups (5 years)
 "cancer"
+
+
+#' US Yield Curves
+#'
+#' Yield curves in the US for 1 - 360 month maturity from 1990 to 2023
+#'  (removing days without information).
+#'
+#' @format ## `rates`
+#' A dfts object
+"rates"
