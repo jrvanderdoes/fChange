@@ -10,7 +10,7 @@
 #' @param sd Numeric. Standard deviation of the Brownian Motion process.
 #'  The default is \code{1}.
 #'
-#' @return Functional time series (funts) object
+#' @return Functional time series (dfts) object
 #' @export
 #'
 #' @examples
@@ -38,7 +38,7 @@ generate_brownian_motion <- function(
                    )
   }
 
-  funts(X=as.matrix(data),intraobs = v)
+  dfts(X=as.matrix(data),intratime = v)
 }
 
 
@@ -51,7 +51,7 @@ generate_brownian_motion <- function(
 #'
 #' @inheritParams generate_brownian_motion
 #'
-#' @return Functional time series (funts) object
+#' @return Functional time series (dfts) object
 #' @export
 #'
 #' @examples
@@ -71,7 +71,7 @@ generate_brownian_bridge <- function(
   data <- data -
     t(data[res,] * t(matrix(rep(v, times = N)/max(v), ncol = N, nrow = res)))
 
-  funts(X=data,intraobs = v)
+  dfts(X=data,intratime = v)
 }
 
 
@@ -79,7 +79,7 @@ generate_brownian_bridge <- function(
 #'
 #' @inheritParams generate_brownian_motion
 #'
-#' @return funts object
+#' @return dfts object
 #'
 #' @noRd
 #' @keywords internal
@@ -100,7 +100,7 @@ generate_brownian_bridge <- function(
     v[1] + X - (v - v[1])/(v[n] - v[1]) * (X[n] - v[1] + v[1])
   },v=v,n=n)
 
-  funts(X = BB, intraobs = v)
+  dfts(X = BB, intratime = v)
 }
 
 
@@ -111,7 +111,7 @@ generate_brownian_bridge <- function(
 #' @param M Numeric number of simulations
 #' @param v Observation points
 #'
-#' @return funts object of the Brownian Motion
+#' @return dfts object of the Brownian Motion
 #'
 #' @references MacNeill, I. B. (1978). Properties of Sequences of Partial Sums
 #'  of Polynomial Regression Residuals with Applications to Tests for Change of
@@ -129,5 +129,5 @@ generate_brownian_bridge <- function(
     (2*v-3*v^2) %*% t(W$data[nrow(W$data),]) +
     (-6*v + 6*v^2) %*% t(dot_integrate_col(W$data, v))
 
-  funts(X=V,intraobs = v)
+  dfts(X=V,intratime = v)
 }

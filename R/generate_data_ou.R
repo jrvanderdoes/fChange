@@ -1,20 +1,20 @@
 
-#' Generate Data via OU Process
+#' Generate Data via Ornstein-Uhlenbeck Process
 #'
-#' @param resolution Numeric for data resolution
+#' @param resolution Numeric for data resolution or specific observed intratime
 #' @param N Numeric for data length
 #' @param rho Numeric for amount of dependence
 #'
-#' @return funts object of generated OU data
-#'
-#' @keywords internal
-#' @noRd
+#' @return dfts object of generated OU data
+#' @export
 #'
 #' @examples
-#' generate_ou(20,100)
-.generate_ou <- function(resolution, N, rho=0){
+#' generate_ornstein_uhlenbeck(20,100)
+generate_ornstein_uhlenbeck <- function(N, resolution, rho=0){
   if(is.null(rho))
     rho <- 0
+  if(length(resolution)==1)
+    resolution <- seq(0,1,length.out=resolution)
   r <- length(resolution)
 
   # Covariance structure (OU process Cov)
@@ -34,5 +34,5 @@
     data[,i] <- rho*data[,i-1] + fiid[i,]
   }
 
-  funts(data)
+  dfts(data)
 }

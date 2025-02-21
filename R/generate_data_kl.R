@@ -49,9 +49,9 @@
 #' #                  )
 generate_karhunen_loeve <- function(
     N, eigenvalues, basis, means, distribution,
-    resolution, dependence, burnin, silent, dof,
+    resolution, dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
     prev_eps=NULL) {
-
+  ## TODO:: Add example
   ## Verification
   m <- length(basis$names)
 
@@ -106,7 +106,7 @@ generate_karhunen_loeve <- function(
     }
   }
 
-  # If Num of Eigs increases or decreases (only at CPs)
+  # If Num of Eigs increases or decreases (only at changes)
   psiDim1 <- dim(psi)[1]
   pepDim1 <- dim(prev_eps)[1]
 

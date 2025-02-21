@@ -11,7 +11,7 @@
 #' @param dropFirst Booolean if first values should be dropped so the data varies
 #'  at the first rather than starting at 0 (given that is the observed first point)
 #'
-#' @return funts object of the data
+#' @return dfts object of the data
 #' @export
 #'
 #' @examples
@@ -55,5 +55,5 @@ generate_far1 <- function(N, resolution, sd=1, dependence=1/2, dropFirst=TRUE){
     }
   }
 
-  funts(X, intraobs = res)
+  dfts(X, intratime = res)
 }
