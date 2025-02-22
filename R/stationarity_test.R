@@ -6,9 +6,8 @@
 #'  methods have not been validated in the literature (although such an option
 #'  is provided, please use them at your own risk).
 #'
-#' @param X The functional time series being tested, inputted in a matrix form
-#'  with each row representing each observation of the functional data values
-#'  on equidistant points of any pre-specified interval.
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param statistic String for test statistic. Options are \code{Tn} and
 #' \code{Mn}. Default is \code{Tn}.
 #' @param critical String for method of determining the critical values. Options are
@@ -41,12 +40,12 @@ stationarity_test <-
            perm_method='separate',  M=1000, blocksize = 3, TVE=1, replace=TRUE){
     critical <- .verify_input(critical, c('simulation','permutation'))
 
-    X <- funts(X)
+    X <- dfts(X)
 
   N <- ncol(X$data)
   r <- nrow(X$data)
 
-  stat <- .compute_stationary_test_stat(X$data, X$intraobs, statistic)
+  stat <- .compute_stationary_test_stat(X$data, X$intratime, statistic)
 
   if(critical=="simulation"){
     pca_X <- pca(X, TVE = TVE)
@@ -56,7 +55,7 @@ stationarity_test <-
         sum(eigs *
               dot_integrate_col(
                 generate_brownian_bridge(length(eigs), v = v)$data^2, v) )
-      },eigs=pca_X$sdev^2, v=X$intraobs)
+      },eigs=pca_X$sdev^2, v=X$intratime)
     }else if(statistic=='Mn'){
       sim_stats <- sapply(1:M,function(m, eigs, v){
         vv <- v
@@ -64,7 +63,7 @@ stationarity_test <-
         sum(eigs * dot_integrate_col(
           (bbs - matrix(dot_integrate_col(bbs), nrow = length(vv),
                         ncol = length(eigs), byrow = TRUE))^2, vv ) )
-      },eigs=pca_X$sdev^2, v=X$intraobs)
+      },eigs=pca_X$sdev^2, v=X$intratime)
   }else{
       stop('Statistic is incorrect',call. = FALSE)
     }
@@ -73,7 +72,7 @@ stationarity_test <-
     sim_stats <- .bootstrap(X$data, blocksize=blocksize, M=M,
                             type=perm_method, replace=replace,
                             fn=.compute_stationary_test_stat,
-                            statistic=statistic, v=X$intraobs)
+                            statistic=statistic, v=X$intratime)
   }
 
   list('pvalue' = sum(stat <= sim_stats)/M,
@@ -98,7 +97,7 @@ stationarity_test <-
 
   # Test Statistics
   ## TODO:: CUsum with data.frame
-  Zn <- 1/sqrt(N) * ( cumsum(funts(X))$data -
+  Zn <- 1/sqrt(N) * ( cumsum(dfts(X))$data -
                         matrix((1:N)/N, nrow = r, ncol = N, byrow = TRUE) * rowSums(X) )
   if(statistic == 'Tn'){
     stat <- dot_integrate(dot_integrate_col(Zn^2, v))

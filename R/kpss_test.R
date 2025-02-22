@@ -2,7 +2,8 @@
 #'
 #' Compute the KPSS statistic for functional data.
 #'
-#' @param X Funts object for data
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param method String (default MC) for the method: monte carlo simulation
 #'  (\code{MC}), block permutation (\code{block}), and sliding window
 #'  permutation (\code{sliding})
@@ -29,7 +30,7 @@
 #'              method='sliding')
 kpss_test <-function(X, method=c("MC",'block','sliding'),
                         M=1000, h = 3, TVE=1, replace=TRUE){
-  X <- funts(X)
+  X <- dfts(X)
   method <- .verify_input(method, c("MC",'block','sliding'))
 
   N <- ncol(X$data)
@@ -43,13 +44,13 @@ kpss_test <-function(X, method=c("MC",'block','sliding'),
 
     # pca_X <- pca(X, TVE=1)$sdev^2
     # eigs <- est_eigenvalue(t(hat_eta), K, 2/5)
-    eigs <- pca(funts(hat_eta), TVE=TVE)$sdev^2
+    eigs <- pca(dfts(hat_eta), TVE=TVE)$sdev^2
 
     sim_RNs <- sapply(1:M,function(m,eigs,v){
       sum(eigs *
             dot_integrate_col(
               .generate_second_level_brownian_bridge(length(eigs), v = v)$data^2) )
-    },eigs=eigs, v=X$intraobs)
+    },eigs=eigs, v=X$intratime)
 
   } else if(method=='block' || method=='sliding'){
     xi_hat <- (12/(N*(N^2-1))) *
@@ -66,7 +67,7 @@ kpss_test <-function(X, method=c("MC",'block','sliding'),
       boot_X[[i]] <- matrix(mu_hat,nrow = r,ncol = N) +
         matrix(1:N,ncol=N, nrow=r,byrow = TRUE) * xi_hat + boot_etas[[i]]
 
-      tmp <- .compute_kpss_test_stat(funts(boot_X[[i]]))
+      tmp <- .compute_kpss_test_stat(dfts(boot_X[[i]]))
       sim_RNs[i] <- tmp$test_statistic
     }
 
@@ -95,9 +96,9 @@ kpss_test <-function(X, method=c("MC",'block','sliding'),
     t( ( (1:N-(N+1)/2) * 6/(N-1) - 1 )  %*% t(mean(X))) -
     t( ( 12/(N*(N^2-1))*(1:N-(N+1)/2) ) %*% t(iX) )
 
-  # ZN <- 1/sqrt(N) * cumsum(funts(hat_eta))$data
+  # ZN <- 1/sqrt(N) * cumsum(dfts(hat_eta))$data
   ZN <- .kpss_partial_sum(hat_eta)
-  RN <- dot_integrate(dot_integrate_col(ZN^2, X$intraobs))# * r
+  RN <- dot_integrate(dot_integrate_col(ZN^2, X$intratime))# * r
 
   list('test_statistic'=RN,'hat_eta'=hat_eta)
 }

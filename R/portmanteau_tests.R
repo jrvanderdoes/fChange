@@ -47,7 +47,8 @@
 #' The "imhof" test requires the "tensorA" and "CompQuadForm" packages. Note also that the imhof test does not
 #' return a statistic, and thus returns a list with only 2 elements if suppress_raw_output = FALSE.
 #'
-#' @param data A funts object or functional data matrix with observed functions in the columns.
+#' @param data A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param test A String specifying the hypothesis test. Currently available tests are referred to by their
 #'  string handles: 'variety', "single-lag", "multi-lag", "spectral", "independence", and "imhof". Please see the Details
 #'  section of the documentation, or the vignette, for a short overview of the available tests. For a more
@@ -129,7 +130,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
                        kernel = "Bartlett", bandwidth = "adaptive",
                        components = 3, block_size = "adaptive", moving=FALSE,
                        B = 500, alpha=0.05) {
-  data <- funts(data)
+  data <- dfts(data)
   poss_tests <- c('variety', 'single-lag', 'multi-lag', 'spectral',
                     'independence', 'imhof')
   test <- .verify_input(test,poss_tests)
@@ -154,7 +155,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   ## RUN TESTS
   if (test == 'variety') {
     m <- as.table(matrix(0, ncol = 1, 10))
-    colnames(m) <- c('p_value')
+    colnames(m) <- c('pvalue')
     rownames(m) <- c('single-lag, lag = 1', 'single-lag, lag = 2',
                      'single-lag, lag = 3', 'multi-lag, lag = 5',
                      'multi-lag, lag = 10', 'multi-lag, lag = 20',
@@ -163,24 +164,24 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
                      'independence, 3 components, lag = 3',
                      'independence, 16 components, lag = 10')
 
-    m[1] <- portmanteau_tests(data, test = 'single-lag', lag = 1, alpha=alpha)$p_value
-    m[2] <- portmanteau_tests(data, test = 'single-lag', lag = 2, alpha=alpha)$p_value
-    m[3] <- portmanteau_tests(data, test = 'single-lag', lag = 3, alpha=alpha)$p_value
+    m[1] <- portmanteau_tests(data, test = 'single-lag', lag = 1, alpha=alpha)$pvalue
+    m[2] <- portmanteau_tests(data, test = 'single-lag', lag = 2, alpha=alpha)$pvalue
+    m[3] <- portmanteau_tests(data, test = 'single-lag', lag = 3, alpha=alpha)$pvalue
 
-    m[4] <- portmanteau_tests(data, test = 'multi-lag', lag = 5, alpha=alpha)$p_value
-    m[5] <- portmanteau_tests(data, test = 'multi-lag', lag = 10, alpha=alpha)$p_value
-    m[6] <- portmanteau_tests(data, test = 'multi-lag', lag = 20, alpha=alpha)$p_value
+    m[4] <- portmanteau_tests(data, test = 'multi-lag', lag = 5, alpha=alpha)$pvalue
+    m[5] <- portmanteau_tests(data, test = 'multi-lag', lag = 10, alpha=alpha)$pvalue
+    m[6] <- portmanteau_tests(data, test = 'multi-lag', lag = 20, alpha=alpha)$pvalue
 
     m[7] <- portmanteau_tests(data, test = 'spectral', method=method, B=B,
-                       bandwidth = 'static')$p_value
+                       bandwidth = 'static')$pvalue
     m[8] <- portmanteau_tests(data, test = 'spectral', method=method, B=B,
-                       bandwidth = 'adaptive')$p_value
+                       bandwidth = 'adaptive')$pvalue
 
     m[9] <- portmanteau_tests(data, test = 'independence', method=method, B=B,
-                       components = 3, lag = 3)$p_value
+                       components = 3, lag = 3)$pvalue
 
     m[10] <- portmanteau_tests(data, test = 'independence', method=method, B=B,
-                        components = 16, lag = 10)$p_value
+                        components = 16, lag = 10)$pvalue
     results <- m
   } else if (test == 'multi-lag') {
     # Lag Tests
@@ -226,7 +227,8 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #'  operator is equal to 0. This test is designed for stationary functional time-series, and is valid under
 #'  conditional heteroscedasticity conditions.
 #'
-#' @param data funts object or functional data matrix with observed functions in the columns
+#' @param data A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param lag Positive integer value. The lag to use to compute the single lag test statistic.
 #' @param alpha Numeric value between 0 and 1 specifying the significance level to be used in the specified
 #'  hypothesis test. The default value is 0.05. Note, the significance value is only ever used to compute the
@@ -269,7 +271,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 .single_lag_test <- function(
     data, lag=1, alpha=0.05, method = c('iid', 'lowdiscrepancy', 'bootstrap'),
     M=NULL, block_size='adaptive', B=300, moving = FALSE){
-  data <- funts(data)
+  data <- dfts(data)
 
   poss_methods <- c('iid', 'lowdiscrepancy', 'bootstrap')
   method <- .verify_input(method, poss_methods)
@@ -286,11 +288,11 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
     # stats_distr <- lapply(bootstrap_samples, t_statistic_Q, lag=lag)
     quantile <- stats::quantile(as.numeric(stats_distr), 1 - alpha)
     statistic <- t_statistic_Q(data$data, lag)
-    p_value <- sum(statistic <= stats_distr) / length(stats_distr)
+    pvalue <- sum(statistic <= stats_distr) / length(stats_distr)
 
     results <- list(statistic = as.numeric(statistic),
                     quantile = as.numeric(quantile),
-                    p_value = as.numeric(p_value), block_size = block_size)
+                    pvalue = as.numeric(pvalue), block_size = block_size)
   } else if(method=='lowdiscrepancy') {
     results <- Q_WS_quantile(data$data, lag, alpha=alpha, M=M, low_disc=TRUE)
   } else if(method=='iid') {
@@ -311,7 +313,8 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #'  operators (h going from 1 to lag) is equal to 0. This test is designed for stationary functional time-series, and
 #'  is valid under conditional heteroscedasticity conditions.
 #'
-#' @param data funts object or functional data matrix with observed functions in the columns
+#' @param data A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param lag Positive integer value. The lag to use to compute the single lag test statistic
 #' @param M Positive integer value. Number of Monte-Carlo simulation for Welch-Satterthwaite approximation.
 #' @param method Method to use:
@@ -347,7 +350,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   method <- .verify_input(method, poss_methods)
 
   # Setup
-  data <- funts(data)
+  data <- dfts(data)
   f_data <- data$data
 
   N <- NCOL(f_data)
@@ -359,7 +362,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 
     bandwidth <- ceiling(0.25 * (N ^ (1/3)))
 
-    covs <- autocovariance(center(funts(f_data))$data^2,
+    covs <- autocovariance(center(dfts(f_data))$data^2,
                                    lags = 1:lag, center=FALSE)
     mean_welch <- do.call("sum", covs) / J^2
 
@@ -398,7 +401,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   p_val <- stats::pchisq(statistic / beta, nu, lower.tail = FALSE)
 
   # Return results
-  list(statistic = statistic, quantile = quantile, p_value = p_val)
+  list(statistic = statistic, quantile = quantile, pvalue = p_val)
 }
 
 
@@ -412,7 +415,8 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #'  uncorrelated series. Unlike the "single-lag" and "multi-lag" tests, this test is not for general white noise
 #'  series, and may not hold under functional conditionally heteroscedastic assumptions.
 #'
-#' @param data funts object or functional data matrix with observed functions in the columns
+#' @param data A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param kernel A String specifying the kernel function to use. The currently supported kernels are the
 #' 'Bartlett' and  'Parzen' kernels. The default kernel is 'Bartlett'.
 #' @param bandwidth A String or positive Integer value which specifies the bandwidth to use. Currently admitted
@@ -445,7 +449,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 .spectral_test <- function(data, kernel = 'Bartlett',
                           bandwidth = 'adaptive', alpha = 0.05) {
   ## TODO: Make kernels match rest of package
-  data <- funts(data)
+  data <- dfts(data)
   f_data <- data$data
 
   J <- NROW(f_data)
@@ -502,7 +506,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 
   list(statistic = t_stat,
        quantile = stats::qnorm(1 - alpha),
-       p_value = 1 - stats::pnorm(t_stat),
+       pvalue = 1 - stats::pnorm(t_stat),
        band = bandwidth)
 }
 
@@ -518,7 +522,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #'  may not hold under functional conditionally heteroscedastic assumptions. Please consult the vignette for a
 #'  deeper exposition, and consult the reference for a complete treatment.
 #'
-#' @param data funts object or functional data matrix with observed functions in the columns
+#' @param data dfts object or functional data matrix with observed functions in the columns
 #' @param components A positive Integer specifying the number of principal components to project the data on;
 #'  ranked in order of importance (importance is determined by the proportion of the variance that is explained
 #'  by the individual principal component.)
@@ -543,7 +547,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #' # b <- generate_brownian_motion(250)
 #' # .independence_test(b, components = 3, lag = 5)
 .independence_test <- function(data, components, lag, alpha = 0.05) {
-  data <- funts(data)
+  data <- dfts(data)
 
   if ( (components < 1) | (components %% 1 != 0) ) {
     stop("The 'components parameter must be a positive integer.")
@@ -585,7 +589,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   p_val <- as.numeric(1 - stats::pchisq(Q_n, df = components^2 * lag))
   quantile <- as.numeric(stats::qchisq(1 - alpha, df = components^2 * lag))
 
-  list(statistic = Q_n, quantile = quantile, p_value = p_val)
+  list(statistic = Q_n, quantile = quantile, pvalue = p_val)
 }
 
 
@@ -595,7 +599,8 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #'   the probability that the observed value of the statistic Q_h is larger than the 1-alpha
 #'   quantile of the quadratic form in normal variables described in (15)
 #'
-#' @param data funts object or data that can be easily converted
+#' @param data A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param lag the lag for which to compute the imhof test
 #'
 #' @return A list containing the SVD of tensor c^hat_i_j(t,s,u,v) and the p-value computing the
@@ -606,9 +611,9 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #' @keywords internal
 #'
 #' @examples
-#' # .imhof_test(funts(electricity[,1:50]),1)
+#' # .imhof_test(dfts(electricity$data[,1:50]),1)
 .imhof_test <- function(data, lag) {
-  data <- funts(data)
+  data <- dfts(data)
 
   if (!requireNamespace('tensorA')) {
     stop("Please install the 'tensorA' package to perform the imhof test.")
@@ -641,5 +646,5 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   eigenvalues <- as.numeric(SVD$d / (J^2))
   pval_imhof <- CompQuadForm::imhof(t_statistic_val, lambda = eigenvalues)$Qq
 
-  list(statistic = t_statistic_val, p_value = pval_imhof)
+  list(statistic = t_statistic_val, pvalue = pval_imhof)
 }

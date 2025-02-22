@@ -21,7 +21,7 @@ Q_WS_quantile <- function(f_data, lag, alpha=0.05, M=NULL, low_disc=FALSE) {
   # Mean
   # mean_Q_h <- mean_hat_Q_h(f_data, lag)
   J <- NROW(f_data)
-  f_data1 <- funts(f_data)
+  f_data1 <- dfts(f_data)
   cov <- autocovariance(center(f_data1)$data^2,lags = lag, center=FALSE)
 
   mean_Q_h <- as.numeric(unlist(lapply(cov, function(x) sum(x))) / J^2)
@@ -42,7 +42,7 @@ Q_WS_quantile <- function(f_data, lag, alpha=0.05, M=NULL, low_disc=FALSE) {
   statistic <- t_statistic_Q(f_data, lag)
   p_val <- stats::pchisq(statistic / beta, nu, lower.tail = FALSE)
 
-  list(statistic = statistic, quantile = quantile, p_value = p_val)
+  list(statistic = statistic, quantile = quantile, pvalue = p_val)
 }
 
 
@@ -58,8 +58,8 @@ Q_WS_quantile <- function(f_data, lag, alpha=0.05, M=NULL, low_disc=FALSE) {
 #'         degrees of freedom (which approximates Q_h) (computed under a strong white noise
 #'         assumption).
 #'
-#'  @noRd
-#'  @keywords internal
+#' @noRd
+#' @keywords internal
 Q_WS_quantile_iid <- function(f_data, alpha=0.05) {
   J <- NROW(f_data)
 
@@ -80,7 +80,7 @@ Q_WS_quantile_iid <- function(f_data, alpha=0.05) {
   statistic <- t_statistic_Q(f_data, lag = 1)
   p_val <- stats::pchisq(statistic / beta, nu, lower.tail = FALSE)
 
-  list(statistic = statistic, quantile = quantile, p_value = p_val)
+  list(statistic = statistic, quantile = quantile, pvalue = p_val)
 }
 
 
@@ -205,7 +205,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 #
 #   ## Mean
 #   # mean_V_K <- mean_hat_V_K(f_data, K)
-#   store <- obtain_autocovariance(center(funts(f_data))$data^2,
+#   store <- obtain_autocovariance(center(dfts(f_data))$data^2,
 #                                  lags = 1:K, center=FALSE)
 #   mean_V_K <- do.call("sum", store) / NROW(f_data)^2
 #
@@ -236,7 +236,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 #   statistic <- sum(t_statistic_Q(f_data, 1:K))
 #   p_val <- stats::pchisq(statistic / beta, nu, lower.tail = FALSE)
 #
-#   list(statistic = statistic, quantile = quantile, p_value = p_val)
+#   list(statistic = statistic, quantile = quantile, pvalue = p_val)
 # }
 
 
@@ -270,7 +270,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 #   statistic <- sum(t_statistic_Q(f_data, 1:K))
 #   p_val <- stats::pchisq(statistic / beta, nu, lower.tail = FALSE)
 #
-#   list(statistic = statistic, quantile = quantile, p_value = p_val)
+#   list(statistic = statistic, quantile = quantile, pvalue = p_val)
 # }
 
 
@@ -387,10 +387,10 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 #     stats_distr <- lapply(bootstrap_samples, t_statistic_Q, lag=lag)
 #     statistic <- t_statistic_Q(f_data, lag=lag)
 #     quantile <- stats::quantile(as.numeric(stats_distr), 1 - alpha)
-#     p_value <- sum(statistic > stats_distr) / length(stats_distr)
+#     pvalue <- sum(statistic > stats_distr) / length(stats_distr)
 #
 #     list(statistic = as.numeric(statistic), quantile = as.numeric(quantile),
-#          p_value = as.numeric(p_value), block_size = block_size)
+#          pvalue = as.numeric(pvalue), block_size = block_size)
 #   } else if (iid == FALSE) {
 #     results <- Q_WS_quantile(f_data, lag, alpha=alpha, M=M, low_disc=low_disc)
 #     statistic <- results$statistic
@@ -398,7 +398,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 #     p_val <- results$p_val
 #     reject <- statistic > quantile
 #
-#     list(statistic = statistic, quantile = quantile, p_value = p_val)
+#     list(statistic = statistic, quantile = quantile, pvalue = p_val)
 #   } else {
 #     results <- Q_WS_quantile_iid(f_data, alpha=alpha)
 #     statistic <- results$statistic
@@ -406,7 +406,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 #     p_val <- results$p_val
 #     reject <- statistic > quantile
 #
-#     list(statistic= statistic, quantile = quantile, p_value = p_val)
+#     list(statistic= statistic, quantile = quantile, pvalue = p_val)
 #   }
 # }
 
@@ -449,7 +449,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 # #' @keywords internal
 # mean_hat_V_K <- function(f_data, K) {
 #   # store <- covariance_diag_store(f_data, K)
-#   store <- obtain_autocovariance(center(funts(f_data))$data^2,
+#   store <- obtain_autocovariance(center(dfts(f_data))$data^2,
 #                                  lags = 1:K, center=FALSE)
 #
 #   do.call("sum", store) / NROW(f_data)^2
@@ -772,7 +772,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 # #'  functional data, for lags h in the range 1:K.
 # covariance_diag_store <- function(f_data, K) {
 #   cov_i_store <- list()
-#   f_data <- funts(f_data)
+#   f_data <- dfts(f_data)
 #   ## TODO:: Remove loop
 #   for (j in 1:K) {
 #     # cov_i_store[[j]] <- diagonal_covariance_i(f_data, j)
@@ -866,7 +866,7 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 # #' @return scalar approximation of the mean of the test statistic Q_h.
 # mean_hat_Q_h <- function(f_data, lags) {
 #   # TODO:: Remove this function by incorporating into its one call
-#   f_data <- funts(f_data)
+#   f_data <- dfts(f_data)
 #   J <- NROW(f_data)
 #   # TODO:: remove sapply
 #   cov <- sapply(lags,
