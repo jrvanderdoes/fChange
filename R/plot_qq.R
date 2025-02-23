@@ -5,7 +5,7 @@
 #'
 #' @name qqplot
 #'
-#' @seealso [qqplot.funts()] [qqplot.default()]
+#' @seealso [qqplot.dfts()] [qqplot.default()]
 #'
 #' @export
 qqplot <- function(x, ...) UseMethod("qqplot")
@@ -15,16 +15,17 @@ qqplot <- function(x, ...) UseMethod("qqplot")
 qqplot.default <- function(x, ...) stats::qqplot(x, ...)
 
 
-#' Generic Function to Compute QQ plot for funts
+#' Generic Function to Compute QQ plot for dfts
 #'
 #' Creates normal QQ plots on the principal components of functional data
 #'
-#' @param x funts object
+#' @param x A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param TVE Numeric in \[0,1\] giving the total variance explained for selecting
 #'  the number of principal components.
 #' @param d.max Max number of principal components
 #' @param alpha Significance level, alpha in \[0,1\]
-#' @param CPs Vector of change points
+#' @param changes Vector of change points
 #' @param legend Boolean indicating if legend should be shown
 #' @param ... Unused
 #'
@@ -32,18 +33,19 @@ qqplot.default <- function(x, ...) stats::qqplot(x, ...)
 #' @export
 #'
 #' @examples
-#' result <- qqplot(funts(electricity))
-qqplot.funts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
-                         CPs=NULL, legend = FALSE, ...){
+#' result <- qqplot(electricity)
+qqplot.dfts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
+                         changes=NULL, legend = FALSE, ...){
   .plot_distribution(X = x, TVE = TVE, d.max = d.max, distribution = 'norm',
-                     alpha = alpha, CPs=CPs, legend=legend, ...)
+                     alpha = alpha, changes=changes, legend=legend, ...)
 }
 
 
 #' Distribution plot
 #'
-#' @param X funts object
-#' @param CPs Vector of change points
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
+#' @param changes Vector of change points
 #' @param TVE Total variance explained. Value in \[0,1\]
 #' @param d.max Numberic for max number of pca components to examine
 #' @param distribution String for distribution to consider. Any distribution with
@@ -59,14 +61,14 @@ qqplot.funts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
 #'
 #' @examples
 #' # result <-  .plot_distribution(electricity)
-#' # result1 <- .plot_distribution(electricity,distribution='exp', CPs=c(50,175))
+#' # result1 <- .plot_distribution(electricity,distribution='exp', changes=c(50,175))
 #'
 #' @noRd
 #' @keywords internal
-.plot_distribution <- function(X, CPs=NULL, TVE=0.95, d.max = 3,
+.plot_distribution <- function(X, changes=NULL, TVE=0.95, d.max = 3,
                                distribution = "norm",
                                alpha = 0.05, legend = FALSE, ...){
-  X <- funts(X)
+  X <- dfts(X)
 
   # Parameters
   #   All data will be of length n
@@ -74,18 +76,18 @@ qqplot.funts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
   Z_alpha <- stats::qnorm(1 - alpha/2)
 
   # Convert X to pca
-  if(is.null(CPs)){
+  if(is.null(changes)){
     X_pca <- pca(X,TVE = TVE)
     D <- min(ncol(X_pca$x), d.max)
 
     dat <- X_pca$x[,1:D]
   }else{
-    CPs <- unique(c(0, CPs, ncol(X)))
-    max_n <- max(CPs[-1] - CPs[-length(CPs)])#max((CPs-lag(CPs))[-1])
+    changes <- unique(c(0, changes, ncol(X)))
+    max_n <- max(changes[-1] - changes[-length(changes)])#max((changes-lag(changes))[-1])
     D <- min(nrow(X), d.max)
     dat <- list()
-    for(d in 1:(length(CPs)-1)){
-      X_pca <- pca(funts(X$data[,(CPs[d]+1):CPs[d+1]]), TVE = TVE)
+    for(d in 1:(length(changes)-1)){
+      X_pca <- pca(dfts(X$data[,(changes[d]+1):changes[d+1]]), TVE = TVE)
       dat[[d]] <- X_pca$x[,1:D]
       # dat[,d] <- c(X_pca$x,rep(NA,length.out=max_n-length(X_pca$x)))
     }
@@ -106,9 +108,9 @@ qqplot.funts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
     n <- c()
     P <- list()
 
-    if(!is.null(CPs)){
+    if(!is.null(changes)){
       df <- data.frame()
-      for(i in 1:(length(CPs)-1)){
+      for(i in 1:(length(changes)-1)){
         data_comp <- stats::na.omit(dat[[i]][,d])
         n <- c(n,length(data_comp))
         P[[i]] <- stats::ppoints(n[i])
@@ -116,7 +118,7 @@ qqplot.funts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
         ord <- order(data_comp)
         df <- rbind(df,
                     data.frame(
-                      'CP' = paste0(CPs[i]+1,'-',CPs[i+1]),
+                      'CP' = paste0(changes[i]+1,'-',changes[i+1]),
                       'ord' = data_comp[ord],
                       'z' = q.function(P[[i]], ...)))
       }
@@ -157,7 +159,7 @@ qqplot.funts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
     results <- rbind(results, data.frame('d'=paste0('Dim-',d), df))
   }
 
-  if(!is.null(CPs)){
+  if(!is.null(changes)){
     p <- ggplot2::ggplot() +
       ggplot2::facet_grid(row=ggplot2::vars(d),scales='free_y')
   }else{
@@ -168,7 +170,7 @@ qqplot.funts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
       ggplot2::guides(fill='none',
                       color='none')
   }else{
-    if(!is.null(CPs)){
+    if(!is.null(changes)){
       # Order legend
       p <- p +
         ggplot2::scale_fill_discrete(breaks=unique(results$CP),
@@ -186,7 +188,7 @@ qqplot.funts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
   # Remove warnings
   z <- lower <- upper <- i <- s <- CP <- NULL
 
-  if(!is.null(CPs)){
+  if(!is.null(changes)){
     p <- p +
       ggplot2::geom_ribbon(ggplot2::aes(x=z, ymin = lower, ymax = upper, color=CP, fill=CP),
                            data=results, alpha=0.2) +

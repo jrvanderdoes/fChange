@@ -2,9 +2,9 @@
 #'
 #' \code{.plot_fd} plots functional data either in an fd object or evaluated at certain points
 #'
-#' @param X funts object or data.frame of evaluated fd objects (the columns being lines and
-#'     the rows the evaluated points)
-#' @param CPs (Optional) Vectors of numeric values indicating the location of
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
+#' @param changes (Optional) Vectors of numeric values indicating the location of
 #'     change points. This will color each section differently. Default vallue
 #'     is NULL.
 #' @param plot_title (Optional) String to title the plot. Default value is NULL.
@@ -35,41 +35,46 @@
 #' @keywords internal
 #'
 #' @examples
-#' #.plot_fd(X = electricity[, 1:10])
-#' #.plot_fd(X = electricity[, 1:50], CPs = c(25))
+#' #.plot_fd(X = electricity$data[, 1:10])
+#' #.plot_fd(X = electricity$data[, 1:50], changes = c(25))
 #' #.plot_fd(
-#' #  X = electricity, CPs = c(50, 150, 220, 300),
+#' #  X = electricity, changes = c(50, 150, 220, 300),
 #' #  interactive = FALSE, showticklabels = FALSE
 #' #)
-.plot_fd <- function(X, CPs = NULL, plot_title = X$name,
-                    val_axis_title = "Value", res_axis_title = "Resolution",
+.plot_fd <- function(X, changes = NULL, plot_title = X$name,
+                    val_axis_title = "Value",
+                    res_axis_title = "Intratime",
                     FD_axis_title = "Observations",
                     eye = list(x = -1.5, y = -1.5, z = 1.5),
                     aspectratio = NULL,
                     showticklabels = TRUE, interactive = TRUE) {
+  # Setup
   if(is.null(eye)) eye <- list(x = -1.5, y = -1.5, z = 1.5)
+  if(is.null(val_axis_title)) val_axis_title = ''
+  if(is.null(res_axis_title)) res_axis_title = ''
+  if(is.null(FD_axis_title)) FD_axis_title = ''
 
-  X <- funts(X)
-  if(!is.null(CPs)) CPs <- CPs[order(CPs)]
+  X <- dfts(X,inc.warnings = FALSE)
+  if(!is.null(changes)) changes <- changes[order(changes)]
 
   if (!interactive) {
     if(is.null(aspectratio)) aspectratio <- c(2.5, 0.75, 1)
 
     fdPlot <- .plot_evalfd_highdim(
       X = X,
-      CPs = CPs, plot_title = plot_title,
+      changes = changes, plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
       FD_axis_title = FD_axis_title,
       aspectratio = aspectratio,
       showticklabels = showticklabels
     )
-  } else if (!is.null(CPs) && length(stats::na.omit(CPs)) > 0) {
+  } else if (!is.null(changes) && length(stats::na.omit(changes)) > 0) {
     if(is.null(aspectratio)) aspectratio <- list(x = 1, y = 1, z = 1)
 
-    fdPlot <- .plot_evalfd_3dlines_cps(
+    fdPlot <- .plot_evalfd_3dlines_changes(
       X = X,
-      CPs = CPs, plot_title = plot_title,
+      changes = changes, plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
       FD_axis_title = FD_axis_title,
@@ -107,8 +112,8 @@
 #' @keywords internal
 .plot_evalfd_3dlines <- function(X, plot_title = NULL,
                                  val_axis_title = "Value",
-                                 res_axis_title = "Resolution",
-                                 FD_axis_title = "Observation",
+                                 res_axis_title = "Intratime",
+                                 FD_axis_title = "Observations",
                                  eye = list(x = -1.5, y = -1.5, z = 1.5),
                                  aspectratio = list(x = 1, y = 1, z = 1),
                                  showticklabels = TRUE) {
@@ -118,7 +123,7 @@
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = X$intraobs,
+        "resolution" = X$intratime,
         "FDRep" = i, #X$labels[i],
         "Value" = X$data[,i]
       )
@@ -144,7 +149,9 @@
       scene = list(
         yaxis = list(
           title = res_axis_title,
-          showticklabels = showticklabels
+          showticklabels = showticklabels,
+          ticktext=round(seq(min(X$intratime),max(X$intratime),length.out=5),3),
+          tickvals=.select_n(vals=seq(min(X$intratime),max(X$intratime),length.out=5), n=5)
         ),
         xaxis = list(
           title = FD_axis_title,
@@ -218,29 +225,29 @@
 #'     change points.
 #'
 #' @inheritParams .plot_fd
-#' @param CPs Vectors of numeric values indicating the location of change points.
+#' @param changes Vectors of numeric values indicating the location of change points.
 #'     This will color each section differently.
 #'
 #' @return A plotly plot
 #'
 #' @noRd
 #' @keywords internal
-.plot_evalfd_3dlines_cps <- function(X, CPs,
+.plot_evalfd_3dlines_changes <- function(X, changes,
                                      plot_title = NULL,
                                      val_axis_title = "Value",
-                                     res_axis_title = "resolution",
-                                     FD_axis_title = "FD Sims",
+                                     res_axis_title = "Intratime",
+                                     FD_axis_title = "Observations",
                                      eye = list(x = -1.5, y = -1.5, z = 1.5),
                                      aspectratio = list(x = 1, y = 1, z = 1),
                                      showticklabels = TRUE) {
   plotData <- data.frame()
 
   # Color Group to first CP
-  for (j in 1:min(CPs)) {
+  for (j in 1:min(changes)) {
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = X$intraobs,
+        "resolution" = X$intratime,
         "FDRep" = j,
         "Color" = 1,
         "Value" = X$data[, j]
@@ -248,26 +255,26 @@
     )
   }
   # Color Group from last CP
-  for (j in (max(CPs) + 1):ncol(X)) {
+  for (j in (max(changes) + 1):ncol(X)) {
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = X$intraobs,
+        "resolution" = X$intratime,
         "FDRep" = j,
-        "Color" = length(CPs) + 1,
+        "Color" = length(changes) + 1,
         "Value" = X$data[, j]
       )
     )
   }
 
   # Color Additional Groups
-  if (length(CPs) > 1) {
-    for (i in 2:length(CPs)) {
-      for (j in (CPs[i - 1] + 1):CPs[i]) {
+  if (length(changes) > 1) {
+    for (i in 2:length(changes)) {
+      for (j in (changes[i - 1] + 1):changes[i]) {
         plotData <- rbind(
           plotData,
           data.frame(
-            "resolution" = X$intraobs,
+            "resolution" = X$intratime,
             "FDRep" = j,
             "Color" = i,
             "Value" = X$data[, j]
@@ -284,9 +291,9 @@
   )
 
   # Get Colors
-  tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-  if (length(CPs) > 9) {
-    tmpColors <- rep(tmpColors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+  tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+  if (length(changes) > 9) {
+    tmpColors <- rep(tmpColors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
   }
 
   # magrittr::`%>%`(
@@ -360,13 +367,13 @@
 #'
 #' @noRd
 #' @keywords internal
-.plot_evalfd_highdim <- function(X, CPs = NULL,
+.plot_evalfd_highdim <- function(X, changes = NULL,
                                  plot_title = NULL,
                                  val_axis_title = NULL,
                                  res_axis_title = NULL,
                                  FD_axis_title = NULL,
                                  aspectratio = c(2.5, .75, 1),
-                                 showticklabels = FALSE) {
+                                 showticklabels = TRUE) {
   if (!requireNamespace("lattice", quietly = TRUE)) {
     stop(
       "Package \"lattice\" must be installed to use this function.",
@@ -375,7 +382,7 @@
   }
 
   # data <- X$data
-  # curve_points <- X$intraobs
+  # curve_points <- X$intratime
   valRange <- c(
     floor(min(X$data,na.rm = T)),
     ceiling(max(X$data,na.rm = T))
@@ -384,7 +391,7 @@
   name <- V1 <- value <- NULL
   data1 <- X$data
   colnames(data1) <- 1:ncol(X)
-  plotData <- cbind(X$intraobs,data1) %>%
+  plotData <- cbind(X$intratime,data1) %>%
     as.data.frame() %>%
     tidyr::pivot_longer(cols = 1+1:ncol(X)) %>%
     dplyr::mutate(name=as.numeric(name)) %>%
@@ -394,18 +401,18 @@
   plotData <- plotData[order(plotData$FDRep),]
 
   ## Setup up Colors
-  #   Rainbow for no CPs, colored for CPs
+  #   Rainbow for no changes, colored for changes
   plotData[["color"]] <- rep(1:ncol(X), each = nrow(X))
-  if (!is.null(CPs)) {
-    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-    if (length(CPs) > 9) {
-      tmp_colors <- rep(tmp_colors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+  if (!is.null(changes)) {
+    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+    if (length(changes) > 9) {
+      tmp_colors <- rep(tmp_colors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
     }
 
-    CPs <- unique(c(1, CPs, ncol(X)))
+    changes <- unique(c(1, changes, ncol(X)))
     colors_plot <- rep(tmp_colors[1], ncol(X))
-    for (i in 2:(length(CPs) - 1)) {
-      colors_plot[CPs[i]:CPs[i + 1]] <- tmp_colors[i]
+    for (i in 2:(length(changes) - 1)) {
+      colors_plot[changes[i]:changes[i + 1]] <- tmp_colors[i]
     }
   } else {
     colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
@@ -415,45 +422,49 @@
   plotData[["color"]] <- rep(colors_plot, each = nrow(X) )
 
   ## Set up Tick Labels
-  z_range <- round(range(plotData$Value,na.rm = T), -2)
+  #   TODO:: Test more thoroughly
+  r_z <- range(plotData$Value,na.rm = T)
+  r_z[2] <- r_z[2]+4
+  z_range <- round(r_z, -nchar(round(max(plotData$Value,na.rm = TRUE)))+1)
+
   if (showticklabels) {
     scale_info <- list(
       col = "black", arrows = FALSE, cex = 1.2,
       x = list(
-        at = seq(min(X$intraobs),
-          max(X$intraobs),
+        at = seq(min(X$intratime),
+          max(X$intratime),
           length.out = 5
         ),
-        # labels=.specify_decimal(rev(seq(max(curve_points),
-        #                                 min(curve_points),
-        #                                 length.out=4)),2)),
+        # labels=.specify_decimal(seq(max(X$intratime),
+        #                                 min(X$intratime),
+        #                                 length.out=5),2)
         labels = NULL
       ),
       y = list(
-        at = -seq(1, ncol(X), length.out = 8),
-        labels = X$labels[rev(seq(1, ncol(X), length.out = 8))]
+        at = -seq(1, ncol(X), length.out = 7),
+        labels = X$labels[seq(1, ncol(X), length.out = 7)]
       ),
       z = list(
         at = seq(z_range[1], z_range[2],
           length.out = 5
         ),
-        labels = .specify_decimal(
-          seq(z_range[1], z_range[2], length.out = 5), 0
-        )
+        labels = c('',.specify_decimal(
+          seq(z_range[1], z_range[2], length.out = 5)[-1], 0
+        ))
       )
     )
   } else {
     scale_info <- list(
       col = "black", arrows = FALSE, cex = 0.75,
       x = list(
-        at = seq(min(X$intraobs),
-          max(X$intraobs),
+        at = seq(min(X$intratime),
+          max(X$intratime),
           length.out = 5
         ),
         labels = NULL
       ),
       y = list(
-        at = -seq(1, ncol(X), length.out = 8),
+        at = -seq(1, ncol(X), length.out = 7),
         labels = NULL
       ),
       z = list(
@@ -480,6 +491,7 @@
     # screen=list(z = 90, x = -75,y=-45),
     # trellis.par.set(list(axis.text=list(cex=2)),
     #                "axis.line",list(col=NA)),
+    xlim = rev(range(X$intratime)),
     zlim = valRange,
     aspect = aspectratio,
     drape = TRUE, colorkey = FALSE,

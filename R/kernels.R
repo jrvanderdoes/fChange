@@ -146,13 +146,14 @@ flat_top_kernel <- function(x) {
 #' Computes the "optimal" bandwidth using a bandwidth selection method based on the
 #'   spectral density operator which adapts to the functional data.
 #'
-#' @param X Functional data object
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param kernel Kernel function selection to use, 'bartlett' or 'parzen'.
 #'
 #' @return a scalar value of the "optimal" data-adapted bandwidth.
 #' @export
 adaptive_bandwidth <- function(X, kernel='bartlett') {
-  X <- funts(X)
+  X <- dfts(X)
   f_data <- X$data
 
   ## TODO:: Setup to not be hidden

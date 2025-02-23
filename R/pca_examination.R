@@ -1,6 +1,7 @@
 #' Principal Component Exploration
 #'
-#' @param X funts object
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param TVE Numeric in \[0,1\]. Total variance explained to determine the
 #'  number of components to examine
 #' @param d.max Numeric. Max number of components to investigate (if TVE
@@ -16,9 +17,9 @@
 #' @export
 #'
 #' @examples
-#' results <- pca_examination(funts(electricity))
+#' results <- pca_examination(electricity)
 pca_examination <- function(X, TVE=0.95, d.max = 3){
-  X <- funts(X)
+  X <- dfts(X)
 
   pc_data <- pca(X,TVE=TVE)
   num_pcs <- min(length(pc_data$sdev),d.max)
@@ -32,10 +33,10 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
   for(i in 1:num_pcs){
     results[,,i] <- .pca_mult(pc_data, i)
 
-    plots[[i]] <- .plot_rainbow(funts(results[,,i])) +
+    plots[[i]] <- .plot_rainbow(dfts(results[,,i])) +
       ggplot2::ggtitle(paste0('Principal Component ',i)) +
       ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
-    plots1[[i]] <- .plot_banded(funts(results[,,i])) +
+    plots1[[i]] <- .plot_banded(dfts(results[,,i])) +
       ggplot2::ggtitle(paste0('Principal Component ',i)) +
       ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
   }
@@ -49,7 +50,7 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
   reconstruction <- .pca_reconstruct(pc_data)
 
   plot_reconstruction <-
-    .plot_rainbow(funts(reconstruction)) +
+    .plot_rainbow(dfts(reconstruction)) +
     ggplot2::ggtitle(
       paste0('Reconstruction With ', d.max,
              'Principal Components') ) +
@@ -57,7 +58,7 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
 
   residuals <- X$data - reconstruction
   plot_residuals <-
-    .plot_rainbow(funts(residuals)) +
+    .plot_rainbow(dfts(residuals)) +
     ggplot2::ggtitle(
       paste0('Residuals from reconstruction With ', d.max,
              ' Principal Components') ) +
@@ -74,7 +75,8 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
 
 #' Forecast using principal component analysis
 #'
-#' @param X funts object
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param TVE Numeric for the total variance explained to select number
 #'  of components in PCA
 #' @param model String to indicate method to model components, either
@@ -88,8 +90,8 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
 #'
 #' @return List with the following elements:
 #' \itemize{
-#'  \item fit: funts object for fit
-#'  \item errors: funts object for errors from fit
+#'  \item fit: dfts object for fit
+#'  \item errors: dfts object for errors from fit
 #'  \item parameters: list with fit parameters like pcs, TVE, and model
 #' }
 #' @export
@@ -100,8 +102,8 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
 #'  https://doi.org/10.1016/j.csda.2006.07.028
 #'
 #' @examples
-#' result <- model_pca(funts(electricity)[,50:150], n.ahead=10)
-model_pca <- function(X, TVE = 0.95, model=c('ets','arima'),
+#' result <- projection_model(dfts(electricity$data[,50:150]), n.ahead=10)
+projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
                     n.ahead=0, alpha=0.05, check.cp=TRUE, ...){
   if(!requireNamespace('forecast',quietly = TRUE))
     stop("Please install the 'forecast' package",call. = FALSE)
@@ -111,7 +113,7 @@ model_pca <- function(X, TVE = 0.95, model=c('ets','arima'),
     TVE <- max(min(TVE,1),0)
     warning('TVE should be in [0,1]. It was automatically rounded to ensure this.')
   }
-  X <- funts(X)
+  X <- dfts(X)
 
   # Project data and model each component
   pc_data <- pca(X, TVE = TVE, ...)
@@ -138,45 +140,52 @@ model_pca <- function(X, TVE = 0.95, model=c('ets','arima'),
   errors <- X$data - fit[,1:ncol(X)]
 
   if(n.ahead>0){
-    fit_prep <- funts(fit, name = 'Fit', intraobs=X$intraobs)
+    fit_prep <- dfts(fit, name = 'Fit', intratime=X$intratime)
+    data_prep <- dfts(cbind(X$data,fit[,(ncol(X)+1):ncol(fit)]),
+                       name = 'Forecast', intratime=X$intratime)
   }else{
-    fit_prep <- funts(fit, labels=X$labels, name='Fit', intraobs=X$intraobs)
+    fit_prep <- dfts(fit, labels=X$labels, name='Fit', intratime=X$intratime)
+    data_prep <- dfts(X$data,
+                       name = 'Forecast', intratime=X$intratime)
   }
 
-  # Check CPs
+  # Check changes
   if(check.cp){
-    res <- change(funts(errors), type='segmentation', ...)
+    res <- change(X = dfts(errors), type='segmentation', ...)
     if(!is.null(res)){
-      CPs <- res$location
-      errors_use <- funts(errors[,(max(res$location)+1):ncol(X),drop=FALSE])
+      changes <- res$location
+      errors_use <- dfts(errors[,(max(res$location)+1):ncol(X),drop=FALSE])
     }else{
-      errors_use <- funts(errors)
-      CPs <- NULL
+      errors_use <- dfts(errors)
+      changes <- NULL
     }
   } else{
-    errors_use <- funts(errors)
-    CPs <- NULL
+    errors_use <- dfts(errors)
+    changes <- NULL
   }
 
   # Confidence intervals for forecast and plots
   if(n.ahead>0){
 
-    covs <- autocovariance(funts(errors_use),lags = 0)
+    covs <- autocovariance(dfts(errors_use),lags = 0)
     lower <- upper <- matrix(nrow=nrow(X),ncol=n.ahead)
     for(i in 1:n.ahead){
       lower[,i] <- fit[,ncol(X)+i] - stats::qnorm(1-alpha/2) * sqrt(diag(covs))
       upper[,i] <- fit[,ncol(X)+i] + stats::qnorm(1-alpha/2) * sqrt(diag(covs))
     }
 
-    plt <- .plot_forecast(fit_prep, lower, upper, CPs=CPs, ...)
+    plt_for <- .plot_forecast(data_prep, lower, upper, changes=changes, ...)
+    plt_for_fit <- .plot_forecast(fit_prep, lower, upper, changes=changes, ...)
   } else{
-    plt <- plot(fit_prep, CPs=CPs, ...)
+    plt_for <- plot(data_prep, changes=changes, ...)
+    plt_for_fit <- plot(fit_prep, changes=changes, ...)
   }
 
   list(fit = fit_prep,
-       plot = plt,
-       errors = funts(errors, labels=X$labels, name='Errors', intraobs=X$intraobs),
-       CPs = CPs,
+       forecast_plot = plt_for,
+       fit_plot = plt_for,
+       errors = dfts(errors, labels=X$labels, name='Errors', intratime=X$intratime),
+       changes = changes,
        parameters = list(
          pcs = length(pc_data$sdev),
          TVE = TVE,
@@ -199,7 +208,7 @@ model_pca <- function(X, TVE = 0.95, model=c('ets','arima'),
 #' @noRd
 #'
 #' @examples
-#' #pc_data <- pca(funts(electricity),TVE=0.8)
+#' #pc_data <- pca(electricity,TVE=0.8)
 #' #fit <- .pca_reconstruct(pc_data)
 .pca_reconstruct <- function(pca, new_pca = NULL){
   # if(is.null(pcs)) pcs <- seq(pca$sdev)
@@ -248,7 +257,7 @@ model_pca <- function(X, TVE = 0.95, model=c('ets','arima'),
 #' @noRd
 #'
 #' @examples
-#' #vals <- pca(funts(electricity))
+#' #vals <- pca(electricity)
 #' #res <- .pca_mult(vals,1)
 .pca_mult <- function(pca, pc_num = 1){
   pca_coef <- pca$x[,pc_num] %*% t(pca$rotation[,pc_num])

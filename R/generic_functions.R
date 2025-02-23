@@ -1,7 +1,7 @@
 #' Generic Centering of Data
 #'
 #' @param object Object for computation of centering
-#' @param CPs Change points for centering individual sections.
+#' @param changes Change points for centering individual sections.
 #' @param type String of \code{mean} or \code{median} for method of centering.
 #' @param ... Unused
 #'
@@ -54,13 +54,13 @@ NULL
 #'
 #' @seealso
 #'  [center.default()], [center.data.frame()],
-#'  [center.matrix()], [center.funts()]
+#'  [center.matrix()], [center.dfts()]
 #'
 #' @export
-center <- function(object, CPs=NULL, type='mean', ...) UseMethod("center")
+center <- function(object, changes=NULL, type='mean', ...) UseMethod("center")
 #' @rdname center
 #' @export
-center.default <- function(object, CPs=NULL, type='mean', ...) {
+center.default <- function(object, changes=NULL, type='mean', ...) {
   type <- .verify_input(type, c('mean','median'))
   if(type=='mean'){
     method <- mean
@@ -69,15 +69,15 @@ center.default <- function(object, CPs=NULL, type='mean', ...) {
   }
 
 
-  if(is.null(CPs)){
+  if(is.null(changes)){
     object <- object - method(object)
   }else{
-    CPs_use <- unique(c(0, CPs, length(object)))
-    CPs_use <- CPs_use[order(CPs_use)]
-    for(i in 1:(length(CPs_use)-1)){
-      object[(CPs_use[i]+1):CPs_use[i+1]] <-
-        object[(CPs_use[i]+1):CPs_use[i+1]] -
-        method(object[(CPs_use[i]+1):CPs_use[i+1]])
+    changes_use <- unique(c(0, changes, length(object)))
+    changes_use <- changes_use[order(changes_use)]
+    for(i in 1:(length(changes_use)-1)){
+      object[(changes_use[i]+1):changes_use[i+1]] <-
+        object[(changes_use[i]+1):changes_use[i+1]] -
+        method(object[(changes_use[i]+1):changes_use[i+1]])
     }
   }
 
@@ -85,10 +85,10 @@ center.default <- function(object, CPs=NULL, type='mean', ...) {
 }
 #' @rdname center
 #' @export
-center.data.frame <- function(object, CPs=NULL, type='mean', ...) { object <- as.matrix(object); NextMethod("center") }
+center.data.frame <- function(object, changes=NULL, type='mean', ...) { object <- as.matrix(object); NextMethod("center") }
 #' @rdname center
 #' @export
-center.matrix <- function(object, CPs=NULL, type='mean', ...) {
+center.matrix <- function(object, changes=NULL, type='mean', ...) {
   type <- .verify_input(type, c('mean','median'))
   if(type=='mean'){
     row_method <- rowMeans
@@ -97,15 +97,15 @@ center.matrix <- function(object, CPs=NULL, type='mean', ...) {
   }
 
 
-  if(is.null(CPs)){
+  if(is.null(changes)){
     object <- object - row_method(object)
   }else{
-    CPs_use <- unique(c(0, CPs, ncol(object)))
-    CPs_use <- CPs_use[order(CPs_use)]
-    for(i in 1:(length(CPs_use)-1)){
-      object[,(CPs_use[i]+1):CPs_use[i+1]] <-
-        object[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE] -
-        row_method(object[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE])
+    changes_use <- unique(c(0, changes, ncol(object)))
+    changes_use <- changes_use[order(changes_use)]
+    for(i in 1:(length(changes_use)-1)){
+      object[,(changes_use[i]+1):changes_use[i+1]] <-
+        object[,(changes_use[i]+1):changes_use[i+1],drop=FALSE] -
+        row_method(object[,(changes_use[i]+1):changes_use[i+1],drop=FALSE])
     }
   }
 
@@ -113,7 +113,7 @@ center.matrix <- function(object, CPs=NULL, type='mean', ...) {
 }
 #' @rdname center
 #' @export
-center.funts <- function(object, CPs=NULL, type='mean', ...) {
+center.dfts <- function(object, changes=NULL, type='mean', ...) {
   type <- .verify_input(type, c('mean','median'))
   if(type=='mean'){
     row_method <- rowMeans
@@ -122,15 +122,15 @@ center.funts <- function(object, CPs=NULL, type='mean', ...) {
   }
 
 
-  if(is.null(CPs)){
+  if(is.null(changes)){
     object$data <- object$data - row_method(object$data)
   }else{
-    CPs_use <- unique(c(0, CPs, ncol(object$data)))
-    CPs_use <- CPs_use[order(CPs_use)]
-    for(i in 1:(length(CPs_use)-1)){
-      object$data[,(CPs_use[i]+1):CPs_use[i+1]] <-
-        object$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE] -
-        row_method(object$data[,(CPs_use[i]+1):CPs_use[i+1],drop=FALSE])
+    changes_use <- unique(c(0, changes, ncol(object$data)))
+    changes_use <- changes_use[order(changes_use)]
+    for(i in 1:(length(changes_use)-1)){
+      object$data[,(changes_use[i]+1):changes_use[i+1]] <-
+        object$data[,(changes_use[i]+1):changes_use[i+1],drop=FALSE] -
+        row_method(object$data[,(changes_use[i]+1):changes_use[i+1],drop=FALSE])
     }
   }
 
@@ -160,8 +160,8 @@ pca.default <- function(object, ...) { stats::prcomp(object, ...) }
 #' @export
 #'
 #' @examples
-#' pca(funts(electricity))
-pca.funts <- function(object, TVE = 1, ...){
+#' pca(electricity)
+pca.dfts <- function(object, TVE = 1, ...){
   if(TVE > 1 || TVE < 0) stop('TVE must be in [0,1].',call. = FALSE)
 
   pc <- stats::prcomp(x=t(object$data), ...)
@@ -216,8 +216,8 @@ sd.default <- function(object, ...) stats::sd(object, ...)
 #' @export
 #'
 #' @examples
-#' sd(funts(electricity),type='pointwise')
-sd.funts <- function(object, type='pointwise', ...) {
+#' sd(electricity,type='pointwise')
+sd.dfts <- function(object, type='pointwise', ...) {
   type <- c('pointwise')[min(pmatch(type,c('pointwise')))]
 
   if(type=='pointwise'){
@@ -242,9 +242,9 @@ var.default <- function(object, ...) stats::var(object, ...)
 #' @export
 #'
 #' @examples
-#' var(funts(electricity),type='pointwise')
-#' var(funts(electricity),type='operator')
-var.funts <- function(object, type=c('operator','pointwise'), ...) {
+#' var(electricity,type='pointwise')
+#' var(electricity,type='operator')
+var.dfts <- function(object, type=c('operator','pointwise'), ...) {
   type <- c('operator','pointwise')[min(pmatch(type,c('operator','pointwise')))]
 
   if(type=='operator'){
@@ -258,17 +258,20 @@ var.funts <- function(object, type=c('operator','pointwise'), ...) {
 }
 
 
-#' Cumsum for funts object
+#' Cumsum for dfts object
 #'
-#' @param x funts object
+#' @param x A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #'
-#' @return funts object with data as cumsum
+#' @return dfts object with data as cumsum
 #' @export
 #'
 #' @examples
-#' cumsum(funts(electricity))
-cumsum.funts <- function(x){
-    funts(t(apply(x$data,MARGIN = 1,cumsum)),
-          labels = x$labels,
-          intraobs = x$intraobs)
+#' cumsum(electricity)
+cumsum.dfts <- function(x){
+  x <- dfts(x)
+
+  dfts(t(apply(x$data,MARGIN = 1,cumsum)),
+        labels = x$labels,
+        intratime = x$intratime)
 }

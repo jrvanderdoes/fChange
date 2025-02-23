@@ -1,15 +1,16 @@
-#' Plot Funts
+#' Plot dfts
 #'
-#' A function to plot funts objects in many ways.
+#' A function to plot dfts objects in many ways.
 #'
-#' @param x Funts object or data easily convertible. See [funts()].
-#' @param CPs Vector of change points. Can be NULL.
+#' @param x A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
+#' @param changes Vector of change points. Can be NULL.
 #' @param type Choice of plotting method. Options include: 'spaghetti', 'highdim',
 #'  'rainbow','banded','acf', 'pacf', 'summary', 'qq', 'distribution', 'change',
 #'  'interval', and'surface'.
 #' @param plot_title Title to include on the return plot
 #' @param val_axis_title,res_axis_title,FD_axis_title Title for the axis giving
-#'  the values (val), the resolution of the intraobs (res), and the functional
+#'  the values (val), the resolution of the intratime (res), and the functional
 #'  observations (FD)
 #' @param eye,aspectratio Angle (eye) and ratio (aspectratio) to view 3d plots
 #' @param showticklabels Boolean if the tick marks should be shown
@@ -37,9 +38,9 @@
 #'  Regression. Sage.
 #'
 #' @examples
-#' plt <- plot(funts(electricity))
-#' plt <- plot(var(funts(electricity)), type='surface')
-plot.funts <- function(x, CPs=NULL,
+#' plt <- plot(electricity)
+#' plt <- plot(var(electricity), type='surface')
+plot.dfts <- function(x, changes=NULL,
                        type=c('spaghetti','highdim', 'rainbow','banded',
                               'acf', 'pacf', 'summary', 'qq', 'distribution',
                               'change','interval', 'surface'),
@@ -53,21 +54,21 @@ plot.funts <- function(x, CPs=NULL,
                        method = c('Welch','MC','Imhof'),
                        legend=TRUE,
                        highlight_changes=TRUE,
-                       intervals = confidence_interval(x, CPs),
+                       intervals = confidence_interval(x, changes),
                        int.gradual=TRUE, ...
                        ){
-  x <- funts(x)
+  x <- dfts(x, inc.warnings = FALSE)
   poss_types <- c('spaghetti','highdim', 'rainbow','banded','acf', 'pacf',
                   'summary', 'qq', 'distribution', 'change','interval',
                   'surface')
   type <- .verify_input(type, poss_types)
 
-  if(length(CPs)==0) CPs <- NULL
+  if(length(changes)==0) changes <- NULL
 
 
   return_plot <- switch (type,
           spaghetti = {
-            .plot_fd(X = x, CPs = CPs,
+            .plot_fd(X = x, changes = changes,
                                   plot_title = plot_title,
                                   val_axis_title = val_axis_title,
                                   res_axis_title = res_axis_title,
@@ -77,7 +78,7 @@ plot.funts <- function(x, CPs=NULL,
                                   interactive = TRUE)
           },
           highdim = {
-            .plot_fd(X = x, CPs = CPs,
+            .plot_fd(X = x, changes = changes,
                                    plot_title = plot_title,
                                    val_axis_title = val_axis_title,
                                    res_axis_title = res_axis_title,
@@ -87,35 +88,35 @@ plot.funts <- function(x, CPs=NULL,
                                    interactive = FALSE)
           },
           rainbow = {
-            .plot_rainbow(object = x, CPs=CPs)
+            .plot_rainbow(object = x, changes=changes)
           },
           banded = {
-            .plot_banded(object=x, CPs=CPs, alpha=alpha)
+            .plot_banded(object=x, changes=changes, alpha=alpha)
           },
           acf = {
             # TODO:: Allow TVE
-            acf.funts(x = x, lag.max = lag.max, alpha=alpha, method = method, ...)
+            acf.dfts(x = x, lag.max = lag.max, alpha=alpha, method = method, ...)
           },
           pacf = {
             # TODO:: Allow TVE
-            pacf.funts(x = x, lag.max = lag.max, alpha=alpha, n_pcs = NULL, method=method, ...)
+            pacf.dfts(x = x, lag.max = lag.max, alpha=alpha, n_pcs = NULL, method=method, ...)
           },
           summary = {
-            summary.funts(object=x, CPs=CPs, lag.max=lag.max, d.max=d.max, ...)
+            summary.dfts(object=x, changes=changes, lag.max=lag.max, d.max=d.max, ...)
           },
           qq = {
-            qqplot(x=x, CPs=CPs, TVE=TVE, d.max=d.max,
+            qqplot(x=x, changes=changes, TVE=TVE, d.max=d.max,
                    alpha=alpha, legend=legend)
           },
           distribution = {
-            .plot_distribution(X=x, CPs=CPs, TVE=TVE, d.max = d.max,
+            .plot_distribution(X=x, changes=changes, TVE=TVE, d.max = d.max,
                      distribution = distribution,
                      alpha = alpha, legend = legend, ...)
           },
           change = {
-            if(length(CPs)<1)
-              stop('CPs must not be NULL to use change plot',call. = FALSE)
-            .plot_change(X=x, CPs=CPs,
+            if(length(changes)<1)
+              stop('changes must not be NULL to use change plot',call. = FALSE)
+            .plot_change(X=x, changes=changes,
                         plot_title = plot_title,
                         val_axis_title = val_axis_title,
                         res_axis_title = res_axis_title,

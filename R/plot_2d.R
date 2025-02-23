@@ -1,6 +1,6 @@
 #' Plot data as stack on 2d plot
 #'
-#' @inheritParams summary.funts
+#' @inheritParams summary.dfts
 #'
 #' @return Plot (ggplot2) with colored observations / regions
 #'
@@ -8,28 +8,28 @@
 #' @keywords internal
 #'
 #' @examples
-#' # results <- .plot_rainbow(funts(electricity))
-#' # results1 <- .plot_rainbow(funts(electricity), CPs=c(50,100,200))
-.plot_rainbow <- function(object, CPs=NULL){
-  object <- funts(object)
+#' # results <- .plot_rainbow(electricity)
+#' # results1 <- .plot_rainbow(electricity, changes=c(50,100,200))
+.plot_rainbow <- function(object, changes=NULL){
+  object <- dfts(object)
   data <- object$data
   plot_data <-
-    tidyr::pivot_longer(data = cbind(data.frame('Time'=object$intraobs),data),
+    tidyr::pivot_longer(data = cbind(data.frame('Time'=object$intratime),data),
                         cols = 1+1:ncol(data))
   # Colors
   ## Setup up Colors
-  #   Rainbow for no CPs, colored for CPs
-  if (!is.null(CPs)) {
-    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-    if (length(CPs) > 9) {
-      tmp_colors <- rep(tmp_colors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+  #   Rainbow for no changes, colored for changes
+  if (!is.null(changes)) {
+    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+    if (length(changes) > 9) {
+      tmp_colors <- rep(tmp_colors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
     }
-    tmp_colors <- tmp_colors[1:(length(CPs)+1)]
+    tmp_colors <- tmp_colors[1:(length(changes)+1)]
 
-    CPs <- unique(c(0, CPs, ncol(data)))
+    changes <- unique(c(0, changes, ncol(data)))
     colors_plot <- rep(tmp_colors[1], ncol(data))
-    for (i in 2:(length(CPs) - 1)) {
-      colors_plot[(CPs[i]+1):CPs[i + 1]] <- tmp_colors[i]
+    for (i in 2:(length(changes) - 1)) {
+      colors_plot[(changes[i]+1):changes[i + 1]] <- tmp_colors[i]
     }
   } else {
     colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
@@ -49,21 +49,21 @@
   }
 
   # Setup Means
-  if (!is.null(CPs)) {
-    means_mat <- matrix(nrow=nrow(data),ncol=length(CPs)-1)
-    for(i in 1:(length(CPs)-1)){
-      means_mat[,i] <- rowMeans(data[,(CPs[i]+1):CPs[i+1],drop=FALSE])
+  if (!is.null(changes)) {
+    means_mat <- matrix(nrow=nrow(data),ncol=length(changes)-1)
+    for(i in 1:(length(changes)-1)){
+      means_mat[,i] <- rowMeans(data[,(changes[i]+1):changes[i+1],drop=FALSE])
     }
     colnames(means_mat) <- unique( plot_data$color )
   } else{
     means_mat <- matrix(rowMeans(data), nrow=nrow(data), ncol=1)
   }
   means_mat <-
-    tidyr::pivot_longer(data = cbind(data.frame('Time'=object$intraobs),
+    tidyr::pivot_longer(data = cbind(data.frame('Time'=object$intratime),
                                      means_mat),
                         cols = 1+1:ncol(means_mat))
   colnames(means_mat)<- c('Time','color','value')
-  means_mat$name <- rep(1:(max(2,length(CPs))-1), times=nrow(data))
+  means_mat$name <- rep(1:(max(2,length(changes))-1), times=nrow(data))
 
 
   ## Plot
@@ -86,7 +86,7 @@
                                 breaks = plot_data$color) +
     ggplot2::xlab('') +
     ggplot2::ylab('') +
-    ggplot2::xlim(range(object$intraobs))
+    ggplot2::xlim(range(object$intratime))
 }
 
 
@@ -95,7 +95,7 @@
 #' Plot functional data as 2-dimensional data with the mean(s) and the related
 #'  distribution(s) given.
 #'
-#' @inheritParams summary.funts
+#' @inheritParams summary.dfts
 #' @param alpha Significance
 #'
 #' @return Plot (ggplot2) with colored observations / regions
@@ -104,18 +104,18 @@
 #' @keywords internal
 #'
 #' @examples
-#' #results <- .plot_banded(funts(electricity))
-#' #results1 <- .plot_banded(funts(electricity), CPs=c(50,100,200))
-.plot_banded <- function(object, CPs=NULL, alpha=0.05){
+#' #results <- .plot_banded(electricity)
+#' #results1 <- .plot_banded(electricity, changes=c(50,100,200))
+.plot_banded <- function(object, changes=NULL, alpha=0.05){
   # data <- object$data
-  if(!is.null(CPs)) CPs <- unique(c(0, CPs, ncol(object$data)))
+  if(!is.null(changes)) changes <- unique(c(0, changes, ncol(object$data)))
 
   # Select subsets to show
-  if (!is.null(CPs)) {
-    subset_data <- data.frame(matrix(nrow=nrow(object$data),ncol=length(CPs)-1))
-    for (i in 1:(length(CPs) - 1)) {
-      # subsets <- c(subsets,round(stats::median((CPs_tmp[i]+1):CPs_tmp[i+1])))
-      subset_data[,i] <- rowMeans(object$data[,(CPs[i]+1):CPs[i+1]])
+  if (!is.null(changes)) {
+    subset_data <- data.frame(matrix(nrow=nrow(object$data),ncol=length(changes)-1))
+    for (i in 1:(length(changes) - 1)) {
+      # subsets <- c(subsets,round(stats::median((changes_tmp[i]+1):changes_tmp[i+1])))
+      subset_data[,i] <- rowMeans(object$data[,(changes[i]+1):changes[i+1]])
     }
   } else{
     subset_idxs <- round(seq(1,ncol(object$data),length.out=10))
@@ -123,25 +123,25 @@
   }
 
   plot_data <- tidyr::pivot_longer(
-    data = cbind(data.frame('Time'=object$intraobs),subset_data),
+    data = cbind(data.frame('Time'=object$intratime),subset_data),
     cols = 1+1:ncol(subset_data))
   # Colors
   ## Setup up Colors
-  #   Rainbow for no CPs, colored for CPs
-  if (!is.null(CPs)) {
-    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs)-1)), "Set1")
-    if (length(CPs) > 9) {
-      tmp_colors <- rep(tmp_colors, ceiling(c(length(CPs) - 1) / 9))[1:(length(CPs)-1)]
-    } else if(length(CPs)<=3){
-      tmp_colors <- tmp_colors[1:(length(CPs)-1)]
+  #   Rainbow for no changes, colored for changes
+  if (!is.null(changes)) {
+    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes)-1)), "Set1")
+    if (length(changes) > 9) {
+      tmp_colors <- rep(tmp_colors, ceiling(c(length(changes) - 1) / 9))[1:(length(changes)-1)]
+    } else if(length(changes)<=3){
+      tmp_colors <- tmp_colors[1:(length(changes)-1)]
     }
     colors_plot <- tmp_colors
 
-    # CPs_tmp <- unique(c(1, CPs, ncol(data)))
-    # colors_plot <- rep(tmp_colors[1], length(CPs)+1)
-    # # for (i in 2:(length(CPs_tmp) - 1)) {
-    # #   colors_plot[CPs_tmp[i]:CPs_tmp[i + 1]] <- tmp_colors[i]
-    # for (i in 2:(length(CPs_tmp) - 1)) {
+    # changes_tmp <- unique(c(1, changes, ncol(data)))
+    # colors_plot <- rep(tmp_colors[1], length(changes)+1)
+    # # for (i in 2:(length(changes_tmp) - 1)) {
+    # #   colors_plot[changes_tmp[i]:changes_tmp[i + 1]] <- tmp_colors[i]
+    # for (i in 2:(length(changes_tmp) - 1)) {
     #   colors_plot[i-1] <- tmp_colors[i]
     # }
   } else {
@@ -165,14 +165,14 @@
   }
 
   # Get Mean Bounds
-  if(!is.null(CPs)){
+  if(!is.null(changes)){
     # warnings
     name <- group <- group1 <- group2 <- Time <- color <- type <- value <- . <- NULL
 
-    bounds <- data.frame('Time'=object$intraobs)
-    for (i in 1:(length(CPs) - 1)) {
+    bounds <- data.frame('Time'=object$intratime)
+    for (i in 1:(length(changes) - 1)) {
       bounds_tmp <-
-        t(apply(object$data[,(CPs[i]+1):CPs[i+1]], MARGIN = 1,
+        t(apply(object$data[,(changes[i]+1):changes[i+1]], MARGIN = 1,
                 stats::quantile, probs=c(alpha/2,1-alpha/2),na.rm=TRUE))
       colnames(bounds_tmp) <- paste0('X',i,c('_L','_U'))
       bounds <- cbind(bounds, bounds_tmp)
@@ -188,11 +188,11 @@
       tidyr::pivot_wider(id_cols = c(Time,group,color),
                          names_from = type,values_from = value)
   }else{
-    bounds <- quantile.funts(object,
+    bounds <- quantile.dfts(object,
                              probs = c(alpha/2,1-alpha/2),
                              na.rm=TRUE)
     colnames(bounds) <- c('L','U')
-    bounds_long <- cbind(data.frame('Time'=object$intraobs), bounds) %>%
+    bounds_long <- cbind(data.frame('Time'=object$intratime), bounds) %>%
       tidyr::pivot_longer(cols = colnames(.)[-1]) %>%
       dplyr::mutate('group'='X1',color='gray')
     bounds_wide <- bounds_long %>%
@@ -211,7 +211,7 @@
       ggplot2::aes(x=Time,
                    ymin=L, ymax=U,group=group, fill=color),
       data = bounds_wide,, alpha=0.25) +
-    ggplot2::geom_line(ggplot2::aes(x=object$intraobs, y=mean(object)),
+    ggplot2::geom_line(ggplot2::aes(x=object$intratime, y=mean(object)),
                        linewidth=1.5, color='black', linetype='dashed', alpha=0.25) +
     ggplot2::geom_line(ggplot2::aes(x=Time,y=value,
                                     group=name,

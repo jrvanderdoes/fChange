@@ -1,7 +1,7 @@
 
 #' Plot Data with Forecast Bands
 #'
-#' @inheritParams plot.funts
+#' @inheritParams plot.dfts
 #' @param lower Matrix of resolution-by-estimates indicating the lower bounds
 #' @param upper Matrix of resolution-by-estimates indicating the upper bounds
 #'
@@ -9,7 +9,7 @@
 #'
 #' @noRd
 #' @keywords internal
-.plot_forecast <- function(X, lower, upper, CPs=NULL,
+.plot_forecast <- function(X, lower, upper, changes=NULL,
                            plot_title = X$name,
                            val_axis_title = "Value",
                            res_axis_title = "Resolution",
@@ -19,18 +19,18 @@
                            showticklabels = TRUE){
   # Get Sizes
   pred_n <- max(ncol(lower),ncol(upper))
-  CPs <- unique(c(CPs, ncol(X)-pred_n))
+  changes <- unique(c(changes, ncol(X)-pred_n))
 
   # Setup Data
   plotData <- plotData_forecast <- plotData_lower <- plotData_upper <- data.frame()
 
   # Main Data
-  if (length(CPs) > 1) {
-    for (j in 1:min(CPs)) {
+  if (length(changes) > 1) {
+    for (j in 1:min(changes)) {
       plotData <- rbind(
         plotData,
         data.frame(
-          "resolution" = X$intraobs,
+          "resolution" = X$intratime,
           "FDRep" = j,
           "Color" = 1,
           "Value" = X$data[, j]
@@ -38,12 +38,12 @@
       )
     }
 
-    for (i in 2:length(CPs)) {
-      for (j in (CPs[i - 1] + 1):CPs[i]) {
+    for (i in 2:length(changes)) {
+      for (j in (changes[i - 1] + 1):changes[i]) {
         plotData <- rbind(
           plotData,
           data.frame(
-            "resolution" = X$intraobs,
+            "resolution" = X$intratime,
             "FDRep" = j,
             "Color" = i,
             "Value" = X$data[, j]
@@ -52,11 +52,11 @@
       }
     }
   } else{
-    for (j in 1:min(CPs)) {
+    for (j in 1:min(changes)) {
       plotData <- rbind(
         plotData,
         data.frame(
-          "resolution" = X$intraobs,
+          "resolution" = X$intratime,
           "FDRep" = j,
           "Color" = j,
           "Value" = X$data[, j]
@@ -67,13 +67,13 @@
   }
 
   # Forecast Data
-  for (j in (max(CPs) + 1):ncol(X)) {
+  for (j in (max(changes) + 1):ncol(X)) {
     plotData_forecast <- rbind(
       plotData_forecast,
       data.frame(
-        "resolution" = X$intraobs,
+        "resolution" = X$intratime,
         "FDRep" = j,
-        "Color" = max(CPs) + 1,
+        "Color" = max(changes) + 1,
         "Value" = X$data[, j]
       )
     )
@@ -81,39 +81,39 @@
     plotData_lower <- rbind(
       plotData_lower,
       data.frame(
-        "resolution" = X$intraobs,
+        "resolution" = X$intratime,
         "FDRep" = j,
-        "Color" = max(CPs) + 1,
-        "Value" = lower[,j-max(CPs)]
+        "Color" = max(changes) + 1,
+        "Value" = lower[,j-max(changes)]
       )
     )
 
     plotData_upper <- rbind(
       plotData_upper,
       data.frame(
-        "resolution" = X$intraobs,
+        "resolution" = X$intratime,
         "FDRep" = j,
-        "Color" = max(CPs) + 1,
-        "Value" = upper[,j-max(CPs)]
+        "Color" = max(changes) + 1,
+        "Value" = upper[,j-max(changes)]
       )
     )
   }
 
 
   # Get Colors
-  if (length(CPs) > 1) {
-    plot_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs))), "Set1")[1:min(9,length(CPs))]
-    if (length(CPs)-1 > 9) {
-      plot_colors <- rep(plot_colors, ceiling(c(length(CPs) + 1) / 9))[1:length(CPs)]
+  if (length(changes) > 1) {
+    plot_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes))), "Set1")[1:min(9,length(changes))]
+    if (length(changes)-1 > 9) {
+      plot_colors <- rep(plot_colors, ceiling(c(length(changes) + 1) / 9))[1:length(changes)]
     }
 
     plot_colors <- c(plot_colors,'black')
-    names(plot_colors) <- c(1:(length(CPs)),CPs[length(CPs)]+1)
+    names(plot_colors) <- c(1:(length(changes)),changes[length(changes)]+1)
   } else{
     plot_colors <- RColorBrewer::brewer.pal(11, "Spectral")
     plot_colors[6] <- "yellow"
-    plot_colors <- c(grDevices::colorRampPalette(plot_colors)(CPs),'black')
-    names(plot_colors) <- c(1:(CPs+1))
+    plot_colors <- c(grDevices::colorRampPalette(plot_colors)(changes),'black')
+    names(plot_colors) <- c(1:(changes+1))
   }
 
   # Setup View

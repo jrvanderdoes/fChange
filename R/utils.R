@@ -58,7 +58,8 @@
 
 #' Bootstrap Data
 #'
-#' @param X funts data object
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #' @param blocksize Numeric indicating size of blocks
 #' @param M Numeric indicating the number of iterations
 #' @param type String for 'overlapping' or 'separate' block bootstrapping
@@ -70,7 +71,7 @@
 #' @noRd
 .bootstrap <- function(X, blocksize, M=1000, type='overlapping', replace=TRUE,
                        fn=NULL, ...){
-  X <- funts(X)
+  X <- dfts(X)
   N <- ncol(X$data)
 
   # Get groups

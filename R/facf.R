@@ -1,7 +1,7 @@
 #' ACF/PACF Functions
 #'
 #' This function computes the ACF/PACF of data. This can be applied on traditional
-#'  scalar time series or functional time series defined in [funts()].
+#'  scalar time series or functional time series defined in [dfts()].
 #'
 #' @param x Object for computation of (partial) autocorrelation function
 #'  (ACF/PACF).
@@ -9,7 +9,7 @@
 #'  that will be used to estimate the (partial) autocorrelation function.
 #' @param ... Additional parameters to appropriate function
 #'
-#' @seealso [stats::acf()], [fChange::acf.funts()]
+#' @seealso [stats::acf()], [fChange::acf.dfts()]
 #'
 #' @name acf
 #'
@@ -102,10 +102,10 @@ pacf.default <- function(x, lag.max = NULL, ...) stats::pacf(x)
 #'
 #' @export
 #' @rdname acf
-acf.funts <- function(x, lag.max = NULL, alpha=0.05,
+acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
                       method = c('Welch','MC','Imhof'),
                       WWN = TRUE, figure = TRUE, ...){
-  x <- funts(x)
+  x <- dfts(x)
 
   if(is.null(lag.max))
     lag.max <- 20 # 10 * log(ncol(x)/, base=10)
@@ -117,17 +117,17 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
   autocovs <- autocovariance(x, 0:lag.max)
 
   # L2 norm autocov surfaces
-  # l2norms <- .obtain_suface_L2_norm(x$intraobs, autocovs)
+  # l2norms <- .obtain_suface_L2_norm(x$intratime, autocovs)
   # l2norms <- l2norms[-1] # Drop Lag 0
   l2norms <- sapply(1:lag.max, function(idx,autocovs,res){
     dot_integrate(
       dot_integrate_col(v=t(autocovs[[idx+1]]^2),r=res),
       r=res)
-  },autocovs=autocovs,res=x$intraobs)
+  },autocovs=autocovs,res=x$intratime)
 
   # Obtain autocorrelation estimates
   normalization.value <-
-    dot_integrate(r = x$intraobs, v = diag(autocovs$Lag0))
+    dot_integrate(r = x$intratime, v = diag(autocovs$Lag0))
   rho <- sqrt(l2norms) / normalization.value
 
   # Estimate distribution of SWN (iid) bound
@@ -182,7 +182,7 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #'  hypothesis of strong functional white noise. This function uses a
 #'  Monte Carlo method to estimate the distribution.
 #'
-#' @inheritParams acf.funts
+#' @inheritParams acf.dfts
 #' @param autocovSurface An \eqn{(m x m)} matrix with the discretized
 #' values of the autocovariance operator \eqn{\hat{C}_{0}}, obtained
 #' by calling the function \code{autocovariance()}.
@@ -238,13 +238,13 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #' @noRd
 .estimate_iid_distr_MC <-
   function(x, autocovSurface, matindex, nsims= 10000){
-    x <- funts(x)
+    x <- dfts(x)
 
     # TODO:: Update Means
     # # mat.means <- matrix(rep(colMeans(Y),nrow(Y)),ncol=ncol(Y),byrow = TRUE)
     # # l <- obtain_autocov_eigenvalues(v,Y - mat.means)
     # means <- matrix(rep(rowMeans(x$data),ncol(x$data)), nrow=nrow(x$data))
-    # l <- .obtain_autocov_eigenvalues(x$data - means,x$intraobs)
+    # l <- .obtain_autocov_eigenvalues(x$data - means,x$intratime)
     l <- .obtain_autocov_eigenvalues(center(x))
 
     neig <- length(l)
@@ -283,7 +283,7 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #'  function \eqn{\hat{C}_{0}}. This functions returns the eigenvalues which
 #'  are greater than the value \code{epsilon}.
 #'
-#' @inheritParams acf.funts
+#' @inheritParams acf.dfts
 #' @param epsilon Value used to determine how many eigenvalues will be returned.
 #'   The eigenvalues \eqn{\lambda_{j}/\lambda_{1} > \code{epsilon}} will be
 #'   returned. By default \code{epsilon = 0.0001}.
@@ -301,7 +301,7 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #' @keywords internal
 #' @noRd
 .obtain_autocov_eigenvalues <- function(x, epsilon = 0.0001){
-  x <- funts(x)
+  x <- dfts(x)
 
   nobs <- ncol(x$data) # nt
   res <- nrow(x$data) # nv
@@ -313,7 +313,7 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
     mat.aux <- matrix(rep(x$data[,ii],each = nobs),
                       nrow = nobs, ncol = res)*t(x$data)
     for(jj in 1:nobs){
-      W[ii,jj] <- dot_integrate(r = x$intraobs, v = mat.aux[jj,])
+      W[ii,jj] <- dot_integrate(r = x$intratime, v = mat.aux[jj,])
     }
   }
 
@@ -378,14 +378,14 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #' @keywords internal
 #' @noRd
 .estimate_iid_distr_Imhof <- function(x, autocovs, l2norms){
-  x <- funts(x)
+  x <- dfts(x)
 
   if(!requireNamespace('CompQuadForm')) stop('Install `CompQuadForm` to run Imhof.')
 
   # # mat.means <- matrix(rep(colMeans(Y),nrow(Y)),ncol=ncol(Y),byrow = TRUE)
   # # l <- obtain_autocov_eigenvalues(v,Y - mat.means)
   # means <- matrix(rep(rowMeans(x$data),ncol(x$data)), nrow=nrow(x$data))
-  # l <- .obtain_autocov_eigenvalues(x$data - means,x$intraobs)
+  # l <- .obtain_autocov_eigenvalues(x$data - means,x$intratime)
   l <- .obtain_autocov_eigenvalues(center(x))
 
   nl <- length(l)
@@ -436,9 +436,9 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #' the functional time series obtained by calling the
 #' function \code{obtain_FACF}.
 #' @param SWN The upper prediction bound for the strong white noise iid
-#'  distribution obtained by calling the function \code{acf.funts}.
+#'  distribution obtained by calling the function \code{acf.dfts}.
 #' @param WWN The upper prediction bound for the weak white noise iid
-#'  distribution obtained by calling the function \code{acf.funts}.
+#'  distribution obtained by calling the function \code{acf.dfts}.
 #' @param ... Further arguments passed to the \code{plot} function.
 #'
 #' @examples
@@ -448,7 +448,7 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #' #bbridge <- generate_brownian_bridge(N, v, sig)
 #' #lag.max <- 15
 #' #upper_bound <- 0.95
-#' #fACF <- acf.funts(x = bbridge, lag.max = lag.max,
+#' #fACF <- acf.dfts(x = bbridge, lag.max = lag.max,
 #' #                      alpha=upper_bound, figure = FALSE)
 #' #.plot_FACF(rho = fACF$acfs,SWN = fACF$SWN_bound, WWN = fACF$WWN_bound)
 #'
@@ -459,7 +459,7 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #' #bbridge <- generate_brownian_bridge(N, v, sig)
 #' #lag.max <- 15
 #' #upper_bound <- 0.95
-#' #fACF <- acf.funts(x = bbridge, lag.max = lag.max,
+#' #fACF <- acf.dfts(x = bbridge, lag.max = lag.max,
 #' #                      alpha = upper_bound, figure = FALSE)
 #' #.plot_FACF(rho = fACF$acfs,SWN = fACF$SWN_bound,WWN = fACF$WWN_bound)
 #' }
@@ -579,7 +579,7 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #' @param figure Logical. If \code{TRUE}, plots the
 #' estimated partial autocorrelation function with the
 #' specified i.i.d. bound.
-#' @param ... Further arguments passed to the [acf.funts()]
+#' @param ... Further arguments passed to the [acf.dfts()]
 #' function.
 #'
 #' @return Return a list with:
@@ -604,9 +604,9 @@ acf.funts <- function(x, lag.max = NULL, alpha=0.05,
 #'
 #' @export
 #' @rdname acf
-pacf.funts <- function(x, lag.max = NULL, n_pcs = NULL,
+pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
                        alpha=0.95, figure = TRUE, ...){
-  x <- funts(x)
+  x <- dfts(x)
 
   res <- nrow(x$data) #dv <- length(v)
   nobs <- ncol(x$data) #dt <- nrow(y)
@@ -616,7 +616,7 @@ pacf.funts <- function(x, lag.max = NULL, n_pcs = NULL,
     max_pc <- 20
 
     # If there are less discretization points than max_pc, use the disc points
-    num_fpc <- min(c(length(x$intraobs), max_pc))
+    num_fpc <- min(c(length(x$intratime), max_pc))
 
     pca <- stats::princomp(t(x$data))#$scores[,1:num_fpc]
     eigs <- pca$sdev^2
@@ -639,7 +639,7 @@ pacf.funts <- function(x, lag.max = NULL, n_pcs = NULL,
   # Initialize FPACF vector
   FPACF <- rep(NA, lag.max)
 
-  FACF <- acf.funts(
+  FACF <- acf.dfts(
     x = x, lag.max = 1,
     alpha = alpha, figure = FALSE, WWN = FALSE, ...)
 
@@ -709,7 +709,7 @@ pacf.funts <- function(x, lag.max = NULL, n_pcs = NULL,
     }
     var_1 <- var_1 / count
 
-    traza_1 <- dot_integrate(r = x$intraobs, v = diag(var_1))
+    traza_1 <- dot_integrate(r = x$intratime, v = diag(var_1))
 
     var_2 <- matrix(0, res, res)
     count <- 0
@@ -723,18 +723,18 @@ pacf.funts <- function(x, lag.max = NULL, n_pcs = NULL,
     }
     var_2 <- var_2 / count
 
-    traza_2 <- dot_integrate(r = x$intraobs, v = diag(var_2))
+    traza_2 <- dot_integrate(r = x$intratime, v = diag(var_2))
 
     sup_corr <- sup_cov / ( sqrt(traza_1)*sqrt(traza_2) )
 
     # Check - L2 surface norm
     vector_PACF[lag_PACF] <-
       dot_integrate(
-        dot_integrate_col(v=t(sup_corr^2),r=x$intraobs),
-        r=x$intraobs)
+        dot_integrate_col(v=t(sup_corr^2),r=x$intratime),
+        r=x$intratime)
 
     # vector_PACF[lag_PACF] <-
-    #   sqrt( .obtain_suface_L2_norm(x$intraobs, list(Lag0 = sup_corr)) )
+    #   sqrt( .obtain_suface_L2_norm(x$intratime, list(Lag0 = sup_corr)) )
   }
 
   if(figure){
@@ -755,7 +755,7 @@ pacf.funts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'   Once fitted, the Karhunen-Loeve expansion is used to re-transform the
 #'   fitted values into functional observations.
 #'
-#' @inheritParams pacf.funts
+#' @inheritParams pacf.dfts
 #' @param p Numeric value specifying the order
 #' of the functional autoregressive
 #' model to be fitted.
@@ -790,7 +790,7 @@ pacf.funts <- function(x, lag.max = NULL, n_pcs = NULL,
 #' # }
 #' #
 #' # # Fit an ARH(1) model
-#' # mod <- .fit_ARHp_FPCA(x = funts(y,intraobs = v), p = 1, n_pcs = 5)
+#' # mod <- .fit_ARHp_FPCA(x = dfts(y,intratime = v), p = 1, n_pcs = 5)
 #'
 #' # Plot results
 #' # plot(v, y[,50], type = "l", lty = 1, ylab = "")
@@ -806,7 +806,7 @@ pacf.funts <- function(x, lag.max = NULL, n_pcs = NULL,
 #' @keywords internal
 #' @noRd
 .fit_ARHp_FPCA <- function(x, p, n_pcs, show_varprop = TRUE){
-  x <- funts(x)
+  x <- dfts(x)
 
   nobs <- ncol(x$data) #dt <- nrow(y)
   res <- nrow(x$data) #dv <- length(v)

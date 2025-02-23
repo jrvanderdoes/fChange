@@ -1,7 +1,8 @@
-#' Summary for funts Object
+#' Summary for dfts Object
 #'
-#' @param object funts object
-#' @param CPs CPs, if there are any. Default is NULL.
+#' @param object A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
+#' @param changes changes, if there are any. Default is NULL.
 #' @param lag.max Max lags to consider for ACF. Default is 20.
 #' @param d.max Max number of dimensions for QQ-plot.
 #' @param demean Boolean if data should be demeaned based on changes and create
@@ -12,48 +13,48 @@
 #' @export
 #'
 #' @examples
-#' res <- summary(funts(electricity[,1:20]), lag.max=2)
-#' # res1 <- summary(funts(electricity[,1:20]), CPs=c(3), lag.max=2)
-#' # summary(funts(electricity), CPs=c(50,200,300), lag.max=5, demean = TRUE)
-summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, ...){
-  object <- funts(object)
+#' res <- summary(dfts(electricity$data[,1:20]), lag.max=2)
+#' # res1 <- summary(dfts(electricity$data[,1:20]), changes=c(3), lag.max=2)
+#' # summary(electricity, changes=c(50,200,300), lag.max=5, demean = TRUE)
+summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE, ...){
+  object <- dfts(object)
 
   # Demean to send to correct places
   if(demean){
-    if(!is.null(CPs)){
-      CPs <- unique(c(0, CPs, ncol(object)))
+    if(!is.null(changes)){
+      changes <- unique(c(0, changes, ncol(object)))
       object_tmp <- object
 
-      for(d in 1:(length(CPs)-1)){
-        object_tmp <- funts(object$data[,(CPs[d]+1):CPs[d+1]], intraobs = object$intraobs)
-        object$data[,(CPs[d]+1):CPs[d+1]] <- object$data[,(CPs[d]+1):CPs[d+1]] - mean(object_tmp)
+      for(d in 1:(length(changes)-1)){
+        object_tmp <- dfts(object$data[,(changes[d]+1):changes[d+1]], intratime = object$intratime)
+        object$data[,(changes[d]+1):changes[d+1]] <- object$data[,(changes[d]+1):changes[d+1]] - mean(object_tmp)
       }
 
-      CPs <- NULL
+      changes <- NULL
     }else{
       object$data <- object$data - mean(object)
     }
   }
 
-  if(is.null(CPs)) return(.summary_nochange(object, lag.max, d.max, ...))
+  if(is.null(changes)) return(.summary_nochange(object, lag.max, d.max, ...))
 
-  CPs <- c(0,CPs, ncol(object$data))
-  CPs <- CPs[!is.null(CPs)]
-  CPs <- unique(CPs[order(CPs)])
+  changes <- c(0,changes, ncol(object$data))
+  changes <- changes[!is.null(changes)]
+  changes <- unique(changes[order(changes)])
 
   #####
   ## Compute WN p-values
-  p_values_wn <- data.frame(matrix(nrow=lag.max, ncol=length(CPs)-1))
+  p_values_wn <- data.frame(matrix(nrow=lag.max, ncol=length(changes)-1))
   data_acf <- list()
 
-  for(cp in 1:(length(CPs)-1)){
-    X_cp <- funts(object$data[,(CPs[cp]+1):CPs[cp+1]])
+  for(cp in 1:(length(changes)-1)){
+    X_cp <- dfts(object$data[,(changes[cp]+1):changes[cp+1]])
     ## WN P-values
     p_values <- rep(NA, lag.max)
     for(h in 1:lag.max){
       p_values[h] <- tryCatch({
-        # .single_lag_test(X_cp, lag = h)$p_value
-        .multi_lag_test(X_cp, lag = h, method = 'iid')$p_value
+        # .single_lag_test(X_cp, lag = h)$pvalue
+        .multi_lag_test(X_cp, lag = h, method = 'iid')$pvalue
       }, error = function(e){NA} )
     }
 
@@ -88,7 +89,7 @@ summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, .
 
   #####
   ## Plot QQ
-  plot_qq <- .plot_distribution(object,CPs = CPs,d.max = d.max)
+  plot_qq <- .plot_distribution(object,changes = changes,d.max = d.max)
 
   #####
   ## Plot ACF
@@ -131,11 +132,11 @@ summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, .
 
   #####
   ## Plot Lines
-  data_lines <- cbind(data.frame('Time'=object$intraobs),
+  data_lines <- cbind(data.frame('Time'=object$intratime),
                       object$data) %>%
     tidyr::pivot_longer(cols = 1+1:ncol(object$data))
 
-  if (length(CPs)==2) {
+  if (length(changes)==2) {
     colors_plot <- as.character(1:ncol(object$data))
     for(i in 1:length(colors_plot)){
       if(nchar(colors_plot[i]) < max(nchar(colors_plot)) ){
@@ -145,17 +146,17 @@ summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, .
       }
     }
   } else{
-    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-    if (length(CPs) > 9) {
-      tmp_colors <- rep(tmp_colors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+    if (length(changes) > 9) {
+      tmp_colors <- rep(tmp_colors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
     }
 
     colors_plot <- rep(tmp_colors[1], ncol(object$data))
-    for (i in 2:(length(CPs) - 1)) {
-      colors_plot[CPs[i]:CPs[i + 1]] <- tmp_colors[i]
+    for (i in 2:(length(changes) - 1)) {
+      colors_plot[changes[i]:changes[i + 1]] <- tmp_colors[i]
     }
   }
-  data_lines$color <- rep(colors_plot,times=length(object$intraobs))
+  data_lines$color <- rep(colors_plot,times=length(object$intratime))
   data_lines$name <- as.numeric(data_lines$name)
 
   Time <- color <- NULL
@@ -176,8 +177,8 @@ summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, .
   ## Print Descriptive Statistics
   data_summary <-
     data.frame('Segment'=c(paste0('1-',ncol(object)),
-                           paste0(CPs[-length(CPs)],'-',CPs[-1])),
-               'Observations'=c(ncol(object),CPs[-1]-CPs[-length(CPs)]),
+                           paste0(changes[-length(changes)],'-',changes[-1])),
+               'Observations'=c(ncol(object),changes[-1]-changes[-length(changes)]),
                'kpss'=NA,
                'stationarity'=NA,
                'Resolution'=nrow(object)
@@ -209,9 +210,9 @@ summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, .
 }
 
 
-#' Summary for funts Object with no changes
+#' Summary for dfts Object with no changes
 #'
-#' @inheritParams summary.funts
+#' @inheritParams summary.dfts
 #'
 #' @return Plot (ggplot) summarizing the data
 #'
@@ -219,7 +220,7 @@ summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, .
 #' # .summary_nochange(
 #' #   generate_brownian_motion(N = 500,
 #' #      v=seq(from = 0, to = 1, length.out = 20)))
-#' # .summary_nochange(funts(electricity),rainbow='full')
+#' # .summary_nochange(electricity,rainbow='full')
 #' # .summary_nochange(generate_far1(20,300))
 #'
 #' @keywords internal
@@ -230,8 +231,8 @@ summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, .
   ## Plot white noise lags
   wn_pvalues <- rep(NA, lag.max)
   for(h in 1:lag.max){
-    # wn_pvalues[h] <- .single_lag_test(object,lag = h,method = 'bootstrap')$p_value
-    wn_pvalues[h] <- .multi_lag_test(object,lag = h)$p_value
+    # wn_pvalues[h] <- .single_lag_test(object,lag = h,method = 'bootstrap')$pvalue
+    wn_pvalues[h] <- .multi_lag_test(object,lag = h)$pvalue
   }
 
   plot_whitenoise <-
@@ -272,7 +273,7 @@ summary.funts <- function(object, CPs=NULL, lag.max=20, d.max=2, demean=FALSE, .
 
   #####
   ## Plot Lines
-  data_lines <- cbind(data.frame('Time'=object$intraobs),
+  data_lines <- cbind(data.frame('Time'=object$intratime),
                       object$data) %>%
     tidyr::pivot_longer(cols = 1+1:ncol(object$data))
 
