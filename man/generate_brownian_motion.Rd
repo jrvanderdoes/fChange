@@ -17,7 +17,7 @@ By default it is evenly spaced on [0,1] with 20 points.}
 The default is \code{1}.}
 }
 \value{
-Functional time series (funts) object
+Functional time series (dfts) object
 }
 \description{
 Generate a functional time series according to an iid Brownian Motion process.

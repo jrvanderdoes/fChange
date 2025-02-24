@@ -4,48 +4,29 @@
 \alias{generate_data}
 \title{Generate Functional Data}
 \usage{
-generate_data(general, parameters)
+generate_data(resolution, data_details, burnin = 100)
 }
 \arguments{
-\item{general}{List of general parameters for entire data sequence.
-\itemize{
-\item \strong{resolution}: Numeric(s). Either a number indicating the
-observational resolution which are evenly spaced on [0,1] or a vector of
-points which indicate the evalution points. Resolution does not change
-between generated data.
-\item \strong{burnin}: Numeric for the number of burnin before the first group.
-This is a key burnin as later processes often avoid burnin to ensure
-dependence / clean changes.
-}}
-
-\item{parameters}{List of lists indicating parameters for each data group.
+\item{data_details}{List of named lists indicating parameters for each data group.
 Each process can use different parameters, given below.
 \itemize{
-\item \strong{All}: All processes must contain:
-\itemize{
-\item \strong{N}: Numeric indicating the number of observations.
-\item \strong{process}: The process which should be used to generate the
-data. Options are the name for each: \code{bmotion}, \code{bbridge},
-\code{kl}, \code{ou}, and \code{far1}.
-}
 \item \strong{bmotion}: Brownian motion contains:
 \itemize{
+\item \strong{N}: Numeric indicating the number of observations.
 \item \strong{sd}: Numeric for the standard deviation of the observations.
 }
 \item \strong{bbridge}: Brownian bridge contains:
 \itemize{
+\item \strong{N}: Numeric indicating the number of observations.
 \item \strong{sd}: Numeric for the standard deviation of the observations.
-}
-\item \strong{bbridge2}: The second order Brownian bridge contains:
-\itemize{
-\item \strong{sd}: Numeric for the standard deviation of the Brownian motion
-used to build the data.
 }
 \item \strong{kl}: Karhunen-Loeve expansion contains:
 \itemize{
+\item \strong{N}: Numeric indicating the number of observations.
 \item \strong{distribution}: Distribution of the errors. Options include:
 \code{binomial}, \code{exponential}, \code{laplace}, \code{normal},
-\code{t} (add dof argument), and \code{cauchy}.
+\code{t} (add dof argument), \code{gamma} (add shape argument),
+and \code{cauchy}.
 \item \strong{eigenvalues}: Numerics for the eigenvalues of the given
 distribution (value for each in basis).
 \item \strong{mean}: Numeric for the mean of the group.
@@ -53,13 +34,17 @@ distribution (value for each in basis).
 \item \strong{basis}: fda \code{basisfd} object.
 \item \strong{dof}: (Optional) Numeric for the degrees of freedom if using
 a \code{t} distribution.
+\item \strong{shape}: (Optional) Numeric for the shape if using
+a \code{gamma} distribution.
 }
 \item \strong{ou}: Ornstein-Uhlenbeck process requires:
 \itemize{
+\item \strong{N}: Numeric indicating the number of observations.
 \item \strong{dependence}: Strength of dependence between observation.
 }
 \item \strong{far1}: Functional autoregressive process of order 1 contains:
 \itemize{
+\item \strong{N}: Numeric indicating the number of observations.
 \item \strong{dependence}: Strength of dependence between observation.
 \item \strong{sd}: Numeric for the standard deviation of the observations.
 \item \strong{vary}: Boolean if the starting value each observation should
@@ -70,7 +55,7 @@ resolution is a vector, the resolution will be one smaller.
 }}
 }
 \value{
-funts object for the generated data
+dfts object for the generated data
 }
 \description{
 This function allows generation of functional data according to several
@@ -78,20 +63,18 @@ approaches: \code{bbridge}, \code{bmotion}, \code{kl}, \code{ou}, and \code{far1
 }
 \examples{
 result <- generate_data(
-  general=list('resolution'=10,'burnin'=100),
-  parameters =list('bmotion'=list('N'=100, 'process'='bmotion', 'sd'=1),
-                   'bbridge'=list('N'=100, 'process'='bbridge', 'sd'=1),
-                   'kl'=list('process'='kl', 'N'=100,
-                             'distribution'='Normal',
-                             'eigenvalues'=1/1:4,
-                             'mean'=0, 'dependence'=0,
-                             'basis'=fda::create.bspline.basis(),
-                             'sd'=1),
-                   'ou'=list('N'=100, 'process'='ou', 'dependence'=0 ) ,
-                   'far1'=list('N'=100, 'process'='far1', 'dependence'=0,
-                               'sd'=1,'vary'=FALSE) )
-                 )
-result <- generate_data(
-  general=list('resolution'=5,'burnin'=100),
-  parameters =list(list('N'=100, 'dependence'=0, 'process'='far1', 'sd'=1,'vary'=TRUE)) )
+  resolution=15,
+  data_details =list('bmotion'=list('N'=100, 'sd'=1),
+                     'bbridge'=list('N'=100, 'sd'=1),
+                     'bbridge'=list('N'=100, 'sd'=1),
+                     'kl'=list('N'=100,
+                               'distribution'='Normal',
+                               'eigenvalues'=1/1:4,
+                               'mean'=0, 'dependence'=0,
+                               'basis'=fda::create.bspline.basis(),
+                               'sd'=1),
+                     'ou'=list('N'=100, 'dependence'=0 ) ,
+                     'far1'=list('N'=100, 'dependence'=0,
+                                 'sd'=1,'vary'=FALSE) )
+)
 }

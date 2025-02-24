@@ -3,23 +3,23 @@
 \name{sd}
 \alias{sd}
 \alias{sd.default}
-\alias{sd.funts}
+\alias{sd.dfts}
 \alias{var}
 \alias{var.default}
-\alias{var.funts}
+\alias{var.dfts}
 \title{Generic sd/var of Data}
 \usage{
 sd(object, ...)
 
 \method{sd}{default}(object, ...)
 
-\method{sd}{funts}(object, type = "pointwise", ...)
+\method{sd}{dfts}(object, type = "pointwise", ...)
 
 var(object, ...)
 
 \method{var}{default}(object, ...)
 
-\method{var}{funts}(object, type = c("operator", "pointwise"), ...)
+\method{var}{dfts}(object, type = c("operator", "pointwise"), ...)
 }
 \arguments{
 \item{object}{Data to compute on}
@@ -42,7 +42,7 @@ Generic Variance Standard Deviation
 \examples{
 sd(1:10)
 var(1:10)
-sd(funts(electricity),type='pointwise')
-var(funts(electricity),type='pointwise')
-var(funts(electricity),type='operator')
+sd(electricity,type='pointwise')
+var(electricity,type='pointwise')
+var(electricity,type='operator')
 }

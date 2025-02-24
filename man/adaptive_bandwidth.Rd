@@ -7,7 +7,8 @@
 adaptive_bandwidth(X, kernel = "bartlett")
 }
 \arguments{
-\item{X}{Functional data object}
+\item{X}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{kernel}{Kernel function selection to use, 'bartlett' or 'parzen'.}
 }

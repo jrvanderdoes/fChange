@@ -12,7 +12,8 @@ impute(
 )
 }
 \arguments{
-\item{X}{Funts object or data easily convertible. See \code{\link[=funts]{funts()}}}
+\item{X}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{method}{String to indicate method of imputation.
 \itemize{
@@ -28,10 +29,10 @@ impute(
 data should be shared across observations. For example, is the end of
 observation i related to the start of observation i+1. Default is FALSE,
 which suggests independence. If true, the distance between the end and
-start of observations is taken to be the mean of the intraobs.}
+start of observations is taken to be the mean of the intratime.}
 }
 \value{
-funts object with interpolated missing data
+dfts object with interpolated missing data
 }
 \description{
 Impute missing values in functional data.

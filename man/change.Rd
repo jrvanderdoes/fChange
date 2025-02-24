@@ -2,25 +2,25 @@
 % Please edit documentation in R/change.R
 \name{change}
 \alias{change}
-\title{Change Function for funts Objects}
+\title{Change Function for dfts Objects}
 \usage{
 change(
   X,
-  method = c("characteristic", "mean", "robust", "eigenjoint", "eigensingle", "trace",
-    "covariance", "pcamean", "pcadistribution"),
+  method = c("characteristic", "mean", "robustmean", "eigenjoint", "eigensingle",
+    "trace", "covariance", "projmean", "projdistribution"),
   statistic = c("Tn", "Mn"),
   critical = c("simulation", "permutation", "welch"),
   type = c("single", "segmentation", "elbow"),
   perm_type = "separate",
   replace = TRUE,
   max_changes = min(ncol(X), 20),
-  CPs = NULL,
+  changes = NULL,
   blocksize = 1,
-  d = 3,
+  eigen_number = 3,
   h = 3,
   M = 1000,
   J = 50,
-  W = computeSpaceMeasuringVectors(X = X, M = 20, space = "BM"),
+  W = space_measuring_vectors(X = X, M = 20, space = "BM"),
   K = bartlett_kernel,
   alpha = 0.05,
   cov.res = 30,
@@ -36,11 +36,12 @@ change(
 )
 }
 \arguments{
-\item{X}{Funts object or data easily convertible. See \code{\link[=funts]{funts()}}.}
+\item{X}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{method}{Method to compute change point. Options include:
-'characteristic', 'mean', 'robust', 'eigenjoint', 'eigensingle', 'trace', 'covariance',
-'pcamean', and 'pcadistribution'.}
+'characteristic', 'mean', 'robustmean', 'eigenjoint', 'eigensingle', 'trace', 'covariance',
+'projmean', and 'projdistribution'.}
 
 \item{statistic}{String for the Statistic. The integrated, \code{Tn}, or the
 maximal, \code{Mn}.}
@@ -63,13 +64,13 @@ identical.}
 \item{max_changes}{Integer as the max number of changes to search when using
 type is \code{elbow}.}
 
-\item{CPs}{Vector of change points to be given to the eigen test if the data
+\item{changes}{Vector of change points to be given to the eigen test if the data
 should be centered on these values first.}
 
 \item{blocksize}{Integer for the width of the blocks when using a permutation
 test. Can use \code{\link[=adaptive_bandwidth]{adaptive_bandwidth()}} is additional guidance is desired.}
 
-\item{d}{Which eigenvalue or the number of eigenvalues which should be checked
+\item{eigen_number}{Which eigenvalue or the number of eigenvalues which should be checked
 in the eigenvalue tests.}
 
 \item{h}{Number of lags used when computing long run covariance estimates. Used in
@@ -83,7 +84,7 @@ is defined by \code{W}.}
 \item{W}{Space measuring vectors in characteristic method}
 
 \item{K}{Kernel function for use in characteristic, mean, eigen, covariance
-and pcamean}
+and projmean}
 
 \item{alpha}{Significance for Welch approximation}
 
@@ -91,7 +92,7 @@ and pcamean}
 
 \item{weighting}{Weights used in covariance kernel method and pcadistribution}
 
-\item{TVE}{Total variance explained for pcamean}
+\item{TVE}{Total variance explained for projmean and projdistribution}
 
 \item{trim_function}{Trimming to be used in elbow plot}
 
@@ -117,10 +118,10 @@ A list with
 }
 }
 \description{
-Change Function for funts Objects
+Change Function for dfts Objects
 }
 \examples{
-res <- change(electricity[,1:20],method='characteristic',critical = 'welch')
+res <- change(electricity$data[,1:20],method='characteristic',critical = 'welch')
 }
 \references{
 Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural

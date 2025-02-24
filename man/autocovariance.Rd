@@ -7,7 +7,8 @@
 autocovariance(X, lags = 0:1, center = TRUE)
 }
 \arguments{
-\item{X}{funts object of data of interest}
+\item{X}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{lags}{Numeric(s) for the lags to estimate the lagged autocovariance / autocorrelation
 operators.}

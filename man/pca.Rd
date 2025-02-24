@@ -3,14 +3,14 @@
 \name{pca}
 \alias{pca}
 \alias{pca.default}
-\alias{pca.funts}
+\alias{pca.dfts}
 \title{Generic pca of Data}
 \usage{
 pca(object, TVE = 1, ...)
 
 \method{pca}{default}(object, ...)
 
-\method{pca}{funts}(object, TVE = 1, ...)
+\method{pca}{dfts}(object, TVE = 1, ...)
 }
 \arguments{
 \item{object}{Data to compute principal component analysis on}
@@ -30,5 +30,5 @@ Build on \code{prcomp}.
 }
 \examples{
 pca(1:10)
-pca(funts(electricity))
+pca(electricity)
 }

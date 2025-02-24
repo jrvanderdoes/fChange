@@ -16,9 +16,8 @@ stationarity_test(
 )
 }
 \arguments{
-\item{X}{The functional time series being tested, inputted in a matrix form
-with each row representing each observation of the functional data values
-on equidistant points of any pre-specified interval.}
+\item{X}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{statistic}{String for test statistic. Options are \code{Tn} and
 \code{Mn}. Default is \code{Tn}.}

@@ -7,8 +7,7 @@
 \format{
 \subsection{\code{electricity}}{
 
-A data frame with 24 rows and 365 columns, representing the hourly (row)
-electricity spot values for each day (column) of the year in 2014.
+A dfts object
 }
 }
 \source{
@@ -18,7 +17,6 @@ electricity spot values for each day (column) of the year in 2014.
 electricity
 }
 \description{
-A fChange ready data set containing the hourly electricity spot prices from
-Spain in 2014.
+The hourly electricity spot prices from Spain in 2014.
 }
 \keyword{datasets}

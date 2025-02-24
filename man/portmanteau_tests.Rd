@@ -20,7 +20,8 @@ portmanteau_tests(
 )
 }
 \arguments{
-\item{data}{A funts object or functional data matrix with observed functions in the columns.}
+\item{data}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{test}{A String specifying the hypothesis test. Currently available tests are referred to by their
 string handles: 'variety', "single-lag", "multi-lag", "spectral", "independence", and "imhof". Please see the Details

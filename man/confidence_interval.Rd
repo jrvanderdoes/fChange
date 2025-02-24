@@ -6,7 +6,7 @@
 \usage{
 confidence_interval(
   X,
-  CPs,
+  changes,
   K = bartlett_kernel,
   h = 3,
   weighting = 0.5,
@@ -16,9 +16,10 @@ confidence_interval(
 )
 }
 \arguments{
-\item{X}{Funts object or data easily convertible. See \code{\link[=funts]{funts()}}.}
+\item{X}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{CPs}{Numeric vector for detected change points.}
+\item{changes}{Numeric vector for detected change points.}
 
 \item{K}{Function for the Kernel. Default is bartlett_kernel.}
 
@@ -45,13 +46,13 @@ Change Point Confidence Intervals
 \examples{
 X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
            generate_brownian_motion(100,v=seq(0,1,0.05))$data+1000)
-confidence_interval(X,CPs = 100)
-confidence_interval(X,CPs=100,method = 'simulation')
+confidence_interval(X,changes = 100)
+confidence_interval(X,changes=100,method = 'simulation')
 
 X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
            generate_brownian_motion(100,v=seq(0,1,0.05))$data+0.5)
 confidence_interval(X,100,alpha = 0.1)
-confidence_interval(X,CPs=100,alpha = 0.1,method = 'simulation')
+confidence_interval(X,changes=100,alpha = 0.1,method = 'simulation')
 
 X <- generate_brownian_motion(200,v=seq(0,1,0.05))
 confidence_interval(X,100)
@@ -64,7 +65,7 @@ confidence_interval(X,c(200,300))
 
 # set.seed(12345)
 # bs <- binary_segmentation(electricity,statistic = 'Tn',method = 'Boot')
-confidence_interval(X = electricity, CPs = c(66, 144, 204, 243, 305),alpha = 0.1)
+confidence_interval(X = electricity, changes = c(66, 144, 204, 243, 305),alpha = 0.1)
 }
 \references{
 Horvath, L., & Rice, G. (2024). Change Point Analysis for Time

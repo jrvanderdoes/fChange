@@ -5,8 +5,8 @@
 \alias{acf.default}
 \alias{pacf}
 \alias{pacf.default}
-\alias{acf.funts}
-\alias{pacf.funts}
+\alias{acf.dfts}
+\alias{pacf.dfts}
 \title{ACF/PACF Functions}
 \usage{
 acf(x, lag.max = NULL, ...)
@@ -17,7 +17,7 @@ pacf(x, lag.max = NULL, ...)
 
 \method{pacf}{default}(x, lag.max = NULL, ...)
 
-\method{acf}{funts}(
+\method{acf}{dfts}(
   x,
   lag.max = NULL,
   alpha = 0.05,
@@ -27,7 +27,7 @@ pacf(x, lag.max = NULL, ...)
   ...
 )
 
-\method{pacf}{funts}(x, lag.max = NULL, n_pcs = NULL, alpha = 0.95, figure = TRUE, ...)
+\method{pacf}{dfts}(x, lag.max = NULL, n_pcs = NULL, alpha = 0.95, figure = TRUE, ...)
 }
 \arguments{
 \item{x}{Object for computation of (partial) autocorrelation function
@@ -36,7 +36,7 @@ pacf(x, lag.max = NULL, ...)
 \item{lag.max}{Number of lagged covariance estimators for the time series
 that will be used to estimate the (partial) autocorrelation function.}
 
-\item{...}{Further arguments passed to the \code{\link[=acf.funts]{acf.funts()}}
+\item{...}{Further arguments passed to the \code{\link[=acf.dfts]{acf.dfts()}}
 function.}
 
 \item{alpha}{A value between 0 and 1 that indicates
@@ -87,7 +87,7 @@ each lag of the functional time series.
 }
 \description{
 This function computes the ACF/PACF of data. This can be applied on traditional
-scalar time series or functional time series defined in \code{\link[=funts]{funts()}}.
+scalar time series or functional time series defined in \code{\link[=dfts]{dfts()}}.
 
 Estimate the lagged autocorrelation function for a given
 functional time series and its distribution under the
@@ -136,5 +136,5 @@ Computational Statistics & Data Analysis, 155, 107108.
 \url{https://doi.org/10.1016/j.csda.2020.107108}
 }
 \seealso{
-\code{\link[stats:acf]{stats::acf()}}, \code{\link[=acf.funts]{acf.funts()}}
+\code{\link[stats:acf]{stats::acf()}}, \code{\link[=acf.dfts]{acf.dfts()}}
 }

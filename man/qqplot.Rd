@@ -18,5 +18,5 @@ qqplot(x, ...)
 QQ Plot Generic Function
 }
 \seealso{
-\code{\link[=qqplot.funts]{qqplot.funts()}} \code{\link[=qqplot.default]{qqplot.default()}}
+\code{\link[=qqplot.dfts]{qqplot.dfts()}} \code{\link[=qqplot.default]{qqplot.default()}}
 }

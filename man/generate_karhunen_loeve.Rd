@@ -11,10 +11,11 @@ generate_karhunen_loeve(
   means,
   distribution,
   resolution,
-  dependence,
-  burnin,
-  silent,
-  dof,
+  dependence = 0,
+  burnin = 100,
+  silent = TRUE,
+  dof = NULL,
+  shape = NULL,
   prev_eps = NULL
 )
 }

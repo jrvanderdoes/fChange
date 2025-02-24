@@ -14,7 +14,8 @@ kpss_test(
 )
 }
 \arguments{
-\item{X}{Funts object for data}
+\item{X}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{method}{String (default MC) for the method: monte carlo simulation
 (\code{MC}), block permutation (\code{block}), and sliding window

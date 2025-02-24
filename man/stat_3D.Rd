@@ -62,9 +62,9 @@ This function adds 3D geoms such as points and paths to a ggplot2 plot.
 #param phi The colatitude rotation (degrees).
 }
 \examples{
-dat <- funts(electricity)
+dat <- electricity
 
-data_lines <- cbind(data.frame('Time'=dat$intraobs), dat$data) \%>\%
+data_lines <- cbind(data.frame('Time'=dat$intratime), dat$data) \%>\%
  tidyr::pivot_longer(cols = 1+1:ncol(dat$data))
 
 colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")

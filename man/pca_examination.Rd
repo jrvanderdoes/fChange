@@ -7,7 +7,8 @@
 pca_examination(X, TVE = 0.95, d.max = 3)
 }
 \arguments{
-\item{X}{funts object}
+\item{X}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{TVE}{Numeric in [0,1]. Total variance explained to determine the
 number of components to examine}
@@ -28,5 +29,5 @@ values, and residuals
 Principal Component Exploration
 }
 \examples{
-results <- pca_examination(funts(electricity))
+results <- pca_examination(electricity)
 }

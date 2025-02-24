@@ -7,13 +7,14 @@
 \format{
 \subsection{\code{SPY500}}{
 
-A data.frame with columns being day and rows the intraday resolution.
+A dfts object
 }
 }
 \usage{
 SPYUS500
 }
 \description{
-Intraday prices for the S&P500 index (SPY) for 2019 to 2023.
+Intraday prices for the S&P500 index (SPY) for 2019 to 2023. Minutely
+resolution and daily observations.
 }
 \keyword{datasets}

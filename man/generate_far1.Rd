@@ -21,7 +21,7 @@ curve.}
 at the first rather than starting at 0 (given that is the observed first point)}
 }
 \value{
-funts object of the data
+dfts object of the data
 }
 \description{
 Function to generate date according to FAR(1) process.
