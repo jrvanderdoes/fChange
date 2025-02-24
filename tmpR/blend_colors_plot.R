@@ -10,7 +10,7 @@ plotData <- data.frame(
 )[-1, ]
 
 # Color Group to first CP
-for (j in 1:min(CPs)) {
+for (j in 1:min(changes)) {
   plotData <- rbind(
     plotData,
     data.frame(
@@ -22,22 +22,22 @@ for (j in 1:min(CPs)) {
   )
 }
 # Color Group from last CP
-for (j in (max(CPs) + 1):number) {
+for (j in (max(changes) + 1):number) {
   plotData <- rbind(
     plotData,
     data.frame(
       "resolution" = curve_points,
       "FDRep" = j,
-      "Color" = length(CPs) + 1,
+      "Color" = length(changes) + 1,
       "Value" = data[, j]
     )
   )
 }
 
 # Color Additional Groups
-if (length(CPs) > 1) {
-  for (i in 2:length(CPs)) {
-    for (j in (CPs[i - 1] + 1):CPs[i]) {
+if (length(changes) > 1) {
+  for (i in 2:length(changes)) {
+    for (j in (changes[i - 1] + 1):changes[i]) {
       plotData <- rbind(
         plotData,
         data.frame(
@@ -82,9 +82,9 @@ scene <- list(
 )
 
 # Get Colors
-tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-if (length(CPs) > 9) {
-  tmpColors <- rep(tmpColors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+if (length(changes) > 9) {
+  tmpColors <- rep(tmpColors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
 }
 
 finalcolors <- c(tmpColors[1], colorspace::lighten(tmpColors[1],amount=0.5))

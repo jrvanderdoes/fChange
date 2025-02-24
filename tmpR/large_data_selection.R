@@ -16,7 +16,7 @@
 #
 # res2 <- eigen_change(diff(X)$data,d = 2,test = 'ind')
 #
-# plot_fd(diff(X),CPs = res2$change)
+# plot_fd(diff(X),changes = res2$change)
 
 
 ###################
@@ -35,16 +35,16 @@ X <- funts(WHO_bcanc_wide[,-1])
 plot_fd(X)
 
 res0 <- binary_segmentation(X,statistic = 'Tn',method = 'Approx')
-plot_fd(X,CPs=res0[[1]])
+plot_fd(X,changes=res0[[1]])
 
 plot_fd(diff(X))
 res1 <- binary_segmentation(diff(X),statistic = 'Tn',method = 'Approx')
-plot_fd(diff(X),CPs=res1[[1]])
+plot_fd(diff(X),changes=res1[[1]])
 
 # tmp = pcaExploration(X, order=10)
 # res3 <- binary_segmentation(tmp$residuals,statistic = 'Tn',method = 'Approx')
-# plot_fd(X,CPs=res3[[1]])
-# plot_fd(tmp$residuals,CPs=res3[[1]])
+# plot_fd(X,changes=res3[[1]])
+# plot_fd(tmp$residuals,changes=res3[[1]])
 
 
 # ###################
@@ -58,7 +58,7 @@ plot_fd(diff(X),CPs=res1[[1]])
 # WHO_card_wide <- WHO_card %>%
 #   pivot_wider(id_cols = `Age Group`, names_from = Year, values_from = Number)
 # X <- funts(WHO_card_wide[,-1],
-#            intraobs = c(0,1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85))
+#            intratime = c(0,1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85))
 # # summary(X)
 # plot_fd(X)
 #
@@ -70,7 +70,7 @@ plot_fd(diff(X),CPs=res1[[1]])
 # res2 <- binary_segmentation(X,statistic = 'Tn',method = 'Sim')
 #
 # res3 <- covariance_kernel_change(X$data)
-# plot_fd(X,CPs=res3$location)
+# plot_fd(X,changes=res3$location)
 #
 # ###################
 #
@@ -88,14 +88,14 @@ plot_fd(diff(X),CPs=res1[[1]])
 #
 # res <- mean_change(X)
 # res$pvalue
-# plot_fd(X,CPs = 12)
+# plot_fd(X,changes = 12)
 # plot_fd(diff(X))
 # res1 <- characteristic_change_sim(diff(X)$data)
 #
 # res2 <- binary_segmentation(X,statistic = 'Tn',method = 'Sim')
 #
 # res3 <- covariance_kernel_change(X$data)
-# plot_fd(X,CPs=res3$location)
+# plot_fd(X,changes=res3$location)
 
 ###################
 
@@ -107,8 +107,8 @@ summary(X)
 
 tmp = pcaExploration(X,order=3)
 res3 <- binary_segmentation(tmp$residuals,statistic = 'Tn',method = 'Approx')
-plot_fd(X,CPs=res3[[1]])
-plot_fd(tmp$residuals,CPs=res3[[1]])
+plot_fd(X,changes=res3[[1]])
+plot_fd(tmp$residuals,changes=res3[[1]])
 
 ###################
 # https://home.treasury.gov/interest-rates-data-csv-archive
@@ -121,10 +121,10 @@ UScurveyields$Date <- as.Date(UScurveyields$Date,'%m/%d/%y')
 library(devtools)
 load_all()
 X <- funts(t(UScurveyields[,-1]),labels = UScurveyields[,1],
-           intraobs = c(1,2,3,4,6,12,24,36,60,84,120,240,360))
+           intratime = c(1,2,3,4,6,12,24,36,60,84,120,240,360))
 X <- funts(X$data[,colSums(is.na(X$data))<nrow(X$data)],
                     labels = X$labels[colSums(is.na(X$data))>0],
-                    intraobs = X$intraobs)
+                    intratime = X$intratime)
 # mean_change(X)
 X <- impute(X,method='linear')
 # res <- binary_segmentation(X = X,'Tn','Sim')
@@ -139,20 +139,20 @@ summary(X)
 #   as.data.frame()
 # rownames(sweden_wide) <- sweden_wide[,1]
 # sweden_wide <- sweden_wide[,-1]
-# swed <- funts(sweden_wide,intraobs = 0:110)
+# swed <- funts(sweden_wide,intratime = 0:110)
 #
 #
 # result_ce <- binary_segmentation(X = swed,statistic = 'Tn',
 #                                  method = 'Approx')
 # result <- recursive_segmentation(swed$data)
 # plot_fd(swed, result)
-# summary(swed,CPs = result)
+# summary(swed,changes = result)
 #
 # tmp <- diff(funts(sweden_wide))
 # result_ce <- binary_segmentation(X = tmp,statistic = 'Tn', method = 'Sim')
 # result <- recursive_segmentation(tmp)
 # plot_fd(swed, result)
-# summary(swed,CPs = result)
+# summary(swed,changes = result)
 
 # ###################
 # albert_river <- read.delim("C:/Users/jerem/Downloads/albert_river.txt", header=FALSE)
@@ -170,7 +170,7 @@ summary(X)
 # result_ce <- binary_segmentation(X = t(mary_river),
 #                                  statistic = 'Tn',
 #                                  method = 'Sim')
-# plot_fd(t(mary_river),CPs=result_ce[[1]])
+# plot_fd(t(mary_river),changes=result_ce[[1]])
 # ###################
 # lockyer_valley <- read.delim("C:/Users/jerem/Downloads/lockyer_valley.txt", header=FALSE)
 # plot_fd(t(lockyer_valley))
@@ -191,11 +191,11 @@ summary(X)
 # BL_nom <- read.csv("C:/Users/jerem/Downloads/BL_nom.csv")
 # obs <- BL_nom[,1]
 # BL_nom <- t(BL_nom[,-1])
-# BLC <- funts(BL_nom,intraobs = 1:60/60,labels = as.Date(obs,'%d %b %y'))
+# BLC <- funts(BL_nom,intratime = 1:60/60,labels = as.Date(obs,'%d %b %y'))
 # # plot_fd(BLC,interactive = F)
 # BLC_impute <- funts(BLC$data[,colSums(is.na(BLC$data))<nrow(BLC$data)],
 #                     labels = BLC$labels[colSums(is.na(BLC$data))>0],
-#                     intraobs = BLC$intraobs)
+#                     intratime = BLC$intratime)
 # BLC_impute <- impute(BLC_impute, method='mean_obs')
 # # plot_fd(BLC_impute,interactive = F)
 #
@@ -217,7 +217,7 @@ summary(X)
 # result_ce <- binary_segmentation(X = X,
 #                                  statistic = 'Tn',
 #                                  method = 'Sim')
-# pt <- plot_fd(X, CPs=result_ce[[1]])
+# pt <- plot_fd(X, changes=result_ce[[1]])
 # plotly::save_image(pt,'C:/Users/jerem/Downloads/berkley_global.png')
 # val <- recursive_segmentation(X)
 
@@ -235,7 +235,7 @@ summary(X)
 # result_ce1 <- binary_segmentation(X = diff(X),
 #                                  statistic = 'Tn',
 #                                  method = 'Sim')
-# pt1 <- plot_fd(diff(X), CPs=result_ce1[[1]])
+# pt1 <- plot_fd(diff(X), changes=result_ce1[[1]])
 # plotly::save_image(pt1,'C:/Users/jerem/Downloads/diff_fedfunds.png')
-# pt1.1 <- plot_fd(X, CPs=result_ce1[[1]])
+# pt1.1 <- plot_fd(X, changes=result_ce1[[1]])
 # plotly::save_image(pt1.1,'C:/Users/jerem/Downloads/diff_fedfunds1.png')

@@ -63,9 +63,9 @@ scene <- list(
 
 # # Get Colors
 tmpColors <- levels(as.factor(plotData$Color))
-# tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-# if (length(CPs) > 9) {
-#   tmpColors <- rep(tmpColors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+# tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+# if (length(changes) > 9) {
+#   tmpColors <- rep(tmpColors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
 # }
 
 magrittr::`%>%`(

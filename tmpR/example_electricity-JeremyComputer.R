@@ -72,13 +72,13 @@ plot_fd(electricity,elec_bs, showticklabels = F,
         aspectratio=list(x=1.5,y=0.5,z=0.75))
 
 ## Load saved
-cps=c(94,202,275)
+changes=c(94,202,275)
 pdf("electricity_resids.pdf")
-plot_fd(eval_fd_vals,CPs = cps,interactive = FALSE,
+plot_fd(eval_fd_vals,changes = changes,interactive = FALSE,
         val_axis_title = '',res_axis_title = '',FD_axis_title = '',showticklabels = F)
 dev.off()
 
 pdf("electricity.pdf")
-plot_fd(electricity,CPs = cps,interactive = FALSE,
+plot_fd(electricity,changes = changes,interactive = FALSE,
         val_axis_title = '',res_axis_title = '',FD_axis_title = '',showticklabels = F)
 dev.off()

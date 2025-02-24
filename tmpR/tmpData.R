@@ -48,4 +48,4 @@ tmp2
 compute_Tn(linear_imputatation(as.data.frame(oil[-1])))
 
 results <- .autoElbow_method(data=linear_imputatation(as.data.frame(oil[-1])))
-plot_fd(data=linear_imputatation(as.data.frame(oil[-1])), CPs=results)
+plot_fd(data=linear_imputatation(as.data.frame(oil[-1])), changes=results)

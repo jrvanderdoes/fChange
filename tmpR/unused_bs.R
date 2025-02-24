@@ -121,7 +121,7 @@ generalized_wild_binary_segmentation <- function(data, M = 5000, add_full = TRUE
                                                  ...) {
   # Setup
   n <- ncol(data)
-  cps <- c()
+  changes <- c()
   result <- matrix(ncol = 2, nrow = M + add_full)
 
   # Test
@@ -149,7 +149,7 @@ generalized_wild_binary_segmentation <- function(data, M = 5000, add_full = TRUE
   if (nrow(stats::na.omit(result))) {
     cp_loc <- result[which.max(result[, 2]), 1]
 
-    cps <- c(
+    changes <- c(
       wild_binary_segmentation(data[, min_pt:cp_loc],
                                M = M, add_full = add_full, block_size = block_size,
                                ...
@@ -162,5 +162,5 @@ generalized_wild_binary_segmentation <- function(data, M = 5000, add_full = TRUE
     )
   }
 
-  cps
+  changes
 }

@@ -22,4 +22,4 @@ for(i in 1:nrow(tmp_unique)){
 wide_faithful <- tmp_unique %>%
   pivot_wider(id_cols = month, names_from = year,values_from = eruptions)
 
-plot_fd(funts(wide_faithful), CPs=c(32))
+plot_fd(funts(wide_faithful), changes=c(32))

@@ -1,16 +1,16 @@
 # Convert X to pca
-if(is.null(CPs)){
+if(is.null(changes)){
   X_pca <- pca(X,TVE = TVE)
   D <- min(ncol(X_pca$x), max.d)
 }else{
-  CPs <- unique(c(0, CPs, ncol(X)))
-  # max_n <- max((CPs-lag(CPs))[-1])
-  # D <- length(CPs)-1
+  changes <- unique(c(0, changes, ncol(X)))
+  # max_n <- max((changes-lag(changes))[-1])
+  # D <- length(changes)-1
   # dat <- data.frame(matrix(nrow=max_n,ncol=D))
   X_demean <- X
-  for(d in 1:(length(CPs)-1)){
-    X_tmp <- funts(X$data[,(CPs[d]+1):CPs[d+1]],intraobs = X$intraobs)
-    X_demean$data[,(CPs[d]+1):CPs[d+1]] <- X_tmp$data - mean(X_tmp)
+  for(d in 1:(length(changes)-1)){
+    X_tmp <- funts(X$data[,(changes[d]+1):changes[d+1]],intratime = X$intratime)
+    X_demean$data[,(changes[d]+1):changes[d+1]] <- X_tmp$data - mean(X_tmp)
   }
   X_pca <- pca(X_demean, TVE = TVE)
   D <- min(ncol(X_pca$x), max.d)

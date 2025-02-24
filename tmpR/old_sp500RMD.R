@@ -78,7 +78,7 @@ create_plot <- function(data){
   )
 }
 
-create_plot1 <- function(data,CPs){
+create_plot1 <- function(data,changes){
   curve_points = 1:nrow(data)
   plot_title = NULL
   val_axis_title = ""
@@ -100,7 +100,7 @@ create_plot1 <- function(data,CPs){
   )[-1, ]
 
   # Color Group to first CP
-  for (j in 1:min(CPs)) {
+  for (j in 1:min(changes)) {
     plotData <- rbind(
       plotData,
       data.frame(
@@ -112,22 +112,22 @@ create_plot1 <- function(data,CPs){
     )
   }
   # Color Group from last CP
-  for (j in (max(CPs) + 1):number) {
+  for (j in (max(changes) + 1):number) {
     plotData <- rbind(
       plotData,
       data.frame(
         "resolution" = curve_points,
         "FDRep" = FDReps[j],
-        "Color" = length(CPs) + 1,
+        "Color" = length(changes) + 1,
         "Value" = data[, j]
       )
     )
   }
 
   # Color Additional Groups
-  if (length(CPs) > 1) {
-    for (i in 2:length(CPs)) {
-      for (j in (CPs[i - 1] + 1):CPs[i]) {
+  if (length(changes) > 1) {
+    for (i in 2:length(changes)) {
+      for (j in (changes[i - 1] + 1):changes[i]) {
         plotData <- rbind(
           plotData,
           data.frame(
@@ -148,9 +148,9 @@ create_plot1 <- function(data,CPs){
   )
 
   # Get Colors
-  tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-  if (length(CPs) > 9) {
-    tmpColors <- rep(tmpColors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+  tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+  if (length(changes) > 9) {
+    tmpColors <- rep(tmpColors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
   }
 
   tidyr::`%>%`(
@@ -192,7 +192,7 @@ create_plot1 <- function(data,CPs){
 SPYUS_ocidr <- compute_ocidr(SPYUS500)
 
 set.seed(25641)
-spy_min_cps <- binary_segmentation(SPYUS_ocidr,
+spy_min_changes <- binary_segmentation(SPYUS_ocidr,
                                    statistic='Tn',
                                    method='Sim',
                                    h_function = function(X){ncol(X)^(1/3)})
@@ -201,14 +201,14 @@ plotly::save_image(plot_save,
                    "C:/Users/jerem/Downloads/sp500_ocidr_min_1923.png",
                    width=1600, height=800)
 
-tmp <- create_plot1(SPYUS_ocidr,spy_min_cps[[1]])
+tmp <- create_plot1(SPYUS_ocidr,spy_min_changes[[1]])
 plotly::save_image(tmp,
                    "C:/Users/jerem/Downloads/sp500_ocidr_min_changes_1923.png",
                    width=1600, height=800)
 
 
 <!-- ```{r} -->
-  <!-- paperPlot <- function(data,CPs){ -->
+  <!-- paperPlot <- function(data,changes){ -->
       <!--   curve_points = 1:nrow(data) -->
         <!--   plot_title = NULL -->
           <!--   val_axis_title = "" -->
@@ -230,7 +230,7 @@ plotly::save_image(tmp,
                                                              <!--   )[-1, ] -->
 
                               <!--   # Color Group to first CP -->
-                              <!--   for (j in 1:min(CPs)) { -->
+                              <!--   for (j in 1:min(changes)) { -->
                                   <!--     plotData <- rbind( -->
                                                                 <!--       plotData, -->
                                                                 <!--       data.frame( -->
@@ -242,22 +242,22 @@ plotly::save_image(tmp,
                                                                 <!--     ) -->
                                     <!--   } -->
                               <!--   # Color Group from last CP -->
-                              <!--   for (j in (max(CPs) + 1):number) { -->
+                              <!--   for (j in (max(changes) + 1):number) { -->
                                   <!--     plotData <- rbind( -->
                                                                 <!--       plotData, -->
                                                                 <!--       data.frame( -->
                                                                                          <!--         "resolution" = curve_points, -->
                                                                                          <!--         "FDRep" = FDReps[j], -->
-                                                                                         <!--         "Color" = length(CPs) + 1, -->
+                                                                                         <!--         "Color" = length(changes) + 1, -->
                                                                                          <!--         "Value" = data[, j] -->
                                                                                          <!--       ) -->
                                                                 <!--     ) -->
                                     <!--   } -->
 
                               <!--   # Color Additional Groups -->
-                              <!--   if (length(CPs) > 1) { -->
-                                  <!--     for (i in 2:length(CPs)) { -->
-                                      <!--       for (j in (CPs[i - 1] + 1):CPs[i]) { -->
+                              <!--   if (length(changes) > 1) { -->
+                                  <!--     for (i in 2:length(changes)) { -->
+                                      <!--       for (j in (changes[i - 1] + 1):changes[i]) { -->
                                           <!--         plotData <- rbind( -->
                                                                             <!--           plotData, -->
                                                                             <!--           data.frame( -->
@@ -278,9 +278,9 @@ plotly::save_image(tmp,
                                                       <!--   ) -->
 
                                 <!--   # Get Colors -->
-                                <!--   tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1") -->
-                                  <!--   if (length(CPs) > 9) { -->
-                                      <!--     tmpColors <- rep(tmpColors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)] -->
+                                <!--   tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1") -->
+                                  <!--   if (length(changes) > 9) { -->
+                                      <!--     tmpColors <- rep(tmpColors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)] -->
                                         <!--   } -->
 
                                   <!--   magrittr::`%>%`( -->

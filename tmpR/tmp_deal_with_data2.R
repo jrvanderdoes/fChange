@@ -21,12 +21,12 @@ results_KL <- elbow_method(data=data_KL,
 print(results_KL[[2]])
 results_KL[[1]]$CP[2:3]
 
-CPsVals_KL <- complete_binary_segmentation(data = data_KL,
+changesVals_KL <- complete_binary_segmentation(data = data_KL,
                     test_statistic_function=compute_Mn,
                     fn=compute_Mn, cutoff_function = generalized_resampling,
                     trim_function = trim_function,
                     alpha = 0.05, iters=1000,  M=1000)
-CPsVals_KL
+changesVals_KL
 
 ##################################
 results_elec <- elbow_method(data=electricity,
@@ -37,16 +37,16 @@ results_elec <- elbow_method(data=electricity,
                            M=1000)
 print(results_elec[[2]])
 
-CPsVals_elec <- complete_binary_segmentation(data = electricity,
+changesVals_elec <- complete_binary_segmentation(data = electricity,
                    test_statistic_function=compute_Mn,
                    fn=compute_Mn, cutoff_function = generalized_resampling,
                    trim_function = trim_function,
                    alpha = 0.05, iters=2500,  M=2500)
-CPsVals_elec
-plot_fd(electricity, CPs=CPsVals_elec)
+changesVals_elec
+plot_fd(electricity, changes=changesVals_elec)
 # tmp <- complete_binary_segmentation(data = electricity[,183:ncol(electricity)],
 #                                               test_statistic_function=compute_Mn,
 #                                               fn=compute_Mn, cutoff_function = generalized_resampling,
 #                                               trim_function = trim_function,
 #                                               alpha = 0.05, iters=2000,  M=2000)
-# plot_fd(electricity, CPs=c(CPsVals_elec,CPsVals_elec+tmp))
+# plot_fd(electricity, changes=c(changesVals_elec,changesVals_elec+tmp))

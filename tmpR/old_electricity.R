@@ -76,7 +76,7 @@ plot_fd(epca$residuals, res1[[1]])
 
 The above detect a change point, and occasionally the placement; however, if we have multiple change points then another method is necessary. We use binary segmentation in this case.
 ```{r plot_function, eval=FALSE}
-paperPlot <- function(data,CPs){
+paperPlot <- function(data,changes){
   curve_points = 1:nrow(data)
   plot_title = NULL
   val_axis_title = ""
@@ -98,7 +98,7 @@ paperPlot <- function(data,CPs){
   )[-1, ]
 
   # Color Group to first CP
-  for (j in 1:min(CPs)) {
+  for (j in 1:min(changes)) {
     plotData <- rbind(
       plotData,
       data.frame(
@@ -110,22 +110,22 @@ paperPlot <- function(data,CPs){
     )
   }
   # Color Group from last CP
-  for (j in (max(CPs) + 1):number) {
+  for (j in (max(changes) + 1):number) {
     plotData <- rbind(
       plotData,
       data.frame(
         "resolution" = curve_points,
         "FDRep" = FDReps[j],
-        "Color" = length(CPs) + 1,
+        "Color" = length(changes) + 1,
         "Value" = data[, j]
       )
     )
   }
 
   # Color Additional Groups
-  if (length(CPs) > 1) {
-    for (i in 2:length(CPs)) {
-      for (j in (CPs[i - 1] + 1):CPs[i]) {
+  if (length(changes) > 1) {
+    for (i in 2:length(changes)) {
+      for (j in (changes[i - 1] + 1):changes[i]) {
         plotData <- rbind(
           plotData,
           data.frame(
@@ -146,9 +146,9 @@ paperPlot <- function(data,CPs){
   )
 
   # Get Colors
-  tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-  if (length(CPs) > 9) {
-    tmpColors <- rep(tmpColors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+  tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+  if (length(changes) > 9) {
+    tmpColors <- rep(tmpColors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
   }
 
   tidyr::`%>%`(
