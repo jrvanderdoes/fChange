@@ -25,14 +25,14 @@ The goal is to detect any changes in the data.
 
 This data may be viewed using the following:
 ```{r plot_elec}
-plot(funts(electricity),
+plot(electricity,
         val_axis_title = '',res_axis_title = '',FD_axis_title = '',
         plot_title = '')
 ```
 
-This data seems to exhibit some trends over time (perhaps due to season). We wish to model these trends first, and then search the data for any remaining changes. We will use principal component analysis to convert it to finite dimensions, fit a model, and return this to functional data. In \code{fChange}, \code{pca_examination} and \code{model_pca} are pre-built functions that can be used to project the data, e.g.
+This data seems to exhibit some trends over time (perhaps due to season). We wish to model these trends first, and then search the data for any remaining changes. We will use principal component analysis to convert it to finite dimensions, fit a model, and return this to functional data. In \code{fChange}, \code{pca_examination} and \code{projection_model} are pre-built functions that can be used to project the data, e.g.
 ```{r pca_info, eval=FALSE}
-epca <- pca_examination(X = funts(electricity),TVE = 0.99) 
+epca <- pca_examination(X = electricity,TVE = 0.99) 
 set.seed(654321)
 res1 <- change(X = epca$residuals,
                            statistic='Tn',
@@ -43,9 +43,9 @@ res1 <- change(X = epca$residuals,
 The previous approach is similar to the next, except without smoothing incorporated. In the next, we show the details more precisely. We use binary segmentation to investigate the residuals in this case.
 ```{r model_electricity, eval=FALSE}
 set.seed(123456)
-elec_mod <- model_pca(electricity,TVE=0.95,model='ets', check.cp=TRUE)
+elec_mod <- projection_model(electricity,TVE=0.95,model='ets', check.cp=TRUE)
 
-plot(elec_mod$errors,CPs = elec_mod$CPs) 
+plot(elec_mod$errors,changes = elec_mod$changes) 
 ```
 
 # S\&P 500
@@ -68,7 +68,7 @@ compute_ocidr <- function(dat){
 
 SPYUS_ocidr <- compute_ocidr(SPYUS500)
 
-plot_ocidr <- plot(funts(SPYUS_ocidr),
+plot_ocidr <- plot(dfts(SPYUS_ocidr),
                       val_axis_title = '',res_axis_title = '',FD_axis_title = '',
                       plot_title = '')
 ```
@@ -77,11 +77,11 @@ The changes can be detected using binary segmentation as follows.
 ```{r detect_changes_fin, eval=FALSE}
 
 set.seed(25641)
-spy_min_cps <- change(funts(SPYUS_ocidr), type='segmentation',
+spy_min_changes <- change(dfts(SPYUS_ocidr), type='segmentation',
                                    statistic='Tn',
                                    critical='simulation',
                                    method = 'characteristic')
-plot_ocidr <- plot(funts(SPYUS_ocidr),CPs = spy_min_cps[[1]],
+plot_ocidr <- plot(dfts(SPYUS_ocidr),changes = spy_min_changes[[1]],
                       val_axis_title = '',res_axis_title = '',FD_axis_title = '',
                       plot_title = '',type = 'highdim')
 ```
