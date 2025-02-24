@@ -1,39 +1,39 @@
 test_that("Plot Options", {
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='spaghetti')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='spaghetti')
   expect_equal(class(tmp)[1],"plotly")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='highdim')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='highdim')
   expect_equal(class(tmp)[1],"trellis")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='rainbow')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='rainbow')
   expect_equal(class(tmp)[1],"gg")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='banded')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='banded')
   expect_equal(class(tmp)[1],"gg")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='acf')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='acf')
   expect_equal(class(tmp)[1],"list")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='pacf')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='pacf')
   expect_equal(class(tmp)[1],"list")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='summary')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='summary')
   expect_equal(class(tmp)[1],"list")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='qq')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='qq')
   expect_equal(class(tmp)[1],"gg")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='distribution')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='distribution')
   expect_equal(class(tmp)[1],"gg")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='change')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='change')
   expect_equal(class(tmp)[1],"plotly")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='interval',int.gradual = F)
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='interval',int.gradual = F)
   expect_equal(class(tmp)[1],"plotly")
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='interval',int.gradual = T)
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='interval',int.gradual = T)
   expect_equal(class(tmp)[1],"plotly")
 
-  tmp <- plot.funts(funts(electricity), CPs=c(50,175),type='surface')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='surface')
   expect_equal(class(tmp)[1],"matrix")
 })

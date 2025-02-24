@@ -111,13 +111,13 @@ test_that("Robust change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(dat, method='robust',
+  tmp <- change(dat, method='robustmean',
                 statistic='Tn', type='Single',
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0.263)
 
-  tmp <- change(dat, method='robust',
+  tmp <- change(dat, method='robustmean',
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 1000)
@@ -125,13 +125,13 @@ test_that("Robust change", {
 
   # Change
   dat$data[,50:100] <- dat$data[,50:100]+5
-  tmp <- change(dat, method='robust',
+  tmp <- change(dat, method='robustmean',
                 statistic='Tn', type='Single',
                 critical = 'permutation',
                 M = 500)
   expect_equal(tmp$pvalue, 0.012)
 
-  tmp <- change(dat, method='robust',
+  tmp <- change(dat, method='robustmean',
                 statistic='Mn', type='Single',
                 critical = 'permutation',
                 M = 500)
@@ -143,12 +143,12 @@ test_that("Eigen change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(dat, method='eigenjoint', h=0, d=1,
+  tmp <- change(dat, method='eigenjoint', h=0, eigen_number=1,
                 statistic='Tn',
                 critical = 'simulation',
                 M = 200)
   expect_equal(tmp$pvalue, 0.615)
-  tmp <- change(dat, method='eigensingle', h=0, d=1,
+  tmp <- change(dat, method='eigensingle', h=0, eigen_number=1,
                 statistic='Tn',
                 critical = 'simulation',
                 M = 200)
@@ -156,12 +156,12 @@ test_that("Eigen change", {
 
   set.seed(123)
   # dat <- generate_brownian_bridge(30)
-  tmp <- change(dat, method='eigenjoint', h=0, d=1,
+  tmp <- change(dat, method='eigenjoint', h=0, eigen_number=1,
                 statistic='Mn',
                 critical = 'permutation',
                 M = 5)
   expect_equal(tmp$pvalue, 0.6)
-  tmp <- change(dat, method='eigensingle', h=0, d=1,
+  tmp <- change(dat, method='eigensingle', h=0, eigen_number=1,
                 statistic='Mn',
                 critical = 'permutation',
                 M = 5)
@@ -169,23 +169,23 @@ test_that("Eigen change", {
 
   ## Change
   set.seed(123)
-  tmp <- change(electricity, method='eigenjoint', h=0, d=1,
+  tmp <- change(electricity, method='eigenjoint', h=0, eigen_number=1,
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(electricity, method='eigensingle', h=0, d=1,
+  tmp <- change(electricity, method='eigensingle', h=0, eigen_number=1,
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0)
 
-  tmp <- change(electricity, method='eigenjoint', h=0, d=1,
+  tmp <- change(electricity, method='eigenjoint', h=0, eigen_number=1,
                 statistic='Mn',
                 critical = 'permutation',
                 M = 2)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(electricity, method='eigensingle', h=0, d=1,
+  tmp <- change(electricity, method='eigensingle', h=0, eigen_number=1,
                 statistic='Mn',
                 critical = 'permutation',
                 M = 10)
@@ -259,23 +259,23 @@ test_that("PCA-Mean change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(dat, method='pcamean',
+  tmp <- change(dat, method='projmean',
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0.327)
-  tmp <- change(dat, method='pcamean',
+  tmp <- change(dat, method='projmean',
                 statistic='Tn',
                 critical = 'permutation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0.182)
 
-  tmp <- change(dat, method='pcamean',
+  tmp <- change(dat, method='projmean',
                 statistic='Mn',
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0.338)
-  tmp <- change(dat, method='pcamean',
+  tmp <- change(dat, method='projmean',
                 statistic='Mn',
                 critical = 'permutation',
                 M = 1000)
@@ -283,12 +283,12 @@ test_that("PCA-Mean change", {
 
   # Change
   set.seed(123)
-  tmp <- change(electricity, method='pcamean',
+  tmp <- change(electricity, method='projmean',
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(electricity, method='pcamean',
+  tmp <- change(electricity, method='projmean',
                 statistic='Mn',
                 critical = 'simulation',
                 M = 1000)
@@ -300,12 +300,12 @@ test_that("PCA-Distribution change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(50)
-  tmp <- change(dat, method='pcadistribution',
+  tmp <- change(dat, method='projdistribution',
                 statistic='Tn',
                 critical = 'permutation',
                 M = 100)
   expect_equal(tmp$pvalue, 0.630)
-  tmp <- change(dat, method='pcadistribution',
+  tmp <- change(dat, method='projdistribution',
                 statistic='Mn',
                 critical = 'permutation',
                 M = 100)
@@ -313,12 +313,12 @@ test_that("PCA-Distribution change", {
 
   # Change
   dat$data[,25:50] <- dat$data[,25:50]+5
-  tmp <- change(dat, method='pcadistribution',
+  tmp <- change(dat, method='projdistribution',
                 statistic='Tn',
                 critical = 'permutation',
                 M = 100)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(dat, method='pcadistribution',
+  tmp <- change(dat, method='projdistribution',
                 statistic='Mn',
                 critical = 'permutation',
                 M = 100)
@@ -326,7 +326,7 @@ test_that("PCA-Distribution change", {
 
 
   # Error
-  expect_error(change(dat, method='pcadistribution',
+  expect_error(change(dat, method='projdistribution',
                       statistic='Mn',
                       critical = 'simulation',
                       M = 100))
@@ -342,8 +342,8 @@ test_that("Check Elbow Plots", {
                 method='characteristic',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -360,8 +360,8 @@ test_that("Check Elbow Plots", {
                 method='mean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -370,11 +370,11 @@ test_that("Check Elbow Plots", {
   expect_equal(res$suggestion$changes,NA)
 
   res <- change(X = dat,
-                method='robust',
+                method='robustmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -386,8 +386,8 @@ test_that("Check Elbow Plots", {
                 method='eigenjoint',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -399,8 +399,8 @@ test_that("Check Elbow Plots", {
                 method='eigensingle',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -412,8 +412,8 @@ test_that("Check Elbow Plots", {
                 method='trace',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -425,8 +425,8 @@ test_that("Check Elbow Plots", {
                 method='covariance',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -435,11 +435,11 @@ test_that("Check Elbow Plots", {
   expect_equal(res$suggestion$changes,NA)
 
   res <- change(X = dat,
-                method='pcamean',
+                method='projmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -448,11 +448,11 @@ test_that("Check Elbow Plots", {
   expect_equal(res$suggestion$changes,NA)
 
   res <- change(X = dat,
-                method='pcadistribution',
+                method='projdistribution',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -468,8 +468,8 @@ test_that("Check Elbow Plots", {
                 method='characteristic',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -486,8 +486,8 @@ test_that("Check Elbow Plots", {
                 method='mean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -496,11 +496,11 @@ test_that("Check Elbow Plots", {
   expect_equal(res$suggestion$changes,50)
 
   res <- change(X = dat,
-                method='robust',
+                method='robustmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -512,8 +512,8 @@ test_that("Check Elbow Plots", {
                 method='eigenjoint',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -525,8 +525,8 @@ test_that("Check Elbow Plots", {
                 method='eigensingle',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -538,8 +538,8 @@ test_that("Check Elbow Plots", {
                 method='trace',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -551,8 +551,8 @@ test_that("Check Elbow Plots", {
                 method='covariance',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -561,11 +561,11 @@ test_that("Check Elbow Plots", {
   expect_equal(res$suggestion$changes,c(92,49,50))
 
   res <- change(X = dat,
-                method='pcamean',
+                method='projmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -574,11 +574,11 @@ test_that("Check Elbow Plots", {
   expect_equal(res$suggestion$changes,50)
 
   res <- change(X = dat,
-                method='pcadistribution',
+                method='projdistribution',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -593,8 +593,8 @@ test_that("Check Elbow Plots", {
                 method='characteristic',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -607,8 +607,8 @@ test_that("Check Elbow Plots", {
                 method='characteristic',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
-                d=2, h=1,
-                W = computeSpaceMeasuringVectors(X = dat, M = 20, space='BM'),
+                eigen_number=2, h=1,
+                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -633,9 +633,9 @@ test_that("Binary Segmentation", {
                 type='segmentation',
                 perm_type = 'separate', replace=TRUE,
                 blocksize = 1,
-                d=3, h=3,
+                eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                W = space_measuring_vectors(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
@@ -649,9 +649,9 @@ test_that("Binary Segmentation", {
                 type='segmentation',
                 perm_type = 'separate', replace=TRUE,
                 blocksize = 1,
-                d=3, h=3,
+                eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                W = space_measuring_vectors(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
@@ -659,15 +659,15 @@ test_that("Binary Segmentation", {
   expect_equal(res$pvalue,c(0.006,0))
 
   res <- change(X,
-                method='robust',
+                method='robustmean',
                 statistic='Tn',
                 critical='simulation',
                 type='segmentation',
                 perm_type = 'separate', replace=TRUE,
                 blocksize = 1,
-                d=3, h=3,
+                eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                W = space_measuring_vectors(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
@@ -681,9 +681,9 @@ test_that("Binary Segmentation", {
                 type='segmentation',
                 perm_type = 'separate', replace=TRUE,
                 blocksize = 1,
-                d=3, h=3,
+                eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                W = space_measuring_vectors(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
@@ -697,9 +697,9 @@ test_that("Binary Segmentation", {
                 type='segmentation',
                 perm_type = 'separate', replace=TRUE,
                 blocksize = 1,
-                d=3, h=3,
+                eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                W = space_measuring_vectors(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
@@ -713,9 +713,9 @@ test_that("Binary Segmentation", {
                 type='segmentation',
                 perm_type = 'separate', replace=TRUE,
                 blocksize = 1,
-                d=3, h=3,
+                eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                W = space_measuring_vectors(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
@@ -723,15 +723,15 @@ test_that("Binary Segmentation", {
   expect_equal(res$pvalue,NULL)
 
   res <- change(X,
-                method='pcamean',
+                method='projmean',
                 statistic='Tn',
                 critical='simulation',
                 type='segmentation',
                 perm_type = 'separate', replace=TRUE,
                 blocksize = 1,
-                d=3, h=3,
+                eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                W = space_measuring_vectors(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
@@ -744,15 +744,15 @@ test_that("Binary Segmentation", {
   X$data[,26:50] <- X$data[,26:50] +5
 
   res <- change(X,
-                method='pcadistribution',
+                method='projdistribution',
                 statistic='Tn',
                 critical='permutation',
                 type='segmentation',
                 perm_type = 'separate', replace=TRUE,
                 blocksize = 1,
-                d=3, h=3,
+                eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                W = space_measuring_vectors(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
@@ -766,9 +766,9 @@ test_that("Binary Segmentation", {
                 type='segmentation',
                 perm_type = 'separate', replace=TRUE,
                 blocksize = 1,
-                d=3, h=3,
+                eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = computeSpaceMeasuringVectors(X = X, M = 20, space='BM'),
+                W = space_measuring_vectors(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
