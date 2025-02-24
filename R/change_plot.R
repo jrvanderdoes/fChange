@@ -215,7 +215,14 @@
     changes <- changes[order(changes)]
 
     # Get Colors
-    plot_colors <- RColorBrewer::brewer.pal(max(length(changes) - 1,3), "Set1")[1:(length(changes)-1)]
+    plot_colors <- RColorBrewer::brewer.pal(
+      min(9, max(length(changes) - 1,3)), "Set1")
+
+    if (length(changes) > 9) {
+      plot_colors <- rep(plot_colors,
+                         ceiling(c(length(changes) + 1) / 9))[1:(length(changes) - 1)]
+    }
+
   }else{
     changes <- 0:ncol(X)
 

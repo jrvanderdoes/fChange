@@ -111,6 +111,7 @@ change <- function(X,
 
   # Check Data
   X <- dfts(X)
+  if(dim(X)[2]==1) return()
   method <- .verify_input(method,
                           c('characteristic','mean','robustmean','eigenjoint',
                             'eigensingle','trace',
