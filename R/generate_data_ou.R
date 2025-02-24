@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples
-#' generate_ornstein_uhlenbeck(20,100)
+#' generate_ornstein_uhlenbeck(N=100,resolution=20)
 generate_ornstein_uhlenbeck <- function(N, resolution, rho=0){
   if(is.null(rho))
     rho <- 0

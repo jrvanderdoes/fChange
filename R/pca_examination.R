@@ -102,7 +102,8 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
 #'  https://doi.org/10.1016/j.csda.2006.07.028
 #'
 #' @examples
-#' result <- projection_model(dfts(electricity$data[,50:150]), n.ahead=10)
+#' result <- projection_model(dfts(electricity$data[,50:100]),
+#'  n.ahead=1, TVE=0.1, check.cp=FALSE)
 projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
                     n.ahead=0, alpha=0.05, check.cp=TRUE, ...){
   if(!requireNamespace('forecast',quietly = TRUE))

@@ -10,7 +10,7 @@ generate_karhunen_loeve(
   basis,
   means,
   distribution,
-  resolution,
+  intratime,
   dependence = 0,
   burnin = 100,
   silent = TRUE,
@@ -31,7 +31,7 @@ for a given group.}
 
 \item{distribution}{A vector of distributions, length 1 or m.}
 
-\item{resolution}{A vector of points indicating the points to evaluate the
+\item{intratime}{A vector of points indicating the points to evaluate the
 functions on.}
 
 \item{dependence}{Numeric [0,1] indicating strength of VAR(1) process.}
@@ -40,7 +40,9 @@ functions on.}
 
 \item{silent}{A Boolean that toggles running output.}
 
-\item{dof}{Numeric for degrees of freedom with t-distribution}
+\item{dof}{Numeric for shape with gamma distribution (rate is set to 1)}
+
+\item{shape}{Numeric for degrees of freedom with t-distribution}
 
 \item{prev_eps}{previous epsilon for dependence across groups.}
 }
@@ -60,22 +62,16 @@ In this sense, the function creates m 'groups' of discretely observed
 functions with similar properties.
 }
 \examples{
-# result <- generate_karhunen_loeve(
-#   N=c(100,50,25),
-#   eigenvalues = list(rep(1,5),
-#                      c(1/sqrt(1:5)),
-#                      c(1/sqrt(1:5))),
-#
-#   parameters =list('bmotion'=list('N'=100, 'process'='bmotion', 'sd'=1),
-#                    'bbridge'=list('N'=100, 'process'='bbridge', 'sd'=1),
-#                    'kl'=list('process'='kl', 'N'=100,
-#                              'distribution'='Normal',
-#                              'eigenvalues'=1/1:4,
-#                              'mean'=0, 'dependence'=0,
-#                              'basis'=fda::create.bspline.basis(),
-#                              'sd'=1),
-#                    'ou'=list('N'=100, 'process'='ou', 'dependence'=0 ) ,
-#                    'far1'=list('N'=100, 'process'='far1', 'dependence'=0,
-#                                'sd'=1,'vary'=FALSE) )
-#                  )
+dat1 <- generate_karhunen_loeve(
+  N=100, eigenvalues=c(1/(1:3)), basis=fda::create.bspline.basis(nbasis=3,norder=3),
+  means=0, distribution='Normal',
+  intratime=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+  prev_eps=NULL)
+dat2 <- generate_karhunen_loeve(
+  N=50, eigenvalues=c(1/(1:4)), basis=fda::create.bspline.basis(nbasis=4),
+  means=5, distribution='exponential',
+  intratime=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+  prev_eps=dat1$prev_eps)
+
+dat <- dfts(cbind(dat1$data$data, dat2$data$data),intratime = dat1$data$intratime)
 }

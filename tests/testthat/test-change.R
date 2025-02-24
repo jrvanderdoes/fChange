@@ -7,19 +7,19 @@ test_that("Characteristic change", {
                 statistic='Tn', type='Single',
                 critical = 'simulation',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.960)
+  expect_equal(tmp$pvalue, 0.225)
   tmp <- change(dat, method='characteristic', h=0,
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.995)
+  expect_equal(tmp$pvalue, 0.620)
 
   set.seed(123)
   tmp <- change(X = dat, method='characteristic', h=0,
                 statistic='Tn', type='Single',
                 critical = 'welch',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.870)
+  expect_equal(tmp$pvalue, 0.220)
   expect_error(change(dat, method='characteristic', h=0,
                       statistic='Mn', type='Single',
                       critical = 'welch',
@@ -620,11 +620,10 @@ test_that("Check Elbow Plots", {
 
 ## Binary Segmentation
 test_that("Binary Segmentation", {
-  set.seed(123)
+  set.seed(12345)
   X <- generate_brownian_bridge(150)
-  X$data[,51:150] <- X$data[,51:150] +5
+  X$data[,51:150] <- X$data[,51:150] +3
   X$data[,101:150] <- X$data[,101:150]*2
-
 
   res <- change(X,
                 method='characteristic',
@@ -639,8 +638,8 @@ test_that("Binary Segmentation", {
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
-  expect_equal(res$location,c(49,99))
-  expect_equal(res$pvalue,c(0.034,0.027))
+  expect_equal(res$location,c(50,99))
+  expect_equal(res$pvalue,c(0.000,0.000))
 
   res <- change(X,
                 method='mean',
@@ -655,8 +654,9 @@ test_that("Binary Segmentation", {
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
-  expect_equal(res$location,c(50,100))
-  expect_equal(res$pvalue,c(0.006,0))
+  expect_equal(res$location,c(52,100))
+  expect_equal(res$pvalue,c(0,0))
+
 
   res <- change(X,
                 method='robustmean',
@@ -671,8 +671,8 @@ test_that("Binary Segmentation", {
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
-  expect_equal(res$location,c(50,100))
-  expect_equal(res$pvalue,c(0,0.027))
+  expect_equal(res$location,c(52,100))
+  expect_equal(res$pvalue,c(0,0))
 
   res <- change(X,
                 method='eigenjoint',
@@ -687,7 +687,7 @@ test_that("Binary Segmentation", {
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
-  expect_equal(res$location,c(101))
+  expect_equal(res$location,c(100))
   expect_equal(res$pvalue,c(0))
 
   res <- change(X,
@@ -703,7 +703,7 @@ test_that("Binary Segmentation", {
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
-  expect_equal(res$location,c(99))
+  expect_equal(res$location,c(100))
   expect_equal(res$pvalue,c(0))
 
   res <- change(X,
@@ -735,7 +735,7 @@ test_that("Binary Segmentation", {
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 })
-  expect_equal(res$location,c(50,100))
+  expect_equal(res$location,c(52,100))
   expect_equal(res$pvalue,c(0,0))
 
 

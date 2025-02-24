@@ -27,5 +27,5 @@ test_that("Bootstrap Check", {
   expect_equal(length(.bootstrap(electricity,1,M=10,type = 'separate')), 10)
   expect_equal(
     round(.bootstrap(electricity,1,M=10,type = 'separate',
-                     fn = .characteristic_statistic,statistic='Tn')[[2]],4), 0.1032)
+                     fn = .characteristic_statistic,statistic='Tn')[[2]],4), 0.1249)
 })

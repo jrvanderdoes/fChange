@@ -46,7 +46,8 @@ List with the following elements:
 Forecast using principal component analysis
 }
 \examples{
-result <- projection_model(dfts(electricity$data[,50:150]), n.ahead=10)
+result <- projection_model(dfts(electricity$data[,50:100]),
+ n.ahead=1, TVE=0.1, check.cp=FALSE)
 }
 \references{
 Hyndman, R. J., & Shahid Ullah, M. (2007). Robust forecasting

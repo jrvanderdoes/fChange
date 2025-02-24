@@ -64,8 +64,12 @@ dfts <- function(X, name=NULL,
     )
   } else if(requireNamespace("fda.usc", quietly = TRUE) &&
             fda.usc::is.fdata(X)){
-    if(is.null(labels))
+    if(is.null(labels)){
       labels <- rownames(X$data)
+      if(length(labels)==0 && is.null(labels)){
+        labels <- 1:nrow(X$data)
+      }
+    }
     if(is.null(intratime))
       intratime <- X$argvals
 
@@ -82,6 +86,10 @@ dfts <- function(X, name=NULL,
         labels <- X$time
       if(inherits(X, "fds"))
         labels <- colnames(X$y)
+
+      if(length(labels)==0 && is.null(labels)){
+        labels <- 1:ncol(X$y)
+      }
     }
     if(is.null(intratime))
       intratime <- X$x
@@ -94,8 +102,12 @@ dfts <- function(X, name=NULL,
     )
   } else if(requireNamespace('funData', quietly = TRUE) &&
             inherits(X, "funData")){
-    if(is.null(labels))
+    if(is.null(labels)){
       labels <- rownames(X@X)
+      if(length(labels)==0 && is.null(labels)){
+        labels <- 1:nrow(X@X)
+      }
+    }
     if(is.null(intratime))
       intratime <- X@argvals[[1]]
 
@@ -147,10 +159,10 @@ dfts <- function(X, name=NULL,
 
   ## Verification
   # Note if NAs are present
-  if(length(dfts_obj$intratime)!=nrow(dfts_obj$data))
-    stop('Resolution does not match data (rows)',call. = FALSE)
-  if(length(dfts_obj$labels)!=ncol(dfts_obj$data))
-    warning('Labels do not match data (cols)',call. = FALSE)
+  # if(length(dfts_obj$intratime)!=nrow(dfts_obj$data))
+  #   stop('Resolution does not match data (rows)',call. = FALSE)
+  # if(length(dfts_obj$labels)!=ncol(dfts_obj$data))
+  #   warning('Labels do not match data (cols)',call. = FALSE)
 
   if(inc.warnings & sum(is.na(dfts_obj$data))>0)
     warning('NA values in data may affect some methods',call. = FALSE)

@@ -20,5 +20,5 @@ dfts object of generated OU data
 Generate Data via Ornstein-Uhlenbeck Process
 }
 \examples{
-generate_ornstein_uhlenbeck(20,100)
+generate_ornstein_uhlenbeck(N=100,resolution=20)
 }
