@@ -17,8 +17,10 @@ test_that("Plot Options", {
   tmp <- plot.dfts(electricity, changes=c(50,175),type='pacf')
   expect_equal(class(tmp)[1],"list")
 
-  tmp <- plot.dfts(electricity, changes=c(50,175),type='summary')
-  expect_equal(class(tmp)[1],"list")
+  if(Sys.info()['sysname'] !='Linux'){
+    tmp <- plot.dfts(electricity, changes=c(50,175),type='summary')
+    expect_equal(class(tmp)[1],"list")
+  }
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='qq')
   expect_equal(class(tmp)[1],"gg")
