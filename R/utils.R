@@ -134,7 +134,6 @@
 # #' @keywords internal
 # #' @noRd
 # .convertSamplesToDF <- function(data_list) {
-#   ## TODO:: REMOVE USAGE
 #   m <- length(data_list)
 #   maxLen <- 0
 #   for (ii in 1:m) {
