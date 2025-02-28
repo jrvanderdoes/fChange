@@ -295,7 +295,6 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 #   J <- NROW(f_data)
 #   N <- NCOL(f_data)
 #
-#   # TODO:: This may be in adaptive
 #   kernel_string <- kernel
 #   if (kernel == 'Bartlett') {
 #     kernel <- bartlett_kernel
@@ -334,7 +333,6 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 #   t_stat_term <- sigma_squared_hat^(-2) * C_hat_HS_norm[1] * sqrt(2 * D_n_k)
 #   untrans_num <- 2^(-1) * N * sigma_squared_hat^(-2) * spectral_distance_Q_sq
 #
-#   ### TODO: Add case for when H is not R
 #   beta <- 1 - (2/3) * sum(kernel_vals^2) * sum(kernel_vals^6) / (sum(kernel_vals^4)^2)
 #   t_stat <- ((2^(-1) * N * sigma_squared_hat^(-2) * spectral_distance_Q_sq)^beta -
 #                (C_n_k^beta + 2^(-1) * beta * (beta - 1) * C_n_k^(beta-2) * t_stat_term^2)) /
@@ -681,7 +679,6 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 # #'  @noRd
 # #'  @keywords internal
 # scalar_covariance_i_j <- function(f_data, i, j, times) {
-#   # TODO:: Add into single call
 #   J <- NROW(f_data)
 #   N <- NCOL(f_data)
 #   c_f_data <- center(f_data)
@@ -691,7 +688,6 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 #     sum1 <- sum1 + c_f_data[times[1],k-i] * c_f_data[times[2],k] *
 #       c_f_data[times[3],k-j] * c_f_data[times[4],k]
 #   }
-#   # TODO:: Speed this up
 #   # ks <- (1+max(i,j)):N
 #   # sum2 <- c_f_data[times[1],ks-i] * c_f_data[times[2],ks] *
 #   #   c_f_data[times[3],ks-j] * c_f_data[times[4],ks]
@@ -773,7 +769,6 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 # covariance_diag_store <- function(f_data, K) {
 #   cov_i_store <- list()
 #   f_data <- dfts(f_data)
-#   ## TODO:: Remove loop
 #   for (j in 1:K) {
 #     # cov_i_store[[j]] <- diagonal_covariance_i(f_data, j)
 #     cov_i_store[[j]] <- obtain_autocovariance(center(f_data)$data^2,lags = j, center=FALSE)
@@ -865,14 +860,12 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 # #'
 # #' @return scalar approximation of the mean of the test statistic Q_h.
 # mean_hat_Q_h <- function(f_data, lags) {
-#   # TODO:: Remove this function by incorporating into its one call
 #   f_data <- dfts(f_data)
 #   J <- NROW(f_data)
-#   # TODO:: remove sapply
+#
 #   cov <- sapply(lags,
 #                 function(lag,f_data){
 #                   # diagonal_covariance_i(f_data, lag)
-#                   # TODO:: FIX Center to not need
 #                   obtain_autocovariance(center(f_data)$data^2,lags = lag, center=FALSE)
 #                 },
 #                 f_data=f_data)
@@ -895,7 +888,6 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
 # #' @noRd
 # #' @keywords internal
 # mean_hat_Q_h_iid <- function(f_data) {
-#   # TODO:: Incorporate into its single call
 #   J <- NROW(f_data)
 #   # cov <- iid_covariance(f_data)
 #   cov <- obtain_autocovariance(f_data,0)

@@ -259,7 +259,6 @@
       }
 
     }else if(statistic=='Mn'){
-      ## TODO: new bb
       for(i in 1:m){
         # BridgeLam <- matrix(NA,nrow=length(lambda), ncol=b_res)
         # for(j in 1:length(lambda)){
