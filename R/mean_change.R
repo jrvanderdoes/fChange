@@ -132,14 +132,12 @@
 
   if(statistic=='Tn'){
     # for (j in (1:length(lambda))) {
-    #   # TODO: Convert to function implementation
     #   BridgeLam[j, ] <- lambda[j] * (sde::BBridge(x = 0, y = 0, t0 = 0, T = 1, N = n - 1)^2)
     # }
     threshold <- dot_integrate(colSums(BridgeLam))
 
   } else if(statistic=='Mn'){
     # for (j in (1:length(lambda))) {
-    #   # TODO:: Use custom
     #   BridgeLam[j, ] <- lambda[j] * (sde::BBridge(x = 0, y = 0, t0 = 0, T = 1, N = n - 1)^2)
     # }
     threshold <- max(colSums(BridgeLam))
@@ -163,7 +161,6 @@
 # #' @noRd
 # #' @keywords internal
 # .compute_mean_stat <- function(data, k, weight = 0.5) {
-#   # TODO:: IMPLEMENT THIS
 #   data <- dfts(data)
 #   n <- ncol(data$data)
 #   stop('Not tested with weights')

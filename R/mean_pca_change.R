@@ -82,7 +82,6 @@
       simulations <- sapply(1:M, function(k,d,n){
         # B.Bridges <- rep(0, d)
         # for(j in 1:d){
-        #   # TODO:: change to internal bb
         #   B.Bridges[j] <- dot_integrate( sde::BBridge(0,0,0,1,n-1)^2 )
         # }
         B.Bridges <-
@@ -94,7 +93,6 @@
       simulations <- sapply(1:M, function(k,d,n){
         # B.Bridges <- matrix(NA, d,n)
         # for(j in 1:d){
-        #   # TODO:: change to internal bb
         #   B.Bridges[j,] <-  sde::BBridge(0,0,0,1,n-1)^2
         # }
         B.Bridges <-
@@ -192,16 +190,15 @@
 
 # #' Compute S_n Test statistic for PCA change
 # #'
-# #' @param eta.hat TODO
-# #' @param k TODO
-# #' @param n TODO
+# #' @param eta.hat XXX
+# #' @param k XXX
+# #' @param n XXX
 # #'
 # #' @return Numeric test statistic
 # #'
 # #' @keywords internal
 # #' @noRd
 # .S_n_pca <- function(eta.hat, k, n){
-#   # TODO:: Add
 #   # normalizer = ((k/n) * ((n-k) / n))^(-0.5)
 #   if(is.null(dim(eta.hat))){
 #     eta.bar <- sum(eta.hat)/n
