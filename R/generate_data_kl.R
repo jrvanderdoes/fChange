@@ -46,7 +46,6 @@ generate_karhunen_loeve <- function(
     N, eigenvalues, basis, means, distribution,
     intratime, dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
     prev_eps=NULL) {
-  ## TODO:: Add example
   ## Verification
   m <- length(basis$names)
 

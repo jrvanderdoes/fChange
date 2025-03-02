@@ -85,7 +85,6 @@ generate_brownian_bridge <- function(
 #' @keywords internal
 .generate_brownian_bridge_second_order <- function(
     N, v = seq(from = 0, to = 1, length.out = 100), sd = 1){
-  ## TODO:: Find use or remove
 
   if(length(v)==1){
     v <- seq(0,1,length.out=v)

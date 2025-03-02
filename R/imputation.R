@@ -40,8 +40,7 @@ impute <- function(X,
                               'mean_data','median_data',
                               'linear','functional'),
                    obs_share_data = FALSE){
-  # TODO:: Read https://onlinelibrary-wiley-com.proxy.lib.uwaterloo.ca/doi/pdf/10.1002%2Fsta4.331
-  #   Modern multiple imputation with functional data
+  # See :Modern multiple imputation with functional data" for more to add
   X <- dfts(X, inc.warnings = F)
   method <- .verify_input(method,
                           c('zero','mean_obs','median_obs', 'mean_data',
@@ -127,7 +126,6 @@ impute <- function(X,
 #' @keywords internal
 #' @noRd
 .linear_imputatation <- function(data, obs_share_data = FALSE) {
-  ## TODO:: STUDY,  Modern multiple imputation with functional data
   data <- dfts(data, inc.warnings = FALSE)
   data_fill <- data$data
   n <- ncol(data$data)
