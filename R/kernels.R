@@ -156,7 +156,7 @@ adaptive_bandwidth <- function(X, kernel='bartlett') {
   X <- dfts(X)
   f_data <- X$data
 
-  ## TODO:: Setup to not be hidden
+  ## TODO:: Checkout/expand
   J <- NROW(f_data)
   N <- NCOL(f_data)
 

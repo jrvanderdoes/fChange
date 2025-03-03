@@ -92,7 +92,6 @@
 
     if(critical=='simulation'){
 
-      ## TODO:: Convert to internal BB
       if(statistic=='Tn'){
         Values <- sapply(1:M,
                          function(i,N,d) {
@@ -132,7 +131,6 @@
 
     if(critical=='simulation'){
 
-      ## TODO:: Convert to internal BB
       if(statistic=='Tn'){
         # Values <- sapply(1:M, function(k)
         #   dot_integrate(sde::BBridge(0, 0, 0, 1, N-1)^2))

@@ -39,8 +39,6 @@
 #' @keywords internal
 #' @noRd
 .verify_input <- function(selection, poss_selections){
-  # TODO:: Use this in functions instead of repeating code
-
   selection1 <- tolower(selection)
   poss_selections1 <- tolower(poss_selections)
   selection1 <- selection1[selection1 %in% poss_selections1]
