@@ -11,6 +11,7 @@ projection_model(
   n.ahead = 0,
   alpha = 0.05,
   check.cp = TRUE,
+  frequency = 1,
   ...
 )
 }
@@ -30,6 +31,9 @@ of components in PCA}
 
 \item{check.cp}{Boolean which indicates if the errors should be checked for
 change points to change forecasts and plots}
+
+\item{frequency}{Numeric for seasonal frequency when component is made a ts
+object}
 
 \item{...}{Additional information to pass into pca, change (if check.cp=TRUE),
 and plot}

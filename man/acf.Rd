@@ -74,6 +74,8 @@ bound for the i.i.d. distribution under strong white noise assumption.
 bound for the i.i.d. distribution under weak white noise assumption.
 \item \code{acfs}: Autocorrelation values for
 each lag of the functional time series.
+\item \code{plot}: Plot of autocorrelation values for
+each lag of the functional time series.
 }
 
 Return a list with:
@@ -88,18 +90,6 @@ each lag of the functional time series.
 \description{
 This function computes the ACF/PACF of data. This can be applied on traditional
 scalar time series or functional time series defined in \code{\link[=dfts]{dfts()}}.
-
-Estimate the lagged autocorrelation function for a given
-functional time series and its distribution under the
-hypothesis of strong functional white noise. This graphic tool
-can be used to identify seasonal patterns in the functional
-data as well as auto-regressive or moving average terms.
-Strong white noise is included and weak white noise can also be included to
-test the presence of serial correlation in the data.
-
-Estimate the partial autocorrelation function for a given functional
-time series and its distribution under the hypothesis of strong
-functional white noise.
 }
 \examples{
 acf(1:10)

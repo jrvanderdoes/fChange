@@ -85,6 +85,8 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
 #' @param alpha Significance in \[0,1\] for intervals when forecasting
 #' @param check.cp Boolean which indicates if the errors should be checked for
 #'  change points to change forecasts and plots
+#' @param frequency Numeric for seasonal frequency when component is made a ts
+#'  object
 #' @param ... Additional information to pass into pca, change (if check.cp=TRUE),
 #'  and plot
 #'

@@ -39,6 +39,8 @@
 #' @keywords internal
 #' @noRd
 .verify_input <- function(selection, poss_selections){
+  # method <- match.arg(method, c('welch','mc','imhof'))
+
   selection1 <- tolower(selection)
   poss_selections1 <- tolower(poss_selections)
   selection1 <- selection1[selection1 %in% poss_selections1]

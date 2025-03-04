@@ -68,6 +68,8 @@ pacf.default <- function(x, lag.max = NULL, ...) stats::pacf(x)
 #'     bound for the i.i.d. distribution under weak white noise assumption.
 #'     \item \code{acfs}: Autocorrelation values for
 #'     each lag of the functional time series.
+#'     \item \code{plot}: Plot of autocorrelation values for
+#'     each lag of the functional time series.
 #' }
 #'
 #' @references Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
@@ -123,8 +125,8 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   rho <- sqrt(l2norms) / normalization.value
 
   # Estimate distribution of SWN (iid) bound
-  method <- match.arg(method, c('Welch','MC','Imhof'))
-  if(method=='Welch'){
+  method <- .verify_input(method, c('welch','mc','imhof'))
+  if(method=='welch'){
     # Obtain SWN bound for specified confidence value
     SWN_bound <- rep(NA,length(alpha))
     for(ii in 1:length(alpha)){
@@ -133,9 +135,9 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
         ( sqrt(NCOL(x$data)) * normalization.value )
     }
   } else{
-    if(method=='MC'){
+    if(method=='mc'){
       iid.distribution <- .estimate_iid_distr_MC(x, autocovs, l2norms)
-    } else if(method=='Imhof'){
+    } else if(method=='imhof'){
       iid.distribution <- .estimate_iid_distr_Imhof(x, autocovs, l2norms)
     }
 
@@ -160,11 +162,12 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   }
 
   # Plot
+  plt <- .plot_FACF(rho,SWN=SWN_bound, WWN=WWN_bound, ...)
   if(figure){
-    .plot_FACF(rho,SWN=SWN_bound, WWN=WWN_bound, ...)
+    plt
   }
 
-  invisible( list('SWN_bound'=SWN_bound, 'WWN_bound'=WWN_bound, 'acfs'=rho) )
+  invisible( list('SWN_bound'=SWN_bound, 'WWN_bound'=WWN_bound, 'acfs'=rho, 'plot'=plt) )
 }
 
 
