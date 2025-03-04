@@ -4,25 +4,10 @@
 #'     for general functions. Change points are recursively found until no
 #'     more change points are detected.
 #'
-#' @param X A dfts object or data which can be automatically converted to that
-#'  format. See [dfts()].
-#' @param test_statistic_function XXXXXXXXXXXXXXXXX.
-#' @param cutoff_function XXXXXX
-#' @param trim_function XXXXXX
-#' @param alpha Numeric value in \eqn{[0, 1]} indicating the significance for
-#'     cutoff_function.
-#' @param final_verify (Optional) Boolean value XXXXXXXXXXXXX
+#' @inheritParams change
+#' @param ... Additional arguments passed into method
 #'
-#' Indicates if a final pass looking at sequences with only one change point
-#'     should be conducted to verify results. Note, this may modify existing
-#'     locations of change points, potentially to less accurate locations.
-#' @param silent (Optional) Boolean value
-#'
-#' Indicates if useful output should be silenced. Default FALSE shows output.
-#' @param ... Additional arguments passed into test_statistic_function
-#'
-#' @return A list of numeric values indicating change points  (if exists),
-#'     NA otherwise
+#' @return A data.frame of numeric values indicating change points and pvalues
 #'
 #' @noRd
 #' @keywords internal
@@ -64,20 +49,10 @@
 #' This (internal) function is multiple .single_binary_segmentation for
 #'     complete_binary_segmentation. It recursively calls itself
 #'
-#' @param X Numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
+#' @inheritParams change
+#' @param ... Additional arguments passed into method
 #'
-#' @param test_statistic_function Function with the first argument being data.
-#'     Additional arguments passed in via ... . Return the selected change point.
-#'     Give this or test_statistic_function.
-#' @param alpha (Optional) Numeric value in \[0,1\] indicating the significance.
-#' @param addAmt (Optional) Default 0. This adds a number to shift change points.
-#'               Used for recursive calls, likely no need to change.
-#' @param silent (Optional) Boolean indicating if output should be given. Default
-#'               is FALSE (meaning print output).
-#' @param ... (Optional) Additional parameters for the functions.
-#'
-#' @return Vector of detected change point locations
+#' @return A data.frame of numeric values indicating change points and pvalues
 #'
 #' @noRd
 #' @keywords internal
@@ -145,12 +120,11 @@
 #' This function implements traditional binary segmentation on functional data
 #'     for general functions. At most one change point is detected.
 #'
-#' @inheritParams generalized_binary_segmentation
-#' @param trim_function XXXXX
-#' @param include_value XXXXX
 #'
-#' @return A numeric value indicating the cutoff location (if exists),
-#'     NA otherwise
+#' @inheritParams change
+#' @param ... Additional arguments passed into method
+#'
+#' @return A data.frame of numeric values indicating change points and pvalues
 #'
 #' @noRd
 #' @keywords internal
@@ -174,25 +148,11 @@
 #'
 #' This (internal) function is used to verify change points.
 #'
-#' @param data dfts object or numeric data.frame with rows for evaluated values and columns
-#'    indicating FD
-#' @param changes_info Numeric vector indicating change point locations (empty vector
-#'     used if no change point detected)
-#' @param test_statistic_function Function with the first argument being data
-#'     and the second argument optional argument for candidate change points.
-#'     Additional arguments passed in via ... . Return a single numeric value.
-#' @param cutoff_function Function with first argument being data and the second
-#'     argument being alpha. No other arguments given. Return single numeric
-#'     value.
-#' @param trim_function Function taking data as an argument and returning a
-#'     numeric value indicating how much should be trimmed on each end
-#' @param alpha Numeric value in \[0,1\] indicating the significance for
-#'     cutoff_function.
-#' @param silent Boolean to indicate if progress output should be printed
-#' @param ... Additional inputs to pass to the given functions
+#' @inheritParams change
+#' @param changes_info A data.frame of numeric values indicating change points and pvalues
+#' @param ... Additional arguments passed into method
 #'
-#' @return changes_info Numeric vector indicating change point locations (NA if no
-#'     change points are detected)
+#' @return A data.frame of numeric values indicating change points and pvalues
 #'
 #' @noRd
 #' @keywords internal

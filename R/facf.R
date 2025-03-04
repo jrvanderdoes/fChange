@@ -43,14 +43,6 @@ pacf.default <- function(x, lag.max = NULL, ...) stats::pacf(x)
 
 #' Obtain the autocorrelation function for a given functional time series.
 #'
-#' Estimate the lagged autocorrelation function for a given
-#'  functional time series and its distribution under the
-#'  hypothesis of strong functional white noise. This graphic tool
-#'  can be used to identify seasonal patterns in the functional
-#'  data as well as auto-regressive or moving average terms.
-#'  Strong white noise is included and weak white noise can also be included to
-#'  test the presence of serial correlation in the data.
-#'
 #' @param alpha A value between 0 and 1 that indicates significant level for
 #'  the confidence interval for the i.i.d. bounds of the autocorrelation
 #'  function. By default \code{alpha = 0.95}.
@@ -240,7 +232,6 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   function(x, autocovSurface, matindex, nsims= 10000){
     x <- dfts(x)
 
-    # TODO:: Update Means
     # # mat.means <- matrix(rep(colMeans(Y),nrow(Y)),ncol=ncol(Y),byrow = TRUE)
     # # l <- obtain_autocov_eigenvalues(v,Y - mat.means)
     # means <- matrix(rep(rowMeans(x$data),ncol(x$data)), nrow=nrow(x$data))
@@ -565,10 +556,6 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
 
 
 #' Obtain the partial autocorrelation function for a given FTS.
-#'
-#' Estimate the partial autocorrelation function for a given functional
-#'  time series and its distribution under the hypothesis of strong
-#'  functional white noise.
 #'
 #' @param n_pcs Number of principal components
 #' that will be used to fit the ARH(p) models.
