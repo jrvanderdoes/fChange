@@ -172,7 +172,7 @@ pca.dfts <- function(object, TVE = 1, ...){
   }
 
   ## TODO:: Check out
-  new_rot <- pc$rotation[,1:min_pc,drop=FALSE]*sqrt(nrow(object$data))
+  new_rot <- pc$rotation[,1:min_pc,drop=FALSE] * sqrt(nrow(object$data))
 
   # scores <- matrix(NA, nrow=ncol(x$data),ncol = min_pc)
   # for(i in 1:ncol(x$data)){
