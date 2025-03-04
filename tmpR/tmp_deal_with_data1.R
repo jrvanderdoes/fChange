@@ -1,13 +1,13 @@
 library(ggplot2)
 
-# CPsVals=complete_binary_segmentation(electricity, test_statistic_function=compute_Mn,
+# changesVals=complete_binary_segmentation(electricity, test_statistic_function=compute_Mn,
 #                              fn=compute_Mn,
 #                              cutoff_function = generalized_resampling,
 #                              trim_function = trim_function,
 #                              alpha = 0.05,
 #                              iters=1000,
 #                              M=1000)
-# changepoint_verification(CPsVals=CPsVals, data=electricity,
+# changepoint_verification(changesVals=changesVals, data=electricity,
 #                          test_statistic_function=compute_Mn,
 #                          fn=compute_Mn,
 #                          cutoff_function = generalized_resampling,
@@ -24,15 +24,15 @@ results_elec <- elbow_method(data = electricity, test_statistic_function=compute
                              iters=1000,
                              M=5000)
 print(results_elec[[2]])
-use_cp <- changepoint_verification(CPsVals = results_elec[[1]]$CP[2:4],
+use_cp <- changepoint_verification(changesVals = results_elec[[1]]$CP[2:4],
                                    data = electricity,
                                    test_statistic_function=compute_Mn,
                                    fn=compute_Mn,
                                    cutoff_function = generalized_resampling,
                                    trim_function = trim_function,
                                    M=5000, iters=1000, alpha=0.05)
-plot_fd(electricity,CPs=results_elec[[1]]$CP[2:4])
-plot_fd(electricity,CPs=use_cp)
+plot_fd(electricity,changes=results_elec[[1]]$CP[2:4])
+plot_fd(electricity,changes=use_cp)
 
 ##
 results_elec_no <- elbow_method(data=electricity,
@@ -44,15 +44,15 @@ results_elec_no <- elbow_method(data=electricity,
                                 iters=1000,
                                 M=5000)
 print(results_elec_no[[2]])
-use_cp1 <- changepoint_verification(CPsVals = results_elec_no[[1]]$CP[2:11],
+use_cp1 <- changepoint_verification(changesVals = results_elec_no[[1]]$CP[2:11],
                                     data = electricity,
                                     test_statistic_function=compute_Mn,
                                     fn=compute_Mn,
                                     cutoff_function = generalized_resampling,
                                     trim_function = function(dat, ...){0},
                                     M=5000, iters=1000, alpha=0.05)
-plot_fd(electricity,CPs=results_elec_no[[1]]$CP[2:11])
-plot_fd(electricity,CPs=use_cp1)
+plot_fd(electricity,changes=results_elec_no[[1]]$CP[2:11])
+plot_fd(electricity,changes=use_cp1)
 
 ##############
 #     Take out Mean Change then Distribution
@@ -67,14 +67,14 @@ results_elec_mean1 <- elbow_method(data = electricity,
                                    trim_function = function(dat, ...){0},
                                    alpha = 0.05)
 results_elec_mean1[[2]]
-use_cp2 <- changepoint_verification(CPsVals = results_elec_mean1[[1]]$CP[2:7],
+use_cp2 <- changepoint_verification(changesVals = results_elec_mean1[[1]]$CP[2:7],
                                     data = electricity,
                                     test_statistic_function=compute_mean_stat,
                                     fn=compute_mean_stat,
                                     cutoff_function = compute_mean_cutoff,
                                     trim_function = function(dat, ...){0},
                                     alpha = 0.05)
-plot_fd(electricity,CPs=use_cp2)
+plot_fd(electricity,changes=use_cp2)
 
 segs <- list()
 use_cp2_all <- c(0,use_cp2,ncol(electricity))
@@ -89,7 +89,7 @@ for(i in 1:(length(use_cp2_all)-1)){
                       final_verify = T,
                       errorType='Tr') + use_cp2_all[[i]]
 }
-plot_fd(electricity,CPs= c(use_cp2,unlist(segs)[!is.na(unlist(segs))]))
+plot_fd(electricity,changes= c(use_cp2,unlist(segs)[!is.na(unlist(segs))]))
 saveRDS(c(use_cp2,unlist(segs)[!is.na(unlist(segs))]),
         file='C:/Users/Jeremy/Downloads/elbowplots+/New/elbow_mean_v_full_Mn_v.RDS')
 
@@ -114,9 +114,9 @@ dist_seg <- complete_binary_segmentation(
   errorType='Tr')
 
 if(!is.na(dist_seg))
-  plot_fd(electricity,CPs= c(use_cp2,dist_seg))
+  plot_fd(electricity,changes= c(use_cp2,dist_seg))
 if(is.na(dist_seg))
-  plot_fd(electricity,CPs= use_cp2)
+  plot_fd(electricity,changes= use_cp2)
 
 ##############
 dist_seg <- complete_binary_segmentation(
@@ -139,15 +139,15 @@ results_syd <- elbow_method(aust_tmp2, test_statistic_function=compute_Mn,
                             iters=1000,
                             M=5000)
 print(results_syd[[2]])
-use_cp4 <- changepoint_verification(CPsVals = results_syd[[1]]$CP[2:3],
+use_cp4 <- changepoint_verification(changesVals = results_syd[[1]]$CP[2:3],
                                     data = aust_tmp2,
                                     test_statistic_function=compute_Mn,
                                     fn=compute_Mn,
                                     cutoff_function = generalized_resampling,
                                     trim_function = trim_function,
                                     M=5000, iters=1000, alpha=0.05)
-plot_fd(aust_tmp2,CPs=results_syd[[1]]$CP[2:3])
-plot_fd(aust_tmp2,CPs=use_cp4)
+plot_fd(aust_tmp2,changes=results_syd[[1]]$CP[2:3])
+plot_fd(aust_tmp2,changes=use_cp4)
 
 
 results_syd_no <- elbow_method(aust_tmp2, test_statistic_function=compute_Mn,
@@ -158,15 +158,15 @@ results_syd_no <- elbow_method(aust_tmp2, test_statistic_function=compute_Mn,
                                iters=1000,
                                M=5000)
 results_syd_no[[2]]
-use_cp5 <- changepoint_verification(CPsVals = results_syd_no[[1]]$CP[2:5],
+use_cp5 <- changepoint_verification(changesVals = results_syd_no[[1]]$CP[2:5],
                                     data = aust_tmp2,
                                     test_statistic_function=compute_Mn,
                                     fn=compute_Mn,
                                     cutoff_function = generalized_resampling,
                                     trim_function = function(dat, ...){0},
                                     M=5000, iters=1000, alpha=0.05)
-plot_fd(aust_tmp2,CPs=results_syd_no[[1]]$CP[2:5])
-plot_fd(aust_tmp2,CPs=use_cp5)
+plot_fd(aust_tmp2,changes=results_syd_no[[1]]$CP[2:5])
+plot_fd(aust_tmp2,changes=use_cp5)
 
 
 ##############
@@ -179,7 +179,7 @@ results_syd_mean1 <- elbow_method(data = aust_tmp2,
                                    trim_function = function(dat, ...){0},
                                    alpha = 0.05)
 results_syd_mean1[[2]]
-use_cp_syd <- changepoint_verification(CPsVals = results_syd_mean1[[1]]$CP[2:3],
+use_cp_syd <- changepoint_verification(changesVals = results_syd_mean1[[1]]$CP[2:3],
                                     data = aust_tmp2,
                                     test_statistic_function=compute_mean_stat,
                                     fn=compute_mean_stat,
@@ -202,7 +202,7 @@ for(i in 1:(length(use_cp_syd_all)-1)){
     final_verify = T,
     errorType='Tr') + use_cp_syd_all[[i]]
 }
-plot_fd(aust_tmp2,CPs= c(use_cp_syd,unlist(segs_syd)[!is.na(unlist(segs_syd))]))
+plot_fd(aust_tmp2,changes= c(use_cp_syd,unlist(segs_syd)[!is.na(unlist(segs_syd))]))
 #saveRDS(c(use_cp_syd,unlist(segs_syd)[!is.na(unlist(segs_syd))]),
 #        file='C:/Users/Jeremy/Downloads/elbowplots+/New/syd_elbow_mean_v_full_Mn_v.RDS')
 
@@ -232,6 +232,6 @@ dist_seg <- complete_binary_segmentation(
     errorType='Tr')
 dist_seg
 if(!is.na(dist_seg))
-  plot_fd(aust_tmp2,CPs= c(use_cp_syd,dist_seg))
+  plot_fd(aust_tmp2,changes= c(use_cp_syd,dist_seg))
 if(is.na(dist_seg))
-  plot_fd(aust_tmp2,CPs= use_cp_syd)
+  plot_fd(aust_tmp2,changes= use_cp_syd)

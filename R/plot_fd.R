@@ -1,14 +1,12 @@
 #' Plot functional data
 #'
-#' \code{plot_fd} plots functional data either in an fd object or evaluated at certain points
+#' \code{.plot_fd} plots functional data either in an fd object or evaluated at certain points
 #'
-#' @param data funts object or data.frame of evaluated fd objects (the columns being lines and
-#'     the rows the evaluated points)
-#' @param CPs (Optional) Vectors of numeric values indicating the location of
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
+#' @param changes (Optional) Vectors of numeric values indicating the location of
 #'     change points. This will color each section differently. Default vallue
 #'     is NULL.
-#' @param curve_points (Optional) An vector containing the points at which the
-#'     data was evaluated. Default is 1:nrow(data)
 #' @param plot_title (Optional) String to title the plot. Default value is NULL.
 #' @param val_axis_title (Optional) String to title the axis for values of
 #'     observation. Default value is 'Value'.
@@ -16,8 +14,6 @@
 #'     range axis (observations in an FD object). Default value is 'resolution'.
 #' @param FD_axis_title (Optional) String to title the axis for FD observations.
 #'     Default value is 'Observation'.
-#' @param FDReps (Optional) Vector of values for FD observation names. Default
-#'     value is 1:ncol(data).
 #' @param eye (Optional) List with certain parameters to determine the view of
 #'     the resulting image. The default value is list(x = -1.5, y = -1.5, z = 1.5).
 #' @param aspectratio (Optional) List with certain parameters to determine the
@@ -34,37 +30,51 @@
 #'
 #' @return A plot for the data. It is an interactive plotly plot if
 #'  interactive is FALSE (default) and a lattice plot if TRUE.
-#' @export
+#'
+#' @noRd
+#' @keywords internal
 #'
 #' @examples
-#' plot_fd(data = electricity[, 1:10])
-#' plot_fd(data = electricity[, 1:50], CPs = c(25))
-#' plot_fd(
-#'   data = electricity, CPs = c(50, 150, 220, 300),
-#'   interactive = FALSE, showticklabels = FALSE
-#' )
-plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = NULL,
-                    val_axis_title = "Value", res_axis_title = "resolution",
-                    FD_axis_title = "Observations", FDReps = 1:ncol(data),
+#' #.plot_fd(X = electricity$data[, 1:10])
+#' #.plot_fd(X = electricity$data[, 1:50], changes = c(25))
+#' #.plot_fd(
+#' #  X = electricity, changes = c(50, 150, 220, 300),
+#' #  interactive = FALSE, showticklabels = FALSE
+#' #)
+.plot_fd <- function(X, changes = NULL, plot_title = X$name,
+                    val_axis_title = "Value",
+                    res_axis_title = "Intratime",
+                    FD_axis_title = "Observations",
                     eye = list(x = -1.5, y = -1.5, z = 1.5),
-                    aspectratio = list(x = 1, y = 1, z = 1),
+                    aspectratio = NULL,
                     showticklabels = TRUE, interactive = TRUE) {
-  data <- .check_data(data)
+  # Setup
+  if(is.null(eye)) eye <- list(x = -1.5, y = -1.5, z = 1.5)
+  if(is.null(val_axis_title)) val_axis_title = ''
+  if(is.null(res_axis_title)) res_axis_title = ''
+  if(is.null(FD_axis_title)) FD_axis_title = ''
+
+  X <- dfts(X,inc.warnings = FALSE)
+  if(!is.null(changes)) changes <- changes[order(changes)]
 
   if (!interactive) {
+    if(is.null(aspectratio)) aspectratio <- c(2.5, 0.75, 1)
+
     fdPlot <- .plot_evalfd_highdim(
-      data = data$data, curve_points = curve_points,
-      CPs = CPs, plot_title = plot_title,
+      X = X,
+      changes = changes, plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
       FD_axis_title = FD_axis_title,
       aspectratio = aspectratio,
       showticklabels = showticklabels
     )
-  } else if (!is.null(CPs) && length(stats::na.omit(CPs)) > 0) {
-    fdPlot <- .plot_evalfd_3dlines_cps(
-      data = data$data, curve_points = curve_points,
-      CPs = CPs[order(CPs)], plot_title = plot_title,
+  } else if (!is.null(changes) && length(stats::na.omit(changes)) > 0) {
+    if(is.null(aspectratio)) aspectratio <- list(x = 1, y = 1, z = 1)
+
+    fdPlot <- .plot_evalfd_3dlines_changes(
+      X = X,
+      changes = changes, plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
       FD_axis_title = FD_axis_title,
@@ -72,12 +82,14 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
       showticklabels = showticklabels
     ) # ,FDReps)
   } else {
+    if(is.null(aspectratio)) aspectratio <- list(x = 1, y = 1, z = 1)
+
     fdPlot <- .plot_evalfd_3dlines(
-      data = data$data, curve_points = curve_points,
+      X=X,
       plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
-      FD_axis_title = FD_axis_title, FDReps = FDReps,
+      FD_axis_title = FD_axis_title,
       eye = eye, aspectratio = aspectratio,
       showticklabels = showticklabels
     )
@@ -92,35 +104,28 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
 #' This (internal) function to plot the function data, with no coloring based on
 #'     change points.
 #'
-#' @inheritParams plot_fd
+#' @inheritParams .plot_fd
 #'
 #' @return A plotly plot
 #'
 #' @noRd
-.plot_evalfd_3dlines <- function(data, curve_points, plot_title = NULL,
+#' @keywords internal
+.plot_evalfd_3dlines <- function(X, plot_title = NULL,
                                  val_axis_title = "Value",
-                                 res_axis_title = "Resolution",
-                                 FD_axis_title = "Observation",
-                                 FDReps = 1:ncol(data),
+                                 res_axis_title = "Intratime",
+                                 FD_axis_title = "Observations",
                                  eye = list(x = -1.5, y = -1.5, z = 1.5),
                                  aspectratio = list(x = 1, y = 1, z = 1),
                                  showticklabels = TRUE) {
-  number <- length(data[1, ])
-  valRange <- c(min(data), max(data))
 
-  plotData <- data.frame(
-    "resolution" = curve_points,
-    "FDRep" = FDReps[1],
-    "Value" = data[, 1]
-  )
-
-  for (i in 2:number) {
+  plotData <- data.frame()
+  for (i in 1:ncol(X)) {
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = curve_points,
-        "FDRep" = FDReps[i],
-        "Value" = as.factor(data[, i])
+        "resolution" = X$intratime,
+        "FDRep" = i, #X$labels[i],
+        "Value" = X$data[,i]
       )
     )
   }
@@ -131,39 +136,68 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
     aspectratio = aspectratio
   )
 
-  tmpColors <- RColorBrewer::brewer.pal(11, "Spectral")
-  tmpColors[6] <- "yellow"
+  plot_colors <- RColorBrewer::brewer.pal(11, "Spectral")
+  plot_colors[6] <- "yellow"
 
-  magrittr::`%>%`(
-    magrittr::`%>%`(
-      magrittr::`%>%`(
-        plotly::plot_ly(plotData,
-          x = ~FDRep, y = ~resolution, z = ~Value,
-          type = "scatter3d", mode = "lines",
-          color = ~ as.factor(FDRep),
-          colors = tmpColors
+  plotly::plot_ly(plotData,
+                  x = ~FDRep, y = ~resolution, z = ~Value,
+                  type = "scatter3d", mode = "lines",
+                  color = ~ as.factor(FDRep),
+                  colors = plot_colors
+  ) %>%
+    plotly::layout(
+      scene = list(
+        yaxis = list(
+          title = res_axis_title,
+          showticklabels = showticklabels,
+          ticktext=round(seq(min(X$intratime),max(X$intratime),length.out=5),3),
+          tickvals=.select_n(vals=seq(min(X$intratime),max(X$intratime),length.out=5), n=5)
         ),
-        plotly::layout(
-          scene = list(
-            yaxis = list(
-              title = res_axis_title,
-              showticklabels = showticklabels
-            ),
-            xaxis = list(
-              title = FD_axis_title,
-              showticklabels = showticklabels
-            ),
-            zaxis = list(
-              title = val_axis_title,
-              showticklabels = showticklabels
-            )
-          )
+        xaxis = list(
+          title = FD_axis_title,
+          showticklabels = showticklabels,
+          ticktext=.select_n(vals=X$labels, n=6),
+          tickvals=.select_n(vals=1:length(X$labels), n=6)
+        ),
+        zaxis = list(
+          title = val_axis_title,
+          showticklabels = showticklabels
         )
-      ),
-      plotly::layout(title = plot_title, scene = scene)
-    ),
+      )
+    ) %>%
+    plotly::layout(title = plot_title, scene = scene) %>%
     plotly::layout(showlegend = FALSE)
-  )
+
+  # magrittr::`%>%`(
+  #   magrittr::`%>%`(
+  #     magrittr::`%>%`(
+  #       plotly::plot_ly(plotData,
+  #         x = ~FDRep, y = ~resolution, z = ~Value,
+  #         type = "scatter3d", mode = "lines",
+  #         color = ~ as.factor(FDRep),
+  #         colors = plot_colors
+  #       ),
+  #       plotly::layout(
+  #         scene = list(
+  #           yaxis = list(
+  #             title = res_axis_title,
+  #             showticklabels = showticklabels
+  #           ),
+  #           xaxis = list(
+  #             title = FD_axis_title,
+  #             showticklabels = showticklabels
+  #           ),
+  #           zaxis = list(
+  #             title = val_axis_title,
+  #             showticklabels = showticklabels
+  #           )
+  #         )
+  #       )
+  #     ),
+  #     plotly::layout(title = plot_title, scene = scene)
+  #   ),
+  #   plotly::layout(showlegend = FALSE)
+  # )
 
   # plotly::plot_ly(plotData,
   #                x = ~as.factor(FDRep), y = ~resolution, z = ~Value,
@@ -190,67 +224,60 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
 #' This (internal) function to plot the function data, with coloring based on
 #'     change points.
 #'
-#' @inheritParams plot_fd
-#' @param CPs Vectors of numeric values indicating the location of change points.
+#' @inheritParams .plot_fd
+#' @param changes Vectors of numeric values indicating the location of change points.
 #'     This will color each section differently.
 #'
 #' @return A plotly plot
 #'
 #' @noRd
-.plot_evalfd_3dlines_cps <- function(data, curve_points, CPs,
+#' @keywords internal
+.plot_evalfd_3dlines_changes <- function(X, changes,
                                      plot_title = NULL,
                                      val_axis_title = "Value",
-                                     res_axis_title = "resolution",
-                                     FD_axis_title = "FD Sims",
+                                     res_axis_title = "Intratime",
+                                     FD_axis_title = "Observations",
                                      eye = list(x = -1.5, y = -1.5, z = 1.5),
                                      aspectratio = list(x = 1, y = 1, z = 1),
                                      showticklabels = TRUE) {
-  number <- length(data[1, ])
-  valRange <- c(min(data), max(data))
-
-  plotData <- data.frame(
-    "resolution" = NA,
-    "FDRep" = NA,
-    "Color" = NA,
-    "Value" = NA
-  )[-1, ]
+  plotData <- data.frame()
 
   # Color Group to first CP
-  for (j in 1:min(CPs)) {
+  for (j in 1:min(changes)) {
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = curve_points,
+        "resolution" = X$intratime,
         "FDRep" = j,
         "Color" = 1,
-        "Value" = data[, j]
+        "Value" = X$data[, j]
       )
     )
   }
   # Color Group from last CP
-  for (j in (max(CPs) + 1):number) {
+  for (j in (max(changes) + 1):ncol(X)) {
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = curve_points,
+        "resolution" = X$intratime,
         "FDRep" = j,
-        "Color" = length(CPs) + 1,
-        "Value" = data[, j]
+        "Color" = length(changes) + 1,
+        "Value" = X$data[, j]
       )
     )
   }
 
   # Color Additional Groups
-  if (length(CPs) > 1) {
-    for (i in 2:length(CPs)) {
-      for (j in (CPs[i - 1] + 1):CPs[i]) {
+  if (length(changes) > 1) {
+    for (i in 2:length(changes)) {
+      for (j in (changes[i - 1] + 1):changes[i]) {
         plotData <- rbind(
           plotData,
           data.frame(
-            "resolution" = curve_points,
+            "resolution" = X$intratime,
             "FDRep" = j,
             "Color" = i,
-            "Value" = data[, j]
+            "Value" = X$data[, j]
           )
         )
       }
@@ -264,61 +291,89 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
   )
 
   # Get Colors
-  tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-  if (length(CPs) > 9) {
-    tmpColors <- rep(tmpColors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+  tmpColors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+  if (length(changes) > 9) {
+    tmpColors <- rep(tmpColors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
   }
 
-  magrittr::`%>%`(
-    magrittr::`%>%`(
-      magrittr::`%>%`(
-        plotly::plot_ly(plotData,
-          x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
-          type = "scatter3d", mode = "lines",
-          split = ~ as.factor(FDRep),
-          color = ~ as.factor(Color),
-          colors = tmpColors
+  # magrittr::`%>%`(
+  #   magrittr::`%>%`(
+  #     magrittr::`%>%`(
+  #       plotly::plot_ly(plotData,
+  #         x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
+  #         type = "scatter3d", mode = "lines",
+  #         split = ~ as.factor(FDRep),
+  #         color = ~ as.factor(Color),
+  #         colors = tmpColors
+  #       ),
+  #       plotly::layout(
+  #         scene = list(
+  #           yaxis = list(
+  #             title = res_axis_title,
+  #             showticklabels = showticklabels
+  #           ),
+  #           xaxis = list(
+  #             title = FD_axis_title,
+  #             showticklabels = showticklabels
+  #           ),
+  #           zaxis = list(
+  #             title = val_axis_title,
+  #             showticklabels = showticklabels
+  #           )
+  #         )
+  #       )
+  #     ),
+  #     plotly::layout(title = plot_title, scene = scene)
+  #   ),
+  #   plotly::layout(showlegend = FALSE)
+  # )
+  plotly::plot_ly(plotData,
+                  x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
+                  type = "scatter3d", mode = "lines",
+                  split = ~ as.factor(FDRep),
+                  color = ~ as.factor(Color),
+                  colors = tmpColors
+  ) %>%
+    plotly::layout(
+      scene = list(
+        yaxis = list(
+          title = res_axis_title,
+          showticklabels = showticklabels
         ),
-        plotly::layout(
-          scene = list(
-            yaxis = list(
-              title = res_axis_title,
-              showticklabels = showticklabels
-            ),
-            xaxis = list(
-              title = FD_axis_title,
-              showticklabels = showticklabels
-            ),
-            zaxis = list(
-              title = val_axis_title,
-              showticklabels = showticklabels
-            )
-          )
+        xaxis = list(
+          title = FD_axis_title,
+          showticklabels = showticklabels
+        ),
+        zaxis = list(
+          title = val_axis_title,
+          showticklabels = showticklabels
         )
-      ),
-      plotly::layout(title = plot_title, scene = scene)
-    ),
+      )
+    ) %>%
+    plotly::layout(title = plot_title, scene = scene) %>%
     plotly::layout(showlegend = FALSE)
-  )
 }
 
 
 #' Plot With Surface for Speed
 #'
-#' @inheritParams plot_fd
+#' @inheritParams .plot_fd
 #' @param aspectratio (Optional) List with certain parameters to determine the
 #'     image size parameters. The default value is c(2.5,.75,1). Also any lists
-#'     are converted to this (as it is likely from default call `in plot_fd()`).
+#'     are converted to this (as it is likely from default call in
+#'     \code{.plot_fd()}).
 #'
 #' @return A lattice plot
 #'
 #' @noRd
-.plot_evalfd_highdim <- function(data, curve_points, CPs = NULL,
-                                 plot_title = NULL, val_axis_title = NULL,
+#' @keywords internal
+.plot_evalfd_highdim <- function(X, changes = NULL,
+                                 plot_title = NULL,
+                                 val_axis_title = NULL,
                                  res_axis_title = NULL,
                                  FD_axis_title = NULL,
                                  aspectratio = c(2.5, .75, 1),
-                                 showticklabels = FALSE) {
+                                 showticklabels = TRUE) {
   if (!requireNamespace("lattice", quietly = TRUE)) {
     stop(
       "Package \"lattice\" must be installed to use this function.",
@@ -326,97 +381,90 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
     )
   }
 
-  # This resets ratio, since default was likely used
-  if (is.list(aspectratio)) aspectratio <- c(2.5, 0.75, 1)
-
-  number <- length(data[1, ])
+  # data <- X$data
+  # curve_points <- X$intratime
   valRange <- c(
-    floor(min(data)),
-    ceiling(max(data))
+    floor(min(X$data,na.rm = T)),
+    ceiling(max(X$data,na.rm = T))
   )
 
-  plotData <- data.frame(
-    "resolution" = curve_points,
-    "FDRep" = 1,
-    "Value" = data[, 1]
-  )
-
-  for (i in 2:number) {
-    plotData <- rbind(
-      plotData,
-      data.frame(
-        "resolution" = curve_points,
-        "FDRep" = i,
-        "Value" = data[, i]
-      )
-    )
-  }
+  name <- V1 <- value <- NULL
+  data1 <- X$data
+  colnames(data1) <- 1:ncol(X)
+  plotData <- cbind(X$intratime,data1) %>%
+    as.data.frame() %>%
+    tidyr::pivot_longer(cols = 1+1:ncol(X)) %>%
+    dplyr::mutate(name=as.numeric(name)) %>%
+    dplyr::rename(resolution=V1,
+           Value=value,
+           FDRep=name)
+  plotData <- plotData[order(plotData$FDRep),]
 
   ## Setup up Colors
-  #   Rainbow for no CPs, colored for CPs
-  plotData[["color"]] <- rep(1:ncol(data), each = nrow(data))
-  if (!is.null(CPs)) {
-    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-    if (length(CPs) > 9) {
-      tmp_colors <- rep(tmp_colors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+  #   Rainbow for no changes, colored for changes
+  plotData[["color"]] <- rep(1:ncol(X), each = nrow(X))
+  if (!is.null(changes)) {
+    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+    if (length(changes) > 9) {
+      tmp_colors <- rep(tmp_colors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
     }
 
-    CPs <- unique(c(1, CPs, ncol(data)))
-    colors_plot <- rep(tmp_colors[1], ncol(data))
-    for (i in 2:(length(CPs) - 1)) {
-      colors_plot[CPs[i]:CPs[i + 1]] <- tmp_colors[i]
+    changes <- unique(c(1, changes, ncol(X)))
+    colors_plot <- rep(tmp_colors[1], ncol(X))
+    for (i in 2:(length(changes) - 1)) {
+      colors_plot[changes[i]:changes[i + 1]] <- tmp_colors[i]
     }
   } else {
     colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
     colors_plot[6] <- "yellow"
-    colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(data))
-    plotData[["color"]] <- rep(colors_plot,
-      each = nrow(data)
-    )
+    colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(X))
   }
+  plotData[["color"]] <- rep(colors_plot, each = nrow(X) )
 
   ## Set up Tick Labels
-  z_range <- round(range(plotData$Value), -2)
+  #   TODO:: Test more thoroughly
+  r_z <- range(plotData$Value,na.rm = T)
+  r_z[2] <- r_z[2]+4
+  z_range <- round(r_z, -nchar(round(max(plotData$Value,na.rm = TRUE)))+1)
+
   if (showticklabels) {
     scale_info <- list(
-      col = "black", arrows = FALSE, cex = 0.75, cex.title = 1.5,
+      col = "black", arrows = FALSE, cex = 1.2,
       x = list(
-        at = seq(min(curve_points),
-          max(curve_points),
+        at = seq(min(X$intratime),
+          max(X$intratime),
           length.out = 5
         ),
-        # labels=.specify_decimal(rev(seq(max(curve_points),
-        #                                 min(curve_points),
-        #                                 length.out=4)),2)),
+        # labels=.specify_decimal(seq(max(X$intratime),
+        #                                 min(X$intratime),
+        #                                 length.out=5),2)
         labels = NULL
       ),
       y = list(
-        at = -seq(1, number, length.out = 8),
-        labels = .specify_decimal(
-          seq(1, number, length.out = 8), 0
-        )
+        at = -seq(1, ncol(X), length.out = 7),
+        labels = X$labels[seq(1, ncol(X), length.out = 7)]
       ),
       z = list(
         at = seq(z_range[1], z_range[2],
           length.out = 5
         ),
-        labels = .specify_decimal(
-          seq(z_range[1], z_range[2], length.out = 5), 0
-        )
+        labels = c('',.specify_decimal(
+          seq(z_range[1], z_range[2], length.out = 5)[-1], 0
+        ))
       )
     )
   } else {
     scale_info <- list(
-      col = "black", arrows = FALSE, cex = 0.75, cex.title = 1.5,
+      col = "black", arrows = FALSE, cex = 0.75,
       x = list(
-        at = seq(min(curve_points),
-          max(curve_points),
+        at = seq(min(X$intratime),
+          max(X$intratime),
           length.out = 5
         ),
         labels = NULL
       ),
       y = list(
-        at = -seq(1, number, length.out = 8),
+        at = -seq(1, ncol(X), length.out = 7),
         labels = NULL
       ),
       z = list(
@@ -433,23 +481,24 @@ plot_fd <- function(data, CPs = NULL, curve_points = 1:nrow(data), plot_title = 
   lattice::cloud(
     x = Value ~ (resolution) * (-FDRep),
     data = plotData,
-    type = "l", groups = color,
+    type = "l", groups = plotData$FDRep,
     par.box = c(col = "transparent"),
     par.settings =
       list(
         axis.line = list(col = "transparent"),
-        superpose.line = list(col = colors_plot)
+        superpose.line = list(col = (colors_plot))
       ),
     # screen=list(z = 90, x = -75,y=-45),
     # trellis.par.set(list(axis.text=list(cex=2)),
     #                "axis.line",list(col=NA)),
+    xlim = rev(range(X$intratime)),
     zlim = valRange,
     aspect = aspectratio,
     drape = TRUE, colorkey = FALSE,
     scales = scale_info,
-    xlab = list(res_axis_title, rot = 30),
-    ylab = list(paste0("\n", FD_axis_title), rot = -30),
-    zlab = list(val_axis_title, rot = 90, just = 0.75),
+    xlab = list(res_axis_title, rot = 30,cex=1.75),
+    ylab = list(paste0("\n", FD_axis_title), rot = -30,cex=1.75),
+    zlab = list(val_axis_title, rot = 90, just = 0.75,cex=1.75),
     main = plot_title
   )
 }

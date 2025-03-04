@@ -5,49 +5,49 @@
 \title{Imputation}
 \usage{
 impute(
-  data,
-  method = c("zero", "mean_obs", "median_obs", "mean_data", "median_data", "linear"),
+  X,
+  method = c("zero", "mean_obs", "median_obs", "mean_data", "median_data", "linear",
+    "functional"),
   obs_share_data = FALSE
 )
 }
 \arguments{
-\item{data}{funts object}
+\item{X}{A dfts object or data which can be automatically converted to that
+format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{method}{String to indicate method of imputation.
 \itemize{
-zero: Fill missing with 0
-mean_obs: Fill missing with mean of each observation
-median_obs: Fill missing with median of each observation
-mean_data: Fill missing with mean at time through all data
-median_data: Fill missing with median at time through all data
-linear: Linearly interpolate missing data
+\item zero: Fill missing with 0
+\item mean_obs: Fill missing with mean of each observation
+\item median_obs: Fill missing with median of each observation
+\item mean_data: Fill missing with mean at time through all data
+\item median_data: Fill missing with median at time through all data
+\item linear: Linearly interpolate missing data
 }}
 
 \item{obs_share_data}{Boolean in linear interpolation that indicates if
 data should be shared across observations. For example, is the end of
 observation i related to the start of observation i+1. Default is FALSE,
 which suggests independence. If true, the distance between the end and
-start of observations is taken to be the mean of the intraobs.}
+start of observations is taken to be the mean of the intratime.}
 }
 \value{
-funts object with interpolated missing data
+dfts object with interpolated missing data
 }
 \description{
-Imputation
+Impute missing values in functional data.
 }
 \examples{
 temp <- data.frame(c(NA,NA,3:9,NA),
-                   c(NA,rnorm(2),NA, rnorm(6)),
-                   rnorm(10),
-                   c(rnorm(4),rep(NA,3), rnorm(3)),
+                   c(NA,stats::rnorm(2),NA, stats::rnorm(6)),
+                   stats::rnorm(10),
+                   c(stats::rnorm(4),rep(NA,3), stats::rnorm(3)),
                    rep(NA,10),
-                   c(rnorm(1), rep(NA,9)),
-                   c(rnorm(9),NA),
-                   rnorm(10),
-                   rnorm(10),
+                   c(stats::rnorm(1), rep(NA,9)),
+                   c(stats::rnorm(9),NA),
+                   stats::rnorm(10),
+                   stats::rnorm(10),
                    c(NA,NA,3:9, NA))
 impute(temp, method='mean_obs')
-impute(temp, method='mean_data')
-impute(temp, method='linear')
 impute(temp, method='linear', obs_share_data=TRUE)
 }

@@ -5,32 +5,38 @@
 \alias{center.default}
 \alias{center.data.frame}
 \alias{center.matrix}
-\alias{center.funts}
+\alias{center.dfts}
 \title{Generic Centering of Data}
 \usage{
-center(x, ...)
+center(object, changes = NULL, type = "mean", ...)
 
-\method{center}{default}(x, ...)
+\method{center}{default}(object, changes = NULL, type = "mean", ...)
 
-\method{center}{data.frame}(x, ...)
+\method{center}{data.frame}(object, changes = NULL, type = "mean", ...)
 
-\method{center}{matrix}(x, ...)
+\method{center}{matrix}(object, changes = NULL, type = "mean", ...)
 
-\method{center}{funts}(x, CPs = NULL, ...)
+\method{center}{dfts}(object, changes = NULL, type = "mean", ...)
 }
 \arguments{
-\item{...}{Additional parameters to function based on data}
-
 \item{object}{Object for computation of centering}
+
+\item{changes}{Change points for centering individual sections.}
+
+\item{type}{String of \code{mean} or \code{median} for method of centering.}
+
+\item{...}{Unused}
 }
 \value{
 Centered data of the same format as the given data
 }
 \description{
 Generic Centering of Data
-
-Center funts data
 }
 \examples{
 center(1:10)
+}
+\seealso{
+\code{\link[=center.default]{center.default()}}, \code{\link[=center.data.frame]{center.data.frame()}},
+\code{\link[=center.matrix]{center.matrix()}}, \code{\link[=center.dfts]{center.dfts()}}
 }

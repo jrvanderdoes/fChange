@@ -83,12 +83,12 @@ SPYUS_ocidr15 <- compute_ocidr(SPYUS_wide_15min)
 SPYUS_ocidr <- compute_ocidr(SPYUS_wide)
 
 set.seed(25641)
-spy_min_cps <- binary_segmentation(SPYUS_ocidr,'Tn','Sim')
+spy_min_changes <- binary_segmentation(SPYUS_ocidr,'Tn','Sim')
 plot_save <- plotData(SPYUS_ocidr)
 plotly::save_image(plot_save,
                    "C:/Users/jerem/Downloads/sp500_ocidr_min_1923.png",
                    width=1600, height=800)
-tmp <- paperPlot(SPYUS_ocidr,spy_min_cps)
+tmp <- paperPlot(SPYUS_ocidr,spy_min_changes)
 plotly::save_image(tmp,
                    "C:/Users/jerem/Downloads/sp500_ocidr_min_changes_1923.png",
                    width=1600, height=800)
@@ -105,12 +105,12 @@ plotly::save_image(plot_save,
 
 
 set.seed(42513)
-spy_cps <- binary_segmentation(SPYUS_ocidr15,'Tn','Sim')
+spy_changes <- binary_segmentation(SPYUS_ocidr15,'Tn','Sim')
 
-tmp <- paperPlot(SPYUS_ocidr15,spy_cps)
+tmp <- paperPlot(SPYUS_ocidr15,spy_changes)
 plotly::save_image(tmp,
                    "C:/Users/jerem/Downloads/sp500_ocidr_changes.png",
                    width=1600, height=800)
 
 set.seed(24132)
-spy_cps1 <- binary_segmentation(SPYUS_cidr15,'Tn','Sim')
+spy_changes1 <- binary_segmentation(SPYUS_cidr15,'Tn','Sim')

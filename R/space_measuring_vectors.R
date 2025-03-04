@@ -7,21 +7,23 @@
 #' @param space String for the space of interest. Options are Brownian motion
 #' ('BM'), OU process ('OU'), principal components ('PC'), and a vectors in iid
 #' standard, random normals ('RN').
-#' @param X Data of interest. Used to know evaluation amount of vectors
+#' @param X A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
 #'
 #' @return Data.frame with columns of vectors describing the space. Columns are
 #'  independent vectors.
 #' @export
 #'
 #' @examples
-#' computeSpaceMeasuringVectors(M=10, space="BM", X=funts(electricity))
-#' #computeSpaceMeasuringVectors(M=10, space="OU", X=funts(electricity))
-#' computeSpaceMeasuringVectors(M=10, space="PC", X=funts(electricity))
-computeSpaceMeasuringVectors <- function(M, space, X) {
-  X <- .check_data(X)
+#' space_measuring_vectors(M=10, space="BM", X=electricity)
+#' #space_measuring_vectors(M=10, space="OU", X=electricity)
+#' space_measuring_vectors(M=10, space="PC", X=electricity)
+space_measuring_vectors <- function(X, M=20, space='BM') {
+  X <- dfts(X)
 
   if (space == "BM") {
-    W <- as.data.frame(sapply(rep(0, M), sde::BM, N = nrow(X$data) - 1))
+    # W <- as.data.frame(sapply(rep(0, M), sde::BM, N = nrow(X$data) - 1))
+    W <- generate_brownian_motion(M,v=seq(0,1,length.out=nrow(X$data)))$data
   } else if (space == "PC") {
     pComps <- stats::prcomp(X$data, center = FALSE, scale = FALSE)
     W <- as.data.frame(sapply(rep(nrow(X$data), M),

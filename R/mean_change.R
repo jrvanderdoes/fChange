@@ -6,97 +6,108 @@
 #'     and hence does not depend on any dimension reduction technique such as
 #'     fPCA.
 #'
-#' @param data funts object or numeric data.frame with evaled points on rows and fd objects in columns
+#' @param data A dfts object or data which can be automatically converted to that
+#'  format. See [dfts()].
+#' @param statistic String \code{Tn} or \code{Mn}, for integrated or maximum test statistic
 #' @param M (Optional) Number of Monte Carlo simulations used to get the critical
 #'     values. The default value is \code{M=1000}
 #' @param  h (Optional) The window parameter parameter for the estimation of the
 #'     long run covariance kernel. The default value is \code{h=0}, i.e., it
 #'     assumes iid data
 #' @param K (Optional) Function indicating the Kernel to use if h>0
-#' @param alpha (Optional) Numeric value indicating significance. Defaults to 0.05
-#' @param inc.pval (Optional) Boolean to indicate if pval should also be returned
-#' @param ... Unused, just for use in other functions
 #'
-#' @export
+#' @noRd
+#' @keywords internal
+#'
 #' @return If inc.pval is false, Numeric of CP location or NA, otherwise
 #'     location or NA and the p-value
 #'
-#' @references Aue A., Rice G., Sonmez O. (2017+), \emph{Detecting and dating structural breaks in
-#'  functional data without dimension reduction} (https://arxiv.org/pdf/1511.04020.pdf)
+#' @references Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural
+#'  breaks in functional data without dimension reduction. Journal of the Royal
+#'  Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
+#'  \url{https://doi.org/10.1111/rssb.12257}
 #'
 #' @examples
-#' mean_change(generate_brownian_motion(500,v=seq(0,1,length.out=25)), M = 250)
-#' mean_change(electricity, M = 250)
-mean_change <- function(data, M = 1000, h = 0,
-                        K = bartlett_kernel) {
-  data <- .check_data(data)
+#' # .change_mean(generate_brownian_motion(500,v=seq(0,1,length.out=25)), M = 250)
+#' # .change_mean(electricity, M = 250)
+.change_mean <- function(data, statistic=c('Mn','Tn'), critical='simulation',
+                         M = 1000, h = 0, K = bartlett_kernel,
+                         blocksize=1, type = 'separate',replace = TRUE) {
+  statistic <- .verify_input(statistic, c('Tn','Mn'))
+  data <- dfts(data)
   data <- center(data)
-  # data1 <- .check_data(data1)
 
-  n <- ncol(data$data)
+  ## Estimate eigenvalues (lambda_i, 1<=i<=d)
+  Ceps <- long_run_covariance(data, h, K) # data1
+  lambda <- eigen(Ceps)$values
+
+  tmp <- .mean_statistic(data$data, statistic,location=TRUE)
+  stat <- tmp[1]
+  k.star <- tmp[2]
+  # # Compute Test statistic
+  # if(statistic=='Tn'){
+  #   stat <- dot_integrate(Sn2)
+  # }else if(statistic=='Mn'){
+  #   stat <- max(Sn2,na.rm = T)
+  # }else{
+  #   stop('Set `statistic` to `Tn` or `Mn`.',call. = FALSE)
+  # }
+
+  if(critical=='simulation'){
+    values_sim <- sapply(1:M, function(k, lambda, n, statistic)
+      .asymp_dist(n, lambda, statistic),
+      lambda = lambda, n = ncol(data), statistic = statistic
+    )
+  } else if(critical=='permutation'){
+    values_sim <- .bootstrap(X = data, blocksize = blocksize, M = M,
+                             type = type, replace = replace, fn = .mean_statistic,
+                             statistic=statistic)
+  }
+
+  p <- sum(stat <= values_sim) / M
+
+
+  list('pvalue' = p, 'location' = k.star,
+       # 'change_fun' = mean(data$data[,1:k.star])-mean(data$data[,(k.star+1):n]),
+       'statistic' = stat, 'simulations' = values_sim)
+}
+
+
+#' Statistic for Mean Change
+#'
+#' @inheritParams .change_mean
+#' @param location Boolean if location should also be returned
+#'
+#' @returns Either (1) the test statistic value or (2) the test statistic value
+#'  and the estimated location
+#'
+#' @noRd
+#' @keywords internal
+.mean_statistic <- function(data, statistic, location=FALSE){
+  n <- ncol(data)
+
   Sn2 <- rep(0, n)
   # CUSUM
   for (k in 1:n) {
     # TODO:: add weights
     # Sn2[k] <- compute_mean_stat(data,k=k,weight=0.5)
-    Sn2[k] <- sum((rowSums(data$data[, 1:k,drop=FALSE]) -
-                     (k / n) * rowSums(data$data))^2)
+    Sn2[k] <- sum((rowSums(data[, 1:k,drop=FALSE]) -
+                     (k / n) * rowSums(data))^2)
   }
   Sn2 <- Sn2 / n
 
-  Tn <- max(Sn2,na.rm = T)
-  k.star <- min(which(Sn2 == max(Sn2,na.rm = T)))
+  # Compute Test statistic
+  if(statistic=='Tn'){
+    stat <- dot_integrate(Sn2)
+  }else if(statistic=='Mn'){
+    stat <- max(Sn2,na.rm = T)
+  }else{
+    stop('Set `statistic` to `Tn` or `Mn`.',call. = FALSE)
+  }
 
-  ## Estimate eigenvalues (lambda_i, 1<=i<=d)
-  Ceps <- .long_run_var(data, h, K) # data1
-  lambda <- eigen(Ceps)$values
+  if(!location) return(stat)
 
-  values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist(n, lambda),
-    lambda = lambda, n = n
-  )
-  p <- sum(Tn <= values_sim) / M # Compute p-value
-  # p <- 1-ecdf(Values)(Tn) # Compute p-value
-
-  dat.b <- funts(data$data[,1:k.star],
-                 intraobs = data$intraobs,
-                 labels = data$labels[1:k.star])
-  dat.a <- funts(data$data[,(k.star+1):n],
-                 intraobs = data$intraobs,
-                 labels = data$labels[(k.star+1):n])
-  mean.b <- mean(dat.b)
-  mean.a <- mean(dat.a)
-  delta <- mean.a - mean.b
-
-  plot1 <- .plot_stack(data,CPs=k.star)
-  # .plot_substack(X,CPs=k.star) ## TODO:: color bands
-
-  plot2 <-
-    ggplot2::ggplot() +
-    ggplot2::geom_line(ggplot2::aes(x=data$intraobs, y=delta)) +
-    ggplot2::geom_hline(ggplot2::aes(yintercept=0),linetype='dotted') +
-    ggplot2::theme_bw() +
-    ggplot2::xlab('') +
-    ggplot2::ylab('')
-
-  list('data_plot'=plot1, 'mean_diff_plot'=plot2,
-       'pvalue' = p, 'change' = k.star,
-       'DataBefore' = dat.b, 'DataAfter' = dat.a,
-       'change_fun' = delta,
-       'Tn' = Tn, 'nullTnSims' = values_sim)
-
-  # ## TODO:: add setting for this
-  # # Just return CP for now
-  # if (p <= alpha) {
-  #   return_val <- k.star
-  # } else {
-  #   return_val <- NA
-  # }
-  #
-  # if (inc.pval) {
-  #   return_val <- c(return_val, p)
-  # }
-  #
-  # return_val
+  c(stat, min(which(Sn2 == max(Sn2,na.rm = T))))
 }
 
 
@@ -111,213 +122,50 @@ mean_change <- function(data, M = 1000, h = 0,
 #' @return Numeric indicating max value of the Brownian bridge
 #'
 #' @noRd
-#'
-#' @examples
-#' .asymp_dist(200, 1:5)
-#' .asymp_dist(200, 1:5)
-.asymp_dist <- function(n, lambda) {
+#' @keywords internal
+.asymp_dist <- function(n, lambda, statistic='Mn') {
   BridgeLam <- matrix(0, length(lambda), n)
-  for (j in (1:length(lambda))) {
-    # TODO:: Use custom
-    BridgeLam[j, ] <- lambda[j] * (sde::BBridge(x = 0, y = 0, t0 = 0, T = 1, N = n - 1)^2)
+
+  BridgeLam <-
+    t(generate_brownian_bridge(length(lambda),v=seq(0,1,length.out=n))$data^2 %*%
+    diag(lambda))
+
+  if(statistic=='Tn'){
+    # for (j in (1:length(lambda))) {
+    #   BridgeLam[j, ] <- lambda[j] * (sde::BBridge(x = 0, y = 0, t0 = 0, T = 1, N = n - 1)^2)
+    # }
+    threshold <- dot_integrate(colSums(BridgeLam))
+
+  } else if(statistic=='Mn'){
+    # for (j in (1:length(lambda))) {
+    #   BridgeLam[j, ] <- lambda[j] * (sde::BBridge(x = 0, y = 0, t0 = 0, T = 1, N = n - 1)^2)
+    # }
+    threshold <- max(colSums(BridgeLam))
   }
-  max(colSums(BridgeLam))
+
+  threshold
 }
 
 
-#' Estimate Long-run Covariance Kernel
-#'
-#' This (internal) function estimates the long-run covariance kernel. That is,
-#'     \eqn{C_{\epsilon}(t,t') = \sum_{l=-\inf}^{\inf} \text{Cov}(\epsilon_0(t),
-#'     \epsilon_l(t'))} with error sequence \eqn{(\epsilon_i : i \in \mathbb{Z})}.
-#'
-#' This is an internal function, see use in mean_change.
-#'
-#' @param data funts object or Numeric data.frame with evaled points on rows and fd objects in columns
-#' @param  h The window parameter parameter for the estimation of the long run covariance kernel. The default
-#'  value is \code{h=0}, i.e., it assumes iid data
-#' @param K (Optional) Function indicating the Kernel to use if h>0
-#'
-#' @return Data.frame of numerics with dim of ncol(data) x ncol(data), that is
-#'     symmetric.
-#'
-#' @noRd
-.long_run_var <- function(data, h, K){
-  data <- .check_data(data)
-  data <- center(data)
-
-  N <- ncol(data$data)
-  D <- nrow(data$data)
-  Ceps <- matrix(NA, nrow = D, ncol = D)
-
-  for (k in 1:D) {
-    for (r in k:D) {
-      # Multiple all observations taken at the same point in time across FDs
-      s <- data$data[k, ] %*% data$data[r, ]
-      if (h > 0) {
-        # Take care of lagged values if important
-        for (i in 1:h) {
-          a <- as.numeric(data$data[k, 1:(N - i)]) %*% as.numeric(data$data[r, (i + 1):N])
-          a <- a + as.numeric(data$data[r, 1:(N - i)]) %*% as.numeric(data$data[k, (i + 1):N])
-          s <- s + K(i/h) * a
-        }
-      }
-      Ceps[k, r] <- Ceps[r, k] <- s
-    }
-  }
-
-  Ceps / N
-}
-
-
-# #' Center Data
+# #' Compute CUSUM Statistic for Mean Change
 # #'
-# #' This (internal) function centers each time point.
+# #' This function is used to compute the CUSUM statistic for a mean change of
+# #'     FD observations.
 # #'
-# #' This is an internal function, see use in .estimateCeps.
+# #' @param data dfts object or numeric data.frame with evaled points on rows and fd objects in columns
+# #' @param k Numeric indicating the change point of interest
+# #' @param ... Unused, just for use in other functions
 # #'
-# #' @param data Numeric data.frame with evaled points on rows and fd objects in columns
-# #'
-# #' @return Numeric data.frame of the data, but with centered values at each time point
+# #' @return Numeric indicating the CUSUM value at the given K value
 # #'
 # #' @noRd
-# .centerData <- function(data) {
-#   data - rowMeans(data)
+# #' @keywords internal
+# .compute_mean_stat <- function(data, k, weight = 0.5) {
+#   data <- dfts(data)
+#   n <- ncol(data$data)
+#   stop('Not tested with weights')
+#   normalizer <- ( (k/n) * ((n-k) / n) )^(-weight)
+#   sum(normalizer * (rowSums(data$data[, 1:k,drop=FALSE]) -
+#          (k / n) * rowSums(data$data))^2) / n
 # }
 
-
-#' Compute CUSUM Statistic for Mean Change
-#'
-#' This function is used to compute the CUSUM statistic for a mean change of
-#'     FD observations.
-#'
-#' @param data funts object or numeric data.frame with evaled points on rows and fd objects in columns
-#' @param k Numeric indicating the change point of interest
-#' @param ... Unused, just for use in other functions
-#'
-#' @return Numeric indicating the CUSUM value at the given K value
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Null Example
-#' data_KL <- generate_data_fd(
-#'   ns = c(100, 100),
-#'   eigsList = list(
-#'     c(3, 2, 1, 0.5),
-#'     c(3, 2, 1, 0.5)
-#'   ),
-#'   basesList = list(
-#'     fda::create.bspline.basis(nbasis = 4, norder = 4),
-#'     fda::create.bspline.basis(nbasis = 4, norder = 4)
-#'   ),
-#'   meansList = c(0, 0),
-#'   distsArray = c("Normal", "Normal"),
-#'   evals = seq(0, 1, 0.05),
-#'   kappasArray = c(0, 0)
-#' )
-#'
-#' compute_mean_stat(data_KL$data, 100)
-#'
-#' # Mean CP Example
-#' data_KL <- generate_data_fd(
-#'   ns = c(100, 100),
-#'   eigsList = list(
-#'     c(3, 2, 1, 0.5),
-#'     c(3, 2, 1, 0.5)
-#'   ),
-#'   basesList = list(
-#'     fda::create.bspline.basis(nbasis = 4, norder = 4),
-#'     fda::create.bspline.basis(nbasis = 4, norder = 4)
-#'   ),
-#'   meansList = c(0, 0.2),
-#'   distsArray = c("Normal", "Normal"),
-#'   evals = seq(0, 1, 0.05),
-#'   kappasArray = c(0, 0)
-#' )
-#'
-#' compute_mean_stat(data_KL$data, 100)
-#' }
-compute_mean_stat <- function(data, k, weight = 0.5) {
-  data <- .check_data(data)
-  n <- ncol(data$data)
-  stop('Not tested with weights')
-  normalizer <- ( (k/n) * ((n-k) / n) )^(-weight)
-  sum(normalizer * (rowSums(data$data[, 1:k,drop=FALSE]) -
-         (k / n) * rowSums(data$data))^2) / n
-}
-
-
-#' #' Compute CUSUM Mean Statistic Cutoff
-#' #'
-#' #' This function computes the cutoff for CUSUM statistic of a mean change
-#' #'
-#' #' @param data funts object or numeric data.frame with evaled points on rows and fd objects in columns
-#' #' @param alpha Numeric value indicating significance
-#' #' @param  h (Optional) The window parameter parameter for the estimation of the
-#' #'     long run covariance kernel. The default value is \code{h=0}, i.e., it
-#' #'     assumes iid data
-#' #' @param K (Optional) Function indicating the Kernel to use if h>0
-#' #' @param M (Optional) Number of Monte Carlo simulations used to get the critical
-#' #'     values. The default value is \code{M=1000}
-#' #' @param ... Unused, just for use in other functions
-#' #'
-#' #' @return Numeric indicating the cutoff value for CUSUM mean statistic
-#' #' @export
-#' #'
-#' #' @examples
-#' #' \dontrun{
-#' #' # Null Example
-#' #' data_KL <- generate_data_fd(
-#' #'   ns = c(100, 100),
-#' #'   eigsList = list(
-#' #'     c(3, 2, 1, 0.5),
-#' #'     c(3, 2, 1, 0.5)
-#' #'   ),
-#' #'   basesList = list(
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
-#' #'   ),
-#' #'   meansList = c(0, 0),
-#' #'   distsArray = c("Normal", "Normal"),
-#' #'   evals = seq(0, 1, 0.05),
-#' #'   kappasArray = c(0, 0)
-#' #' )
-#' #'
-#' #' compute_mean_cutoff(data_KL$data, 0.05)
-#' #'
-#' #' # Mean CP Example
-#' #' data_KL <- generate_data_fd(
-#' #'   ns = c(100, 100),
-#' #'   eigsList = list(
-#' #'     c(3, 2, 1, 0.5),
-#' #'     c(3, 2, 1, 0.5)
-#' #'   ),
-#' #'   basesList = list(
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4),
-#' #'     fda::create.bspline.basis(nbasis = 4, norder = 4)
-#' #'   ),
-#' #'   meansList = c(0, 0.2),
-#' #'   distsArray = c("Normal", "Normal"),
-#' #'   evals = seq(0, 1, 0.05),
-#' #'   kappasArray = c(0, 0)
-#' #' )
-#' #'
-#' #' compute_mean_cutoff(data_KL$data, 0.05)
-#' #' }
-#' compute_mean_cutoff <- function(data, alpha, h = 0, K = bartlett_kernel,
-#'                                 M = 1000, ...) {
-#'   data <- .check_data(data)
-#'
-#'   n <- ncol(data$data)
-#'
-#'   ## Estimate eigenvalues (lambda_i, 1<=i<=d)
-#'   Ceps <- .estimateCeps(data, h, K)
-#'   lambda <- eigen(Ceps / n)$values
-#'
-#'   values_sim <- sapply(1:M, function(k, lambda, n) .asymp_dist(n, lambda),
-#'     lambda = lambda, n = n
-#'   )
-#'
-#'   as.numeric(stats::quantile(values_sim, 1 - alpha))
-#' }

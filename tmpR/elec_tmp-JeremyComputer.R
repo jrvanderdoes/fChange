@@ -40,14 +40,14 @@ eval_fd_vals <- eval.basis(1:24,electricity_fd$basis) %*%
 #                        fn=compute_Mn, iters=1000, replace=F)
 
 
-cps=c(94,202,275)
+changes=c(94,202,275)
 pdf("electricity_resids.pdf")
-plot_fd(eval_fd_vals,CPs = cps,interactive = FALSE,
+plot_fd(eval_fd_vals,changes = changes,interactive = FALSE,
         val_axis_title = '',res_axis_title = '',FD_axis_title = '',showticklabels = F)
 dev.off()
 
 pdf("electricity.pdf")
-plot_fd(electricity,CPs = cps,interactive = FALSE,
+plot_fd(electricity,changes = changes,interactive = FALSE,
         val_axis_title = '',res_axis_title = '',FD_axis_title = '',showticklabels = F)
 dev.off()
 

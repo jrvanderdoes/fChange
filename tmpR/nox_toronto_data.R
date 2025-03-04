@@ -41,4 +41,4 @@ plot_fd(tmp[,-c(1:2)],
 
 tmp_int <- linear_imputatation(tmp[,-c(1:2)])
 mn1 <- compute_Mn(tmp_int)
-plot_fd(tmp_int,CPs = mn1$location)
+plot_fd(tmp_int,changes = mn1$location)

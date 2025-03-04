@@ -32,5 +32,5 @@ RH_fd <-
 # source(file = paste0(path2folder,"tmp_plot_fd.R"))
 
 RH_Mn <- compute_Mn(RH_fd)
-plot_fd(RH_fd,CPs = RH_Mn$location)
+plot_fd(RH_fd,changes = RH_Mn$location)
 plot_fd(RH_fd,val_axis_title = 'Days in 2021')

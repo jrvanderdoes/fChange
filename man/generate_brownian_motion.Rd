@@ -4,30 +4,28 @@
 \alias{generate_brownian_motion}
 \title{Generate a Brownian Motion Process}
 \usage{
-generate_brownian_motion(
-  N,
-  v = seq(from = 0, to = 1, length.out = 100),
-  sd = 1
-)
+generate_brownian_motion(N, v = seq(from = 0, to = 1, length.out = 20), sd = 1)
 }
 \arguments{
 \item{N}{Numeric. The number of observations for the generated data.}
 
-\item{v}{Numeric. Discretization points of the curves. By default it is
-evenly spaced on \link{0,1}, i.e. \code{seq(from = 0, to = 1, length.out = 100)}.}
+\item{v}{Numeric (vector). Discretization points of the curves.This can be
+the evaluated points or the number of evenly spaced points on [0,1].
+By default it is evenly spaced on [0,1] with 20 points.}
 
 \item{sd}{Numeric. Standard deviation of the Brownian Motion process.
 The default is \code{1}.}
 }
 \value{
-Functional time series object
+Functional time series (dfts) object
 }
 \description{
 Generate a functional time series according to an iid Brownian Motion process.
 Each observation is discretized in the points indicated in \code{v}.
 }
 \examples{
-N <- 100
-v <- seq(from = 0, to = 1, length.out = 20)
-bmotion <- generate_brownian_motion(N, v, sd = 1)
+bmotion <- generate_brownian_motion(N=100,
+  v=c(0,0.25,0.4,0.7, 1, 1.5), sd = 1)
+bmotion1 <- generate_brownian_motion(N=100,
+  v=10, sd = 2)
 }

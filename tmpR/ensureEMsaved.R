@@ -25,14 +25,14 @@ elbow_method <- function(data,
   while(TRUE){
     # Setup
     i <- i + 1
-    CPs <- c(0,return_data$CP, n)
-    CPs <- CPs[order(CPs)]
+    changes <- c(0,return_data$CP, n)
+    changes <- changes[order(changes)]
     prev_CP <- return_data[nrow(return_data),'CP']
-    prev_CP_loc <- which(CPs==prev_CP)
+    prev_CP_loc <- which(changes==prev_CP)
 
     ## We only need to recompute for the interval changed by last CP!
     # Before
-    beforePrevCP <- (CPs[prev_CP_loc-1]+1):(CPs[prev_CP_loc])
+    beforePrevCP <- (changes[prev_CP_loc-1]+1):(changes[prev_CP_loc])
     test_stat[beforePrevCP] <- NA
     if(1+trim_amt < length(beforePrevCP)-trim_amt){
       fill_idx <- (1+trim_amt):(length(beforePrevCP)-trim_amt)
@@ -40,7 +40,7 @@ elbow_method <- function(data,
       test_stat[beforePrevCP[fill_idx]] <- stats_tmp$allValues
     }
     # After
-    afterPrevCP <- (CPs[prev_CP_loc]+1):CPs[prev_CP_loc+1]
+    afterPrevCP <- (changes[prev_CP_loc]+1):changes[prev_CP_loc+1]
     test_stat[afterPrevCP] <- NA
     if(1+trim_amt < length(afterPrevCP)-trim_amt){
       fill_idx <- (1+trim_amt):(length(afterPrevCP)-trim_amt)

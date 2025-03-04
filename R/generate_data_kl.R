@@ -1,6 +1,6 @@
 #' Generate functional data
 #'
-#' \code{generate_data_fd} generates functional data via KL expansion.
+#' \code{generate_karhunen_loeve} generates functional data via KL expansion.
 #' This can include change points in any combination of the following:
 #' \itemize{
 #'   \item Mean
@@ -11,270 +11,165 @@
 #' In this sense, the function creates m 'groups' of discretely observed
 #'  functions with similar properties.
 #'
-#' @param ns A numerical vector of length m
+#' @param N Vector of Numerics. Each value in N is the number of observations
+#'  for a given group.
+#' @param eigenvalues Vector of eigenvalues. Length 1 or m.
+#' @param basis A list of bases (eigenfunctions), length m.
+#' @param means A vector of means, length 1 or N.
+#' @param distribution A vector of distributions, length 1 or m.
+#' @param intratime A vector of points indicating the points to evaluate the
+#'     functions on.
+#' @param dependence Numeric \[0,1\] indicating strength of VAR(1) process.
+#' @param burnin A numeric value indicating the number of burnin trials.
+#' @param silent A Boolean that toggles running output.
+#' @param shape Numeric for degrees of freedom with t-distribution
+#' @param dof Numeric for shape with gamma distribution (rate is set to 1)
+#' @param prev_eps previous epsilon for dependence across groups.
 #'
-#'     Indicates the number of functional objects (groups) created using first
-#'     set of parameters
-#'
-#' @param eigsList A list of vectors of length $1$ or $m$ with the eigenvalues
-#'     for each group
-#' @param basesList A list of bases (eigenfunctions), length 1 or m
-#'
-#'     Define the basis using fda on c(0, 1) to ensure it works
-#'     (TODO:: Test to see removal of this restriction)
-#' @param meansList A list of means, length 1 or m, for each group
-#' @param distsArray A vector of distributions, length 1 or m, for each group
-#' @param evals A vector of points indicating the points to evaluate the
-#'     functions on
-#' @param kappasArray A vector of Kappas, length 1 or m, for the strength of the
-#'    VAR(1) process
-#' @param burnin A numeric value indicating the number of burnin trials
-#'    This is only necessary when kappa>0
-#' @param silent A Boolean that toggles running output
-#' @param ... Examples such as dof which is used for t-distribution
-#'
-#' @return A data.frame of m columns length(evals) rows (TODO:: Verify)
+#' @return List with (1) data (N-by-m) and (2) previous errors.
 #' @export
 #'
 #' @examples
-#' # Create 200 functions with a midway change point. The change point
-#' #     is a change point in the eigenvalues, eigenfunctions, means,
-#' #     distributions, and VAR(1) strength
-#' data_KL <- generate_data_fd(
-#'   ns = c(25, 25),
-#'   eigsList = list(
-#'     c(3, 2, 1, 0.5),
-#'     c(2, 3, 2)
-#'   ),
-#'   basesList = list(
-#'     fda::create.bspline.basis(nbasis = 4, norder = 4),
-#'     fda::create.fourier.basis(nbasis = 2)
-#'   ),
-#'   meansList = c(0, 0.5),
-#'   distsArray = c("Normal", "Binomial"),
-#'   evals = seq(0, 1, 0.05),
-#'   kappasArray = c(0, 0.5)
-#' )
-generate_data_fd <- function(ns,
-                             eigsList,
-                             basesList,
-                             meansList,
-                             distsArray,
-                             evals,
-                             kappasArray = c(0),
-                             burnin = 100,
-                             silent = FALSE,
-                             ...) {
-  # ns is a vector with length m for the number of data runs until next CP
-  # - i.e. c(10,10,10) has 10 length TS then CP followed by 10 and another CP
-  # eigsList is a list of vectors giving the eigenvalues for each distribution
-  # - Length of list be 1 or m
-  # basesList is a list of bases (eigf) for each distribution
-  # - Length should be 1 or m
-  # - Define basis on (0, 1)
-  # meansList is a list of means for each distribution
-  # - Length should be 1 or m
-  # distsArray is a vector of distributions to each run
-  # - Length should be 1 or m
-  # evals is the vector of points to evaluate
-  # kappasArray is a vector of Kappas for VAR
-  # - Length should be 1 or m
-
+#' dat1 <- generate_karhunen_loeve(
+#'   N=100, eigenvalues=c(1/(1:3)), basis=fda::create.bspline.basis(nbasis=3,norder=3),
+#'   means=0, distribution='Normal',
+#'   intratime=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+#'   prev_eps=NULL)
+#' dat2 <- generate_karhunen_loeve(
+#'   N=50, eigenvalues=c(1/(1:4)), basis=fda::create.bspline.basis(nbasis=4),
+#'   means=5, distribution='exponential',
+#'   intratime=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+#'   prev_eps=dat1$prev_eps)
+#'
+#' dat <- dfts(cbind(dat1$data$data, dat2$data$data),intratime = dat1$data$intratime)
+generate_karhunen_loeve <- function(
+    N, eigenvalues, basis, means, distribution,
+    intratime, dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+    prev_eps=NULL) {
   ## Verification
-  m <- length(ns)
+  m <- length(basis$names)
 
-  eigsList <- .checkLength(eigsList, "eigsList", m)
-  basesList <- .checkLength(basesList, "basesList", m)
-  meansList <- .checkLength(meansList, "meansList", m)
-  distsArray <- unlist(.checkLength(distsArray, "distsArray", m))
-  kappasArray <- unlist(.checkLength(kappasArray, "kappaArray", m))
+  .check_length <- function(n, vecs, name){
+    if(length(vecs)==1){
+      vecs <- rep(vecs, n)
+    }else if(length(vecs)!= n){
+      stop(paste0('Not enough ',name,' given'))
+    }
 
-  # Prepare to generate
-  data <- data.frame(matrix(NA, ncol = sum(ns), nrow = length(evals)))
-  addIdx <- 0
+    vecs
+  }
+
+  eigenvalues <- .check_length(m, eigenvalues, 'eigenvalues')
+  distribution <- .check_length(m, distribution, 'distribution')
+
+  means <- .check_length(N, means, 'means')
+
+  ## Prepare to generate
 
   # Setup psi
-  Ds <- 1:m
-  for (i in 1:m) {
-    Ds[i] <- length(eigsList[[i]])
-  }
-  psi <- .getPsiList(Ds, eigsList, kappasArray)
+  .getPsi <- function(m, eigenvalues, dependence) {
+    psi <- list()
+    normsSD <- stats::rnorm(m, mean = 0, sd = 1)
 
-  # Burnin for VAR
-  peps <- data.frame(matrix(0, ncol = length(evals), nrow = Ds[1]))
-  for (j in 1:burnin) {
-    waste <- .generateData_KL_Expansion(
-      eigs = eigsList[[1]],
-      basis = basesList[[1]],
-      means = meansList[[1]],
-      dist = distsArray[1],
-      evals = evals,
-      peps = peps,
-      psi = psi[[1]],
-      ...
-    )
-
-    peps <- waste[[2]]
-  }
-
-  for (i in 1:m) {
-    if (!silent) cat(paste0("Running setup ", i, "/", m, "\n"))
-
-    # If Num of Eigs increases or decreases (only at CPs)
-    psiDim1 <- dim(psi[[i]])[1]
-    pepDim1 <- dim(peps)[1]
-    if (psiDim1 != pepDim1) {
-      if (psiDim1 > pepDim1) {
-        # Bind row of 0s to the bottom if didn't have a value previously
-        for (k in 1:(psiDim1 - pepDim1)) {
-          peps <- rbind(peps, 0)
-        }
-      } else if (psiDim1 < pepDim1) {
-        # Drop Rows if not needed
-        for (k in 1:(pepDim1 - psiDim1)) {
-          peps <- peps[-nrow(peps), ]
-        }
-      }
-    }
-
-    for (j in 1:ns[i]) {
-      result <- .generateData_KL_Expansion(
-        eigs = eigsList[[i]],
-        basis = basesList[[i]],
-        means = meansList[[i]],
-        dist = distsArray[i],
-        evals = evals,
-        peps = peps,
-        psi = psi[[i]],
-        ...
-      )
-
-      data[, addIdx + j] <- result[[1]]
-      peps <- result[[2]]
-    }
-    addIdx <- addIdx + ns[i] # j
-  }
-
-  funts(data)
-}
-
-
-#' Check Length
-#'
-#' This (internal) function checks the length of inputs to verify all is well
-#'  before spending computational time.
-#'
-#' @param dataList List (or vector at times) containing the data.
-#' @param name String of variable being checked so error can be informative.
-#' @param m Numeric integer indicating the number of segments that will be
-#'  built, i.e. the data should generally be this length or 1 (if all the same).
-#'
-#' @return dataList, perhaps extending it as needed (making repeats).
-#'
-#' @noRd
-.checkLength <- function(dataList, name, m) {
-  if (length(dataList) == 1) {
-    if (fda::is.basis(dataList[[1]])) {
-      retList <- list()
-      for (i in 1:m) {
-        retList <- append(retList, dataList)
-      }
-      dataList <- retList
-    } else {
-      dataList <- list(rep(dataList[[1]], m))
-    }
-  } else if (length(dataList) != m) {
-    stop(paste(name, "is length", length(dataList), "not 1 or", m, "\n"))
-  }
-
-  dataList
-}
-
-
-#' Setup psi
-#'
-#' This (internal) function sets up the psi for dependence of each segment.
-#'
-#' @param D Vector of numerics for the number of eigenvalues in each segment
-#' @inheritParams generate_data_fd
-#'
-#' @return List with the dependence for each segment
-#'
-#' @noRd
-.getPsiList <- function(D, eigsList, kappasArray) {
-  psi <- list()
-  normsSD <- stats::rnorm(max(D), mean = 0, sd = 1)
-
-  for (i in 1:length(D)) {
-    groupSD <- normsSD[1:D[i]] * sqrt(eigsList[[i]])
+    groupSD <- normsSD[1:m] * sqrt(eigenvalues)
     psi0 <- groupSD %*% t(groupSD)
     psi0 <- psi0 / sqrt(sum(psi0^2)) ## TODO:: Check this
-    psi[[i]] <- kappasArray[i] * psi0
+
+    dependence * psi0
   }
 
-  psi
+  psi <- .getPsi(m, eigenvalues, dependence)
+
+  # Burnin for VAR (if not given)
+  if(is.null(prev_eps)){
+    prev_eps <- data.frame(matrix(0, ncol = length(intratime), nrow = m))
+    if(burnin>0){
+      for (j in 1:burnin) {
+        waste <- .KL_Expansion(
+          eigenvalues = eigenvalues,
+          basis = basis,
+          means = means[1],
+          distribution = distribution,
+          resolution = intratime,
+          prev_eps = prev_eps,
+          psi = psi,
+          dof = dof,
+          shape = shape
+        )
+
+        prev_eps <- waste[[2]]
+      }
+    }
+  }
+
+  # If Num of Eigs increases or decreases (only at changes)
+  psiDim1 <- dim(psi)[1]
+  pepDim1 <- dim(prev_eps)[1]
+
+  if (psiDim1 != pepDim1) {
+    if (psiDim1 > pepDim1) {
+      # Bind row of 0s to the bottom if didn't have a value previously
+      for (k in 1:(psiDim1 - pepDim1)) {
+        prev_eps <- rbind(prev_eps, 0)
+      }
+    } else if (psiDim1 < pepDim1) {
+      # Drop Rows if not needed
+      for (k in 1:(pepDim1 - psiDim1)) {
+        prev_eps <- prev_eps[-nrow(prev_eps), ]
+      }
+    }
+  }
+
+  # Generate Data
+  data <- data.frame(matrix(NA, ncol = N, nrow = length(intratime)))
+  for (j in 1:N) {
+    result <- .KL_Expansion(
+      eigenvalues = eigenvalues,
+      basis = basis,
+      means = means[j],
+      distribution = distribution,
+      resolution = intratime,
+      prev_eps = prev_eps,
+      psi = psi,
+      dof = dof,
+      shape = shape
+    )
+
+    data[, j] <- result[[1]]
+    prev_eps <- result[[2]]
+  }
+
+  list('data'= dfts(data, intratime = intratime, labels = 1:ncol(data)),
+       'prev_eps'=prev_eps)
 }
 
 
-#' Generate Data - KL Expansion
+#' KL Expansion Computation
 #'
-#' This (internal) function performs the KL expansion to create FD object.
+#' @inheritParams generate_karhunen_loeve
+#' @param psi Matrix for dependence with previous errors.
 #'
-#' @param eigs Vector of numeric values indicating the eigenvalues of interest
-#' @param basis FDA basis object
-#' @param means Numeric for mean of FD object
-#' @param dist String indicating the distribution to use. Options include Normal,
-#'             Binomial, Exponential, and t.
-#' @param evals A vector of points indicating the points to evaluate the
-#'     functions on
-#' @param peps Vector of numerics for the previous epsilons
-#' @param psi Numeric for psi value.
-#'
-#' @return List of X, observed points in FD, and eps, the epsilons for next
-#'         observation.
+#' @return List with (1) data (N-by-m) and (2) previous errors.
 #'
 #' @noRd
-.generateData_KL_Expansion <- function(eigs, basis, means, dist,
-                                       evals, peps, psi, ...) {
+#' @keywords internal
+.KL_Expansion <- function(
+    eigenvalues, basis, means, distribution, resolution, prev_eps, psi, shape, dof, ...)
+  {
   # Setup
-  n <- length(evals)
-  D <- length(eigs)
-
-  # X <- rep(0, n)
-  # Zeta <- eps <-
-  #   data.frame(matrix(NA,ncol=n,nrow=D)) # Matrix with col as time, row as dimension
-
-  # Verify
-  if (length(means) == 1) {
-    means <- rep(means, n)
-  } else if (length(means) != n) {
-    stop(paste("Length of means is", length(means), "not 1 or", n))
-  }
+  n <- length(resolution)
+  D <- length(eigenvalues)
 
   # Generate - No Loop
-  eval_basis <- fda::eval.basis(evals, basis)
-  # Row for each time, columns for eigen
-  # xi <- sapply(eigs, function(e, dist, n) {
-  #     .generateXi(dist = dist, sd = sqrt(e), n = n, ...)
-  #   },
-  #   dist = dist, n = n
-  # )
-  xi <- sapply(eigs, function(e, dist) {
-      .generateXi(dist = dist, sd = sqrt(e), n = 1, ...)
+  eval_basis <- fda::eval.basis(resolution, basis)
+
+  xi <- sapply(1:length(eigenvalues), function(e, eigenvalues, distribution, dof, shape, ...) {
+    .KL_errors(distribution = distribution[e], sd = sqrt(eigenvalues[e]),
+               n = 1, shape=shape, dof=dof, ...)
     },
-    dist = dist
+  eigenvalues = eigenvalues, distribution = distribution, dof = dof, shape=shape, ...
   )
 
-  # Zeta <- tryCatch(xi * eval_basis,
-  #                  error = function(e) {
-  #                    stop(call. = F, paste0(
-  #                      "Check number of eigenvalues given. ",
-  #                      "It does not match number of basis functions. ",
-  #                      "Note, did you account for the constant function if ",
-  #                      "it is in the basis?"
-  #                    ))
-  #                  }
-  # )
   Zeta <- tryCatch(eval_basis * xi[col(eval_basis)],
                    error = function(e) {
                      stop(call. = F, paste0(
@@ -286,71 +181,56 @@ generate_data_fd <- function(ns,
                    }
   )
 
-  eps <- Zeta + t(psi %*% as.matrix(peps))
+  eps <- Zeta + t(psi %*% as.matrix(prev_eps))
   X <- means + rowSums(eps)
-
-  # Generate
-  # for(t in 1:n){
-  #   eval_basis <- fda::eval.basis(evals[t], basis)
-  #   for(j in 1:D){
-  #     xi <- .generateXi(dist=dist, sd=sqrt(eigs[j]))
-  #     xi2[t,j] <- xi
-  #     Zeta[j,t] <- xi * eval_basis[j]
-  #   }
-  #
-  #   eps[,t] <- Zeta[,t] + psi %*% peps[,t]
-  #   X[t] <- means[t] + sum(eps[,t])
-  # }
 
   list(X, t(eps))
 }
 
 
-#' Generate Xi
+#' KL Expansion Errors
 #'
-#' This (internal) function generates the noise for KL expansion terms
+#' @inheritParams generate_karhunen_loeve
+#' @param sd Standard deviation of errors (sqrt(eigenvalues))
+#' @param n Numeric number of errors to generate
 #'
-#' @param dist String for distribution of interest. Options are: Binomial,
-#'  Exponential, laplace, Normal, and t. Upcoming is cauchy.
-#' @param sd Numeric for the standard deviation of the variable
-#' @param n (Optional) Numeric for the number of observations. Default is 1.
-#' @param dof (Optional) Numeric value indicating the degrees of freedom used
-#'  in the t-distribution. Default is 3. Note, if value is less than 3, the sd
-#'  parameter cannot be followed.
-#'
-#' @return Vector of numerics for observations of the variable.
+#' @return Errors as a vector
 #'
 #' @noRd
-.generateXi <- function(dist, sd, n = 1, dof=NULL) {
+#' @keywords internal
+.KL_errors <- function(distribution, sd, n = 1, dof = NULL, shape = 1, rate = 1) {
   ## This function give centered distributions with eig^2 var
 
-  if (dist == "Normal") {
+  if (tolower(distribution) == "normal") {
     xi <- stats::rnorm(n, mean = 0, sd = sd)
-  } else if (dist == "Binomial") {
+  } else if (tolower(distribution) == "binomial") {
     if (sd == 0) {
       return(rep(0, n))
     }
 
-    mean <- 10 * sd^2 # arbitrary, must exceed var
-    p <- 1 - sd^2 / mean
-    size <- round(mean / p)
+    mean_val <- 10 * sd^2 # arbitrary, must exceed var
+    p <- 1 - sd^2 / mean_val
+    size <- round(mean_val / p)
 
-    xi <- stats::rbinom(n = n, size = size, p = p) - mean
-  } else if (dist == "Exponential") {
+    xi <- stats::rbinom(n = n, size = size, p = p) - mean_val
+  } else if (tolower(distribution) == "exponential") {
     xi <- stats::rexp(n, rate = 1 / sd) - sd
-  } else if (dist == "t") {
+  } else if (tolower(distribution) == "t") {
     xi <- stats::rt(n, dof)
     if(dof>2)
       xi <- xi * sqrt(sd^2 * (dof - 2) / dof)
-  } else if (dist == "cauchy") {
+  } else if (tolower(distribution) == "cauchy") {
     xi <- stats::rt(n, 1)
-  } else if (dist == "laplace") {
+  }  else if (tolower(distribution) == "gamma") {
+    xi <- ( stats::rgamma(n,shape = shape, rate = rate) - shape/rate ) /
+      sqrt( shape * (1/rate)^2 ) * sd
+  } else if (tolower(distribution) == "laplace") {
     if (!requireNamespace("jmuOutlier", quietly = TRUE)) {
-      stop(paste0("Please install 'jmuOutlier'."))
+      stop(paste0("Please install 'jmuOutlier'."), call. = FALSE)
     }
     xi <- jmuOutlier::rlaplace(n, mean = 0, sd = sd)
   } else {
-    stop(paste("Sorry, dist", dist, "not implemented yet"))
+    stop(paste("Sorry, distribution", distribution, "not implemented yet"))
   }
 
   xi

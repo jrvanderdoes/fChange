@@ -8,13 +8,13 @@ rates_only <- dplyr::mutate_all(rates[-1,-1], as.numeric)
 rates_only <- linear_imputatation(data = rates_only,
                                   evalPts = months)
 
-#cps <- detect_changepoint_singleCov(as.matrix(house[,-c(1,ncol(house))]))
+#changes <- detect_changepoint_singleCov(as.matrix(house[,-c(1,ncol(house))]))
 mn <- compute_Mn(X = rates_only)
-#cps <-
+#changes <-
 
 
 plot_fd(data = rates_only,
-        CPs=mn$location,
+        changes=mn$location,
         curve_points = months)
 plot_fd(data = rates_only,
         curve_points = months,
@@ -31,7 +31,7 @@ compute_cidr <- function(dat){
 rates_cidr <- compute_cidr(rates_only)
 mn_cidr <- compute_Mn(X = rates_cidr)
 
-plot_fd(data = rates_cidr,CPs=mn_cidr$location,
+plot_fd(data = rates_cidr,changes=mn_cidr$location,
         curve_points = months)
 plot_fd(data = rates_cidr,
         curve_points = months,

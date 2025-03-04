@@ -3,37 +3,84 @@
 
 using namespace Rcpp;
 
-// [[Rcpp::export]]
-double dot_integrate(NumericVector v) {
-  double val = 0;
+// // [[Rcpp::export]]
+// double dot_integrate(NumericVector v) {
+//   double val = 0;
+//
+//   for(int i=0; i<v.size()-1; i++){
+//     val += v[i+1]+v[i];
+//   }
+//   return val / (2 * (v.size() - 1));
+// }
 
-  for(int i=0; i<v.size()-1; i++){
-    val += v[i+1]+v[i];
+// [[Rcpp::export]]
+double dot_integrate(NumericVector v,
+                     Nullable<NumericVector> r = R_NilValue) {
+  double val = 0;
+  NumericVector rr;
+
+  // Make sure we have the proper resolution
+  if(r.isUsable()) {
+
+    rr = r;
+
+  } else{
+
+    rr = NumericVector(v.size());
+    for (int i = 0; i < rr.length(); i++) {
+      rr(i) = i * ( 1.0 / (rr.length()-1) );
+    }
+
   }
-  return val / (2 * (v.size() - 1));
-}
-
-// [[Rcpp::export]]
-double dot_integrate_uneven(NumericVector v, NumericVector r) {
-  double val = 0;
 
   for(int i=0; i<v.size()-1; i++){
-    val += (v[i+1]+v[i]) * (r[i+1]-r[i]);
+    val += ( v(i+1)+v(i) ) * ( rr(i+1)-rr(i) );
   }
   return val / 2 ;
 }
 
-// [[Rcpp::export]]
-NumericVector dot_integrate_col(NumericMatrix v) {
-  NumericVector val(v.ncol());
+// // [[Rcpp::export]]
+// NumericVector dot_integrate_col(NumericMatrix v) {
+//   NumericVector val(v.ncol());
+//
+//   for(int i=0; i<v.ncol(); i++){
+//     val(i) = 0; //v[i][0];
+//     for(int j=0; j<v.nrow()-1; j++){
+//       //val[i] += v[i][j+1]+v[i][j];
+//       val(i) += v(j+1,i)+v(j,i);
+//     }
+//     val(i) = val(i) / (2 * (v.nrow() - 1));
+//   }
+//   return val;
+// }
 
-  for(int i=0; i<v.ncol(); i++){
-    val(i) = 0; //v[i][0];
-    for(int j=0; j<v.nrow()-1; j++){
-      //val[i] += v[i][j+1]+v[i][j];
-      val(i) += v(j+1,i)+v(j,i);
+// [[Rcpp::export]]
+NumericVector dot_integrate_col(NumericMatrix v,
+                                Nullable<NumericVector> r = R_NilValue) {
+  NumericVector val(v.ncol());
+  NumericVector rr;
+
+  // Make sure we have the proper resolution
+  if(r.isUsable()) {
+
+    rr = r;
+
+  } else{
+
+    rr = NumericVector(v.nrow());
+    for (int i = 0; i < rr.length(); i++) {
+      rr(i) = i * ( 1.0 / (rr.length()-1) );
     }
-    val(i) = val(i) / (2 * (v.nrow() - 1));
+
+  }
+
+  // Integrate
+  for(int i=0; i<v.ncol(); i++){
+    val(i) = 0;
+    for(int j=0; j<v.nrow()-1; j++){ // resolution
+      val(i) += ( v(j+1,i)+v(j,i) ) * ( rr(j+1)-rr(j) );
+    }
+    val(i) = val(i) / 2;
   }
   return val;
 }

@@ -13,24 +13,23 @@ generate_brownian_bridge(
 \arguments{
 \item{N}{Numeric. The number of observations for the generated data.}
 
-\item{v}{Numeric. Discretization points of the curves. By default it is
-evenly spaced on \link{0,1}, i.e. \code{seq(from = 0, to = 1, length.out = 100)}.}
+\item{v}{Numeric (vector). Discretization points of the curves.This can be
+the evaluated points or the number of evenly spaced points on [0,1].
+By default it is evenly spaced on [0,1] with 20 points.}
 
 \item{sd}{Numeric. Standard deviation of the Brownian Motion process.
 The default is \code{1}.}
 }
 \value{
-Functional time series object
+Functional time series (dfts) object
 }
 \description{
 Generate a functional time series from an iid Brownian Bridge process.
 If \eqn{W(t)} is a Wiener process, the Brownian Bridge is
-defined as \eqn{W(t) - tW(1)}.
-Each functional observation is discretized in the points
-indicated in \code{v}.
+defined as \eqn{W(t) - tW(1)}. Each functional observation is discretized on
+the points indicated in \code{v}.
 }
 \examples{
-N <- 100
-v <- seq(from = 0, to = 1, length.out = 20)
-bbridge <- generate_brownian_bridge(N, v, sd=1)
+bbridge <- generate_brownian_bridge(N=100, v=c(0,0.2,0.6,1,1.3), sd=2)
+bbridge <- generate_brownian_bridge(N=100, v=10, sd=1)
 }

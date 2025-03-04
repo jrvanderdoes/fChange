@@ -1,23 +1,27 @@
 Package: fChange
 Title: Functional Change Point Detection
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: c(
     person("Jeremy", "VanderDoes", , "jeremy.vanderdoes@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-9885-3073")),
-    person("Gregory", "Rice", role = "aut") )
-Description: Change point detection for discretely observed, yet innately functional data. Includes optional smoothing and several different change point detections methods as given in (FILL OUT).
+    person("Gregory", "Rice", role = "aut"),
+    person("Martin", "Wendler", role = "aut") )
+Description: Change point detection for discretely observed, yet innately 
+    functional data. Includes methods to process and investigate such data, including 
+    functional ACF, smoothing, change point detection, plotting, and so forth.
 License: GPL (>= 3)
 Encoding: UTF-8
 Imports: 
-    CompQuadForm,
-    cubature,
+    dplyr,
     fastmatrix,
     fda,
     ftsa,
     ggplot2,
+    ggpubr,
+    graphics,
     grDevices,
-    magrittr,
-    mvtnorm,
+    MASS,
+    methods,
     plot3D,
     plotly,
     rainbow,
@@ -27,21 +31,26 @@ Imports:
     Rfast,
     sandwich,
     scales,
-    sde,
     stats,
     tensorA,
-    tidyr
+    tidyr,
+    vars
 LinkingTo: Rcpp, RcppArmadillo
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Suggests: 
-    fOptions,
+    CompQuadForm,
+    fda.usc,
+    forecast,
+    funData,
     jmuOutlier,
     knitr,
     lattice,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 Depends: 
     R (>= 2.10)
 LazyData: true
 VignetteBuilder: knitr
 URL: https://jrvanderdoes.github.io/fChange/
+Config/testthat/edition: 3

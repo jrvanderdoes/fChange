@@ -53,7 +53,7 @@
 
   #####
   ## Plot Lines
-  data_lines <- cbind(data.frame('time'=X$intraobs),
+  data_lines <- cbind(data.frame('time'=X$intratime),
                X$data) %>%
     pivot_longer(cols = 1+1:ncol(X$data))
 
@@ -113,32 +113,32 @@
 #' Title
 #'
 #' @param X
-#' @param CPs
+#' @param changes
 #'
 #' @return
 #' @export
 #'
 #' @examples
-.plot_stack <- function(X, CPs=NULL){
+.plot_stack <- function(X, changes=NULL){
   data <- X$data
-  plot_data <- tidyr::pivot_longer(data = cbind(data.frame('Time'=X$intraobs),data),
+  plot_data <- tidyr::pivot_longer(data = cbind(data.frame('Time'=X$intratime),data),
                       cols = 1+1:ncol(data))
   # Colors
   ## Setup up Colors
-  #   Rainbow for no CPs, colored for CPs
+  #   Rainbow for no changes, colored for changes
   # col_data <- unique(plot_data[,"name"])
   # col_data$color <- 1:nrow(col_data)
   # plot_data[["color"]] <- rep(1:ncol(data), times = nrow(data))
-  if (!is.null(CPs)) {
-    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(CPs) + 1)), "Set1")
-    if (length(CPs) > 9) {
-      tmp_colors <- rep(tmp_colors, ceiling(c(length(CPs) + 1) / 9))[1:(length(CPs) + 1)]
+  if (!is.null(changes)) {
+    tmp_colors <- RColorBrewer::brewer.pal(min(9, max(3, length(changes) + 1)), "Set1")
+    if (length(changes) > 9) {
+      tmp_colors <- rep(tmp_colors, ceiling(c(length(changes) + 1) / 9))[1:(length(changes) + 1)]
     }
 
-    CPs <- unique(c(1, CPs, ncol(data)))
+    changes <- unique(c(1, changes, ncol(data)))
     colors_plot <- rep(tmp_colors[1], ncol(data))
-    for (i in 2:(length(CPs) - 1)) {
-      colors_plot[CPs[i]:CPs[i + 1]] <- tmp_colors[i]
+    for (i in 2:(length(changes) - 1)) {
+      colors_plot[changes[i]:changes[i + 1]] <- tmp_colors[i]
     }
   } else {
     colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
