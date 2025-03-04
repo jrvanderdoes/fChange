@@ -105,7 +105,8 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
 #' result <- projection_model(dfts(electricity$data[,50:100]),
 #'  n.ahead=1, TVE=0.1, check.cp=FALSE)
 projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
-                    n.ahead=0, alpha=0.05, check.cp=TRUE, ...){
+                    n.ahead=0, alpha=0.05, check.cp=TRUE, frequency=1,
+                    ...){
   if(!requireNamespace('forecast',quietly = TRUE))
     stop("Please install the 'forecast' package",call. = FALSE)
   # Verify input
@@ -119,12 +120,12 @@ projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
   # Project data and model each component
   pc_data <- pca(X, TVE = TVE, ...)
 
-  comps_fits <- list()
+  comps_fits <- comps_true <- list()
   for (i in 1:ncol(pc_data$x)) {
     if(model=='ets'){
-      comps <- forecast::ets(stats::ts(pc_data$x[, i]))
+      comps <- forecast::ets(stats::ts(pc_data$x[, i],frequency =frequency))
     }else if(model=='arima'){
-      comps <- forecast::auto.arima(stats::ts(pc_data$x[, i]))
+      comps <- forecast::auto.arima(stats::ts(pc_data$x[, i],frequency = frequency))
     }
 
     # Forecast as request
@@ -133,8 +134,10 @@ projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
       for_vals <- forecast::forecast(comps, h=n.ahead)
     }
     comps_fits[[i]] <- c(comps$fitted, for_vals$mean)
+    comps_true[[i]] <- pc_data$x[, i]
   }
   data_fits <- do.call(cbind, comps_fits)
+  data_reals <- do.call(cbind, comps_true)
 
   # Create functional data and its error
   fit <- .pca_reconstruct(pc_data, data_fits)
@@ -145,8 +148,8 @@ projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
     data_prep <- dfts(cbind(X$data,fit[,(ncol(X)+1):ncol(fit)]),
                        name = 'Forecast', intratime=X$intratime)
   }else{
-    fit_prep <- dfts(fit, labels=X$labels, name='Fit', intratime=X$intratime)
-    data_prep <- dfts(X$data,
+    fit_prep <- dfts(fit, labels=X$labels, name='Fit', intratime=X$intratime,)
+    data_prep <- dfts(X$data, labels=X$labels,
                        name = 'Forecast', intratime=X$intratime)
   }
 
@@ -184,9 +187,11 @@ projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
 
   list(fit = fit_prep,
        forecast_plot = plt_for,
-       fit_plot = plt_for,
+       fit_plot = plt_for_fit,
        errors = dfts(errors, labels=X$labels, name='Errors', intratime=X$intratime),
        changes = changes,
+       component_models = data_fits,
+       component_true = data_reals,
        parameters = list(
          pcs = length(pc_data$sdev),
          TVE = TVE,
