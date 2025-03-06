@@ -8,21 +8,21 @@
 #' @param statistic String for the Statistic. The integrated, \code{Tn}, or the
 #'  maximal, \code{Mn}.
 #' @param critical String for method of computing threshold. Options are
-#' 'simulation', 'permutation', and 'welch'. However, Welch approximation is
+#' 'simulation', 'resample', and 'welch'. However, Welch approximation is
 #' not implemented for all methods.
 #' @param type String for the type of change point detection, single change
 #'  ('single'), binary segmentation ('segmentation'), or elbow plots ('elbow').
-#' @param perm_type String indicating the type of permutation test to use.
+#' @param resample_blocks String indicating the type of resample test to use.
 #'  Using 'separate' gives blocks which are separate while 'overlapping' creates
 #'  overlapping or sliding windows. When \code{blocksize=1} then these will be
 #'  identical.
 #' @param replace Boolean for using a permutation or bootstrapped statistic when
-#'  \code{critical='permutation'}.
+#'  \code{critical='resample'}.
 #' @param max_changes Integer as the max number of changes to search when using
 #'  type is \code{elbow}.
 #' @param changes Vector of change points to be given to the eigen test if the data
 #'  should be centered on these values first.
-#' @param blocksize Integer for the width of the blocks when using a permutation
+#' @param blocksize Integer for the width of the blocks when using a resampling
 #'  test. Can use [adaptive_bandwidth()] is additional guidance is desired.
 #' @param eigen_number Which eigenvalue or the number of eigenvalues which should be checked
 #'  in the eigenvalue tests.
@@ -87,15 +87,15 @@
 #'  based on Empirical Characteristic Functions. Metrika, 63, 145-168.
 #'
 #' @examples
-#' res <- change(electricity$data[,1:20],method='characteristic',critical = 'welch')
-change <- function(X,
+#' res <- fchange(electricity$data[,1:20],method='characteristic',critical = 'welch')
+fchange <- function(X,
                    method=c('characteristic','mean','robustmean','eigenjoint',
                             'eigensingle','trace',
                             'covariance','projmean','projdistribution'),
                    statistic=c('Tn','Mn'),
-                   critical=c('simulation','permutation','welch'),
+                   critical=c('simulation','resample','welch'),
                    type=c('single','segmentation','elbow'),
-                   perm_type = 'separate', replace=TRUE,
+                   resample_blocks = 'separate', replace=TRUE,
                    max_changes=min(ncol(X),20),
                    changes=NULL,
                    blocksize = 1,
@@ -111,13 +111,14 @@ change <- function(X,
 
   # Check Data
   X <- dfts(X)
-  if(dim(X)[2]==1) return()
+  fake_return <- list('pvalue'=1,'location'=NA)
+  if(dim(X)[2]==1) return(fake_return)
   method <- .verify_input(method,
                           c('characteristic','mean','robustmean','eigenjoint',
                             'eigensingle','trace',
                             'covariance','projmean','projdistribution'))
   statistic <- .verify_input(statistic, c('Tn','Mn'))
-  critical <- .verify_input(critical, c('simulation','permutation','welch'))
+  critical <- .verify_input(critical, c('simulation','resample','welch'))
   type <- .verify_input(type, c('single','segmentation','elbow'))
   max_changes <- round(max_changes)
 
@@ -131,7 +132,7 @@ change <- function(X,
                          J=J,
                          nSims = M, h = h,
                          K = K, W = W,
-                         blocksize=blocksize, perm_type = perm_type,
+                         blocksize=blocksize, resample_blocks = resample_blocks,
                          replace = replace, alpha=alpha)
                      },
                      mean={
@@ -139,7 +140,7 @@ change <- function(X,
                        .change_mean(data = X, statistic=statistic,
                                               critical=critical, M = M, h = h,
                                               K = K, blocksize=blocksize,
-                                              type = perm_type, replace = replace)
+                                              type = resample_blocks, replace = replace)
                      },
                      robustmean={
                        # TODO:: Welch check
@@ -157,7 +158,7 @@ change <- function(X,
                                      critical = critical,
                                      blocksize = blocksize,
                                      M = M,K = K,
-                                     type = perm_type,
+                                     type = resample_blocks,
                                      replace = replace)
                      },
                      eigensingle={
@@ -169,7 +170,7 @@ change <- function(X,
                                      critical = critical,
                                      blocksize = blocksize,
                                      M = M,K = K,
-                                     type = perm_type,
+                                     type = resample_blocks,
                                      replace = replace)
                      },
                      trace={
@@ -179,7 +180,7 @@ change <- function(X,
                                      critical = critical,
                                      blocksize = blocksize,
                                      replace = replace,
-                                     type = perm_type)
+                                     type = resample_blocks)
                      },
                      covariance={
                        # TODO:: Welch check
@@ -188,7 +189,7 @@ change <- function(X,
                                                  critical=critical,
                                                  kappa = weighting, len = cov.res,
                                                  blocksize=blocksize, M=M,
-                                                 perm_type=perm_type,
+                                                 resample_blocks=resample_blocks,
                                                  replace=replace,
                                                  K=K)
                      },
@@ -198,15 +199,15 @@ change <- function(X,
                                         critical=critical,
                                         TVE=TVE, M=M, K=K,
                                         blocksize=blocksize,
-                                        perm_type=perm_type,
+                                        resample_blocks=resample_blocks,
                                         replace=replace )
                      },
                      projdistribution={
-                       if(critical != 'permutation')
-                         stop('Only permutation setup for this method currently',call. = FALSE)
+                       if(critical != 'resample')
+                         stop('Only resample setup for this method currently',call. = FALSE)
                        .change_pca_distribution(X=X, statistic=statistic, critical=critical,
                                                 TVE = TVE, gam = weighting, M = M,
-                                                blocksize = blocksize, perm_type = perm_type,
+                                                blocksize = blocksize, resample_blocks = resample_blocks,
                                                 replace = replace)
                      },
                      {
@@ -217,7 +218,7 @@ change <- function(X,
     result <-
       .binary_segmentation(X=X, method=method,
                            statistic=statistic, critical=critical,
-                           perm_type = perm_type, replace=replace,
+                           resample_blocks = resample_blocks, replace=replace,
                            changes=changes, blocksize = blocksize,
                            eigen_number=eigen_number, h=h, M = M, J=J, W = W, K = K,
                            alpha=alpha, cov.res = cov.res, weighting = weighting,
