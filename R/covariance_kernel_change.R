@@ -28,7 +28,7 @@
 #' #result <- .change_covariance_kernel(electricity$data[,1:18], len=20)
 .change_covariance_kernel <- function(X, statistic, critical,
                                       kappa = 1 / 4, len = 30,
-                                      blocksize=1, M=1000, perm_type='separate',
+                                      blocksize=1, M=1000, resample_blocks='separate',
                                       replace=TRUE, K=bartlett_kernel) {
 
   if(statistic=='Tn'){
@@ -39,9 +39,9 @@
     if(critical == 'simulation'){
       simulations <- .covariance_simulations(xf = X$data, len = len, kappa = kappa,
                                              M=M, statistic=statistic, K=K)
-    } else if(critical == 'permutation'){
+    } else if(critical == 'resample'){
       simulations <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
-                           type = perm_type, replace = replace,
+                           type = resample_blocks, replace = replace,
                            fn = .covariance_statistic,
                            statistic=statistic, kappa = kappa)
     }
