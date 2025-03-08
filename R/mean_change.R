@@ -58,7 +58,7 @@
       .asymp_dist(n, lambda, statistic),
       lambda = lambda, n = ncol(data), statistic = statistic
     )
-  } else if(critical=='permutation'){
+  } else if(critical=='resample'){
     values_sim <- .bootstrap(X = data, blocksize = blocksize, M = M,
                              type = type, replace = replace, fn = .mean_statistic,
                              statistic=statistic)
