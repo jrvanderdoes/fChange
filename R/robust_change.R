@@ -2,11 +2,11 @@
 #'
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param m Number of interations for permutation
+#' @param m Number of interations for resampling
 #' @param statistic Test statistic of interest. Either Integrated (\code{Tn}) or
 #'  maximized (\code{Mn}). Default is \code{Tn}
 #' @param statistic Threshold method of interest. Either the simulation distribution
-#'  (\code{simulation}) or permutation (\code{permutation}). Default is simulation.
+#'  (\code{simulation}) or resampling (\code{resample}). Default is simulation.
 #'
 #' @return A list with the following elements
 #' \itemize{
@@ -27,11 +27,11 @@
 #' @examples
 #' #result <- .change_robust(dfts(electricity$data[,1:100]),m=10)
 .change_robust <- function(X, m, statistic=c('Tn','Mn'),
-                          threshold=c('simulation','permutation'),
+                          threshold=c('simulation','resample'),
                           bandwidth = NA){
   # Setup variables
   statistic <- .verify_input(statistic, c('Tn','Mn'))
-  threshold <- .verify_input(threshold, c('simulation','permutation'))
+  threshold <- .verify_input(threshold, c('simulation','resample'))
   X <- dfts(X)
 
   # Create Proper Data and Bandwidths
@@ -272,7 +272,7 @@
       }
     }
 
-  }else if(threshold=='permutation'){
+  }else if(threshold=='resample'){
     # MULTIPLIER BOOTSTRAP
     #   m x n
     U_hC <- fill_U(A_h=Re_A_h,
