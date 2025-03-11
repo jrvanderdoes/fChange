@@ -61,7 +61,7 @@
     }else if(statistic=='Mn'){
       Values <- apply(values_sim, MARGIN = 2, max)
     }
-  } else if(critical=='permutation'){
+  } else if(critical=='resample'){
     Values <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
                          type = type, replace = replace, fn = .trace_statistic,
                          statistic=statistic)
