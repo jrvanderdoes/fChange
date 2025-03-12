@@ -9,7 +9,8 @@
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
 #' @param  h The window parameter parameter for the estimation of the long run
-#'  covariance kernel. The default value is \code{h=0}, i.e., it assumes iid data
+#'  covariance kernel. The default value is \code{h=0}, i.e., it assumes iid
+#'  data. Note there exists an internal check such that \eqn{h=min(h,ncol(X)-1)}.
 #' @param K (Optional) Function indicating the Kernel to use if h>0
 #'
 #' @return Data.frame of numerics with dim of ncol(data) x ncol(data), that is
@@ -25,6 +26,8 @@ long_run_covariance <- function(X, h=0, K=bartlett_kernel){
   res <- nrow(X$data)
   Ceps <- matrix(NA, nrow = res, ncol = res)
 
+  h <- min(h, N-1)
+
   for (k in 1:res) {
     for (r in k:res) {
       # Multiple all observations taken at the same point in time across FDs
@@ -32,6 +35,7 @@ long_run_covariance <- function(X, h=0, K=bartlett_kernel){
       if (h > 0) {
         # Take care of lagged values if important
         for (i in 1:h) {
+          # if( (N - i)>=1 && (i + 1)<=N){}
           a <- as.numeric(X$data[k, 1:(N - i)]) %*% as.numeric(X$data[r, (i + 1):N])
           a <- a + as.numeric(X$data[r, 1:(N - i)]) %*% as.numeric(X$data[k, (i + 1):N])
           s <- s + K(i/h) * a
