@@ -13,7 +13,7 @@
                                    W = space_measuring_vectors(X = X, M = 20, space='BM'),
                                    K = bartlett_kernel, #space = "BM",
                                    blocksize=1,
-                                   perm_type = 'separate', replace = TRUE,
+                                   resample_blocks = 'separate', replace = TRUE,
                                    alpha=0.05, ...) {
   X <- dfts(X)
 
@@ -24,7 +24,7 @@
   M <- ncol(W)
 
   # Test Statistic
-  tmp <- .characteristic_statistic(X = X$data,v=X$intratime,
+  tmp <- .characteristic_statistic(X = X$data,v=X$fparam,
                                     statistic=statistic, W = W, J = J,
                                     location = TRUE)
   stat <- tmp[1]
@@ -60,12 +60,12 @@
       simulations <- as.vector(unlist(gamProcess[2,]))
     }
 
-  } else if(critical=='permutation'){
+  } else if(critical=='resample'){
 
     simulations <- .bootstrap(X = X$data, blocksize = blocksize, M = nSims,
-                         type = perm_type, replace = replace,
+                         type = resample_blocks, replace = replace,
                          fn = .characteristic_statistic,
-                         statistic=statistic, v=X$intratime, W = W, J = J)
+                         statistic=statistic, v=X$fparam, W = W, J = J)
 
   } else if(critical=='welch'){
 
