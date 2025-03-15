@@ -12,7 +12,7 @@
 #'  input variable.
 #' @param labels Labels for the observations. Defaults to the column names or
 #'  names inside of the object X.
-#' @param intratime Vector of numerics indicating the points for each
+#' @param fparam Vector of numerics indicating the points for each
 #'  observation. Defaults to even spacing on \[0,1\], or those included in the
 #'  object. These may be unevenly spaced.
 #' @param inc.warnings Boolean on if warnings should be given. Defaults to TRUE,
@@ -29,7 +29,7 @@
 #' result <- dfts(electricity)
 dfts <- function(X, name=NULL,
                   labels=NULL,
-                  intratime=NULL,
+                  fparam=NULL,
                   inc.warnings=TRUE){
   ## Return if already right object
   if(is.dfts(X)) {
@@ -50,17 +50,17 @@ dfts <- function(X, name=NULL,
      fda::is.fd(X)){
     if(is.null(labels))
       labels <- X$fdnames$reps
-    if(is.null(intratime)){
+    if(is.null(fparam)){
       ran_vals <- X$basis$rangeval
-      intratime <- seq(ran_vals[1],ran_vals[2],
+      fparam <- seq(ran_vals[1],ran_vals[2],
                       length.out=length(X$fdnames$time))
     }
 
     dfts_obj <- list(
-      'data' = as.matrix(fda::eval.fd(intratime, fdobj = X)),
+      'data' = as.matrix(fda::eval.fd(fparam, fdobj = X)),
       'name' = name,
       'labels' = labels,
-      'intratime' = intratime
+      'fparam' = fparam
     )
   } else if(requireNamespace("fda.usc", quietly = TRUE) &&
             fda.usc::is.fdata(X)){
@@ -70,14 +70,14 @@ dfts <- function(X, name=NULL,
         labels <- 1:nrow(X$data)
       }
     }
-    if(is.null(intratime))
-      intratime <- X$argvals
+    if(is.null(fparam))
+      fparam <- X$argvals
 
     dfts_obj <- list(
       'data' = as.matrix(t(X$data)),
       'name' = name,
       'labels' = labels,
-      'intratime' = intratime
+      'fparam' = fparam
     )
   } else if(requireNamespace('rainbow', quietly = TRUE) &&
             (inherits(X, "fts") || inherits(X, "fds"))){
@@ -91,14 +91,14 @@ dfts <- function(X, name=NULL,
         labels <- 1:ncol(X$y)
       }
     }
-    if(is.null(intratime))
-      intratime <- X$x
+    if(is.null(fparam))
+      fparam <- X$x
 
     dfts_obj <- list(
       'data' = as.matrix(X$y),
       'name' = name,
       'labels' = labels,
-      'intratime' = intratime
+      'fparam' = fparam
     )
   } else if(requireNamespace('funData', quietly = TRUE) &&
             inherits(X, "funData")){
@@ -108,20 +108,20 @@ dfts <- function(X, name=NULL,
         labels <- 1:nrow(X@X)
       }
     }
-    if(is.null(intratime))
-      intratime <- X@argvals[[1]]
+    if(is.null(fparam))
+      fparam <- X@argvals[[1]]
 
     dfts_obj <- list(
       'data' = as.matrix(t(X@X)),
       'name' = name,
       'labels' = labels,
-      'intratime' = intratime
+      'fparam' = fparam
     )
   } else if(inherits(X, "matrix") ||
             inherits(X, "data.frame") ||
             inherits(X, "array")){
-    if(is.null(intratime))
-      intratime <- seq(0,1,length.out=nrow(X))
+    if(is.null(fparam))
+      fparam <- seq(0,1,length.out=nrow(X))
     if(is.null(labels))
       labels <- colnames(as.data.frame(X))
 
@@ -129,11 +129,11 @@ dfts <- function(X, name=NULL,
       'data' = as.matrix(X),
       'name' = name,
       'labels' = labels,
-      'intratime' = intratime
+      'fparam' = fparam
     )
   } else if(inherits(X, "numeric")){
-    if(is.null(intratime))
-      intratime <- seq(0,1,length.out=1)
+    if(is.null(fparam))
+      fparam <- seq(0,1,length.out=1)
     if(is.null(labels)){
       if(is.null(names(X))){
         labels <- 1:length(X)
@@ -145,7 +145,7 @@ dfts <- function(X, name=NULL,
       'data' = matrix(X,nrow=1),
       'name' = name,
       'labels' = labels,
-      'intratime' = intratime
+      'fparam' = fparam
     )
   } else{
     stop('Data type not supported.',call. = FALSE)
@@ -159,7 +159,7 @@ dfts <- function(X, name=NULL,
 
   ## Verification
   # Note if NAs are present
-  # if(length(dfts_obj$intratime)!=nrow(dfts_obj$data))
+  # if(length(dfts_obj$fparam)!=nrow(dfts_obj$data))
   #   stop('Resolution does not match data (rows)',call. = FALSE)
   # if(length(dfts_obj$labels)!=ncol(dfts_obj$data))
   #   warning('Labels do not match data (cols)',call. = FALSE)
@@ -211,8 +211,8 @@ is.dfts <- function(X){
   # Sizes
   if(ncol(X) != length(X$labels))
     stop("Data must have the same number of columns as the length of labels")
-  if(nrow(X) != length(X$intratime))
-    stop("Data must have the same number of rows as the length of intratime")
+  if(nrow(X) != length(X$fparam))
+    stop("Data must have the same number of rows as the length of fparam")
 
   X
 }
@@ -266,8 +266,8 @@ Ops.dfts <- function (e1, e2) {
       }
       stopifnot( all.equal(class(e1$labels),
                            class(e2$labels)) )
-      stopifnot( all.equal(class(e1$intratime),
-                           class(e2$intratime)) )
+      stopifnot( all.equal(class(e1$fparam),
+                           class(e2$fparam)) )
 
       i.cols <- intersect( e1$labels, e2$labels )
 
@@ -275,7 +275,7 @@ Ops.dfts <- function (e1, e2) {
 
       ## if there is an intersection, the do the Op
       if(length(i.cols)) {
-        io <- e1$intratime
+        io <- e1$fparam
         e1 <- e1$data[,e1$labels==i.cols]
         e2 <- e2$data[,e2$labels==i.cols]
         # e1 <- e1[i.dates,]
@@ -291,7 +291,7 @@ Ops.dfts <- function (e1, e2) {
         ans <- NextMethod()
 
         #colnames(ans) <- i.cols
-        ans <- dfts(ans,labels = i.cols,intratime = io)
+        ans <- dfts(ans,labels = i.cols,fparam = io)
       } else {
         ## no matching cols, return NULL
         ans <- NULL
@@ -361,7 +361,7 @@ diff.dfts <- function(x, lag = 1L, differences = 1L, ...) {
 #' @param x A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
 #' @param type String indicating if finding for observation ('Obs', default),
-#'  or for pointwise values ('intratime').
+#'  or for pointwise values ('fparam').
 #' @param na.rm Boolean if NA values should be removed. Defaults to TRUE.
 #' @param ... Additional parameters to stats function
 #'
@@ -372,8 +372,8 @@ diff.dfts <- function(x, lag = 1L, differences = 1L, ...) {
 #'
 #' @examples
 #' results <- max(electricity)
-max.dfts <- function(x, type=c('Obs','intratime'), na.rm=TRUE, ...){
-  poss_types <- c('Obs','intratime')
+max.dfts <- function(x, type=c('Obs','fparam'), na.rm=TRUE, ...){
+  poss_types <- c('Obs','fparam')
   type <- .verify_input(type, poss_types)
   x <- dfts(x)
 
@@ -381,13 +381,13 @@ max.dfts <- function(x, type=c('Obs','intratime'), na.rm=TRUE, ...){
     idx <- which.max(colMeans(x$data,na.rm = na.rm))
     return_dat <- dfts(x$data[,idx,drop=FALSE],
                         name = x$name,
-                        intratime = x$intratime,
+                        fparam = x$fparam,
                         labels = x$labels[idx])
-  }else if(type=='intratime'){
+  }else if(type=='fparam'){
     dat <- apply(x$data,MARGIN = 1, max, na.rm=na.rm, ...)
     return_dat <- dfts(matrix(dat),
                         name = x$name,
-                        intratime = x$intratime)
+                        fparam = x$fparam)
 
   }
 
@@ -400,21 +400,21 @@ max.dfts <- function(x, type=c('Obs','intratime'), na.rm=TRUE, ...){
 #'
 #' @examples
 #' results <- min(electricity)
-min.dfts <- function(x, type=c('Obs','intratime'), na.rm=TRUE, ...){
-  poss_types <- c('Obs','intratime')
+min.dfts <- function(x, type=c('Obs','fparam'), na.rm=TRUE, ...){
+  poss_types <- c('Obs','fparam')
   type <- .verify_input(type, poss_types)
 
   if(type == 'Obs'){
     idx <- which.min(colMeans(x$data,na.rm=na.rm))
     return_dat <- dfts(x$data[,idx,drop=FALSE],
                         name = x$name,
-                        intratime = x$intratime,
+                        fparam = x$fparam,
                         labels = x$labels[idx])
-  }else if(type=='intratime'){
+  }else if(type=='fparam'){
     dat <- apply(x$data,MARGIN = 1, min, na.rm=na.rm, ...)
     return_dat <- dfts(matrix(dat),
                         name = x$name,
-                        intratime = x$intratime)
+                        fparam = x$fparam)
 
   }
 
@@ -519,3 +519,108 @@ dim.dfts <- function(x, ...) {
   dim(x$data)
 }
 
+
+#' Extract or Replace parts of dfts object
+#'
+#' Extract or replace subsets of dfts objects.
+#'
+#' @param x dfts object
+#' @param i,j Numerics for elements to extract
+#' @param ... Unused additional parameters
+#'
+#' @returns dfts object
+#' @export
+#'
+#' @rdname extract
+#'
+#' @examples
+#' electricity[1:3]
+#' electricity[1:3,]
+#' electricity[1:2,1:4]
+#' electricity[,1:4]
+`[.dfts`  <- function(x,i,j, ...){
+  Narg <- nargs() # number of arg from x,i,j that were specified
+
+  if(Narg==1){
+    # No i,j
+    return_dfts <-
+      dfts(X=x$data,
+           name = x$name,
+           labels = x$labels,
+           fparam = x$fparam,
+           inc.warnings = FALSE
+      )
+  } else if(Narg==2){
+    # No j
+    return_dfts <-
+      dfts(X = x$data[,i,drop=FALSE],
+           name = x$name,
+           labels = x$labels[i],
+           fparam = x$fparam,
+           inc.warnings = FALSE
+      )
+  } else if(Narg>=3){
+    # i and j (or i missing)
+    if(missing(i)){
+      return_dfts <-
+        dfts(X=x$data[,j,drop=FALSE],
+             name = x$name,
+             labels = x$labels[j],
+             fparam = x$fparam,
+             inc.warnings = FALSE
+        )
+    }else{
+      return_dfts <-
+        dfts(X=x$data[i,j,drop=FALSE],
+             name = x$name,
+             labels = x$labels[j],
+             fparam = x$fparam[i],
+             inc.warnings = FALSE
+        )
+    }
+  }
+
+  return_dfts
+}
+
+
+#' @name extract
+#' @param value A suitable replacement value
+#'
+#' @returns dfts object
+#' @export
+#'
+#' @examples
+#' tmp <- dfts(matrix(1:9,3,3))
+#' tmp$data
+#' tmp[1,1] <- 10
+#' tmp$data
+`[<-.dfts` <- function(x, i, j, value) {
+  x$data <- methods::callGeneric(x$data, i, j, value)
+
+  x
+}
+
+
+
+#' Printing dfts objects
+#'
+#' Basic formatting to print a dfts object
+#'
+#' @param x dfts data
+#' @param ... unused parameter
+#'
+#' @export
+#'
+#' @examples
+#' electricity
+print.dfts <- function(x, ...){
+  cat(x$name,'\n')
+  cat('dimension: ',nrow(x),' x ',ncol(x),'\n',sep = '')
+  cat('fparam (',length(x$fparam),'): ',sep = '')
+  cat(head(x$fparam), ifelse(length(x$fparam)>6,'...',''),'\n')
+  cat('labels (',length(x$labels),'): ',sep = '')
+  cat(head(x$labels), ifelse(length(x$labels)>6,'...',''),'\n')
+  cat('\nExample data\n',sep = '')
+  print(x$data[1:min(6,nrow(x)),1:min(6,ncol(x))])
+}
