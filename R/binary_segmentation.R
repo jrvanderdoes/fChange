@@ -92,7 +92,7 @@
     .detect_changes(
       X = dfts(X$data[, 1:potential$location,drop=FALSE],
                 labels = X$labels[1:potential$location],
-                intratime = X$intratime,inc.warnings = FALSE),
+                fparam = X$fparam,inc.warnings = FALSE),
       method = method,
       trim_function = trim_function,
       alpha = alpha,
@@ -102,8 +102,9 @@
     ),
     data.frame('location'=potential$location + addAmt, 'pvalue'=potential$pvalue),
     .detect_changes(
-      X = dfts(X$data[, (potential$location + 1):ncol(X),drop=FALSE],labels = X$labels[(potential$location + 1):ncol(X)],
-               intratime = X$intratime,inc.warnings = FALSE),
+      X = dfts(X$data[, (potential$location + 1):ncol(X),drop=FALSE],
+               labels = X$labels[(potential$location + 1):ncol(X)],
+               fparam = X$fparam,inc.warnings = FALSE),
       method = method,
       trim_function = trim_function,
       alpha = alpha,
@@ -133,11 +134,11 @@
   trim_amt <- trim_function(X)
   nStart <- 1 + trim_amt
   nEnd <- ncol(X) - trim_amt
-  if(nStart >= nEnd) return(NA)
+  if(nStart >= nEnd) return(data.frame('pvalue'=1, 'location'=NA))
 
 
   # Find test statistic at every candidate change point
-  res <- change(X, method=method, type='single', ...)
+  res <- fchange(X, method=method, type='single', ...)
 
   # Return location if significant
   data.frame('pvalue'=res$pvalue, 'location'=res$location)
@@ -167,10 +168,11 @@
     for (i in 2:(length(tmp_changes) - 1)) {
       ## Get CP
       potential_cp <-
-        .single_segment(X=dfts(X=X$data[, (tmp_changes[i - 1] + 1):tmp_changes[i + 1]],
-                                labels = X$labels[(tmp_changes[i - 1] + 1):tmp_changes[i + 1]],
-                               intratime = X$intratime, inc.warnings = FALSE),
+        .single_segment(X=dfts(X=X$data[, (tmp_changes[i - 1] + 1):tmp_changes[i + 1],drop=FALSE],
+                               labels = X$labels[(tmp_changes[i - 1] + 1):tmp_changes[i + 1]],
+                               fparam = X$fparam, inc.warnings = FALSE),
                         method=method, trim_function=trim_function, ...)
+
       if(potential_cp$pvalue<=alpha){
         changes_new <- rbind(changes_new,
                          data.frame('location'=potential_cp$location+tmp_changes[i - 1],
