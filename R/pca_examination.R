@@ -146,18 +146,18 @@ projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
   errors <- X$data - fit[,1:ncol(X)]
 
   if(n.ahead>0){
-    fit_prep <- dfts(fit, name = 'Fit', intratime=X$intratime)
+    fit_prep <- dfts(fit, name = 'Fit', fparam=X$fparam)
     data_prep <- dfts(cbind(X$data,fit[,(ncol(X)+1):ncol(fit)]),
-                       name = 'Forecast', intratime=X$intratime)
+                       name = 'Forecast', fparam=X$fparam)
   }else{
-    fit_prep <- dfts(fit, labels=X$labels, name='Fit', intratime=X$intratime,)
+    fit_prep <- dfts(fit, labels=X$labels, name='Fit', fparam=X$fparam,)
     data_prep <- dfts(X$data, labels=X$labels,
-                       name = 'Forecast', intratime=X$intratime)
+                       name = 'Forecast', fparam=X$fparam)
   }
 
   # Check changes
   if(check.cp){
-    res <- change(X = dfts(errors), type='segmentation', ...)
+    res <- fchange(X = dfts(errors), type='segmentation', ...)
     if(!is.null(res)){
       changes <- res$location
       errors_use <- dfts(errors[,(max(res$location)+1):ncol(X),drop=FALSE])
@@ -190,7 +190,7 @@ projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
   list(fit = fit_prep,
        forecast_plot = plt_for,
        fit_plot = plt_for_fit,
-       errors = dfts(errors, labels=X$labels, name='Errors', intratime=X$intratime),
+       errors = dfts(errors, labels=X$labels, name='Errors', fparam=X$fparam),
        changes = changes,
        component_models = data_fits,
        component_true = data_reals,

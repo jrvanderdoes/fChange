@@ -30,7 +30,7 @@
       plotData <- rbind(
         plotData,
         data.frame(
-          "resolution" = X$intratime,
+          "resolution" = X$fparam,
           "FDRep" = j,
           "Color" = 1,
           "Value" = X$data[, j]
@@ -43,7 +43,7 @@
         plotData <- rbind(
           plotData,
           data.frame(
-            "resolution" = X$intratime,
+            "resolution" = X$fparam,
             "FDRep" = j,
             "Color" = i,
             "Value" = X$data[, j]
@@ -56,7 +56,7 @@
       plotData <- rbind(
         plotData,
         data.frame(
-          "resolution" = X$intratime,
+          "resolution" = X$fparam,
           "FDRep" = j,
           "Color" = j,
           "Value" = X$data[, j]
@@ -71,7 +71,7 @@
     plotData_forecast <- rbind(
       plotData_forecast,
       data.frame(
-        "resolution" = X$intratime,
+        "resolution" = X$fparam,
         "FDRep" = j,
         "Color" = max(changes) + 1,
         "Value" = X$data[, j]
@@ -81,7 +81,7 @@
     plotData_lower <- rbind(
       plotData_lower,
       data.frame(
-        "resolution" = X$intratime,
+        "resolution" = X$fparam,
         "FDRep" = j,
         "Color" = max(changes) + 1,
         "Value" = lower[,j-max(changes)]
@@ -91,7 +91,7 @@
     plotData_upper <- rbind(
       plotData_upper,
       data.frame(
-        "resolution" = X$intratime,
+        "resolution" = X$fparam,
         "FDRep" = j,
         "Color" = max(changes) + 1,
         "Value" = upper[,j-max(changes)]

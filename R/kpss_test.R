@@ -4,15 +4,15 @@
 #'
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param method String (default MC) for the method: monte carlo simulation
-#'  (\code{MC}), block permutation (\code{block}), and sliding window
+#' @param method String (default MC) for the method: Monte Carlo simulation
+#'  (\code{MC}), block resampling (\code{block}), and sliding window
 #'  permutation (\code{sliding})
 #' @param M Number of simulations (default 1000) to estimate theoretical distribution
-#' @param h Numeric (default 3) for the block size when using a permutation test
+#' @param h Numeric (default 3) for the block size when using a resample test
 #' @param TVE Numeric (default 1) for selecting the number of principle
 #'  components / eigenvalues
 #' @param replace Boolean (default TRUE) to indicate if blocks should be
-#'  selected with replacement when using a permutation test
+#'  selected with replacement when using a resample test
 #'
 #' @return List with statistic, p-value and theoretical simulations, respectively
 #' @export
@@ -50,7 +50,7 @@ kpss_test <-function(X, method=c("MC",'block','sliding'),
       sum(eigs *
             dot_integrate_col(
               .generate_second_level_brownian_bridge(length(eigs), v = v)$data^2) )
-    },eigs=eigs, v=X$intratime)
+    },eigs=eigs, v=X$fparam)
 
   } else if(method=='block' || method=='sliding'){
     xi_hat <- (12/(N*(N^2-1))) *
@@ -98,7 +98,7 @@ kpss_test <-function(X, method=c("MC",'block','sliding'),
 
   # ZN <- 1/sqrt(N) * cumsum(dfts(hat_eta))$data
   ZN <- .kpss_partial_sum(hat_eta)
-  RN <- dot_integrate(dot_integrate_col(ZN^2, X$intratime))# * r
+  RN <- dot_integrate(dot_integrate_col(ZN^2, X$fparam))# * r
 
   list('test_statistic'=RN,'hat_eta'=hat_eta)
 }

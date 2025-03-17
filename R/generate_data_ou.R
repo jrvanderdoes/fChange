@@ -1,7 +1,7 @@
 
 #' Generate Data via Ornstein-Uhlenbeck Process
 #'
-#' @param resolution Numeric for data resolution or specific observed intratime
+#' @param resolution Numeric for data resolution or specific observed fparam
 #' @param N Numeric for data length
 #' @param rho Numeric for amount of dependence
 #'

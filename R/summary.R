@@ -26,7 +26,7 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
       object_tmp <- object
 
       for(d in 1:(length(changes)-1)){
-        object_tmp <- dfts(object$data[,(changes[d]+1):changes[d+1]], intratime = object$intratime)
+        object_tmp <- dfts(object$data[,(changes[d]+1):changes[d+1]], fparam = object$fparam)
         object$data[,(changes[d]+1):changes[d+1]] <- object$data[,(changes[d]+1):changes[d+1]] - mean(object_tmp)
       }
 
@@ -132,7 +132,7 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
 
   #####
   ## Plot Lines
-  data_lines <- cbind(data.frame('Time'=object$intratime),
+  data_lines <- cbind(data.frame('Time'=object$fparam),
                       object$data) %>%
     tidyr::pivot_longer(cols = 1+1:ncol(object$data))
 
@@ -156,7 +156,7 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
       colors_plot[changes[i]:changes[i + 1]] <- tmp_colors[i]
     }
   }
-  data_lines$color <- rep(colors_plot,times=length(object$intratime))
+  data_lines$color <- rep(colors_plot,times=length(object$fparam))
   data_lines$name <- as.numeric(data_lines$name)
 
   Time <- color <- NULL
@@ -273,7 +273,7 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
 
   #####
   ## Plot Lines
-  data_lines <- cbind(data.frame('Time'=object$intratime),
+  data_lines <- cbind(data.frame('Time'=object$fparam),
                       object$data) %>%
     tidyr::pivot_longer(cols = 1+1:ncol(object$data))
 

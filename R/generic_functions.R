@@ -273,5 +273,5 @@ cumsum.dfts <- function(x){
 
   dfts(t(apply(x$data,MARGIN = 1,cumsum)),
         labels = x$labels,
-        intratime = x$intratime)
+        fparam = x$fparam)
 }

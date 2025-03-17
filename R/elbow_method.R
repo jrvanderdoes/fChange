@@ -6,7 +6,7 @@
 #'
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param method Method of detecting changes. See [change()].
+#' @param method Method of detecting changes. See [fchange()].
 #' @param W Basis to measure the space with when using a characteristic-based
 #'  approach.
 #' @param trim_function Function with data input. Used to trim data.
@@ -458,7 +458,7 @@
 #' @noRd
 #' @keywords internal
 .compute_total_var <- function(X, changes, errors = "L2", K=bartlett_kernel,
-                               W=generate_brownian_motion(100, v=X$intratime )$data) {
+                               W=generate_brownian_motion(100, v=X$fparam )$data) {
   # Get Information
   if (tolower(errors) == "l2" || tolower(errors) == "trace") {
 

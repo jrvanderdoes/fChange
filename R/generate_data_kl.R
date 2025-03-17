@@ -17,7 +17,7 @@
 #' @param basis A list of bases (eigenfunctions), length m.
 #' @param means A vector of means, length 1 or N.
 #' @param distribution A vector of distributions, length 1 or m.
-#' @param intratime A vector of points indicating the points to evaluate the
+#' @param fparam A vector of points indicating the points to evaluate the
 #'     functions on.
 #' @param dependence Numeric \[0,1\] indicating strength of VAR(1) process.
 #' @param burnin A numeric value indicating the number of burnin trials.
@@ -33,18 +33,18 @@
 #' dat1 <- generate_karhunen_loeve(
 #'   N=100, eigenvalues=c(1/(1:3)), basis=fda::create.bspline.basis(nbasis=3,norder=3),
 #'   means=0, distribution='Normal',
-#'   intratime=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+#'   fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
 #'   prev_eps=NULL)
 #' dat2 <- generate_karhunen_loeve(
 #'   N=50, eigenvalues=c(1/(1:4)), basis=fda::create.bspline.basis(nbasis=4),
 #'   means=5, distribution='exponential',
-#'   intratime=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+#'   fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
 #'   prev_eps=dat1$prev_eps)
 #'
-#' dat <- dfts(cbind(dat1$data$data, dat2$data$data),intratime = dat1$data$intratime)
+#' dat <- dfts(cbind(dat1$data$data, dat2$data$data),fparam = dat1$data$fparam)
 generate_karhunen_loeve <- function(
     N, eigenvalues, basis, means, distribution,
-    intratime, dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+    fparam, dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
     prev_eps=NULL) {
   ## Verification
   m <- length(basis$names)
@@ -82,7 +82,7 @@ generate_karhunen_loeve <- function(
 
   # Burnin for VAR (if not given)
   if(is.null(prev_eps)){
-    prev_eps <- data.frame(matrix(0, ncol = length(intratime), nrow = m))
+    prev_eps <- data.frame(matrix(0, ncol = length(fparam), nrow = m))
     if(burnin>0){
       for (j in 1:burnin) {
         waste <- .KL_Expansion(
@@ -90,7 +90,7 @@ generate_karhunen_loeve <- function(
           basis = basis,
           means = means[1],
           distribution = distribution,
-          resolution = intratime,
+          resolution = fparam,
           prev_eps = prev_eps,
           psi = psi,
           dof = dof,
@@ -121,14 +121,14 @@ generate_karhunen_loeve <- function(
   }
 
   # Generate Data
-  data <- data.frame(matrix(NA, ncol = N, nrow = length(intratime)))
+  data <- data.frame(matrix(NA, ncol = N, nrow = length(fparam)))
   for (j in 1:N) {
     result <- .KL_Expansion(
       eigenvalues = eigenvalues,
       basis = basis,
       means = means[j],
       distribution = distribution,
-      resolution = intratime,
+      resolution = fparam,
       prev_eps = prev_eps,
       psi = psi,
       dof = dof,
@@ -139,7 +139,7 @@ generate_karhunen_loeve <- function(
     prev_eps <- result[[2]]
   }
 
-  list('data'= dfts(data, intratime = intratime, labels = 1:ncol(data)),
+  list('data'= dfts(data, fparam = fparam, labels = 1:ncol(data)),
        'prev_eps'=prev_eps)
 }
 

@@ -17,7 +17,7 @@
 #'  data should be shared across observations. For example, is the end of
 #'  observation i related to the start of observation i+1. Default is FALSE,
 #'  which suggests independence. If true, the distance between the end and
-#'  start of observations is taken to be the mean of the intratime.
+#'  start of observations is taken to be the mean of the fparam.
 #'
 #' @return dfts object with interpolated missing data
 #' @export
@@ -84,7 +84,7 @@ impute <- function(X,
            na_row <- rowSums(is.na(X$data))
            data_tmp <- stats::na.omit(X$data)
 
-           if(length(X$intratime[na_row==0])==0){
+           if(length(X$fparam[na_row==0])==0){
              stop("Need some evaluation points to be non-NA for all observations",call. = FALSE)
            }
 
@@ -93,11 +93,11 @@ impute <- function(X,
            }
 
 
-           data_fd <- fda::eval.fd(evalarg = X$intratime,
+           data_fd <- fda::eval.fd(evalarg = X$fparam,
                                    fda::Data2fd(
-                                     argvals = X$intratime[na_row==0], y = data_tmp,
+                                     argvals = X$fparam[na_row==0], y = data_tmp,
                                      basisobj = fda::create.bspline.basis(
-                                       rangeval = range(X$intratime[na_row==0])) )
+                                       rangeval = range(X$fparam[na_row==0])) )
            )
            X$data <- ifelse(is.na(X$data),data_fd,X$data)
 
@@ -111,7 +111,7 @@ impute <- function(X,
                 call. = FALSE)
          })
 
-  dfts(X_imp,name=X$name,labels=X$labels, intratime=X$intratime, inc.warnings = F)
+  dfts(X_imp,name=X$name,labels=X$labels, fparam=X$fparam, inc.warnings = F)
 }
 
 
@@ -147,12 +147,12 @@ impute <- function(X,
                               data$data[1,i+1]))
       }
 
-      tmp_x <- as.numeric(c(min( data$intratime)-mean(diff(data$intratime)),
-                            data$intratime,
-                            max(data$intratime)+mean(diff(data$intratime))))
+      tmp_x <- as.numeric(c(min( data$fparam)-mean(diff(data$fparam)),
+                            data$fparam,
+                            max(data$fparam)+mean(diff(data$fparam))))
     }else{
       tmp_y <- as.numeric(data_fill[,i])
-      tmp_x <- as.numeric(data$intratime)
+      tmp_x <- as.numeric(data$fparam)
     }
 
     tmp_approx <- tryCatch({
@@ -179,7 +179,7 @@ impute <- function(X,
         obs_st <- min(which(!is.na(data_i)))
         obs_en <- max(which(!is.na(data_i)))
         slope <-  (data_i[obs_en]-data_i[obs_st]) /
-          (data$intratime[obs_en]-data$intratime[obs_st])
+          (data$fparam[obs_en]-data$fparam[obs_st])
 
         # If only 1 observation, share it
         if(is.nan(slope)) {
@@ -195,9 +195,9 @@ impute <- function(X,
         for(j in obs_missing){
           # Up or down
           if(j < obs_st){
-            data_fill[j, i] <- data_fill[j+1, i]-slope*diff(data$intratime)[j]
+            data_fill[j, i] <- data_fill[j+1, i]-slope*diff(data$fparam)[j]
           }else{
-            data_fill[j, i] <- data_fill[j-1, i]+slope*diff(data$intratime)[j-1]
+            data_fill[j, i] <- data_fill[j-1, i]+slope*diff(data$fparam)[j-1]
           }
         }
       } else{
@@ -207,16 +207,16 @@ impute <- function(X,
         obs_en <- max(which(!is.na(data_i)))
         obs1_en <- min(which(!is.na(data_fill[,i+1])))
 
-        low_x <- (data$intratime[1] -
-                    data$intratime[ length(data$intratime)-obs1_st+1 ]) -
-          mean(diff(data$intratime))
+        low_x <- (data$fparam[1] -
+                    data$fparam[ length(data$fparam)-obs1_st+1 ]) -
+          mean(diff(data$fparam))
         slope_down <- (data_i[obs_st]-data_fill[obs1_st,i-1]) /
-          (data$intratime[obs_st] - low_x)
-        up_x <- (data$intratime[length(data$intratime)] +
-                   data$intratime[ obs1_en ]) +
-          mean(diff(data$intratime))
+          (data$fparam[obs_st] - low_x)
+        up_x <- (data$fparam[length(data$fparam)] +
+                   data$fparam[ obs1_en ]) +
+          mean(diff(data$fparam))
         slope_up <- (data_fill[obs1_en,i+1]-data_i[obs_en]) /
-          ( up_x - data$intratime[obs_en] )
+          ( up_x - data$fparam[obs_en] )
 
         # Get missing, sort so that I go inside to outside
         obs_missing <- which(is.na(data_i))
@@ -227,9 +227,9 @@ impute <- function(X,
         for(j in obs_missing){
           # Up or down
           if(j < obs_st){
-            data_fill[j, i] <- data_fill[j+1, i]-slope_down*diff(data$intratime)[j]
+            data_fill[j, i] <- data_fill[j+1, i]-slope_down*diff(data$fparam)[j]
           }else{
-            data_fill[j, i] <- data_fill[j-1, i]+slope_up*diff(data$intratime)[j-1]
+            data_fill[j, i] <- data_fill[j-1, i]+slope_up*diff(data$fparam)[j-1]
           }
         }
 

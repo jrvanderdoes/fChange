@@ -83,7 +83,7 @@ confidence_interval <- function(X, changes, K=bartlett_kernel,
     X_k2 <- rowMeans(X$data[,idx2])
 
     e <- X_k2 - X_k1
-    e_l2norm <- dot_integrate(e^2, r = X$intratime)
+    e_l2norm <- dot_integrate(e^2, r = X$fparam)
     eps_hat <- matrix(ncol=N, nrow=r)
     eps_hat[,1:CP_simple] <- X$data[,idx1] - X_k1
     eps_hat[,(CP_simple+1):N] <- X$data[,idx2] - X_k2
@@ -92,7 +92,7 @@ confidence_interval <- function(X, changes, K=bartlett_kernel,
     for(j in 1:N){
       g[j] <- dot_integrate(
         eps_hat[,j] * e / sqrt(e_l2norm),
-        r = X$intratime)
+        r = X$fparam)
     }
 
     ## LRV

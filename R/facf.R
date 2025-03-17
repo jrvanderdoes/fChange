@@ -111,17 +111,17 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   autocovs <- autocovariance(x, 0:lag.max)
 
   # L2 norm autocov surfaces
-  # l2norms <- .obtain_suface_L2_norm(x$intratime, autocovs)
+  # l2norms <- .obtain_suface_L2_norm(x$fparam, autocovs)
   # l2norms <- l2norms[-1] # Drop Lag 0
   l2norms <- sapply(1:lag.max, function(idx,autocovs,res){
     dot_integrate(
       dot_integrate_col(v=t(autocovs[[idx+1]]^2),r=res),
       r=res)
-  },autocovs=autocovs,res=x$intratime)
+  },autocovs=autocovs,res=x$fparam)
 
   # Obtain autocorrelation estimates
   normalization.value <-
-    dot_integrate(r = x$intratime, v = diag(autocovs$Lag0))
+    dot_integrate(r = x$fparam, v = diag(autocovs$Lag0))
   rho <- sqrt(l2norms) / normalization.value
 
   # Estimate distribution of SWN (iid) bound
@@ -238,7 +238,7 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
     # # mat.means <- matrix(rep(colMeans(Y),nrow(Y)),ncol=ncol(Y),byrow = TRUE)
     # # l <- obtain_autocov_eigenvalues(v,Y - mat.means)
     # means <- matrix(rep(rowMeans(x$data),ncol(x$data)), nrow=nrow(x$data))
-    # l <- .obtain_autocov_eigenvalues(x$data - means,x$intratime)
+    # l <- .obtain_autocov_eigenvalues(x$data - means,x$fparam)
     l <- .obtain_autocov_eigenvalues(center(x))
 
     neig <- length(l)
@@ -307,7 +307,7 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
     mat.aux <- matrix(rep(x$data[,ii],each = nobs),
                       nrow = nobs, ncol = res)*t(x$data)
     for(jj in 1:nobs){
-      W[ii,jj] <- dot_integrate(r = x$intratime, v = mat.aux[jj,])
+      W[ii,jj] <- dot_integrate(r = x$fparam, v = mat.aux[jj,])
     }
   }
 
@@ -379,7 +379,7 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   # # mat.means <- matrix(rep(colMeans(Y),nrow(Y)),ncol=ncol(Y),byrow = TRUE)
   # # l <- obtain_autocov_eigenvalues(v,Y - mat.means)
   # means <- matrix(rep(rowMeans(x$data),ncol(x$data)), nrow=nrow(x$data))
-  # l <- .obtain_autocov_eigenvalues(x$data - means,x$intratime)
+  # l <- .obtain_autocov_eigenvalues(x$data - means,x$fparam)
   l <- .obtain_autocov_eigenvalues(center(x))
 
   nl <- length(l)
@@ -606,7 +606,7 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
     max_pc <- 20
 
     # If there are less discretization points than max_pc, use the disc points
-    num_fpc <- min(c(length(x$intratime), max_pc))
+    num_fpc <- min(c(length(x$fparam), max_pc))
 
     pca <- stats::princomp(t(x$data))#$scores[,1:num_fpc]
     eigs <- pca$sdev^2
@@ -699,7 +699,7 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
     }
     var_1 <- var_1 / count
 
-    traza_1 <- dot_integrate(r = x$intratime, v = diag(var_1))
+    traza_1 <- dot_integrate(r = x$fparam, v = diag(var_1))
 
     var_2 <- matrix(0, res, res)
     count <- 0
@@ -713,18 +713,18 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
     }
     var_2 <- var_2 / count
 
-    traza_2 <- dot_integrate(r = x$intratime, v = diag(var_2))
+    traza_2 <- dot_integrate(r = x$fparam, v = diag(var_2))
 
     sup_corr <- sup_cov / ( sqrt(traza_1)*sqrt(traza_2) )
 
     # Check - L2 surface norm
     vector_PACF[lag_PACF] <-
       dot_integrate(
-        dot_integrate_col(v=t(sup_corr^2),r=x$intratime),
-        r=x$intratime)
+        dot_integrate_col(v=t(sup_corr^2),r=x$fparam),
+        r=x$fparam)
 
     # vector_PACF[lag_PACF] <-
-    #   sqrt( .obtain_suface_L2_norm(x$intratime, list(Lag0 = sup_corr)) )
+    #   sqrt( .obtain_suface_L2_norm(x$fparam, list(Lag0 = sup_corr)) )
   }
 
   if(figure){
@@ -780,7 +780,7 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #' # }
 #' #
 #' # # Fit an ARH(1) model
-#' # mod <- .fit_ARHp_FPCA(x = dfts(y,intratime = v), p = 1, n_pcs = 5)
+#' # mod <- .fit_ARHp_FPCA(x = dfts(y,fparam = v), p = 1, n_pcs = 5)
 #'
 #' # Plot results
 #' # plot(v, y[,50], type = "l", lty = 1, ylab = "")

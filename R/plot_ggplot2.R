@@ -20,7 +20,7 @@
 #' @examples
 #' dat <- electricity
 #'
-#' data_lines <- cbind(data.frame('Time'=dat$intratime), dat$data) %>%
+#' data_lines <- cbind(data.frame('Time'=dat$fparam), dat$data) %>%
 #'  tidyr::pivot_longer(cols = 1+1:ncol(dat$data))
 #'
 #' colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")

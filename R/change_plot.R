@@ -28,7 +28,7 @@
 
   X <- dfts(X)
   data <- X$data
-  curve_points <- X$intratime
+  curve_points <- X$fparam
 
 
 
@@ -258,7 +258,7 @@
       plotData <- rbind(
         plotData,
         data.frame(
-          "resolution" = X$intratime,
+          "resolution" = X$fparam,
           "FDRep" = j,#X$labels[j],
           "Color" = plot_colors[i],
           "Value" = X$data[, j]
@@ -268,7 +268,7 @@
       plotData_mean <- rbind(
         plotData_mean,
         data.frame(
-          "resolution" = X$intratime,
+          "resolution" = X$fparam,
           "FDRep" = j,#X$labels[j],
           "Color" = plot_colors[i],
           "Value" = means

@@ -5,12 +5,12 @@
 #' @param x A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
 #' @param changes Vector of change points. Can be NULL.
-#' @param type Choice of plotting method. Options include: 'spaghetti', 'highdim',
+#' @param type Choice of plotting method. Options include: 'spaghetti', 'fast',
 #'  'rainbow','banded','acf', 'pacf', 'summary', 'qq', 'distribution', 'change',
 #'  'interval', and'surface'.
 #' @param plot_title Title to include on the return plot
 #' @param val_axis_title,res_axis_title,FD_axis_title Title for the axis giving
-#'  the values (val), the resolution of the intratime (res), and the functional
+#'  the values (val), the resolution of the fparam (res), and the functional
 #'  observations (FD)
 #' @param eye,aspectratio Angle (eye) and ratio (aspectratio) to view 3d plots
 #' @param showticklabels Boolean if the tick marks should be shown
@@ -41,7 +41,7 @@
 #' plt <- plot(electricity)
 #' plt <- plot(var(electricity), type='surface')
 plot.dfts <- function(x, changes=NULL,
-                       type=c('spaghetti','highdim', 'rainbow','banded',
+                       type=c('spaghetti','fast', 'rainbow','banded',
                               'acf', 'pacf', 'summary', 'qq', 'distribution',
                               'change','interval', 'surface'),
                        plot_title = x$name, val_axis_title = NULL,
@@ -58,7 +58,7 @@ plot.dfts <- function(x, changes=NULL,
                        int.gradual=TRUE, ...
                        ){
   x <- dfts(x, inc.warnings = FALSE)
-  poss_types <- c('spaghetti','highdim', 'rainbow','banded','acf', 'pacf',
+  poss_types <- c('spaghetti','fast', 'rainbow','banded','acf', 'pacf',
                   'summary', 'qq', 'distribution', 'change','interval',
                   'surface')
   type <- .verify_input(type, poss_types)
@@ -77,7 +77,7 @@ plot.dfts <- function(x, changes=NULL,
                                   showticklabels = showticklabels,
                                   interactive = TRUE)
           },
-          highdim = {
+          fast = {
             .plot_fd(X = x, changes = changes,
                                    plot_title = plot_title,
                                    val_axis_title = val_axis_title,

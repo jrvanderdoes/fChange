@@ -38,7 +38,7 @@ generate_brownian_motion <- function(
                    )
   }
 
-  dfts(X=as.matrix(data),intratime = v)
+  dfts(X=as.matrix(data),fparam = v)
 }
 
 
@@ -71,7 +71,7 @@ generate_brownian_bridge <- function(
   data <- data -
     t(data[res,] * t(matrix(rep(v, times = N)/max(v), ncol = N, nrow = res)))
 
-  dfts(X=data,intratime = v)
+  dfts(X=data,fparam = v)
 }
 
 
@@ -99,7 +99,7 @@ generate_brownian_bridge <- function(
     v[1] + X - (v - v[1])/(v[n] - v[1]) * (X[n] - v[1] + v[1])
   },v=v,n=n)
 
-  dfts(X = BB, intratime = v)
+  dfts(X = BB, fparam = v)
 }
 
 
@@ -128,5 +128,5 @@ generate_brownian_bridge <- function(
     (2*v-3*v^2) %*% t(W$data[nrow(W$data),]) +
     (-6*v + 6*v^2) %*% t(dot_integrate_col(W$data, v))
 
-  dfts(X=V,intratime = v)
+  dfts(X=V,fparam = v)
 }

@@ -55,5 +55,5 @@ generate_far1 <- function(N, resolution, sd=1, dependence=1/2, dropFirst=TRUE){
     }
   }
 
-  dfts(X, intratime = res)
+  dfts(X, fparam = res)
 }
