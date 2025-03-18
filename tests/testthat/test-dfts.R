@@ -50,3 +50,14 @@ test_that("Check lag of dfts", {
   expect_equal(dim(lag(elec,1)),c(24,364))
   expect_equal(lag(elec,lag=1,difference=2)$data[22,42],18.69)
 })
+
+
+test_that("Check [ or [<-", {
+  expect_equal(electricity[8,10]$data[[1]],51.3)
+  expect_equal(electricity[1]$data[5], 0.5)
+
+  tmp <- dfts(matrix(1:9,3,3))
+  tmp[3,2]$data[1] <- 11
+  expect_equal(tmp[3,2]$data[1], 11)
+  expect_equal(tmp[2,3]$data[1], 8)
+})
