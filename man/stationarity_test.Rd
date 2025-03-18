@@ -7,7 +7,7 @@
 stationarity_test(
   X,
   statistic = "Tn",
-  critical = c("simulation", "permutation"),
+  critical = c("simulation", "resample"),
   perm_method = "separate",
   M = 1000,
   blocksize = 3,
@@ -23,20 +23,20 @@ format. See \code{\link[=dfts]{dfts()}}.}
 \code{Mn}. Default is \code{Tn}.}
 
 \item{critical}{String for method of determining the critical values. Options are
-\code{simulation} and \code{permutation}. Default is \code{simulation}.}
+\code{simulation} and \code{resample}. Default is \code{simulation}.}
 
-\item{perm_method}{String for method of permutation. Options are \code{separate}
+\item{perm_method}{String for method of resampling. Options are \code{separate}
 and \code{sliding}. Default is \code{separate}.}
 
 \item{M}{Numeric for number of simulation to use in determining the null
 distribution. Default is 1000.}
 
-\item{blocksize}{Numeric for blocksize in permutation test. Default is 1.}
+\item{blocksize}{Numeric for blocksize in resample test. Default is 1.}
 
 \item{TVE}{Numeric for total variance explained when using PCA for
 eigenvalues. Default is 1.}
 
-\item{replace}{Boolean if replacement should be used for permutation test.
+\item{replace}{Boolean if replacement should be used for resample test.
 Default is TRUE.}
 }
 \value{
@@ -53,7 +53,7 @@ is provided, please use them at your own risk).
 \examples{
 res <- stationarity_test(
   generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-  critical='permutation', statistic='Mn')
+  critical='resample', statistic='Mn')
 res2 <- stationarity_test(electricity)
 }
 \references{

@@ -6,7 +6,7 @@
 \alias{is.dfts}
 \title{dfts Objects}
 \usage{
-dfts(X, name = NULL, labels = NULL, intratime = NULL, inc.warnings = TRUE)
+dfts(X, name = NULL, labels = NULL, fparam = NULL, inc.warnings = TRUE)
 
 as.dfts(X)
 
@@ -25,7 +25,7 @@ input variable.}
 \item{labels}{Labels for the observations. Defaults to the column names or
 names inside of the object X.}
 
-\item{intratime}{Vector of numerics indicating the points for each
+\item{fparam}{Vector of numerics indicating the points for each
 observation. Defaults to even spacing on [0,1], or those included in the
 object. These may be unevenly spaced.}
 

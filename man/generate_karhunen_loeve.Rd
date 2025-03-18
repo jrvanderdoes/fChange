@@ -10,7 +10,7 @@ generate_karhunen_loeve(
   basis,
   means,
   distribution,
-  intratime,
+  fparam,
   dependence = 0,
   burnin = 100,
   silent = TRUE,
@@ -31,7 +31,7 @@ for a given group.}
 
 \item{distribution}{A vector of distributions, length 1 or m.}
 
-\item{intratime}{A vector of points indicating the points to evaluate the
+\item{fparam}{A vector of points indicating the points to evaluate the
 functions on.}
 
 \item{dependence}{Numeric [0,1] indicating strength of VAR(1) process.}
@@ -65,13 +65,13 @@ functions with similar properties.
 dat1 <- generate_karhunen_loeve(
   N=100, eigenvalues=c(1/(1:3)), basis=fda::create.bspline.basis(nbasis=3,norder=3),
   means=0, distribution='Normal',
-  intratime=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+  fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
   prev_eps=NULL)
 dat2 <- generate_karhunen_loeve(
   N=50, eigenvalues=c(1/(1:4)), basis=fda::create.bspline.basis(nbasis=4),
   means=5, distribution='exponential',
-  intratime=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
+  fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
   prev_eps=dat1$prev_eps)
 
-dat <- dfts(cbind(dat1$data$data, dat2$data$data),intratime = dat1$data$intratime)
+dat <- dfts(cbind(dat1$data$data, dat2$data$data),fparam = dat1$data$fparam)
 }

@@ -29,7 +29,7 @@ format. See \code{\link[=dfts]{dfts()}}.}
 data should be shared across observations. For example, is the end of
 observation i related to the start of observation i+1. Default is FALSE,
 which suggests independence. If true, the distance between the end and
-start of observations is taken to be the mean of the intratime.}
+start of observations is taken to be the mean of the fparam.}
 }
 \value{
 dfts object with interpolated missing data

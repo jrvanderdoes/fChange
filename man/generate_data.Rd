@@ -4,10 +4,10 @@
 \alias{generate_data}
 \title{Generate Functional Data}
 \usage{
-generate_data(intratime, data_details, burnin = 100)
+generate_data(fparam, data_details, burnin = 100)
 }
 \arguments{
-\item{intratime}{intratime of data (or resolution that will be equally spaced
+\item{fparam}{fparam of data (or resolution that will be equally spaced
 on [0,1\).}
 
 \item{data_details}{List of named lists indicating parameters for each data group.
@@ -51,9 +51,9 @@ a \code{gamma} distribution.
 \item \strong{dependence}: Strength of dependence between observation.
 \item \strong{sd}: Numeric for the standard deviation of the observations.
 \item \strong{vary}: Boolean if the starting value each observation should
-be 0 or vary. It does this by dropping first value. If intratime is
+be 0 or vary. It does this by dropping first value. If fparam is
 given as a number, it can adjust so that the length is the same. If
-intratime is a vector, the intratime will be one smaller.
+fparam is a vector, the fparam will be one smaller.
 }
 }}
 
@@ -68,7 +68,7 @@ approaches: \code{bbridge}, \code{bmotion}, \code{kl}, \code{ou}, and \code{far1
 }
 \examples{
 result <- generate_data(
-  intratime=15,
+  fparam=15,
   data_details =list('bmotion'=list('N'=100, 'sd'=1),
                      'bbridge'=list('N'=100, 'sd'=1),
                      'bbridge'=list('N'=100, 'sd'=1),

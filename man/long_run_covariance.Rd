@@ -11,7 +11,8 @@ long_run_covariance(X, h = 0, K = bartlett_kernel)
 format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{h}{The window parameter parameter for the estimation of the long run
-covariance kernel. The default value is \code{h=0}, i.e., it assumes iid data}
+covariance kernel. The default value is \code{h=0}, i.e., it assumes iid
+data. Note there exists an internal check such that \eqn{h=min(h,ncol(X)-1)}.}
 
 \item{K}{(Optional) Function indicating the Kernel to use if h>0}
 }

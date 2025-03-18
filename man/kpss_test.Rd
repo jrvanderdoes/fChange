@@ -17,19 +17,19 @@ kpss_test(
 \item{X}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{method}{String (default MC) for the method: monte carlo simulation
-(\code{MC}), block permutation (\code{block}), and sliding window
+\item{method}{String (default MC) for the method: Monte Carlo simulation
+(\code{MC}), block resampling (\code{block}), and sliding window
 permutation (\code{sliding})}
 
 \item{M}{Number of simulations (default 1000) to estimate theoretical distribution}
 
-\item{h}{Numeric (default 3) for the block size when using a permutation test}
+\item{h}{Numeric (default 3) for the block size when using a resample test}
 
 \item{TVE}{Numeric (default 1) for selecting the number of principle
 components / eigenvalues}
 
 \item{replace}{Boolean (default TRUE) to indicate if blocks should be
-selected with replacement when using a permutation test}
+selected with replacement when using a resample test}
 }
 \value{
 List with statistic, p-value and theoretical simulations, respectively

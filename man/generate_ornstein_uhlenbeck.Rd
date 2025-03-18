@@ -9,7 +9,7 @@ generate_ornstein_uhlenbeck(N, resolution, rho = 0)
 \arguments{
 \item{N}{Numeric for data length}
 
-\item{resolution}{Numeric for data resolution or specific observed intratime}
+\item{resolution}{Numeric for data resolution or specific observed fparam}
 
 \item{rho}{Numeric for amount of dependence}
 }

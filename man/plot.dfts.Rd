@@ -7,7 +7,7 @@
 \method{plot}{dfts}(
   x,
   changes = NULL,
-  type = c("spaghetti", "highdim", "rainbow", "banded", "acf", "pacf", "summary", "qq",
+  type = c("spaghetti", "fast", "rainbow", "banded", "acf", "pacf", "summary", "qq",
     "distribution", "change", "interval", "surface"),
   plot_title = x$name,
   val_axis_title = NULL,
@@ -35,14 +35,14 @@ format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{changes}{Vector of change points. Can be NULL.}
 
-\item{type}{Choice of plotting method. Options include: 'spaghetti', 'highdim',
+\item{type}{Choice of plotting method. Options include: 'spaghetti', 'fast',
 'rainbow','banded','acf', 'pacf', 'summary', 'qq', 'distribution', 'change',
 'interval', and'surface'.}
 
 \item{plot_title}{Title to include on the return plot}
 
 \item{val_axis_title, res_axis_title, FD_axis_title}{Title for the axis giving
-the values (val), the resolution of the intratime (res), and the functional
+the values (val), the resolution of the fparam (res), and the functional
 observations (FD)}
 
 \item{eye, aspectratio}{Angle (eye) and ratio (aspectratio) to view 3d plots}

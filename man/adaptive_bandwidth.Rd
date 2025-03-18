@@ -13,9 +13,18 @@ format. See \code{\link[=dfts]{dfts()}}.}
 \item{kernel}{Kernel function selection to use, 'bartlett' or 'parzen'.}
 }
 \value{
-a scalar value of the "optimal" data-adapted bandwidth.
+Scalar value of the "optimal" data-adapted bandwidth.
 }
 \description{
 Computes the "optimal" bandwidth using a bandwidth selection method based on the
 spectral density operator which adapts to the functional data.
+}
+\examples{
+adaptive_bandwidth(generate_brownian_motion(100))
+}
+\references{
+Rice, G., & Shang, H. L. (2017). A Plug‐in Bandwidth Selection
+Procedure for Long‐Run Covariance Estimation with Stationary Functional Time
+Series. Journal of Time Series Analysis, 38(4), 591–609.
+\url{https://doi.org/10.1111/jtsa.12229}
 }

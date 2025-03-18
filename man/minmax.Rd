@@ -6,16 +6,16 @@
 \alias{min.dfts}
 \title{Max / Min for dfts Objects}
 \usage{
-\method{max}{dfts}(x, type = c("Obs", "intratime"), na.rm = TRUE, ...)
+\method{max}{dfts}(x, type = c("Obs", "fparam"), na.rm = TRUE, ...)
 
-\method{min}{dfts}(x, type = c("Obs", "intratime"), na.rm = TRUE, ...)
+\method{min}{dfts}(x, type = c("Obs", "fparam"), na.rm = TRUE, ...)
 }
 \arguments{
 \item{x}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{type}{String indicating if finding for observation ('Obs', default),
-or for pointwise values ('intratime').}
+or for pointwise values ('fparam').}
 
 \item{na.rm}{Boolean if NA values should be removed. Defaults to TRUE.}
 
