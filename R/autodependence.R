@@ -29,7 +29,7 @@
 autocovariance <- function(X, lags=0:1, center=TRUE){
   X <- dfts(X)
   if(center) X <- center.dfts(X)
-  res <- length(X$intratime)
+  res <- length(X$fparam)
   obs <- length(X$labels)
 
   autocovs <- list()
@@ -88,19 +88,19 @@ autocorrelation <- function(X, lags){
 
   if(length(lags_use)==1){
     normalization.value <-
-      dot_integrate(r = X$intratime, v = diag(autocov))
+      dot_integrate(r = X$fparam, v = diag(autocov))
 
     autocor <- autocov / normalization.value
 
   } else if(length(lags)==1){
     normalization.value <-
-      dot_integrate(r = X$intratime, v = diag(autocov$Lag0))
+      dot_integrate(r = X$fparam, v = diag(autocov$Lag0))
 
     autocor <- autocov[[paste("Lag",lags,sep = "")]] / normalization.value
 
   }else {
     normalization.value <-
-      dot_integrate(r = X$intratime, v = diag(autocov$Lag0))
+      dot_integrate(r = X$fparam, v = diag(autocov$Lag0))
 
     autocor <- list()
     for(kk in lags){
