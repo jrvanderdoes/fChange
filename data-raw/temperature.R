@@ -3,7 +3,7 @@ load(file = "./data-raw/Australian_Temp.RData")
 
 temperature <- list()
 
-cities <- names(Australian_Temp)
+cities <- 'Sydney'#names(Australian_Temp)
 for (i in 1:length(cities)) {
   data_city <- Australian_Temp[[cities[i]]] %>%
     as.data.frame()
@@ -32,14 +32,17 @@ for (i in 1:length(cities)) {
     as.data.frame()
 
   # Fill in missing values
-  data_station <- linear_imputatation(
-    data = data_station,
-    use.prev.curve = TRUE
+  data_station <- impute(
+    X = data_station,
+    obs_share_data = TRUE,
+    method =  'linear'
   )
   # temperature[[paste0(cities[i],"_",stations[j])]] <-
   temperature[[cities[i]]] <-
     data_station
   # }
 }
+
+temperature <- dfts(temperature$Sydney, name='Sydney Temperature')
 
 use_data(temperature)

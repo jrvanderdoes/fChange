@@ -1,15 +1,17 @@
 Package: fChange
-Title: Functional Change Point Detection
+Title: Functional Change Point Detection and Analysis
 Version: 1.0.0
 Authors@R: c(
-    person("Jeremy", "VanderDoes", , "jeremy.vanderdoes@gmail.com", role = c("aut", "cre"),
+    person("Jeremy", "VanderDoes", , "jeremy.vanderdoes@gmail.com", 
+    role = c("aut", "cre","cph"),
            comment = c(ORCID = "0009-0001-9885-3073")),
     person("Gregory", "Rice", role = "aut"),
     person("Martin", "Wendler", role = "aut") )
-Description: Change point detection for discretely observed, yet innately 
-    functional data. Includes methods to process and investigate such data, including 
-    functional ACF, smoothing, change point detection, plotting, and so forth.
-License: GPL (>= 3)
+Description: Analyze functional data and its change points. Includes 
+    functionality to store and process data, summarize and validate assumptions, 
+    characterize and perform inference of change points, and provide 
+    visualizations. Data is stored as discretely collected observations without
+    requiring the selection of basis functions.
 Encoding: UTF-8
 Imports: 
     dplyr,
@@ -54,3 +56,4 @@ LazyData: true
 VignetteBuilder: knitr
 URL: https://jrvanderdoes.github.io/fChange/
 Config/testthat/edition: 3
+License: GPL (>= 3)
