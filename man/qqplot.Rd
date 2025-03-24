@@ -3,20 +3,53 @@
 \name{qqplot}
 \alias{qqplot}
 \alias{qqplot.default}
+\alias{qqplot.dfts}
 \title{QQ Plot Generic Function}
 \usage{
 qqplot(x, ...)
 
 \method{qqplot}{default}(x, ...)
+
+\method{qqplot}{dfts}(
+  x,
+  TVE = 0.95,
+  d.max = NULL,
+  alpha = 0.05,
+  changes = NULL,
+  legend = FALSE,
+  ...
+)
 }
 \arguments{
-\item{x}{Data to examine with qqplot}
+\item{x}{A dfts object. See \code{\link[=dfts]{dfts()}}.}
 
-\item{...}{Additional paramters based on the data}
+\item{...}{Additional parameters based on the data.}
+
+\item{TVE}{Numeric in [0,1] giving the total variance explained for selecting
+the number of principal components.}
+
+\item{d.max}{Max number of principal components. No max when NULL.}
+
+\item{alpha}{Significance level, alpha in [0,1].}
+
+\item{changes}{Vector of change points.}
+
+\item{legend}{Boolean indicating if legend should be shown on plot.}
+}
+\value{
+\strong{qqplot.default}
+
+\strong{qqplot.dfts}: ggplot2 for QQ plot.
 }
 \description{
-QQ Plot Generic Function
+A generic function which by produces a qq-plot of some data. By default, it
+uses \code{\link[stats:qqnorm]{stats::qqplot()}}.
+
+\strong{qqplot.dfts}: Creates normal QQ plots on the principal components of functional data.
+}
+\examples{
+result <- qqplot(electricity, d.max=3)
 }
 \seealso{
-\code{\link[=qqplot.dfts]{qqplot.dfts()}} \code{\link[=qqplot.default]{qqplot.default()}}
+\code{\link[stats:qqnorm]{stats::qqplot()}}
 }

@@ -14,19 +14,22 @@
 \item{x}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{type}{String indicating if finding for observation ('Obs', default),
+\item{type}{String indicating if finding for observation ('Obs'),
 or for pointwise values ('fparam').}
 
 \item{na.rm}{Boolean if NA values should be removed. Defaults to TRUE.}
 
-\item{...}{Additional parameters to stats function}
+\item{...}{Additional parameters to pass to base R's \code{min} or \code{max}
+functions. They are only used in the \code{type='fparam'} case.}
 }
 \value{
-A dfts object
+A dfts object.
 }
 \description{
-Get the observation(s) with the min / max values. Selected as the observation
-with the largest / smallest mean or the pointwise values.
+Get the observation(s) or pointwise values with the min / max values. When
+using \code{type='Obs'}, the selected observation is the one with the
+minimum or maximum mean. When using \code{type='fparam'}, the values are
+given pointwise.
 }
 \examples{
 results <- max(electricity)

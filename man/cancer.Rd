@@ -7,7 +7,7 @@
 \format{
 \subsection{\code{cancer}}{
 
-A data.frame with columns being the year and rows the age groups (5 years)
+A data.frame with columns being the year and rows the age groups (5 years).
 }
 }
 \usage{

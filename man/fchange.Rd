@@ -2,7 +2,7 @@
 % Please edit documentation in R/change.R
 \name{fchange}
 \alias{fchange}
-\title{Change Function for dfts Objects}
+\title{Change Point Detection}
 \usage{
 fchange(
   X,
@@ -15,12 +15,12 @@ fchange(
   replace = TRUE,
   max_changes = min(ncol(X), 20),
   changes = NULL,
-  blocksize = 1,
+  blocksize = 2 * ncol(X)^(1/5),
   eigen_number = 3,
-  h = 3,
+  h = 2 * ncol(X)^(1/5),
   M = 1000,
   J = 50,
-  W = space_measuring_vectors(X = X, M = 20, space = "BM"),
+  W = space_measuring_functions(X = X, M = 20, space = "BM"),
   K = bartlett_kernel,
   alpha = 0.05,
   cov.res = 30,
@@ -32,7 +32,7 @@ fchange(
   errors = "L2",
   recommendation_change_points = 2,
   recommendation_improvement = 0.15,
-  silent.binary = TRUE
+  silent.binary = FALSE
 )
 }
 \arguments{
@@ -40,23 +40,23 @@ fchange(
 format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{method}{Method to compute change point. Options include:
-'characteristic', 'mean', 'robustmean', 'eigenjoint', 'eigensingle', 'trace', 'covariance',
-'projmean', and 'projdistribution'.}
+'characteristic', 'mean', 'robustmean', 'eigenjoint', 'eigensingle', 'trace',
+'covariance', 'projmean', and 'projdistribution'.}
 
-\item{statistic}{String for the Statistic. The integrated, \code{Tn}, or the
-maximal, \code{Mn}.}
+\item{statistic}{String for the test statistic type: integrated, \code{Tn},
+or supremum, \code{Mn}.}
 
 \item{critical}{String for method of computing threshold. Options are
-'simulation', 'resample', and 'welch'. However, Welch approximation is
-not implemented for all methods.}
+'simulation', 'resample', and 'welch'. Not all ways to compute the critical
+thresholds are implemented for every method.}
 
 \item{type}{String for the type of change point detection, single change
 ('single'), binary segmentation ('segmentation'), or elbow plots ('elbow').}
 
 \item{resample_blocks}{String indicating the type of resample test to use.
-Using 'separate' gives blocks which are separate while 'overlapping' creates
-overlapping or sliding windows. When \code{blocksize=1} then these will be
-identical.}
+Using \code{separate} gives blocks which are separate while \code{overlapping}
+creates overlapping or sliding windows. When \code{blocksize=1} then these
+will be identical.}
 
 \item{replace}{Boolean for using a permutation or bootstrapped statistic when
 \code{critical='resample'}.}
@@ -68,7 +68,7 @@ type is \code{elbow}.}
 should be centered on these values first.}
 
 \item{blocksize}{Integer for the width of the blocks when using a resampling
-test. Can use \code{\link[=adaptive_bandwidth]{adaptive_bandwidth()}} is additional guidance is desired.}
+test. Can use \code{\link[=adaptive_bandwidth]{adaptive_bandwidth()}} if additional guidance is desired.}
 
 \item{eigen_number}{Which eigenvalue or the number of eigenvalues which should be checked
 in the eigenvalue tests.}
@@ -81,53 +81,67 @@ mean, characteristic, and eigenvalue tests.}
 \item{J}{Resolution (J) in the characteristic method. The number of vectors
 is defined by \code{W}.}
 
-\item{W}{Space measuring vectors in characteristic method}
+\item{W}{Space measuring functions used in characteristic method to explore
+the functional space.}
 
 \item{K}{Kernel function for use in characteristic, mean, eigen, covariance
-and projmean}
+and projmean.}
 
-\item{alpha}{Significance for Welch approximation}
+\item{alpha}{Significance in [0,1] for Welch approximation.}
 
-\item{cov.res}{Resolution to use when computing covariance kernel changes}
+\item{cov.res}{Resolution to use when computing covariance kernel changes.}
 
-\item{weighting}{Weights used in covariance kernel method and pcadistribution}
+\item{weighting}{Weights used in covariance kernel method and pcadistribution.}
 
-\item{TVE}{Total variance explained for projmean and projdistribution}
+\item{TVE}{Total variance explained for projmean and projdistribution.}
 
-\item{trim_function}{Trimming to be used in elbow plot}
+\item{trim_function}{Trimming to be used in multiple change methods.}
 
-\item{errors}{Type of errors used in elbow plot. Options are L2 and Trace}
+\item{errors}{Type of errors used in elbow plot. Options are L2 and Trace.}
 
 \item{recommendation_change_points}{Number of lags forward to examine in deciding automated
-elbow plot recommendation}
+elbow plot recommendation.}
 
 \item{recommendation_improvement}{Significant drop to look for in deciding automated elbow
-plot recommendation}
+plot recommendation.}
 
 \item{silent.binary}{Boolean if output should be printed when running binary
-segmentation}
+segmentation.}
 }
 \value{
-A list with
+When type is single, returns a list:
 \enumerate{
-\item pvalue:
-\item location:
-\item statistic:
-\item simulations:
-\item extra:
+\item pvalue: p-value for detection of a change point.
+\item location: location of the most likely change.
+\item statistic: Value of the test statistic.
+\item simulations: Values of the simulated test statistics.
+\item extra: Additional details dependent on method.
 }
+When type is elbow:
+\enumerate{
+\item information: data.frame with the information on each change and the
+decrease in variability.
+\item plots: list of plots showing the varibility decrease or improvement
+\item suggestion: list with plot and algorithmic change suggestion. The
+suggested changes are also returned.
+}
+When type is segmentation a data.frame with the locations and p-values is
+returned.
 }
 \description{
-Change Function for dfts Objects
+Change point detection for dfts objects. Various change point methods
+are given, where single or multiple changes can be detected. Multiple change
+extensions currently include binary segmentation and elbow plots.
 }
 \examples{
+# See article on package website for more details
+
 res <- fchange(electricity$data[,1:20],method='characteristic',critical = 'welch')
 }
 \references{
 Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural
 breaks in functional data without dimension reduction. Journal of the Royal
 Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
-\url{https://doi.org/10.1111/rssb.12257}
 
 Wegner, L., Wendler, M. Robust change-point detection for
 functional time series based on U-statistics and dependent wild bootstrap.

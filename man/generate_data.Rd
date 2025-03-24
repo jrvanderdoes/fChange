@@ -8,7 +8,7 @@ generate_data(fparam, data_details, burnin = 100)
 }
 \arguments{
 \item{fparam}{fparam of data (or resolution that will be equally spaced
-on [0,1\).}
+on [0,1]).}
 
 \item{data_details}{List of named lists indicating parameters for each data group.
 Each process can use different parameters, given below.
@@ -57,14 +57,16 @@ fparam is a vector, the fparam will be one smaller.
 }
 }}
 
-\item{burnin}{Numeric for amount of burnin for data}
+\item{burnin}{Numeric for amount of burnin for data. Only used for the first
+groups. Subsequent groups begin at the end of the last group.}
 }
 \value{
-dfts object for the generated data
+A dfts object for the generated data.
 }
 \description{
-This function allows generation of functional data according to several
-approaches: \code{bbridge}, \code{bmotion}, \code{kl}, \code{ou}, and \code{far1}.
+A general wrapper function to allow generation of functional data according
+to several approaches: \code{bbridge}, \code{bmotion}, \code{kl}, \code{ou},
+and \code{far1}.
 }
 \examples{
 result <- generate_data(
@@ -82,4 +84,9 @@ result <- generate_data(
                      'far1'=list('N'=100, 'dependence'=0,
                                  'sd'=1,'vary'=FALSE) )
 )
+}
+\seealso{
+\code{\link[=generate_brownian_bridge]{generate_brownian_bridge()}}, \code{\link[=generate_brownian_motion]{generate_brownian_motion()}},
+\code{\link[=generate_far1]{generate_far1()}}, \code{\link[=generate_karhunen_loeve]{generate_karhunen_loeve()}},
+\code{\link[=generate_ornstein_uhlenbeck]{generate_ornstein_uhlenbeck()}}
 }

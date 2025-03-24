@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plot.dfts}
 \alias{plot.dfts}
-\title{Plot dfts}
+\title{Plot dfts objects}
 \usage{
 \method{plot}{dfts}(
   x,
@@ -33,57 +33,59 @@
 \item{x}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{changes}{Vector of change points. Can be NULL.}
+\item{changes}{Vector of numeric change point locations. Can be NULL.}
 
 \item{type}{Choice of plotting method. Options include: 'spaghetti', 'fast',
 'rainbow','banded','acf', 'pacf', 'summary', 'qq', 'distribution', 'change',
 'interval', and'surface'.}
 
-\item{plot_title}{Title to include on the return plot}
+\item{plot_title}{Title to include on the return plot.}
 
 \item{val_axis_title, res_axis_title, FD_axis_title}{Title for the axis giving
 the values (val), the resolution of the fparam (res), and the functional
-observations (FD)}
+observations (FD).}
 
-\item{eye, aspectratio}{Angle (eye) and ratio (aspectratio) to view 3d plots}
+\item{eye, aspectratio}{Angle (eye) and ratio (aspectratio) to view 3d plots.}
 
-\item{showticklabels}{Boolean if the tick marks should be shown}
+\item{showticklabels}{Boolean if the tick marks should be shown.}
 
-\item{lag.max}{Max number of lags to consider for ACF/PACF and summary plots}
+\item{lag.max}{Max number of lags to consider for ACF/PACF and summary plots.}
 
-\item{d.max}{Max number of dimensions for qq/distribution and summary plots}
+\item{d.max}{Max number of dimensions for qq/distribution and summary plots.}
 
-\item{alpha}{Significance level to be used in various plots. Value in [0,1]}
+\item{alpha}{Significance level to be used in various plots. Value in [0,1].}
 
-\item{TVE}{Total variance explained used in qq/distribution plots. Value in [0,1]}
+\item{TVE}{Total variance explained used in qq/distribution plots. Value in [0,1].}
 
-\item{distribution}{String of the distribution to compare against in
+\item{distribution}{String of the distribution to compare against in.
 distribution plot. The string can be anything such that there is a
 rdistribution and ddistribution function available. For example "exp",
-"gamma". Additional parameters can be passed using ...}
+"gamma". Additional parameters can be passed using ... .}
 
 \item{method}{Method for computing ACF/PACF. Options include 'Welch', 'MC',
 and 'Imhof'.}
 
-\item{legend}{Boolean if legend should be given in qq/distribution plots}
+\item{legend}{Boolean if legend should be given in qq/distribution plots.}
 
-\item{highlight_changes, int.gradual}{Boolean if changes should be highlighted
-or confidence interval be solid gray or gradual colors in change plot}
+\item{highlight_changes}{Boolean if changes should be highlighted in black.}
 
 \item{intervals}{Information on confidence intervals of changes for change
 plot. See \code{\link[=confidence_interval]{confidence_interval()}}.}
 
-\item{...}{Details for plotting in acf/pacf, summary, or distribution function}
+\item{int.gradual}{Boolean if confidence interval be solid gray (FALSE) or
+gradual colors (TRUE) when \code{type='change'} plot.}
+
+\item{...}{Details for plotting in acf/pacf, summary, or distribution function.}
 }
 \value{
-Plot of varying types
+Plot of varying types.
 }
 \description{
-A function to plot dfts objects in many ways.
+Provides various visualizations for functional data.
 }
 \examples{
 plt <- plot(electricity)
-plt <- plot(var(electricity), type='surface')
+plt <- plot(dfts(var(electricity)), type='surface')
 }
 \references{
 John Fox, & Sanford Weisberg (2019). An R Companion to Applied

@@ -2,17 +2,17 @@
 % Please edit documentation in R/dfts.R
 \name{print.dfts}
 \alias{print.dfts}
-\title{Printing dfts objects}
+\title{Print dfts objects}
 \usage{
 \method{print}{dfts}(x, ...)
 }
 \arguments{
-\item{x}{dfts data}
+\item{x}{A dfts object. See \code{\link[=dfts]{dfts()}}.}
 
 \item{...}{unused parameter}
 }
 \description{
-Basic formatting to print a dfts object
+Basic formatting to print a dfts object.
 }
 \examples{
 electricity

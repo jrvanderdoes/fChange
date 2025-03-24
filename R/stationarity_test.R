@@ -2,28 +2,33 @@
 #'
 #' Stationarity test for functional time series with different methods on
 #'  determining the critical values of the test statistic. The Monte Carlo
-#'  method was constructed in Horvath et al. (2014), while the bootstrap-based
-#'  methods have not been validated in the literature (although such an option
-#'  is provided, please use them at your own risk).
+#'  method was constructed in Horvath et al. (2014), while the resample-based
+#'  methods have not been validated in the literature (use the provided option
+#'  at your discretion).
 #'
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param statistic String for test statistic. Options are \code{Tn} and
-#' \code{Mn}. Default is \code{Tn}.
-#' @param critical String for method of determining the critical values. Options are
-#'  \code{simulation} and \code{resample}. Default is \code{simulation}.
+#' @param statistic String for test statistic. Options are integrated (\code{Tn})
+#'  and supremum (\code{Mn}). The default is \code{Tn}.
+#' @param critical String for method of determining the critical values. Options
+#'  are \code{simulation} and \code{resample}. Default is \code{simulation}.
 #' @param perm_method String for method of resampling. Options are \code{separate}
-#'  and \code{sliding}. Default is \code{separate}.
+#'  for block resampling and \code{overlapping} for sliding window.
+#'  Default is \code{separate}.
 #' @param M Numeric for number of simulation to use in determining the null
 #'  distribution. Default is 1000.
-#' @param blocksize Numeric for blocksize in resample test. Default is 1.
+#' @param blocksize Numeric for blocksize in resample test. Default is \eqn{2N^{1/5}}.
 #' @param TVE Numeric for total variance explained when using PCA for
 #'  eigenvalues. Default is 1.
-#' @param replace Boolean if replacement should be used for resample test.
-#'  Default is TRUE.
+#' @param replace Boolean if replacement should be used for resample test. Thus,
+#'  this defines if a bootstrapped or permuted test is used. Default is TRUE.
 #'
-#' @return List with (1) pvalue, (2) test statistic, and (3) test statistics
-#'  from simulating the null distribuion.
+#' @return List with the following elements:
+#'  \enumerate{
+#'    \item pvalue: p-value for the stationarity test.
+#'    \item statistic: test statistic from the test.
+#'    \item simulations: simulations which define the null distribution.
+#'  }
 #' @export
 #'
 #' @references Horvath, L., Kokoszka, P., & Rice, G. (2014). Testing
@@ -37,7 +42,8 @@
 #' res2 <- stationarity_test(electricity)
 stationarity_test <-
   function(X, statistic = 'Tn', critical=c('simulation','resample'),
-           perm_method='separate',  M=1000, blocksize = 3, TVE=1, replace=TRUE){
+           perm_method='separate',  M=1000, blocksize = 2*ncol(X)^(1/5),
+           TVE=1, replace=TRUE){
     critical <- .verify_input(critical, c('simulation','resample'))
 
     X <- dfts(X)

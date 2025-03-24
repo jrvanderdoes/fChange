@@ -6,7 +6,7 @@
 \alias{fChange-package}
 \title{General Information for fChange}
 \description{
-Change point detection for discretely observed, yet innately functional data. Includes methods to process and investigate such data, including functional ACF, smoothing, change point detection, plotting, and so forth.
+Analyze functional data and its change points. Includes functionality to store and process data, summarize and validate assumptions, characterize and perform inference of change points, and provide visualizations. Data is stored as discretely collected observations without requiring the selection of basis functions.
 }
 \seealso{
 Useful links:
@@ -16,7 +16,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Jeremy VanderDoes \email{jeremy.vanderdoes@gmail.com} (\href{https://orcid.org/0009-0001-9885-3073}{ORCID})
+\strong{Maintainer}: Jeremy VanderDoes \email{jeremy.vanderdoes@gmail.com} (\href{https://orcid.org/0009-0001-9885-3073}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{

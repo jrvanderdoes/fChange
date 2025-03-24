@@ -7,7 +7,7 @@
 \format{
 \subsection{\code{electricity}}{
 
-A dfts object
+A dfts object.
 }
 }
 \source{

@@ -10,10 +10,11 @@
 \item{x}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{...}{Additional parameters to stats function}
+\item{...}{Additional parameters to pass to base R's \code{min} or \code{max}
+functions. They are only used in the \code{type='fparam'} case.}
 }
 \value{
-Numerics indicating the dimension of the dfts object
+Numerics indicating the dimension of the dfts object.
 }
 \description{
 Retrieve the dimension of a dfts object.

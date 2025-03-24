@@ -11,18 +11,16 @@
 \method{[}{dfts}(x, i, j) <- value
 }
 \arguments{
-\item{x}{dfts object}
+\item{x}{A dfts object. See \code{\link[=dfts]{dfts()}}.}
 
-\item{i, j}{Numerics for elements to extract}
+\item{i, j}{Numerics for elements to extract.}
 
-\item{...}{Unused additional parameters}
+\item{...}{Additional parameters from generic function for extensions.}
 
-\item{value}{A suitable replacement value}
+\item{value}{A suitable replacement value for selection.}
 }
 \value{
-dfts object
-
-dfts object
+A dfts object.
 }
 \description{
 Extract or replace subsets of dfts objects.

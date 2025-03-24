@@ -1,137 +1,122 @@
-#' Compute Functional Hypothesis Tests
+#' Functional Hypothesis Tests for Functional Data
 #'
-#' Computes a variety of functional portmanteau hypothesis tests. All hypothesis tests in this
-#'  package are accessible through this function.
+#' Computes a variety of portmanteau hypothesis tests for functional data in the
+#'  form of dfts objects.
 #'
-#' @details The "single-lag" portmanteau test is based on the sample autocovariance function computed from the
-#' functional data. This test assesses the significance of lagged autocovariance operators at a single, user-specified
-#' lag h. More specifically, it tests the null hypothesis that the lag-h autocovariance operator is equal to 0.
-#' This test is designed for stationary functional time-series, and is valid under conditional heteroscedasticity
-#' conditions.
-#' The required parameter for this test are 'lag', which determines the lag at which the test is evaluated. If this
-#' parameter is left blank, it will take a default of 1.
-#' The optional parameters for this test are 'iid', 'M', 'low_disc', 'bootstrap', 'block_size', 'straps', 'moving',
-#' and 'alpha'.
+#' @details The "single"-lag portmanteau test assesses the significance of
+#'  empirical lagged autocovariance operators at a single lag \code{lag}.
+#'  It tests the null hypothesis that the lag-h autocovariance operator is equal
+#'  to 0. The test is designed for stationary functional time-series, and is
+#'  valid under conditional heteroscedasticity conditions.
 #'
-#' The "multi-lag" portmanteau test is also based on the sample autocovariance function computed from the functional
-#' data. This test assesses the cumulative significance of lagged autocovariance operators, up to a user-selected
-#' maximum lag lag. More specifically, it tests the null hypothesis that the first lag lag-h autocovariance operators
-#' (h going from 1 to lag) is equal to 0. This test is designed for stationary functional time-series, and is valid
-#' under conditional heteroscedasticity conditions.
-#' The required parameter for this test is 'lag', which determines the maximum lag at which the test is evaluated.
-#' If this parameter is left blank, it will take a default of 20.
-#' The optional parameters for this test are 'iid', 'M', 'low_disc', 'bootstrap', 'block_size', 'straps', 'moving',
-#' and 'alpha'.
+#' The "multi"-lag portmanteau test assesses the cumulative significance of
+#'  empirical lagged autocovariance operators, up to a user-selected maximum lag
+#'  \code{lag}. It tests the null hypothesis that the first lag-h autocovariance
+#'  operators, \eqn{h=1,\dots,lag}, is equal to 0. The test is designed for
+#'  stationary functional time-series, and is valid under conditional
+#'  heteroscedasticity conditions.
 #'
-#' The "spectral" portmanteau test is based on the spectral density operator. It essentially measures the proximity of a
-#' functional time series to a white noise - the constant spectral density operator of an uncorrelated series.
-#' Unlike the "single-lag" and "multi-lag" tests, this test is not for general white noise series, and may not hold
-#' under functional conditionally heteroscedastic assumptions.
-#' The optional parameters for this test are 'kernel', 'bandwidth', and 'alpha'.
+#' The "spectral" portmanteau test measures the proximity of a functional time
+#'  series to a white noise. Comparison is made to the constant spectral
+#'  density operator of an uncorrelated series. The test is not for general
+#'  white noise series, and may not hold under functional conditionally
+#'  heteroscedastic assumptions.
 #'
-#' The "independence" portmanteau test is a test of independence and identical distribution based on a dimensionality
-#' reduction by projecting the data onto the most important functional principal components. It is based on the
-#' resulting lagged cross-variances. This test is not for general white noise series, and may not hold under
-#' functional conditionally heteroscedastic assumptions.
-#' The required parameters for this test are 'lag' and 'components'. The 'lag' parameter determines the maximum lag at
-#' which the test is evaluated. The 'components' parameter determines the number of the most important principal
-#' components to use (importance is determined by the proportion of the variance that is explained by the
-#' individual principal component.)
+#' The "independence" portmanteau test measures independence and identical
+#'  distribution based lagged cross-variances from dimension reduction using
+#'  functional principal components analysis. The test is not for general white
+#'  noise series, and may not hold under functional conditionally
+#'  heteroscedastic assumptions.
 #'
-#' The "imhof" portmanteau test is an analogue of the "single-lag" test. While the "single-lag" test computes the
-#' limiting distribution of the test statistic via a Welch-Satterthwaite approximation, the "imhof" test directly
-#' computes the coefficients of the quadratic form in Normal variables which the test statistic converges too as
-#' the sample size goes to infinity. We warn the user that this test is extremely computationally expensive, and
-#' is only recommended for small datasets as a means of cross-verification against the single-lag test.
-#' The required parameter for this test is 'lag', which determines the lag at which the test is evaluated.
-#' The "imhof" test requires the "tensorA" and "CompQuadForm" packages. Note also that the imhof test does not
-#' return a statistic, and thus returns a list with only 2 elements if suppress_raw_output = FALSE.
+#' The "imhof" portmanteau test is an analogue of the "single-lag" test. While
+#'  the "single-lag" test computes the limiting distribution of the test
+#'  statistic via a Welch-Satterthwaite approximation, the "imhof" test directly
+#'  computes the coefficients of the quadratic form in normal variables. Hence,
+#'  the test is computationally expensive.
 #'
-#' @param data A dfts object or data which can be automatically converted to that
+#' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param test A String specifying the hypothesis test. Currently available tests are referred to by their
-#'  string handles: 'variety', "single-lag", "multi-lag", "spectral", "independence", and "imhof". Please see the Details
-#'  section of the documentation, or the vignette, for a short overview of the available tests. For a more
-#'  complete treatment of these hypothesis tests, please consult the references.
-#' @param lag A positive integer value. Only used for the "single-lag", "multi-lag", "independence", and "imhof" tests.
-#'  This parameter specifies the single lag, or maximum lag, to be used by the specified test.
-#' @param M Only used for the "single-lag" and "multi-lag" tests. A positive Integer. Determines the number of
-#'  Monte-Carlo simulations employed in the Welch-Satterthwaite approximation of the limiting distribution of the
-#'  test statistic.
-#' @param method String indicating the method, options include:
+#' @param test A String specifying the hypothesis test. Currently available
+#'  tests are: 'variety', 'single-lag', 'multi-lag', 'spectral', 'independence',
+#'  and 'imhof'.
+#' @param lag A positive integer to specify the lag, or maximum lag, of
+#'  interest. Only used for the "single-lag", "multi-lag", "independence", and
+#'  "imhof" tests.
+#' @param M Numeric to specify the number of Monte-Carlo or resampled
+#'  simulations to use for the limiting distributions.
+#' @param method String indicating the method for the \code{single} test,
+#'  options include:
 #'  \itemize{
-#'    \item **iid**:Only used for the "single-lag" and "multi-lag" tests. The
+#'    \item **iid**: The
 #'      hypothesis test will use a strong-white noise assumption (instead of a
 #'      weak-white noise assumption).
-#'    \item **bootstrap**: Only used for the "single-lag" test. The hypothesis
+#'    \item **resample**: The hypothesis
 #'      test is evaluated by approximating the limiting distribution of the test
-#'      statistic via a block bootstrapping process.
+#'      statistic via a (block) resampling process.
 #'  }
-#' @param kernel Only used for the "spectral" test. A String, 'Bartlett' by default. Specifies the kernel to be
-#'  used in the "spectral" test. Currently supported kernels are the 'Bartlett' and 'Parzen' kernels.
-#' @param bandwidth Only used for the "spectral" test. Either a String or a positive Integer value, 'adaptive' by
-#'  default. Determines the bandwidth (or lag-window) to be used for the test. Given the string handle 'adaptive',
-#'  the bandwidth is computed via a bandwidth selection method which aims to minimize the integrated normed
-#'  error of the spectral density operator. If the given string handle is 'static', the bandwidth is computed
-#'  to be n^(1/(2q + 1)), where n is the sample size and q is the kernel order. If a positive integer is
-#'  given, that will be the bandwidth that is used.
-#' @param components Only used for the "independence" test. A positive Integer value. Determines the number of
-#'  functional principal components to use (ranked by their importance).
-#' @param block_size Only used for the "single-lag" test in the case when 'bootstrap' = TRUE. A positive Integer
-#'  value, with the default value being computed via the adaptive bandwidth selection method in the "spectral" test.
-#'  Determines the block size (of each block in each bootstrap sample) if the test is being bootstrapped.
-#' @param moving Only used for the "single-lag" test in the case when 'bootstrap' = TRUE. A Boolean value, FALSE
-#'  by default If given TRUE, the performed block bootstrap will be moving rather than stationary.
-#' @param B Only used for the "single-lag" test in the case when 'bootstrap' = TRUE. A positive Integer with
-#'  a default value of 300. Determines the number of bootstrap samples to take if the test is being bootstrapped.
-#' @param alpha Numeric value between 0 and 1 specifying the significance level to be used in the specified
-#'  hypothesis test. The default value is 0.05. Note, the significance value is only ever used to compute the
-#'  1-alpha quantile of the limiting distribution of the specified test's test statistic.
+#'  Additional methods are forthcoming.
+#' @param kernel Kernel function for spectral test or estimation of covariance.
+#' @param block_size Numeric to specify block size for resampling tests.
+#' @param bandwidth Numeric for bandwidth of covariance estimation. If left null,
+#'  with be defined by \eqn{N^{1 / (2 * \text{KO} + 1)}} where KO is the order
+#'  of the selected kernel.
+#' @param components Number of functional principal components to use in the
+#'  independence test.
+#' @param resample_blocks String indicating the type of resample test to use.
+#'  Using \code{separate} gives blocks which are separate while \code{overlapping}
+#'  creates overlapping or sliding windows. When \code{blocksize=1} then these
+#'  will be identical.
+#' @param replace Boolean for using a permutation or bootstrapped statistic when
+#'  \code{method='resample'}.
+#' @param alpha Numeric value for significance in \[0,1\].
 #'
-#' @return If suppress_raw_output = FALSE, a list containing the test statistic, the 1-alpha quantile of the
-#'  limiting distribution, and the p-value computed from the specified hypothesis test. Also prints output
-#'  containing a short description of the test, the p-value, and additional information about the test if
-#'  suppress_print_output = FALSE. If 'complete-test' = TRUE, will return a 1-column table instead containing
-#'  the p-values for a variety of tests, which are given short descriptions in the index of the table.
+#' @return List with results dependent on the test. In general, returns the pvalue,
+#'  statistic, and simulations/quantile.
 #' @export
 #'
-#' @references Kim, M., Kokoszka P., & Rice G. (2023) White noise testing for functional
-#'  time series. Statist. Surv., 17, 119-168, DOI: 10.1214/23-SS143
+#' @references Kim, M., Kokoszka P., & Rice G. (2023) White noise testing for
+#'  functional time series. Statist. Surv., 17, 119-168, DOI: 10.1214/23-SS143
 #'
-#' @references Characiejus V., & Rice G. (2019). A general white noise test based on kernel lag-window estimates of the
-#' spectral density operator. Econometrics and Statistics, submitted.
+#' @references Characiejus, V., & Rice, G. (2020). A general white noise test
+#'  based on kernel lag-window estimates of the spectral density operator.
+#'  Econometrics and Statistics, 13, 175–196.
 #'
-#' @references Kokoszka P., & Rice G., & Shang H.L. (2017). Inference for the autocovariance of a functional time series
-#' under conditional heteroscedasticity. Journal of Multivariate Analysis, 162, 32-50.
+#' @references Kokoszka P., & Rice G., & Shang H.L. (2017). Inference for the
+#'  autocovariance of a functional time series under conditional
+#'  heteroscedasticity. Journal of Multivariate Analysis, 162, 32-50.
 #'
-#' @references Zhang X. (2016). White noise testing and model diagnostic checking for functional time series.
-#' Journal of Econometrics, 194, 76-95.
+#' @references Zhang X. (2016). White noise testing and model diagnostic
+#'  checking for functional time series. Journal of Econometrics, 194, 76-95.
 #'
-#' @references Gabrys R., & Kokoszka P. (2007). Portmanteau Test of Independence for Functional Observations.
-#' Journal of the American Statistical Association, 102:480, 1338-1348, DOI: 10.1198/016214507000001111.
+#' @references Gabrys R., & Kokoszka P. (2007). Portmanteau Test of Independence
+#'  for Functional Observations. Journal of the American Statistical Association,
+#'  102:480, 1338-1348, DOI: 10.1198/016214507000001111.
 #'
-#' @references Chen W.W. & Deo R.S. (2004). Power transformations to induce normality and their applications.
-#' Journal of the Royal Statistical Society: Series B (Statistical Methodology), 66, 117-130.
+#' @references Chen W.W. & Deo R.S. (2004). Power transformations to induce
+#'  normality and their applications. Journal of the Royal Statistical Society:
+#'  Series B (Statistical Methodology), 66, 117-130.
 #'
 #' @examples
 #' b <- generate_brownian_motion(250)
-#' res0 <- portmanteau_tests(b, test = 'single-lag', lag = 10)
-#' res1 <- portmanteau_tests(b, test = 'multi-lag', lag = 10, alpha = 0.01)
-#' res2 <- portmanteau_tests(b, test = 'spectral', kernel = 'Bartlett',
-#'                           bandwidth = 'static', alpha = 0.05)
+#' res0 <- portmanteau_tests(b, test = 'single', lag = 10)
+#' res1 <- portmanteau_tests(b, test = 'multi', lag = 10, alpha = 0.01)
+#' res2 <- portmanteau_tests(b, test = 'spectral', kernel = bartlett_kernel,
+#'                           bandwidth = NULL, alpha = 0.05)
 #' res3 <- portmanteau_tests(b, test = 'spectral', alpha = 0.1,
-#'                           kernel = 'Parzen', bandwidth = 'adaptive')
+#'                           kernel = parzen_kernel,
+#'                           bandwidth = adaptive_bandwidth(b, kernel=parzen_kernel))
 #' res4 <- portmanteau_tests(b, test = 'independence', components = 3, lag = 3)
-#' res5 <- portmanteau_tests(b, test = 'single-lag', lag = 1, M = 250)
-portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag',
+#' res5 <- portmanteau_tests(b, test = 'single', lag = 1, M = 250)
+portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
                                       'spectral', 'independence', 'imhof'),
-                       lag=NULL, M=NULL,
+                       lag=5, M=1000,
                        method = c('iid','bootstrap'),
-                       kernel = "Bartlett", bandwidth = "adaptive",
-                       components = 3, block_size = "adaptive", moving=FALSE,
-                       B = 500, alpha=0.05) {
-  data <- dfts(data)
-  poss_tests <- c('variety', 'single-lag', 'multi-lag', 'spectral',
+                       kernel = bartlett_kernel,
+                       block_size = NULL, bandwidth=NULL,
+                       components = 3,
+                       resample_blocks='separate', replace = FALSE, alpha=0.05) {
+  X <- dfts(X)
+  poss_tests <- c('variety', 'single', 'multi', 'spectral',
                     'independence', 'imhof')
   test <- .verify_input(test,poss_tests)
   method <- .verify_input(method, c('iid','bootstrap'))
@@ -152,6 +137,17 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
     }
   }
 
+  ## Define bandwidth for passing
+  if (!is.null(bandwidth) ) {
+    bandwidth <- bandwidth + 0
+  }else if(test %in% c('variety','single','spectral')){
+    ## Get Kernel
+    tmp <- .kernel_details(kernel,name=deparse(substitute(kernel)))
+    kernel_order <- tmp$order
+
+    bandwidth <- ncol(X)^(1 / (2 * kernel_order + 1))
+  }
+
   ## RUN TESTS
   if (test == 'variety') {
     m <- as.table(matrix(0, ncol = 1, 10))
@@ -164,53 +160,84 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
                      'independence, 3 components, lag = 3',
                      'independence, 16 components, lag = 10')
 
-    m[1] <- portmanteau_tests(data, test = 'single-lag', lag = 1, alpha=alpha)$pvalue
-    m[2] <- portmanteau_tests(data, test = 'single-lag', lag = 2, alpha=alpha)$pvalue
-    m[3] <- portmanteau_tests(data, test = 'single-lag', lag = 3, alpha=alpha)$pvalue
+    m[1] <- portmanteau_tests(X, test = 'single', lag = 1, alpha=alpha,
+                              M=M, method=method, kernel=kernel,
+                              block_size = block_size, bandwidth=bandwidth,
+                              components = components,  replace =  replace,
+                              resample_blocks=resample_blocks)$pvalue
+    m[2] <- portmanteau_tests(X, test = 'single', lag = 2, alpha=alpha,
+                              M=M, method=method, kernel=kernel,
+                              block_size = block_size, bandwidth=bandwidth,
+                              components = components,  replace =  replace,
+                              resample_blocks=resample_blocks)$pvalue
+    m[3] <- portmanteau_tests(X, test = 'single', lag = 3, alpha=alpha,
+                              M=M, method=method, kernel=kernel,
+                              block_size = block_size, bandwidth=bandwidth,
+                              components = components,  replace =  replace,
+                              resample_blocks=resample_blocks)$pvalue
 
-    m[4] <- portmanteau_tests(data, test = 'multi-lag', lag = 5, alpha=alpha)$pvalue
-    m[5] <- portmanteau_tests(data, test = 'multi-lag', lag = 10, alpha=alpha)$pvalue
-    m[6] <- portmanteau_tests(data, test = 'multi-lag', lag = 20, alpha=alpha)$pvalue
+    m[4] <- portmanteau_tests(X, test = 'multi', lag = 5, alpha=alpha,
+                              M=M, method=method, kernel=kernel,
+                              block_size = block_size, bandwidth=bandwidth,
+                              components = components,  replace =  replace,
+                              resample_blocks=resample_blocks)$pvalue
+    m[5] <- portmanteau_tests(X, test = 'multi', lag = 10, alpha=alpha,
+                              M=M, method=method, kernel=kernel,
+                              block_size = block_size, bandwidth=bandwidth,
+                              components = components,  replace =  replace,
+                              resample_blocks=resample_blocks)$pvalue
+    m[6] <- portmanteau_tests(X, test = 'multi', lag = 20, alpha=alpha,
+                              M=M, method=method, kernel=kernel,
+                              block_size = block_size, bandwidth=bandwidth,
+                              components = components,  replace =  replace,
+                              resample_blocks=resample_blocks)$pvalue
 
-    m[7] <- portmanteau_tests(data, test = 'spectral', method=method, B=B,
-                       bandwidth = 'static')$pvalue
-    m[8] <- portmanteau_tests(data, test = 'spectral', method=method, B=B,
-                       bandwidth = 'adaptive')$pvalue
+    m[7] <- portmanteau_tests(X, test = 'spectral', lag=lag, method=method,
+                              alpha=alpha, M=M, kernel=kernel,
+                              block_size = block_size, bandwidth=bandwidth,
+                              components = components,  replace =  replace,
+                              resample_blocks=resample_blocks)$pvalue
+    m[8] <- portmanteau_tests(X, test = 'spectral', lag=lag, method=method,
+                              alpha=alpha, M=M, kernel=kernel,
+                              block_size = block_size, bandwidth=bandwidth,
+                              components = components,  replace =  replace,
+                              resample_blocks=resample_blocks)$pvalue
 
-    m[9] <- portmanteau_tests(data, test = 'independence', method=method, B=B,
-                       components = 3, lag = 3)$pvalue
+    m[9] <- portmanteau_tests(X, test = 'independence', method=method,
+                       components = 3, lag = 3, alpha=alpha,
+                       M=M, kernel=kernel,
+                       block_size = block_size, bandwidth=bandwidth,
+                       replace =  replace,
+                       resample_blocks=resample_blocks)$pvalue
 
-    m[10] <- portmanteau_tests(data, test = 'independence', method=method, B=B,
-                        components = 16, lag = 10)$pvalue
+    m[10] <- portmanteau_tests(X, test = 'independence', method=method,
+                        components = 16, lag = 10, alpha=alpha,
+                        M=M, kernel=kernel,
+                        block_size = block_size, bandwidth=bandwidth,
+                        replace =  replace,
+                        resample_blocks=resample_blocks)$pvalue
     results <- m
-  } else if (test == 'multi-lag') {
-    # Lag Tests
-    if (is.null(lag)) {
-      warning("No maximal lag given. Default to lag = 20.")
-      lag = 20
-    }
-
-    results <- .multi_lag_test(data, lag, M=M, method=method, alpha=alpha)
-  } else if (test == 'single-lag') {
-    if (is.null(lag)) {
-      warning("No maximal lag given. Default to lag = 1.")
-      lag = 1
-    }
-    results <- .single_lag_test(data, lag, alpha=alpha,
+  } else if (test == 'multi') {
+    method <- 'iid'
+    results <- .multi_lag_test(X, lag, M=M, method=method, alpha=alpha)
+  } else if (test == 'single') {
+    results <- .single_lag_test(X, lag, alpha=alpha,
                     M=M, method=method,
-                    block_size=block_size, B=B,
-                    moving = moving)
+                    block_size=block_size,
+                    resample_blocks = resample_blocks,
+                    kernel=kernel, replace=replace)
   } else if (test == 'spectral') {
-    results <- .spectral_test(data, kernel = kernel, bandwidth = bandwidth, alpha = alpha)
+    results <- .spectral_test(X, kernel = kernel, bandwidth = bandwidth,
+                              alpha = alpha)
   } else if (test == 'independence') {
-    results <- .independence_test(data, components = components, lag = lag, alpha = alpha)
+    results <- .independence_test(X, components = components, lag = lag, alpha = alpha)
   } else if (test == 'imhof') {
     input <- readline("The imhof test is computationally expensive. \n
                       Press [enter] if you would like to continue.")
     if (input != '') {
       stop("User cancelled the test.")
     }
-    results <- .imhof_test(data, lag)
+    results <- .imhof_test(X, lag)
   }
 
   results
@@ -227,31 +254,19 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #'  operator is equal to 0. This test is designed for stationary functional time-series, and is valid under
 #'  conditional heteroscedasticity conditions.
 #'
-#' @param data A dfts object or data which can be automatically converted to that
-#'  format. See [dfts()].
-#' @param lag Positive integer value. The lag to use to compute the single lag test statistic.
-#' @param alpha Numeric value between 0 and 1 specifying the significance level to be used in the specified
-#'  hypothesis test. The default value is 0.05. Note, the significance value is only ever used to compute the
-#'  1-alpha quantile of the limiting distribution of the specified test's test statistic.
+#' @inheritParams portmanteau_tests
 #' @param method string indicating type of test.
 #'  \itemize{
 #'    \item **iid**: The hypothesis test will use a strong-white
 #'      noise assumption (instead of a weak-white noise assumption).
 #'    \item **lowdiscrepancy**: The hypothesis test will usea
 #'      low-discrepancy sampling in the Monte-Carlo method. Note,
-#'      low-discrepancy sampling will yield deterministic results.
+#'      low-discrepancy sampling will yield deterministic results. (BROKEN)
 #'    \item **bootstrap**: The hypothesis test is done by approximating the
 #'      limiting distribution of the test statistic via a block bootstrap
 #'      process.
 #'  }
 #' @param M Positive integer value. Number of Monte-Carlo simulations for the Welch-Satterthwaite approximation.
-#' @param block_size A positive Integer value, with the default value being computed via the adaptive
-#'  bandwidth selection method in the "spectral" test. Determines the block size (of each block in each
-#'  bootstrap sample) if the test is being bootstrapped.
-#' @param B A positive Integer, with a default value of 300. Determines the number of bootstrap samples
-#'  to take if the test is being bootstrapped. Only used if 'bootstrap' == TRUE.
-#' @param moving A Boolean value, FALSE by default If given TRUE, the performed block bootstrap will be moving
-#'  rather than stationary.
 #'
 #' @return If suppress_raw_output = FALSE, a list containing the test statistic, the 1-alpha quantile of the
 #'  limiting distribution, and the p-value computed from the specified hypothesis test. Also prints output
@@ -270,29 +285,28 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #' # .single_lag_test(f, lag = 2, M=100)
 .single_lag_test <- function(
     data, lag=1, alpha=0.05, method = c('iid', 'lowdiscrepancy', 'bootstrap'),
-    M=NULL, block_size='adaptive', B=300, moving = FALSE){
+    M=500, resample_blocks = 'separate',
+    kernel=bartlett_kernel, replace=FALSE,
+    block_size=adaptive_bandwidth(data$data, kernel = kernel) ){
+
   data <- dfts(data)
 
   poss_methods <- c('iid', 'lowdiscrepancy', 'bootstrap')
   method <- .verify_input(method, poss_methods)
 
   if(method=='bootstrap') {
-    if (block_size == 'adaptive') {
-      block_size <- ceiling(adaptive_bandwidth(data$data, kernel = 'Bartlett'))
-    }
-
-    # bootstrap_samples <- block_bootstrap(data$data, block_size, B = B, moving = moving)
     stats_distr <- .bootstrap(data, blocksize = block_size,
-                                    M = B, type =  ifelse(moving,'overlapping', 'separate'),
-                                    replace = TRUE,lag=lag, fn=t_statistic_Q)
-    # stats_distr <- lapply(bootstrap_samples, t_statistic_Q, lag=lag)
+                                    M = M, type =  resample_blocks,
+                                    replace = replace, lag=lag, fn=t_statistic_Q)
+
     quantile <- stats::quantile(as.numeric(stats_distr), 1 - alpha)
     statistic <- t_statistic_Q(data$data, lag)
     pvalue <- sum(statistic <= stats_distr) / length(stats_distr)
 
-    results <- list(statistic = as.numeric(statistic),
+    results <- list(pvalue = as.numeric(pvalue),
+                    statistic = as.numeric(statistic),
                     quantile = as.numeric(quantile),
-                    pvalue = as.numeric(pvalue), block_size = block_size)
+                    block_size = block_size)
   } else if(method=='lowdiscrepancy') {
     results <- Q_WS_quantile(data$data, lag, alpha=alpha, M=M, low_disc=TRUE)
   } else if(method=='iid') {
@@ -345,6 +359,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #' # .multi_lag_test(b, lag = 10, M = 50)
 .multi_lag_test <- function(data, lag = 20, M=NULL,
                            method = c('iid', 'lowdiscrepancy'), alpha=0.05) {
+
   # Checks
   poss_methods <- c('iid', 'lowdiscrepancy')
   method <- .verify_input(method, poss_methods)
@@ -401,7 +416,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   p_val <- stats::pchisq(statistic / beta, nu, lower.tail = FALSE)
 
   # Return results
-  list(statistic = statistic, quantile = quantile, pvalue = p_val)
+  list(pvalue = p_val, statistic = statistic, quantile = quantile)
 }
 
 
@@ -446,41 +461,19 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
 #' # .spectral_test(b)
 #' # .spectral_test(b, kernel = 'Parzen', bandwidth = 'adaptive')
 #' # .spectral_test(b, kernel = 'Bartlett', bandwidth = 2)
-.spectral_test <- function(data, kernel = 'Bartlett',
-                          bandwidth = 'adaptive', alpha = 0.05) {
-  ## TODO: Make kernels match rest of package
-  data <- dfts(data)
-  f_data <- data$data
+.spectral_test <- function(data, kernel = bartlett_kernel,
+                          bandwidth = NULL, alpha = 0.05, order=NULL) {
 
-  J <- NROW(f_data)
-  N <- NCOL(f_data)
-
-  ## Get Kernel
-  kernel_string <- kernel
-  if (kernel == 'Bartlett') {
-    kernel <- bartlett_kernel
-    kernel_order <- 1
-  } else if (kernel == 'Parzen') {
-    kernel <- parzen_kernel
-    kernel_order <- 2
-    #} else if (kernel == 'Daniell') {
-    #kernel <- daniell_kernel
-    #kernel_order <- 2
-  } else {
-    stop("This kernel is not supported. Please see the documentation for supported kernel functions.")
-  }
+  J <- NROW(data$data)
+  N <- NCOL(data$data)
 
   ## Get Bandwidth
-  if (bandwidth == 'static') {
-    bandwidth <- N^(1 / (2 * kernel_order + 1))
-  } else if (bandwidth == 'adaptive') {
-    bandwidth <- max(2, adaptive_bandwidth(f_data, kernel_string))
-  } else if (!is.numeric(bandwidth)) {
-    stop("Please see the documentation for valid bandwith arguments.")
+  if (is.null(bandwidth) ) {
+    bandwidth <- N^(1 / (2 * order + 1))
   }
 
   ## Compute Statistic
-  data_inner_prod <- crossprod(f_data) / J
+  data_inner_prod <- crossprod(data$data) / J
   C_hat_HS_norm <- numeric(0)
   for (j in 0:(N-1)) {
     C_hat_HS_norm[j+1] <-
@@ -502,12 +495,11 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
                (C_n_k^beta + 2^(-1) * beta * (beta - 1) * C_n_k^(beta-2) * t_stat_term^2)) /
     (beta * C_n_k^(beta-1) * t_stat_term)
 
-  # statistic <- spectral_t_statistic(data$data, kernel = kernel, bandwidth = bandwidth)
-
-  list(statistic = t_stat,
-       quantile = stats::qnorm(1 - alpha),
-       pvalue = 1 - stats::pnorm(t_stat),
-       band = bandwidth)
+  list(
+    pvalue = 1 - stats::pnorm(t_stat),
+    statistic = t_stat,
+    quantile = stats::qnorm(1 - alpha),
+    bandwidth = bandwidth)
 }
 
 
@@ -560,6 +552,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   J <- NROW(data$data)
   data <- center(data)
 
+  # TODO:: Convert to internal PCA
   suppressWarnings(
     pc_decomp <- ftsa::ftsm(rainbow::fts(1:J, data$data),
                             order = components, mean = FALSE)
@@ -589,7 +582,7 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   p_val <- as.numeric(1 - stats::pchisq(Q_n, df = components^2 * lag))
   quantile <- as.numeric(stats::qchisq(1 - alpha, df = components^2 * lag))
 
-  list(statistic = Q_n, quantile = quantile, pvalue = p_val)
+  list(pvalue = p_val, statistic = Q_n, quantile = quantile)
 }
 
 
@@ -643,8 +636,8 @@ portmanteau_tests <- function(data, test = c('variety', 'single-lag', 'multi-lag
   names(tensor_numeric) <- c("a", "b", "c", "d")
 
   SVD <- tensorA::svd.tensor(tensor_numeric, i=c("a", "b"))
-  eigenvalues <- as.numeric(SVD$d / (J^2))
+  eigenvalues <- as.numeric(SVD$d / J^2)
   pval_imhof <- CompQuadForm::imhof(t_statistic_val, lambda = eigenvalues)$Qq
 
-  list(statistic = t_statistic_val, pvalue = pval_imhof)
+  list(pvalue = pval_imhof, statistic = t_statistic_val)
 }

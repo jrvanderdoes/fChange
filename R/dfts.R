@@ -1,21 +1,23 @@
 #' dfts Objects
 #'
-#' Define data as, check data if, and convert data to dfts object. The data
-#'  may be from another popular implementation.
+#' The discrete functional time series (dfts) object is the main object in
+#'  fChange. It stores functional data for use in functions throughout the package.
+#'  Common functions have been extended to dfts. Details of the storage is best
+#'  left to individual parameters descriptions and exploring examples.
 #'
-#' @param X Data to convert into dfts object. Options include: data.frame,
-#'  matrix, array, fda::fd, fda.usc::fdata, rainbow::fts (used in ftsa),
-#'  rainbow::fds (used in ftsa), funData::funData, and fChange::dfts. For a
+#' @param X Data to convert into dfts object. Options include: [data.frame],
+#'  [matrix], [array], [fda::fd], [fda.usc::fdata], [rainbow::fts] (used in ftsa),
+#'  [rainbow::fds] (used in ftsa), [funData::funData], and [fChange::dfts]. For a
 #'  matrix, each column is a unique observation, at the rows are the observed
 #'  intra-observation (i.e. resolution) points.
 #' @param name String for the name of the object. Defaults to the name of the
 #'  input variable.
 #' @param labels Labels for the observations. Defaults to the column names or
 #'  names inside of the object X.
-#' @param fparam Vector of numerics indicating the points for each
+#' @param fparam Vector of numerics indicating the points of evaluation for each
 #'  observation. Defaults to even spacing on \[0,1\], or those included in the
 #'  object. These may be unevenly spaced.
-#' @param inc.warnings Boolean on if warnings should be given. Defaults to TRUE,
+#' @param inc.warnings Boolean on if warnings should be given. Defaults to TRUE.
 #'
 #' @name dfts
 #'
@@ -25,7 +27,6 @@
 #' @examples
 #' bm <- dfts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
 #'
-#' # Electricity
 #' result <- dfts(electricity)
 dfts <- function(X, name=NULL,
                   labels=NULL,
@@ -198,7 +199,7 @@ is.dfts <- function(X){
 #'
 #' Internal function to check lengths and data information is right
 #'
-#' @param X dfts object to verify for any violations
+#' @param X A dfts object. See [dfts()].
 #'
 #' @return Silently returns the data if there are no violations
 #'
@@ -223,10 +224,10 @@ is.dfts <- function(X){
 #'
 #' Group generic methods defined for things like Math, Ops, and so forth.
 #'
-#' @param x,e1,e2 dfts object
-#' @param ... Further arguments passed to the methods
+#' @param x,e1,e2 A dfts object. See [dfts()].
+#' @param ... Further arguments passed to the methods.
 #'
-#' @return dfts object
+#' @return A dfts object with the applied operation
 #' @export
 #'
 #' @name dfts_group
@@ -297,10 +298,13 @@ Ops.dfts <- function (e1, e2) {
         ans <- NULL
       }
     } else {
-      .Class <- "matrix"
-      ans <- NextMethod()
-      colnames(ans) <- i.cols
-      ans <- dfts(ans,labels = i.cols)
+      e1_old <- e1
+      e1 <- e1$data
+      ans0 <- NextMethod()
+      ans <- e1_old
+      ans$data <- ans0
+
+      # ans <- dfts(ans,labels = i.cols)
 
       # if("dfts" %in% c.e1) {
       #   ans.dates <- attr(e1,"index")
@@ -317,15 +321,21 @@ Ops.dfts <- function (e1, e2) {
 
 #' Difference dfts
 #'
-#' Difference the functional data at some lag / to some degree.
+#' Difference the functional data at some lag and iteration. For the
+#'  \eqn{\ell}'th difference at lag \eqn{m}, the differenced series is
+#'  defined as
+#'  \eqn{
+#'    Y_i(t) = (1-B^m)^{\ell} X_i(t)
+#'  }
+#'  where \eqn{B} is the backshift operator.
 #'
 #' @param x A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
 #' @param lag An integer indicating which lag to use.
 #' @param differences	An integer indicating the order of the difference.
-#' @param ... Further arguments to be passed to or from methods.
+#' @param ... Further arguments to be passed to methods.
 #'
-#' @return dfts object with differenced values
+#' @return A dfts object with the differenced values.
 #' @export
 #'
 #' @examples
@@ -355,17 +365,20 @@ diff.dfts <- function(x, lag = 1L, differences = 1L, ...) {
 
 #' Max / Min for dfts Objects
 #'
-#' Get the observation(s) with the min / max values. Selected as the observation
-#'  with the largest / smallest mean or the pointwise values.
+#' Get the observation(s) or pointwise values with the min / max values. When
+#'  using \code{type='Obs'}, the selected observation is the one with the
+#'  minimum or maximum mean. When using \code{type='fparam'}, the values are
+#'  given pointwise.
 #'
 #' @param x A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param type String indicating if finding for observation ('Obs', default),
+#' @param type String indicating if finding for observation ('Obs'),
 #'  or for pointwise values ('fparam').
 #' @param na.rm Boolean if NA values should be removed. Defaults to TRUE.
-#' @param ... Additional parameters to stats function
+#' @param ... Additional parameters to pass to base R's \code{min} or \code{max}
+#' functions. They are only used in the \code{type='fparam'} case.
 #'
-#' @return A dfts object
+#' @return A dfts object.
 #' @export
 #'
 #' @name minmax
@@ -424,7 +437,8 @@ min.dfts <- function(x, type=c('Obs','fparam'), na.rm=TRUE, ...){
 
 #' Average Functions for dfts Objects
 #'
-#' Compute the average values for dfts objects
+#' Compute the pointwise "average" values for dfts objects such as mean and
+#'  median.
 #'
 #' @inheritParams minmax
 #'
@@ -454,16 +468,17 @@ median.dfts <- function(x, na.rm=TRUE, ...) {
 
 #' Quantile dfts
 #'
-#' Obtain the pointwise quantile information of dfts objects
+#' Obtain the pointwise quantile information of functional data.
 #'
-#' @param x A dfts object
-#' @param probs Numerics in \[0,1\] indicating the probabilities of interest
-#' @param ... Additional parameters to pass into quantile function
+#' @param x A dfts object. See [dfts()].
+#' @param probs Numerics in \[0,1\] indicating the probabilities of interest.
+#' @param ... Additional parameters to pass into [stats::quantile()] function.
 #'
-#' @return Matrix with columns for each requested quantile
+#' @return Matrix with columns for each requested quantile computed pointwise.
 #' @export
 #'
 #' @importFrom stats quantile
+#' @seealso [stats::quantile()]
 #'
 #' @examples
 #' result <- quantile(electricity)
@@ -480,17 +495,21 @@ quantile.dfts <- function(x, probs = seq(0, 1, 0.25), ...){
 }
 
 
-#' Lag dfts
+#' Lag dfts objects
 #'
-#' @param x A dfts object or data which can be automatically converted to that
-#'  format. See [dfts()].
-#' @param k integer indicating the number of lags for the data
-#' @param ... Unused additional parameters
+#' Compute a lagged version of a functional time series, shifting the time base
+#'  back by a given number of observations.
 #'
-#' @return A dfts object
+#' @param x A dfts object. See [dfts()].
+#' @param k Integer for the number of lags (in units of observations).
+#' @param ... Unused additional parameters.
+#'
+#' @return A dfts object.
 #' @export
 #'
 #' @importFrom stats lag
+#'
+#' @seealso [stats::lag()], [diff.dfts()]
 #'
 #' @examples
 #' result <- lag(electricity)
@@ -510,7 +529,7 @@ lag.dfts <- function(x, k=1, ...) {
 #'
 #' @inheritParams minmax
 #'
-#' @return Numerics indicating the dimension of the dfts object
+#' @return Numerics indicating the dimension of the dfts object.
 #' @export
 #'
 #' @examples
@@ -524,11 +543,11 @@ dim.dfts <- function(x, ...) {
 #'
 #' Extract or replace subsets of dfts objects.
 #'
-#' @param x dfts object
-#' @param i,j Numerics for elements to extract
-#' @param ... Unused additional parameters
+#' @param x A dfts object. See [dfts()].
+#' @param i,j Numerics for elements to extract.
+#' @param ... Additional parameters from generic function for extensions.
 #'
-#' @returns dfts object
+#' @returns A dfts object.
 #' @export
 #'
 #' @rdname extract
@@ -585,9 +604,8 @@ dim.dfts <- function(x, ...) {
 
 
 #' @name extract
-#' @param value A suitable replacement value
+#' @param value A suitable replacement value for selection.
 #'
-#' @returns dfts object
 #' @export
 #'
 #' @examples
@@ -596,18 +614,40 @@ dim.dfts <- function(x, ...) {
 #' tmp[1,1] <- 10
 #' tmp$data
 `[<-.dfts` <- function(x, i, j, value) {
-  x$data <- methods::callGeneric(x$data, i, j, value)
+  # res <- methods::callGeneric(x$data, i, j, value)
+  nA <- nargs()
+
+  if(!inherits(value,'dfts')){
+    if(nA==4){
+      # i and j both given (or j missing with comma)
+      res <- methods::callGeneric(x$data, i, j, value)
+      x$data <- res
+    }else if (nA==3){
+      res <- methods::callGeneric(t(x$data), i, j, value)
+      x$data <- t(res)
+    }else
+      stop("need 0, 1, or 2 subscripts")
+  } else{
+    if(nA==4){
+      # i and j both given (or missing with comma)
+      res <- methods::callGeneric(x$data, i, j, value$data)
+      x$data <- res
+    }else if (nA==3){
+      x$data[,i] <- value$data
+    }else
+      stop("need 0, 1, or 2 subscripts")
+  }
 
   x
 }
 
 
 
-#' Printing dfts objects
+#' Print dfts objects
 #'
-#' Basic formatting to print a dfts object
+#' Basic formatting to print a dfts object.
 #'
-#' @param x dfts data
+#' @param x A dfts object. See [dfts()].
 #' @param ... unused parameter
 #'
 #' @export
@@ -618,9 +658,9 @@ print.dfts <- function(x, ...){
   cat(x$name,'\n')
   cat('dimension: ',nrow(x),' x ',ncol(x),'\n',sep = '')
   cat('fparam (',length(x$fparam),'): ',sep = '')
-  cat(head(x$fparam), ifelse(length(x$fparam)>6,'...',''),'\n')
+  cat(utils::head(x$fparam), ifelse(length(x$fparam)>6,'...',''),'\n')
   cat('labels (',length(x$labels),'): ',sep = '')
-  cat(head(x$labels), ifelse(length(x$labels)>6,'...',''),'\n')
+  cat(utils::head(x$labels), ifelse(length(x$labels)>6,'...',''),'\n')
   cat('\nExample data\n',sep = '')
   print(x$data[1:min(6,nrow(x)),1:min(6,ncol(x))])
 }

@@ -16,13 +16,15 @@ format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{na.rm}{Boolean if NA values should be removed. Defaults to TRUE.}
 
-\item{...}{Additional parameters to stats function}
+\item{...}{Additional parameters to pass to base R's \code{min} or \code{max}
+functions. They are only used in the \code{type='fparam'} case.}
 }
 \value{
 Numeric vector
 }
 \description{
-Compute the average values for dfts objects
+Compute the pointwise "average" values for dfts objects such as mean and
+median.
 }
 \examples{
 results <- mean(electricity)

@@ -6,9 +6,10 @@
 \usage{
 kpss_test(
   X,
-  method = c("MC", "block", "sliding"),
+  method = c("simulation", "resample"),
+  resample_blocks = "separate",
   M = 1000,
-  h = 3,
+  blocksize = 2 * ncol(X)^(1/5),
   TVE = 1,
   replace = TRUE
 )
@@ -17,32 +18,41 @@ kpss_test(
 \item{X}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{method}{String (default MC) for the method: Monte Carlo simulation
-(\code{MC}), block resampling (\code{block}), and sliding window
-permutation (\code{sliding})}
+\item{method}{String for the method in computing thresholds: Monte Carlo
+simulation (\code{simulation}) or resampling (\code{resample}).}
 
-\item{M}{Number of simulations (default 1000) to estimate theoretical distribution}
+\item{resample_blocks}{String indicating the type of resample test to use.
+Using \code{separate} gives blocks which are separate while \code{overlapping}
+creates overlapping or sliding windows. When \code{blocksize=1} then these
+will be identical.}
 
-\item{h}{Numeric (default 3) for the block size when using a resample test}
+\item{M}{Number of simulations to estimate theoretical distribution.}
 
-\item{TVE}{Numeric (default 1) for selecting the number of principle
-components / eigenvalues}
+\item{blocksize}{Numeric for the block size when using a resample test.}
 
-\item{replace}{Boolean (default TRUE) to indicate if blocks should be
-selected with replacement when using a resample test}
+\item{TVE}{Numeric for \code{\link[=pca]{pca()}} to select the number of principle components.}
+
+\item{replace}{Boolean to indicate if blocks should be selected with
+replacement when using a resample test.}
 }
 \value{
-List with statistic, p-value and theoretical simulations, respectively
+List with the following elements:
+\enumerate{
+\item pvalue: p-value from the test.
+\item statistic: test statistic computed on the data.
+\item simulations: Theoretical values for the null distribution.
+}
 }
 \description{
-Compute the KPSS statistic for functional data.
+Compute the Kwiatkowski–Phillips–Schmidt–Shin (KPSS) statistic for
+functional data.
 }
 \examples{
 kpss_test(generate_brownian_motion(100,v=seq(0,1,length.out=20)))
 kpss_test(generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-             method="block")
+             method="resample")
 kpss_test(generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-             method='sliding')
+             method='resample', resample_blocks='overlapping')
 }
 \references{
 Chen, Y., & Pun, C. S. (2019). A bootstrap-based KPSS test for

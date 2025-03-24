@@ -7,7 +7,6 @@ test_that("PCA Examination", {
 
 test_that("Projection Model", {
   set.seed(123)
-  cat(Sys.info()['sysname'],'\n')
   if(Sys.info()['sysname'] =='Linux') {
     expect_false(FALSE)
     return()
@@ -15,5 +14,5 @@ test_that("Projection Model", {
 
   results <- projection_model(dfts(electricity$data[,50:100]), n.ahead=5)
   expect_equal(round(sum(results$fit$data)), 33283)
-  expect_equal(round(sum(results$errors$data)), 1293)
+  expect_equal(round(sum(results$residuals$data)), 1293)
 })

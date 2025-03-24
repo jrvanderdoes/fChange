@@ -4,30 +4,31 @@
 \alias{pca_examination}
 \title{Principal Component Exploration}
 \usage{
-pca_examination(X, TVE = 0.95, d.max = 3)
+pca_examination(X, TVE = 0.95)
 }
 \arguments{
 \item{X}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{TVE}{Numeric in [0,1]. Total variance explained to determine the
-number of components to examine}
-
-\item{d.max}{Numeric. Max number of components to investigate (if TVE
-suggests too many).}
+\item{TVE}{Numeric in [0,1] for the total variance explained, this determines
+the number of components and can be used for dimension reduction.}
 }
 \value{
 List with the following elements:
 \itemize{
-\item Figures: List with figures on all components, summaries, reconstructed
-values, and residuals
-\item reconstruction: Reconstructed value from pcs
-\item residuals: Difference between true and reconstruction
+\item figures: List with figures on all components, summaries, reconstructed
+values, and residuals.
+\item reconstruction: Reconstructed value from PCs.
+\item residuals: Difference between true and reconstruction.
 }
 }
 \description{
-Principal Component Exploration
+Computes the principal component projection and re-combined data with a myriad
+of figures to understand the projection process.
 }
 \examples{
-results <- pca_examination(electricity)
+results <- pca_examination(electricity, TVE=0.9)
+}
+\seealso{
+\code{\link[=pca.dfts]{pca.dfts()}}
 }

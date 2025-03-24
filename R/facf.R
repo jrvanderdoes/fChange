@@ -4,16 +4,16 @@
 #'  scalar time series or functional time series defined in [dfts()].
 #'
 #' @param x Object for computation of (partial) autocorrelation function
-#'  (ACF/PACF).
+#'  (see \code{acf()} or \code{pacf}).
 #' @param lag.max Number of lagged covariance estimators for the time series
 #'  that will be used to estimate the (partial) autocorrelation function.
 #' @param ... Additional parameters to appropriate function
 #'
-#' @seealso [stats::acf()], [fChange::acf.dfts()]
+#' @seealso [stats::acf()]
 #'
 #' @name acf
 #'
-#' @return ACF or PACF values and plots
+#' @return List with ACF or PACF values and plots
 #' @export
 #'
 #' @examples
@@ -44,8 +44,8 @@ pacf.default <- function(x, lag.max = NULL, ...) stats::pacf(x)
 #' Obtain the autocorrelation function for a given functional time series.
 #'
 #' @param alpha A value between 0 and 1 that indicates significant level for
-#'  the confidence interval for the i.i.d. bounds of the autocorrelation
-#'  function. By default \code{alpha = 0.95}.
+#'  the confidence interval for the i.i.d. bounds of the (partial) autocorrelation
+#'  function. By default \code{alpha = 0.05}.
 #' @param method Character specifying the method to be used when estimating the
 #'  distribution under the hypothesis of functional white noise.
 #'  Accepted values are:
@@ -56,18 +56,18 @@ pacf.default <- function(x, lag.max = NULL, ...) stats::pacf(x)
 #'  }
 #'  By default, \code{method = "Welch"}.
 #' @param WWN Logical. If \code{TRUE}, WWN bounds are also computed
-#' @param figure Logical. If \code{TRUE}, plots the estimated autocorrelation
+#' @param figure Logical. If \code{TRUE}, plots the estimated
 #'  function with the specified bounds.
 #' @param ... Further arguments passed to the \code{.plot_FACF} function.
 #'
-#' @return Return a list with:
+#' @return
 #' \itemize{
+#'     \item \code{acfs/pacfs}: Autocorrelation values for
+#'     each lag of the functional time series.
 #'     \item \code{SWN_bound}: The upper prediction
 #'     bound for the i.i.d. distribution under strong white noise assumption.
 #'     \item \code{WWN_bound}: The upper prediction
 #'     bound for the i.i.d. distribution under weak white noise assumption.
-#'     \item \code{acfs}: Autocorrelation values for
-#'     each lag of the functional time series.
 #'     \item \code{plot}: Plot of autocorrelation values for
 #'     each lag of the functional time series.
 #' }
@@ -76,19 +76,18 @@ pacf.default <- function(x, lag.max = NULL, ...) stats::pacf(x)
 #'  \emph{Functional time series model identification and diagnosis by
 #'  means of auto- and partial autocorrelation analysis.}
 #'  Computational Statistics & Data Analysis, 155, 107108.
-#'  \url{https://doi.org/10.1016/j.csda.2020.107108}
 #'
 #' @references Mestre, G., Portela, J., Munoz San Roque, A., Alonso, E. (2020).
 #'  \emph{Forecasting hourly supply curves in the Italian Day-Ahead
 #'  electricity market with a double-seasonal SARMAHX model.}
 #'  International Journal of Electrical Power & Energy Systems,
-#'  121, 106083. \url{https://doi.org/10.1016/j.ijepes.2020.106083}
+#'  121, 106083.
 #'
 #' @references Kokoszka, P., Rice, G., Shang, H.L. (2017).
 #'  \emph{Inference for the autocovariance of a functional
 #'  time series under conditional heteroscedasticity}
 #'  Journal of Multivariate Analysis,
-#'  162, 32--50. \url{https://doi.org/10.1016/j.jmva.2017.08.004}
+#'  162, 32--50.
 #'
 #' @examples
 #' x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
@@ -167,7 +166,161 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
     plt
   }
 
-  invisible( list('SWN_bound'=SWN_bound, 'WWN_bound'=WWN_bound, 'acfs'=rho, 'plot'=plt) )
+  invisible( list('acfs'=rho, 'SWN_bound'=SWN_bound, 'WWN_bound'=WWN_bound, 'plot'=plt) )
+}
+
+
+#' Obtain the partial autocorrelation function for a given FTS.
+#'
+#' @param n_pcs Number of principal components that will be used to fit the
+#'   ARH(p) models.
+#'
+#' @examples
+#' x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
+#' pacf(x,lag.max = 10, n_pcs = 2)
+#'
+#' @export
+#' @rdname acf
+pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
+                      alpha=0.95, figure = TRUE, ...){
+  x <- dfts(x)
+
+  res <- nrow(x$data) #dv <- length(v)
+  nobs <- ncol(x$data) #dt <- nrow(y)
+
+  # Allow TVE
+  if(is.null(n_pcs)){
+    max_pc <- 20
+
+    # If there are less discretization points than max_pc, use the disc points
+    num_fpc <- min(c(length(x$fparam), max_pc))
+
+    pca <- stats::princomp(t(x$data))#$scores[,1:num_fpc]
+    eigs <- pca$sdev^2
+    varprop <- as.numeric(cumsum(eigs[1:num_fpc]) / sum(eigs))
+
+    # Select 95% Coverage or warn
+    if(any(varprop>=0.95)){
+      n_pcs <- which(varprop>=0.95)[1]
+    }else{
+      warning(paste0("Using ", num_fpc,
+                     " functional principal components only explains ",
+                     format(varprop[length(varprop)],digits = 3),"%",
+                     " of the variance"))
+      n_pcs <- num_fpc
+    }
+  }
+
+  if( is.null(lag.max) ) lag.max <- 20
+
+  # Initialize FPACF vector
+  FPACF <- rep(NA, lag.max)
+
+  FACF <- acf.dfts(
+    x = x, lag.max = 1,
+    alpha = alpha, figure = FALSE, WWN = FALSE, ...)
+
+  FPACF[1] <- FACF$acfs[1]
+
+  vector_PACF <- FPACF
+
+  show_varprop <- TRUE
+
+  # Start loop for fitting ARH(p-1)
+  for(pp in 2:lag.max){
+    lag_PACF <- pp
+
+    # 1 - Fit ARH(1) to the series
+    if(show_varprop){
+      Xest_ARIMA <-
+        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
+                       n_pcs = n_pcs)$x_est
+      show_varprop <- FALSE
+    }else{
+      Xest_ARIMA <-
+        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
+                       n_pcs = n_pcs, show_varprop = FALSE)$x_est
+    }
+
+    # 2 - Fit ARH(1) to the REVERSED series
+    x_rev <- x
+    x_rev$data <- x$data[,seq(from = ncol(x$data), to = 1, by = -1)]
+
+    Xest_ARIMA_REV <- .fit_ARHp_FPCA(
+      x = x_rev, p = lag_PACF-1,
+      n_pcs = n_pcs, show_varprop = FALSE)$x_est
+
+    # 3 - Estimate covariance surface for PACF
+    Xest_1 <- Xest_ARIMA
+    Xest_2 <-
+      Xest_ARIMA_REV[,seq(from = ncol(x$data), to = 1, by = -1)]
+
+    res_filt_1 <- x$data - Xest_1
+    res_filt_2 <- x$data - Xest_2
+
+    # Cross-covariance surface
+    sup_cov <- matrix(0, res, res)
+    ini_serie <- max(which(is.na(Xest_1[1,]))) + 2
+    fin_serie <- min(which(is.na(Xest_2[1,]))) - 2
+
+    count <- 0
+    for(jj in ini_serie:fin_serie){
+      epsilon_1 <- as.matrix(res_filt_1[,jj])
+      epsilon_2 <- as.matrix(res_filt_2[,jj - lag_PACF])
+
+      sup_cov <- sup_cov + ( epsilon_1 %*% t(epsilon_2) )
+
+      count <- count + 1
+    }
+    sup_cov <- sup_cov / count
+
+    # Estimate traces
+    var_1 <- matrix(0, res, res)
+    count <- 0
+    for (jj in ini_serie:nobs){
+      epsilon_1 <- as.matrix(res_filt_1[, jj])
+
+      var_1 <- var_1 + ( epsilon_1 %*% t(epsilon_1) )
+
+      count <- count + 1
+    }
+    var_1 <- var_1 / count
+
+    traza_1 <- dot_integrate(r = x$fparam, v = diag(var_1))
+
+    var_2 <- matrix(0, res, res)
+    count <- 0
+    for (jj in 1:fin_serie){
+      epsilon_1 <- as.matrix(res_filt_2[,jj])
+      epsilon_2 <- as.matrix(res_filt_2[,jj])
+
+      var_2 <- var_2 + ( epsilon_1 %*% t(epsilon_2) )
+
+      count <- count + 1
+    }
+    var_2 <- var_2 / count
+
+    traza_2 <- dot_integrate(r = x$fparam, v = diag(var_2))
+
+    sup_corr <- sup_cov / ( sqrt(traza_1)*sqrt(traza_2) )
+
+    # Check - L2 surface norm
+    vector_PACF[lag_PACF] <-
+      dot_integrate(
+        dot_integrate_col(v=t(sup_corr^2),r=x$fparam),
+        r=x$fparam)
+
+    # vector_PACF[lag_PACF] <-
+    #   sqrt( .obtain_suface_L2_norm(x$fparam, list(Lag0 = sup_corr)) )
+  }
+
+  plt <- .plot_FACF(rho = vector_PACF, SWN = FACF$SWN_bound, WWN=NULL, ylab='PACF', ...)
+  if(figure){
+    plt
+  }
+
+  invisible( list('pacfs' = vector_PACF, 'SWN' = FACF$SWN_bound,
+                  'WWN_bound'=NULL, 'plot'=plt) )
 }
 
 
@@ -557,184 +710,6 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   graphics::box()
 }
 
-
-#' Obtain the partial autocorrelation function for a given FTS.
-#'
-#' @param n_pcs Number of principal components
-#' that will be used to fit the ARH(p) models.
-#' @param alpha A value between 0 and 1 that indicates
-#' the confidence interval for the i.i.d. bounds
-#' of the partial autocorrelation function. By default
-#' \code{ci = 0.95}.
-#' @param figure Logical. If \code{TRUE}, plots the
-#' estimated partial autocorrelation function with the
-#' specified i.i.d. bound.
-#' @param ... Further arguments passed to the [acf.dfts()]
-#' function.
-#'
-#' @return Return a list with:
-#' \itemize{
-#'     \item \code{Blueline}: The upper prediction
-#'     bound for the i.i.d. distribution.
-#'     \item \code{rho}: Partial autocorrelation
-#'     coefficients for
-#'     each lag of the functional time series.
-#' }
-#'
-#' @references
-#' Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
-#' \emph{Functional time series model identification and diagnosis by
-#' means of auto- and partial autocorrelation analysis.}
-#' Computational Statistics & Data Analysis, 155, 107108.
-#' \url{https://doi.org/10.1016/j.csda.2020.107108}
-#'
-#' @examples
-#' x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
-#' pacf(x,lag.max = 10, n_pcs = 2)
-#'
-#' @export
-#' @rdname acf
-pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
-                       alpha=0.95, figure = TRUE, ...){
-  x <- dfts(x)
-
-  res <- nrow(x$data) #dv <- length(v)
-  nobs <- ncol(x$data) #dt <- nrow(y)
-
-  # Allow TVE
-  if(is.null(n_pcs)){
-    max_pc <- 20
-
-    # If there are less discretization points than max_pc, use the disc points
-    num_fpc <- min(c(length(x$fparam), max_pc))
-
-    pca <- stats::princomp(t(x$data))#$scores[,1:num_fpc]
-    eigs <- pca$sdev^2
-    varprop <- as.numeric(cumsum(eigs[1:num_fpc]) / sum(eigs))
-
-    # Select 95% Coverage or warn
-    if(any(varprop>=0.95)){
-      n_pcs <- which(varprop>=0.95)[1]
-    }else{
-      warning(paste0("Using ", num_fpc,
-                     " functional principal components only explains ",
-                     format(varprop[length(varprop)],digits = 3),"%",
-                     " of the variance"))
-      n_pcs <- num_fpc
-    }
-  }
-
-  if( is.null(lag.max) ) lag.max <- 20
-
-  # Initialize FPACF vector
-  FPACF <- rep(NA, lag.max)
-
-  FACF <- acf.dfts(
-    x = x, lag.max = 1,
-    alpha = alpha, figure = FALSE, WWN = FALSE, ...)
-
-  FPACF[1] <- FACF$acfs[1]
-
-  vector_PACF <- FPACF
-
-  show_varprop <- TRUE
-
-  # Start loop for fitting ARH(p-1)
-  for(pp in 2:lag.max){
-    lag_PACF <- pp
-
-    # 1 - Fit ARH(1) to the series
-    if(show_varprop){
-      Xest_ARIMA <-
-        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
-                       n_pcs = n_pcs)$x_est
-      show_varprop <- FALSE
-    }else{
-      Xest_ARIMA <-
-        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
-                       n_pcs = n_pcs, show_varprop = FALSE)$x_est
-    }
-
-    # 2 - Fit ARH(1) to the REVERSED series
-    x_rev <- x
-    x_rev$data <- x$data[,seq(from = ncol(x$data), to = 1, by = -1)]
-
-    Xest_ARIMA_REV <- .fit_ARHp_FPCA(
-      x = x_rev, p = lag_PACF-1,
-      n_pcs = n_pcs, show_varprop = FALSE)$x_est
-
-    # 3 - Estimate covariance surface for PACF
-    Xest_1 <- Xest_ARIMA
-    Xest_2 <-
-      Xest_ARIMA_REV[,seq(from = ncol(x$data), to = 1, by = -1)]
-
-    res_filt_1 <- x$data - Xest_1
-    res_filt_2 <- x$data - Xest_2
-
-    # Cross-covariance surface
-    sup_cov <- matrix(0, res, res)
-    ini_serie <- max(which(is.na(Xest_1[1,]))) + 2
-    fin_serie <- min(which(is.na(Xest_2[1,]))) - 2
-
-    count <- 0
-    for(jj in ini_serie:fin_serie){
-      epsilon_1 <- as.matrix(res_filt_1[,jj])
-      epsilon_2 <- as.matrix(res_filt_2[,jj - lag_PACF])
-
-      sup_cov <- sup_cov + ( epsilon_1 %*% t(epsilon_2) )
-
-      count <- count + 1
-    }
-    sup_cov <- sup_cov / count
-
-    # Estimate traces
-    var_1 <- matrix(0, res, res)
-    count <- 0
-    for (jj in ini_serie:nobs){
-      epsilon_1 <- as.matrix(res_filt_1[, jj])
-
-      var_1 <- var_1 + ( epsilon_1 %*% t(epsilon_1) )
-
-      count <- count + 1
-    }
-    var_1 <- var_1 / count
-
-    traza_1 <- dot_integrate(r = x$fparam, v = diag(var_1))
-
-    var_2 <- matrix(0, res, res)
-    count <- 0
-    for (jj in 1:fin_serie){
-      epsilon_1 <- as.matrix(res_filt_2[,jj])
-      epsilon_2 <- as.matrix(res_filt_2[,jj])
-
-      var_2 <- var_2 + ( epsilon_1 %*% t(epsilon_2) )
-
-      count <- count + 1
-    }
-    var_2 <- var_2 / count
-
-    traza_2 <- dot_integrate(r = x$fparam, v = diag(var_2))
-
-    sup_corr <- sup_cov / ( sqrt(traza_1)*sqrt(traza_2) )
-
-    # Check - L2 surface norm
-    vector_PACF[lag_PACF] <-
-      dot_integrate(
-        dot_integrate_col(v=t(sup_corr^2),r=x$fparam),
-        r=x$fparam)
-
-    # vector_PACF[lag_PACF] <-
-    #   sqrt( .obtain_suface_L2_norm(x$fparam, list(Lag0 = sup_corr)) )
-  }
-
-  if(figure){
-    .plot_FACF(rho = vector_PACF, SWN = FACF$SWN_bound, WWN=NULL, ylab='PACF', ...)
-  }
-
-  list(pacfs = vector_PACF, SWN = FACF$SWN_bound)
-}
-
-
 #' Fit an ARH(p) to a given functional time series
 #'
 #' Fit an \eqn{ARH(p)} model to a given functional time series. The fitted
@@ -791,7 +766,7 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #' @references Aue, A., Norinho, D. D., Hormann, S. (2015).
 #'  \emph{On the Prediction of Stationary Functional Time Series}
 #'  Journal of the American Statistical Association,
-#'  110, 378--392. \url{https://doi.org/10.1080/01621459.2014.909317}
+#'  110, 378--392.
 #'
 #' @keywords internal
 #' @noRd

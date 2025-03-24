@@ -1,16 +1,16 @@
-#' Draw 3D Geoms
+#' Draw 3D Geoms for ggplot2
 #'
 #' This function adds 3D geoms such as points and paths to a ggplot2 plot.
 #'
-#' #param theta The azimuthal rotation (degrees).
-#' #param phi The colatitude rotation (degrees).
-#'
 #' @inheritParams ggplot2::ggplot
 #' @inheritParams ggplot2::layer
-#' @param position The azimuthal rotation (degrees).
-#' @param na.rm Boolean if na data should be removed
+#' @param position Set position information. Find more details in \code{ggplot2}
+#'  function.
+#' @param na.rm Boolean if na data should be removed.
 #' @param ... Arguments passed on to layer. Often the aesthetics
-#'  like color = "red" or size = 3.
+#'  like \code{color = "red"} or \code{size = 3}. Two important ones are
+#'  \code{theta} (azimuthal rotation) and \code{phi} (colatitude rotation)
+#'  to define angle in degrees of viewing data.
 #'
 #' @references Acker D (2024). gg3D: 3D perspective plots for ggplot2. R
 #'                package version 0.0.0.9000.
@@ -18,25 +18,25 @@
 #' @export
 #'
 #' @examples
-#' dat <- electricity
+#'dat <- electricity
 #'
-#' data_lines <- cbind(data.frame('Time'=dat$fparam), dat$data) %>%
-#'  tidyr::pivot_longer(cols = 1+1:ncol(dat$data))
+#'data_lines <- cbind(data.frame('Time'=dat$fparam), dat$data) %>%
+#' tidyr::pivot_longer(cols = 1+1:ncol(dat$data))
 #'
-#' colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
-#' colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(dat$data))
-#' data_lines$color <- rep(colors_plot, nrow(dat$data) )
-#' data_lines$name <- as.numeric(data_lines$name)
+#'colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
+#'colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(dat$data))
+#'data_lines$color <- rep(colors_plot, nrow(dat$data) )
+#'data_lines$name <- as.numeric(data_lines$name)
 #'
-#' result <- ggplot2::ggplot(data_lines,
-#'    ggplot2::aes(y=Time, x=name, z=value, color=color)) +
-#' ggplot2::theme_void() +
-#' stat_3D(theta=0, phi=15, geom='path') +
-#' ggplot2::scale_color_manual(
-#'    breaks = data_lines$color,
-#'    values = data_lines$color
-#' ) +
-#' ggplot2::guides(color='none')
+#'result <- ggplot2::ggplot(data_lines,
+#'   ggplot2::aes(y=Time, x=name, z=value, color=color)) +
+#'   ggplot2::theme_void() +
+#'   stat_3D(theta=0, phi=15, geom='path') +
+#'   ggplot2::scale_color_manual(
+#'      breaks = data_lines$color,
+#'      values = data_lines$color
+#'   ) +
+#'   ggplot2::guides(color='none')
 stat_3D <- function(mapping = NULL, data = NULL, geom = "point",
                     position = "identity", na.rm = FALSE, show.legend = NA,
                     inherit.aes = TRUE, ...) {

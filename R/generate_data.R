@@ -1,10 +1,11 @@
 #' Generate Functional Data
 #'
-#' This function allows generation of functional data according to several
-#'  approaches: \code{bbridge}, \code{bmotion}, \code{kl}, \code{ou}, and \code{far1}.
+#' A general wrapper function to allow generation of functional data according
+#'  to several approaches: \code{bbridge}, \code{bmotion}, \code{kl}, \code{ou},
+#'  and \code{far1}.
 #'
 #' @param fparam fparam of data (or resolution that will be equally spaced
-#'  on \[0,1\).
+#'  on \[0,1\]).
 #' @param data_details List of named lists indicating parameters for each data group.
 #'  Each process can use different parameters, given below.
 #'  \itemize{
@@ -51,10 +52,15 @@
 #'          fparam is a vector, the fparam will be one smaller.
 #'      }
 #'  }
-#' @param burnin Numeric for amount of burnin for data
+#' @param burnin Numeric for amount of burnin for data. Only used for the first
+#'  groups. Subsequent groups begin at the end of the last group.
 #'
-#' @return dfts object for the generated data
+#' @return A dfts object for the generated data.
 #' @export
+#'
+#' @seealso [generate_brownian_bridge()], [generate_brownian_motion()],
+#'  [generate_far1()], [generate_karhunen_loeve()],
+#'  [generate_ornstein_uhlenbeck()]
 #'
 #' @examples
 #' result <- generate_data(
@@ -107,7 +113,7 @@ generate_data <- function(fparam, data_details, burnin=100){
                          results_tmp$data[, (N-N_data+1):N]
                        },
                        kl = {
-                         results <- generate_karhunen_loeve(N = N,
+                         results <- generate_karhunen_loeve(Ns = N,
                                                             eigenvalues = data_details[[i]]$eigenvalues,
                                                             basis = data_details[[i]]$basis,
                                                             means = data_details[[i]]$mean,
@@ -125,7 +131,7 @@ generate_data <- function(fparam, data_details, burnin=100){
                          results$data$data[, (N-N_data+1):N]
                        },
                        ou = {
-                         results <- generate_ornstein_uhlenbeck(resolution = fparam, N = N,
+                         results <- generate_ornstein_uhlenbeck(v = fparam, N = N,
                                                  rho = data_details[[i]]$dependence)
 
                          results$data[, (N-N_data+1):N]
@@ -145,7 +151,7 @@ generate_data <- function(fparam, data_details, burnin=100){
                          results <- generate_far1(N = N, resolution = resolution1,
                                                   sd=data_details[[i]]$sd,
                                                   dependence = data_details[[i]]$dependence,
-                                                  dropFirst=data_details[[i]]$vary)
+                                                  drop_first=data_details[[i]]$vary)
 
                          results$data[, (N-N_data+1):N]
                        }

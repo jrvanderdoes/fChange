@@ -10,6 +10,6 @@ test_that("Kernels", {
 })
 
 test_that("Adaptive Bandwidth", {
-  expect_equal(round(adaptive_bandwidth(electricity,'Bartlett'),4), 69.3986)
+  expect_equal(round(adaptive_bandwidth(electricity,bartlett_kernel),4), 69.3986)
 })
 

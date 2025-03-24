@@ -5,7 +5,7 @@
 \title{Generate functional data}
 \usage{
 generate_karhunen_loeve(
-  N,
+  Ns,
   eigenvalues,
   basis,
   means,
@@ -20,14 +20,14 @@ generate_karhunen_loeve(
 )
 }
 \arguments{
-\item{N}{Vector of Numerics. Each value in N is the number of observations
-for a given group.}
+\item{Ns}{Vector of Numerics. Each value in Ns is the number of observations
+for a given group, for m groups.}
 
-\item{eigenvalues}{Vector of eigenvalues. Length 1 or m.}
+\item{eigenvalues}{Vector of eigenvalues, length 1 or m.}
 
 \item{basis}{A list of bases (eigenfunctions), length m.}
 
-\item{means}{A vector of means, length 1 or N.}
+\item{means}{A vector of means, length 1 or Ns.}
 
 \item{distribution}{A vector of distributions, length 1 or m.}
 
@@ -38,37 +38,34 @@ functions on.}
 
 \item{burnin}{A numeric value indicating the number of burnin trials.}
 
-\item{silent}{A Boolean that toggles running output.}
+\item{silent}{A Boolean that toggles displaying the running status.}
 
-\item{dof}{Numeric for shape with gamma distribution (rate is set to 1)}
+\item{dof}{Numeric for shape with gamma distribution (rate is set to 1).}
 
-\item{shape}{Numeric for degrees of freedom with t-distribution}
+\item{shape}{Numeric for degrees of freedom with t-distribution.}
 
-\item{prev_eps}{previous epsilon for dependence across groups.}
+\item{prev_eps}{Previous epsilon for dependence across groups. This is only
+needed if a separate code was run but the new data should be appended. In
+general only used in internal functions.}
 }
 \value{
-List with (1) data (N-by-m) and (2) previous errors.
+List with (1) dfts data and (2) the errors of the last iteration.
 }
 \description{
-\code{generate_karhunen_loeve} generates functional data via KL expansion.
-This can include change points in any combination of the following:
-\itemize{
-\item Mean
-\item Distribution
-\item Eigenvalue(s)
-\item Eigenvector(s)
-}
-In this sense, the function creates m 'groups' of discretely observed
+\code{generate_karhunen_loeve} generates functional data via an autoregressive
+Karhunen-Loeve expansion. The approach easily accomondate change points in
+the mean, distribution, eigenvalues, eigenfunctions, and so forth. In a
+sense, the function creates m `groups' of discretely observed
 functions with similar properties.
 }
 \examples{
 dat1 <- generate_karhunen_loeve(
-  N=100, eigenvalues=c(1/(1:3)), basis=fda::create.bspline.basis(nbasis=3,norder=3),
+  Ns=100, eigenvalues=c(1/(1:3)), basis=fda::create.bspline.basis(nbasis=3,norder=3),
   means=0, distribution='Normal',
   fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
   prev_eps=NULL)
 dat2 <- generate_karhunen_loeve(
-  N=50, eigenvalues=c(1/(1:4)), basis=fda::create.bspline.basis(nbasis=4),
+  Ns=50, eigenvalues=c(1/(1:4)), basis=fda::create.bspline.basis(nbasis=4),
   means=5, distribution='exponential',
   fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
   prev_eps=dat1$prev_eps)

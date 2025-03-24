@@ -10,7 +10,7 @@
 .change_characteristic <- function(X, statistic, critical,
                                    M = 20, J=50,
                                    nSims = 1000, h = 3,
-                                   W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                                   W = space_measuring_functions(X = X, M = 20, space='BM'),
                                    K = bartlett_kernel, #space = "BM",
                                    blocksize=1,
                                    resample_blocks = 'separate', replace = TRUE,
@@ -19,7 +19,7 @@
 
   # Generate Noise
   if(is.null(W)){
-    W <- space_measuring_vectors(X = X, M = 20, ...)
+    W <- space_measuring_functions(X = X, M = 20, ...)
   }
   M <- ncol(W)
 
@@ -144,7 +144,7 @@
 #' @keywords internal
 .characteristic_statistic <- function(
     X, statistic='Tn', v=seq(0,1,length.out=nrow(X)),
-    W = space_measuring_vectors(M = 20, X = X, space = 'BM'), J = 50,
+    W = space_measuring_functions(M = 20, X = X, space = 'BM'), J = 50,
     location = FALSE, all.stats=FALSE){
 
   n <- ncol(X)

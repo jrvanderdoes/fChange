@@ -1,28 +1,33 @@
 #' Change Point Confidence Intervals
 #'
+#' Compute confidence intervals for the data based on some changes. The current
+#'  version is tuned to mean changes.
+#'
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
 #' @param changes Numeric vector for detected change points.
 #' @param K Function for the Kernel. Default is bartlett_kernel.
-#' @param h Numeric for bandwidth in computation of long run variance.
+#' @param h Numeric for bandwidth in computation of long run variance. The default
+#'  is \eqn{2N^{1/5}}.
 #' @param weighting Weighting for the interval computation, value in \[0,1\].
 #'  Default is 0.5.
 #' @param M Numeric for the number of Brownian motion simulations in computation
 #'  of the confidence interval. Default is 1000.
-#' @param alpha Numeric for the significance level, in \[0,1\]. Default is 0.05.
-#' @param method String to indicate the method for computing the confidence
-#'  interval. The options are 'distribution' and 'simulation'. Default is 'distribution'.
+#' @param alpha Numeric for the significance level, in \[0,1\]. Default is 0.1.
+#' @param method String to indicate the method for computing the percentiles used
+#'  in the confidence intervals. The options are 'distribution' and 'simulation'.
+#'  Default is 'distribution'.
 #'
 #' @references Horvath, L., & Rice, G. (2024). Change Point Analysis for Time
-#'  Series (First edition.). Springer. \url{https://doi.org/10.1007/978-3-031-51609-2}
+#'  Series (First edition.). Springer.
 #'
 #' @references Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural
 #'  breaks in functional data without dimension reduction. Journal of the Royal
 #'  Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
-#'  \url{https://doi.org/10.1111/rssb.12257}
 #'
-#' @return Data.frame with the first column for the change, second for the lower
-#'  confidence interval, and the third for the upper confidence interval.
+#' @return Data.frame with the first column for the changes, second for the lower
+#'  bounds of confidence intervals, and the third for the upper bounds of
+#'  confidence intervals.
 #' @export
 #'
 #' @examples
@@ -45,11 +50,9 @@
 #'            generate_brownian_motion(150,v=seq(0,1,0.05))$data-0.05)
 #' confidence_interval(X,c(200,300))
 #'
-#' # set.seed(12345)
-#' # bs <- binary_segmentation(electricity,statistic = 'Tn',method = 'Boot')
-#' confidence_interval(X = electricity, changes = c(66, 144, 204, 243, 305),alpha = 0.1)
+#' confidence_interval(X = electricity, changes = c(64, 120),alpha = 0.1)
 confidence_interval <- function(X, changes, K=bartlett_kernel,
-                                h=3, weighting=0.5, M=5000,
+                                h=2*ncol(X)^(1/5), weighting=0.5, M=5000,
                                 alpha=0.1, method='distribution'){
   ## Verify Inputs
   method <- .verify_input(method, c('distribution','simulation'))
@@ -64,6 +67,7 @@ confidence_interval <- function(X, changes, K=bartlett_kernel,
   if(length(changes)==0){
     stop('Must specify at least one change in 1, 2, ..., N in parameter changes.', call. = FALSE)
   }
+  if(h<0) stop('The parameter h cannot be negative.',call. = FALSE)
   changes <- changes[order(changes)]
   X <- dfts(X)
 

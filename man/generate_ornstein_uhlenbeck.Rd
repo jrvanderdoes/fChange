@@ -4,21 +4,24 @@
 \alias{generate_ornstein_uhlenbeck}
 \title{Generate Data via Ornstein-Uhlenbeck Process}
 \usage{
-generate_ornstein_uhlenbeck(N, resolution, rho = 0)
+generate_ornstein_uhlenbeck(N, v, rho = 0)
 }
 \arguments{
-\item{N}{Numeric for data length}
+\item{N}{Numeric for the number of observations.}
 
-\item{resolution}{Numeric for data resolution or specific observed fparam}
+\item{v}{Numeric for resolution of data or a vector specifying the
+observation points.}
 
-\item{rho}{Numeric for amount of dependence}
+\item{rho}{Numeric which indicates the dependence on the previous
+curve.}
 }
 \value{
-dfts object of generated OU data
+A dfts object for the generated data.
 }
 \description{
-Generate Data via Ornstein-Uhlenbeck Process
+Generate autoregressive process with errors according the Ornstein-Uhlenbeck
+process.
 }
 \examples{
-generate_ornstein_uhlenbeck(N=100,resolution=20)
+generate_ornstein_uhlenbeck(N=100,v=20)
 }

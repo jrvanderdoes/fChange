@@ -2,7 +2,7 @@
 % Please edit documentation in R/imputation.R
 \name{impute}
 \alias{impute}
-\title{Imputation}
+\title{Functional Imputatio}
 \usage{
 impute(
   X,
@@ -17,25 +17,31 @@ format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{method}{String to indicate method of imputation.
 \itemize{
-\item zero: Fill missing with 0
-\item mean_obs: Fill missing with mean of each observation
-\item median_obs: Fill missing with median of each observation
-\item mean_data: Fill missing with mean at time through all data
-\item median_data: Fill missing with median at time through all data
-\item linear: Linearly interpolate missing data
+\item zero: Fill missing values with 0.
+\item mean_obs: Fill missing values with the mean of each observation.
+\item median_obs: Fill missing values with the median of each observation.
+\item mean_data: Fill missing values with the mean of the data at that
+particular fparam value.
+\item median_data: Fill missing values with the median of the data at that
+particular fparam value.
+\item linear: Fill missing values with linear interpolation.
+\item functional: Fill missing values with functional interpolation. This
+is done by fitting the data to basis with the package 'fda'.
 }}
 
 \item{obs_share_data}{Boolean in linear interpolation that indicates if
-data should be shared across observations. For example, is the end of
+data should be shared across observations. For example, if the end of
 observation i related to the start of observation i+1. Default is FALSE,
 which suggests independence. If true, the distance between the end and
-start of observations is taken to be the mean of the fparam.}
+start of observations is taken to be the mean average distance of points in
+fparam.}
 }
 \value{
-dfts object with interpolated missing data
+A dfts object of the data with missing values interpolated.
 }
 \description{
-Impute missing values in functional data.
+Several basic imputation methods for missing values in functional data
+formatted as dfts objects.
 }
 \examples{
 temp <- data.frame(c(NA,NA,3:9,NA),

@@ -154,7 +154,7 @@
     ## With max test-statistic on each section, take one leading to min variance
     return_data[nrow(return_data)+1, ] <- return_data_tmp[which.min(return_data_tmp$Var), ]
 
-    if(sum(test_stats)==0) break
+    if(sum(test_stats,na.rm = TRUE)==0) break
   }
 
 
@@ -415,25 +415,40 @@
     }
   }else if(method=='projdistribution'){
 
-    pca_X <- pca(dfts(X), TVE=TVE)
-    d <- length(pca_X$sdev)
+    X_pca <- pca(dfts(X), TVE=TVE)
+    n <- ncol(X)
+    d <- length(X_pca$sdev)
 
     kappa <- matrix(nrow=d, ncol=n-1)
+
+    # Params for loop
+    t_vals <- seq(0, 1, length.out=n )
+    ws <- .w(t_vals)
+    ks <- 1:(n-1)
+    weights <- ((ks * (n - ks)) / n^2)^weighting * ((ks * (n - ks)) / n)
+
     for(i in 1:d){
-      for (k in 1:(n - 1)) {
-        kappa[i,k] <- ((k * (n - k)) / n^2)^weighting * ((k * (n - k)) / n) *
-          stats::integrate(
-            function(t, Y, k) {
-              abs(.phi_k(Y, t, k) - .phi_k0(Y, t, k))^2 * .w(t)
-            },
-            lower = 0, upper = 1, Y = pca_X$x[,i], k = k
-          )[[1]]
-      }
+      Y <- X_pca$x[,i]
+
+      dat <- exp(complex(real = 0, imaginary = 1) * t_vals %*% t(Y) )
+
+      ## This commented code is a slow version of below
+      # internals <- sapply(ks, function(k, dat, ws){
+      #   abs(rowMeans(dat[,1:k,drop=FALSE]) - rowMeans(dat[,(k+1):n,drop=FALSE]) )^2 * ws
+      # },dat=dat,ws=ws)
+
+      cmean <- t(apply(dat,MARGIN = 1,cumsum)) /
+        matrix(1:ncol(dat),nrow=length(t_vals),ncol=n,byrow = T)
+      cmean1 <- t(apply(dat[,n:2,drop=FALSE],MARGIN = 1,cumsum))[,(n-1):1] /
+        matrix((n-1):1,nrow=length(t_vals),ncol=n-1,byrow = T)
+      internals <- abs(cmean[,-n] - cmean1)^2 * ws
+
+      kappa[i,] <- weights * dot_integrate_col(internals)
     }
-    if(d > 1){
-      stats <-  diag( 1/n * ( t(kappa) %*% diag(1/pca_X$sdev^2) %*% kappa ) )
+    if(d>1){
+      stats <-  diag( 1/n * ( t(kappa) %*% diag(1/X_pca$sdev^2) %*% kappa ) )
     }else{
-      stats <-  diag( 1/n * ( t(kappa) %*% (1/pca_X$sdev^2) %*% kappa ) )
+      stats <-  diag( 1/n * ( t(kappa) %*% (1/X_pca$sdev^2) %*% kappa ) )
     }
 
     stats <- c(stats,0)

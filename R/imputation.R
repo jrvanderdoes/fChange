@@ -1,25 +1,31 @@
-#' Imputation
+#' Functional Imputatio
 #'
-#' Impute missing values in functional data.
+#' Several basic imputation methods for missing values in functional data
+#'  formatted as dfts objects.
 #'
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
 #' @param method String to indicate method of imputation.
 #'  \itemize{
-#'    \item zero: Fill missing with 0
-#'    \item mean_obs: Fill missing with mean of each observation
-#'    \item median_obs: Fill missing with median of each observation
-#'    \item mean_data: Fill missing with mean at time through all data
-#'    \item median_data: Fill missing with median at time through all data
-#'    \item linear: Linearly interpolate missing data
+#'    \item zero: Fill missing values with 0.
+#'    \item mean_obs: Fill missing values with the mean of each observation.
+#'    \item median_obs: Fill missing values with the median of each observation.
+#'    \item mean_data: Fill missing values with the mean of the data at that
+#'      particular fparam value.
+#'    \item median_data: Fill missing values with the median of the data at that
+#'      particular fparam value.
+#'    \item linear: Fill missing values with linear interpolation.
+#'    \item functional: Fill missing values with functional interpolation. This
+#'      is done by fitting the data to basis with the package 'fda'.
 #'  }
 #' @param obs_share_data Boolean in linear interpolation that indicates if
-#'  data should be shared across observations. For example, is the end of
+#'  data should be shared across observations. For example, if the end of
 #'  observation i related to the start of observation i+1. Default is FALSE,
 #'  which suggests independence. If true, the distance between the end and
-#'  start of observations is taken to be the mean of the fparam.
+#'  start of observations is taken to be the mean average distance of points in
+#'  fparam.
 #'
-#' @return dfts object with interpolated missing data
+#' @return A dfts object of the data with missing values interpolated.
 #' @export
 #'
 #' @examples
@@ -79,7 +85,7 @@ impute <- function(X,
          },
          functional={
            if(!requireNamespace('fda',quietly = TRUE))
-             stop('Functional not possible without fda package. Install and re-run code', call. = FALSE)
+             stop('Functional not possible without \'fda\' package. Install and re-run code', call. = FALSE)
 
            na_row <- rowSums(is.na(X$data))
            data_tmp <- stats::na.omit(X$data)

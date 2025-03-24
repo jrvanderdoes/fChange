@@ -56,8 +56,49 @@ test_that("Check [ or [<-", {
   expect_equal(electricity[8,10]$data[[1]],51.3)
   expect_equal(electricity[1]$data[5], 0.5)
 
+  # All 4 indices replacement
   tmp <- dfts(matrix(1:9,3,3))
-  tmp[3,2]$data[1] <- 11
-  expect_equal(tmp[3,2]$data[1], 11)
-  expect_equal(tmp[2,3]$data[1], 8)
+  tmp[1,2] <- 1
+  expect_equal(tmp[1,2]$data[1], 1)
+  tmp[,2] <- 2
+  expect_equal(sum(tmp$data[,2]), 6)
+  tmp[1,] <- 3
+  expect_equal(sum(tmp$data[1,]), 9)
+  tmp[2:3,1:2] <- 5
+  expect_equal(sum(tmp$data[2:3,1:2]), 20)
+  tmp[1,] <- 1:3
+  expect_equal(sum(tmp$data[1,]), 6)
+  tmp[c(1,3),] <- 1
+  expect_equal(sum(tmp$data[c(1,3),]), 6)
+
+  # 3 indices replacement
+  tmp <- dfts(matrix(1:9,3,3))
+  tmp[2] <- 1
+  expect_equal(sum(tmp$data[,2]), 3)
+  tmp[2] <- 1:3
+  expect_equal(sum(tmp$data[,2]), 6)
+  tmp[c(1,3)] <- 1
+  expect_equal(sum(tmp$data[,c(1,3)]), 6)
+
+  # dfts addition
+  tmp <- dfts(matrix(1:9,3,3))
+  tmp[,2:3] <- tmp[,2:3] + 1
+  expect_equal(sum(tmp$data[,2:3]), 6+sum(4:9))
+
+  tmp <- dfts(matrix(1:9,3,3))
+  tmp[1,] <- tmp[1,] + 1
+  expect_equal(sum(tmp$data[1,]), 3+ sum(c(1,4,7)))
+
+  tmp <- dfts(matrix(1:9,3,3))
+  tmp[c(1,3),] <- tmp[c(1,3),] + 1
+  expect_equal(sum(tmp$data[c(1,3),]), 2*3+sum(c(1,3,4,6,7,9)))
+
+  tmp <- dfts(matrix(1:9,3,3))
+  tmp[3] <- tmp[3] + 1
+  expect_equal(sum(tmp$data[,3]), 3+sum(c(7,8,9)))
+
+  tmp <- dfts(matrix(1:9,3,3))
+  tmp[c(1,3)] <- tmp[c(1,3)] + 1
+  expect_equal(sum(tmp$data[,c(1,3)]), 2*3+sum(c(1:3,7:9)))
+
 })

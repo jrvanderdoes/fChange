@@ -34,7 +34,7 @@
   list('pvalue' = sum(stat <= simulations) / M,
        'location' = location,
        'statistic' = stat,
-       'simulations'=simulations)
+       'simulations'=as.vector(simulations))
 }
 
 #' Compute Test Statistic for PCA Distribution Change
@@ -71,7 +71,7 @@
 
     cmean <- t(apply(dat,MARGIN = 1,cumsum)) /
       matrix(1:ncol(dat),nrow=length(t_vals),ncol=n,byrow = T)
-    cmean1 <- t(apply(dat[,n:2],MARGIN = 1,cumsum))[,(n-1):1] /
+    cmean1 <- t(apply(dat[,n:2,drop=FALSE],MARGIN = 1,cumsum))[,(n-1):1] /
       matrix((n-1):1,nrow=length(t_vals),ncol=n-1,byrow = T)
     internals <- abs(cmean[,-n] - cmean1)^2 * ws
 

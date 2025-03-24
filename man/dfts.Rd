@@ -13,9 +13,9 @@ as.dfts(X)
 is.dfts(X)
 }
 \arguments{
-\item{X}{Data to convert into dfts object. Options include: data.frame,
-matrix, array, fda::fd, fda.usc::fdata, rainbow::fts (used in ftsa),
-rainbow::fds (used in ftsa), funData::funData, and fChange::dfts. For a
+\item{X}{Data to convert into dfts object. Options include: \link{data.frame},
+\link{matrix}, \link{array}, \link[fda:fd]{fda::fd}, \link[fda.usc:fdata]{fda.usc::fdata}, \link[rainbow:fds]{rainbow::fts} (used in ftsa),
+\link[rainbow:fds]{rainbow::fds} (used in ftsa), \link[funData:funData-class]{funData::funData}, and \link{dfts}. For a
 matrix, each column is a unique observation, at the rows are the observed
 intra-observation (i.e. resolution) points.}
 
@@ -25,11 +25,11 @@ input variable.}
 \item{labels}{Labels for the observations. Defaults to the column names or
 names inside of the object X.}
 
-\item{fparam}{Vector of numerics indicating the points for each
+\item{fparam}{Vector of numerics indicating the points of evaluation for each
 observation. Defaults to even spacing on [0,1], or those included in the
 object. These may be unevenly spaced.}
 
-\item{inc.warnings}{Boolean on if warnings should be given. Defaults to TRUE,}
+\item{inc.warnings}{Boolean on if warnings should be given. Defaults to TRUE.}
 }
 \value{
 dfts / as.dfts: dfts object
@@ -37,13 +37,14 @@ dfts / as.dfts: dfts object
 is.dfts: Boolean indicating if \code{x} is a dfts object or not
 }
 \description{
-Define data as, check data if, and convert data to dfts object. The data
-may be from another popular implementation.
+The discrete functional time series (dfts) object is the main object in
+fChange. It stores functional data for use in functions throughout the package.
+Common functions have been extended to dfts. Details of the storage is best
+left to individual parameters descriptions and exploring examples.
 }
 \examples{
 bm <- dfts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
 
-# Electricity
 result <- dfts(electricity)
 result <- as.dfts(electricity)
 result <- is.dfts(electricity)

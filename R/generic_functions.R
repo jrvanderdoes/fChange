@@ -1,51 +1,43 @@
 #' Generic Centering of Data
 #'
-#' @param object Object for computation of centering
+#' Center data by removing the mean or median. Defining changes allow for
+#'  regional centering.
+#'
+#' @param object Object for computation of centering.
 #' @param changes Change points for centering individual sections.
 #' @param type String of \code{mean} or \code{median} for method of centering.
-#' @param ... Unused
+#' @param ... Parameters that may be fed into other versions of centering.
 #'
 #' @name center
 #'
-#' @return Centered data of the same format as the given data
+#' @return Centered data of the same format as the given data.
 #' @export
 #'
 #' @examples
 #' center(1:10)
 NULL
 
-#' Generic pca of Data
+#' Generic Function for Principal Component Analysis
 #'
-#'  Build on \code{prcomp}.
+#' This is a generic function to call PCA on various objects. The default method
+#'  uses [stats::prcomp()].
 #'
-#' @param object Object for computation of principle components analysis
-#' @param ... Additional parameters to function based on data
+#'
+#' @param object Object for computation of principle components analysis.
+#' @param TVE Numeric in \[0,1\] for the total variance explained, this determines
+#'  the number of components and can be used for dimension reduction.
+#' @param ... Additional parameters to extensions based on data. Often this is
+#'  additional information for \code{prcomp}.
+#'
+#' @return Principal component data.
+#' @export
 #'
 #' @name pca
 #'
-#' @return PCA data
-#' @export
 #'
 #' @examples
 #' pca(1:10)
 NULL
-
-#' Generic sd/var of Data
-#'
-#' @param object Object for computation of standard deviation or variance of
-#'  a given data set.
-#' @param ... Additional parameters to function based on data
-#'
-#' @name sd
-#'
-#' @return Numeric(s) to explain the standard deviation / variance
-#' @export
-#'
-#' @examples
-#' sd(1:10)
-#' var(1:10)
-NULL
-
 
 #############################################
 
@@ -139,15 +131,7 @@ center.dfts <- function(object, changes=NULL, type='mean', ...) {
 
 
 
-#' Generic function for PCA
-#'
-#' @param object Data to compute principal component analysis on
-#' @param TVE Numeric in \[0,1\] for the total variance explained. Can use this to
-#'  select only the required components.
-#' @param ... Additional information for \code{prcomp}.
-#'
-#' @return Principal component data
-#'
+#' @rdname pca
 #' @export
 pca <- function(object, TVE = 1,...) UseMethod("pca")
 #' @rdname pca
@@ -197,21 +181,35 @@ pca.dfts <- function(object, TVE = 1, ...){
 }
 
 
-#' Generic Variance Standard Deviation
+
+
+#' Generic Function for Variance and Standard Deviation Computation
 #'
-#' @param object Data to compute on
-#' @param ... Additional parameters based on the data
+#' Generic function to compute the variance and standard deviations. The default
+#'  uses [stats::var()] and [stats::sd()].
 #'
-#' @return Standard Deviation/Variance
+#' @param object Object for computation of standard deviation or variance of
+#'  the given data set.
+#' @param ... Additional parameters for the particular extensions.
+#'
+#' @name sdvar
+#'
+#' @return Numeric(s) to explain the standard deviation / variance
 #' @export
+#'
+#' @seealso [stats::sd()], [stats::var()]
+#'
+#' @examples
+#' sd(1:10)
+#' var(1:10)
 sd <- function(object, ...) UseMethod("sd")
-#' @rdname sd
+#' @rdname sdvar
 #' @export
 sd.default <- function(object, ...) stats::sd(object, ...)
 
-#' @rdname sd
-#' @param type Character to specify if an operator ('op') or pointwise ('pw')
-#'  calculation is desired
+#' @rdname sdvar
+#' @param type String to specify if an operator ('op') or pointwise ('pw')
+#'  calculation is desired on the functional data.
 #'
 #' @export
 #'
@@ -229,15 +227,15 @@ sd.dfts <- function(object, type='pointwise', ...) {
 }
 
 
-#' @rdname sd
+#' @rdname sdvar
 #' @export
 var <- function(object, ...) UseMethod("var")
-#' @rdname sd
+#' @rdname sdvar
 #' @export
 var.default <- function(object, ...) stats::var(object, ...)
 
 
-#' @rdname sd
+#' @rdname sdvar
 #'
 #' @export
 #'
@@ -258,10 +256,7 @@ var.dfts <- function(object, type=c('operator','pointwise'), ...) {
 }
 
 
-#' Cumsum for dfts object
-#'
-#' @param x A dfts object or data which can be automatically converted to that
-#'  format. See [dfts()].
+#' @name dfts_group
 #'
 #' @return dfts object with data as cumsum
 #' @export

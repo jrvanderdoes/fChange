@@ -4,24 +4,20 @@
 \alias{generate_brownian_bridge}
 \title{Generate a Brownian Bridge Process}
 \usage{
-generate_brownian_bridge(
-  N,
-  v = seq(from = 0, to = 1, length.out = 100),
-  sd = 1
-)
+generate_brownian_bridge(N, v = 30, sd = 1)
 }
 \arguments{
 \item{N}{Numeric. The number of observations for the generated data.}
 
 \item{v}{Numeric (vector). Discretization points of the curves.This can be
 the evaluated points or the number of evenly spaced points on [0,1].
-By default it is evenly spaced on [0,1] with 20 points.}
+By default it is evenly spaced on [0,1] with 30 points.}
 
 \item{sd}{Numeric. Standard deviation of the Brownian Motion process.
 The default is \code{1}.}
 }
 \value{
-Functional time series (dfts) object
+Functional time series (dfts) object.
 }
 \description{
 Generate a functional time series from an iid Brownian Bridge process.

@@ -4,27 +4,28 @@
 \alias{generate_far1}
 \title{Generate FAR(1) Data}
 \usage{
-generate_far1(N, resolution, sd = 1, dependence = 1/2, dropFirst = TRUE)
+generate_far1(N, resolution, sd = 1, dependence = 1/2, drop_first = FALSE)
 }
 \arguments{
-\item{N}{Numeric for the number of observations}
+\item{N}{Numeric for the number of observations.}
 
 \item{resolution}{Numeric for resolution of data or a vector specifying the
-observation points}
+observation points.}
 
-\item{sd}{Numeric for standard deviation with Brownian Motion}
+\item{sd}{Numeric for standard deviation with Brownian motion.}
 
 \item{dependence}{Numeric which indicates the dependence on the previous
 curve.}
 
-\item{dropFirst}{Booolean if first values should be dropped so the data varies
-at the first rather than starting at 0 (given that is the observed first point)}
+\item{drop_first}{Booolean if first values should be dropped so the data varies
+at the first rather than starting at 0 (given that is the observed first point).
+Note this will affect the resolution observed.}
 }
 \value{
-dfts object of the data
+dfts object of the data.
 }
 \description{
-Function to generate date according to FAR(1) process.
+Function to generate data according to FAR(1) process.
 }
 \examples{
 res <- generate_far1(20,10)

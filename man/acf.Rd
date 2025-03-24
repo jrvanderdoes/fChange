@@ -31,18 +31,16 @@ pacf(x, lag.max = NULL, ...)
 }
 \arguments{
 \item{x}{Object for computation of (partial) autocorrelation function
-(ACF/PACF).}
+(see \code{acf()} or \code{pacf}).}
 
 \item{lag.max}{Number of lagged covariance estimators for the time series
 that will be used to estimate the (partial) autocorrelation function.}
 
-\item{...}{Further arguments passed to the \code{\link[=acf.dfts]{acf.dfts()}}
-function.}
+\item{...}{Further arguments passed to the \code{.plot_FACF} function.}
 
-\item{alpha}{A value between 0 and 1 that indicates
-the confidence interval for the i.i.d. bounds
-of the partial autocorrelation function. By default
-\code{ci = 0.95}.}
+\item{alpha}{A value between 0 and 1 that indicates significant level for
+the confidence interval for the i.i.d. bounds of the (partial) autocorrelation
+function. By default \code{alpha = 0.05}.}
 
 \item{method}{Character specifying the method to be used when estimating the
 distribution under the hypothesis of functional white noise.
@@ -56,34 +54,23 @@ By default, \code{method = "Welch"}.}
 
 \item{WWN}{Logical. If \code{TRUE}, WWN bounds are also computed}
 
-\item{figure}{Logical. If \code{TRUE}, plots the
-estimated partial autocorrelation function with the
-specified i.i.d. bound.}
+\item{figure}{Logical. If \code{TRUE}, plots the estimated
+function with the specified bounds.}
 
-\item{n_pcs}{Number of principal components
-that will be used to fit the ARH(p) models.}
+\item{n_pcs}{Number of principal components that will be used to fit the
+ARH(p) models.}
 }
 \value{
-ACF or PACF values and plots
+List with ACF or PACF values and plots
 
-Return a list with:
 \itemize{
+\item \code{acfs/pacfs}: Autocorrelation values for
+each lag of the functional time series.
 \item \code{SWN_bound}: The upper prediction
 bound for the i.i.d. distribution under strong white noise assumption.
 \item \code{WWN_bound}: The upper prediction
 bound for the i.i.d. distribution under weak white noise assumption.
-\item \code{acfs}: Autocorrelation values for
-each lag of the functional time series.
 \item \code{plot}: Plot of autocorrelation values for
-each lag of the functional time series.
-}
-
-Return a list with:
-\itemize{
-\item \code{Blueline}: The upper prediction
-bound for the i.i.d. distribution.
-\item \code{rho}: Partial autocorrelation
-coefficients for
 each lag of the functional time series.
 }
 }
@@ -105,26 +92,19 @@ Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
 \emph{Functional time series model identification and diagnosis by
 means of auto- and partial autocorrelation analysis.}
 Computational Statistics & Data Analysis, 155, 107108.
-\url{https://doi.org/10.1016/j.csda.2020.107108}
 
 Mestre, G., Portela, J., Munoz San Roque, A., Alonso, E. (2020).
 \emph{Forecasting hourly supply curves in the Italian Day-Ahead
 electricity market with a double-seasonal SARMAHX model.}
 International Journal of Electrical Power & Energy Systems,
-121, 106083. \url{https://doi.org/10.1016/j.ijepes.2020.106083}
+121, 106083.
 
 Kokoszka, P., Rice, G., Shang, H.L. (2017).
 \emph{Inference for the autocovariance of a functional
 time series under conditional heteroscedasticity}
 Journal of Multivariate Analysis,
-162, 32--50. \url{https://doi.org/10.1016/j.jmva.2017.08.004}
-
-Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
-\emph{Functional time series model identification and diagnosis by
-means of auto- and partial autocorrelation analysis.}
-Computational Statistics & Data Analysis, 155, 107108.
-\url{https://doi.org/10.1016/j.csda.2020.107108}
+162, 32--50.
 }
 \seealso{
-\code{\link[stats:acf]{stats::acf()}}, \code{\link[=acf.dfts]{acf.dfts()}}
+\code{\link[stats:acf]{stats::acf()}}
 }

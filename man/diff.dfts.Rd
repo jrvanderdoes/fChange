@@ -14,13 +14,19 @@ format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{differences}{An integer indicating the order of the difference.}
 
-\item{...}{Further arguments to be passed to or from methods.}
+\item{...}{Further arguments to be passed to methods.}
 }
 \value{
-dfts object with differenced values
+A dfts object with the differenced values.
 }
 \description{
-Difference the functional data at some lag / to some degree.
+Difference the functional data at some lag and iteration. For the
+\eqn{\ell}'th difference at lag \eqn{m}, the differenced series is
+defined as
+\eqn{
+   Y_i(t) = (1-B^m)^{\ell} X_i(t)
+ }
+where \eqn{B} is the backshift operator.
 }
 \examples{
 result <- diff(electricity, lag=1)
