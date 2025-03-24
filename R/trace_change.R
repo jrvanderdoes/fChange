@@ -80,10 +80,10 @@
   # tr_before <- sum(data1_pca$sdev)
   # tr_after <- sum(data2_pca$sdev)
   list('pvalue' = p,
-       'location' = k_star,
-       'statistic' = Sn,
-       'simulations' = Values
-       )
+       'location' = k_star)#,
+       # 'statistic' = Sn,
+       # 'simulations' = Values
+       # )
 }
 
 

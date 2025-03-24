@@ -110,9 +110,9 @@
   }
 
   list('pvalue' = sum(stat <= simulations) / M,
-       'location' = location,
-       'statistic' = stat,
-       'simulations'=simulations)
+       'location' = location)#,
+       # 'statistic' = stat,
+       # 'simulations'=simulations)
 }
 
 

@@ -57,15 +57,12 @@
 #'  \enumerate{
 #'    \item pvalue: p-value for detection of a change point.
 #'    \item location: location of the most likely change.
-#'    \item statistic: Value of the test statistic.
-#'    \item simulations: Values of the simulated test statistics.
-#'    \item extra: Additional details dependent on method.
 #'  }
 #'  When type is elbow:
 #'  \enumerate{
 #'    \item information: data.frame with the information on each change and the
 #'      decrease in variability.
-#'    \item plots: list of plots showing the varibility decrease or improvement
+#'    \item plots: list of plots showing the variability decrease or improvement
 #'    \item suggestion: list with plot and algorithmic change suggestion. The
 #'      suggested changes are also returned.
 #'  }

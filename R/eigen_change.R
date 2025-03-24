@@ -164,9 +164,9 @@
   }
 
   list('pvalue' = p,
-       'location' = k_star,
-       'statistic' = Sn,
-       'simulations' = Values)
+       'location' = k_star)#,
+       # 'statistic' = Sn,
+       # 'simulations' = Values)
        # eval_before = before,
        # eval_after = after)
 }

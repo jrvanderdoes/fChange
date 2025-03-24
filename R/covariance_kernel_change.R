@@ -48,9 +48,9 @@
 
   return(list(
     'pvalue' = sum(stat <= simulations) / length(simulations),
-    'location' = location,
-    'statistic' = stat,
-    'simulations' = simulations
+    'location' = location#,
+    # 'statistic' = stat,
+    # 'simulations' = simulations
   ))
   # if (stat_d0[[1]] > cv_d0[2]) {
   #   return(stat_d0[[2]])

@@ -115,14 +115,14 @@
   ## Setup and Return Data
   return_value <- list(
     "pvalue" = sum(stat <= simulations) / nSims,
-    'location' = location,
-    "statistic" = stat,
-    "simulations" = simulations
+    'location' = location#,
+    # "statistic" = stat,
+    # "simulations" = simulations
   )
-  if(critical=='welch') {
-    return_value[['critical']] <- val_cutoff
-    return_value[['alpha']] <- alpha
-  }
+  # if(critical=='welch') {
+  #   return_value[['critical']] <- val_cutoff
+  #   return_value[['alpha']] <- alpha
+  # }
 
   return_value
 }

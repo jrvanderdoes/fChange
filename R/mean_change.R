@@ -66,9 +66,10 @@
   p <- sum(stat <= values_sim) / M
 
 
-  list('pvalue' = p, 'location' = k.star,
+  list('pvalue' = p,
+       'location' = k.star)#,
        # 'change_fun' = mean(data$data[,1:k.star])-mean(data$data[,(k.star+1):n]),
-       'statistic' = stat, 'simulations' = values_sim)
+       # 'statistic' = stat, 'simulations' = values_sim)
 }
 
 

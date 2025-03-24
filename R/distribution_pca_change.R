@@ -32,9 +32,9 @@
   }
 
   list('pvalue' = sum(stat <= simulations) / M,
-       'location' = location,
-       'statistic' = stat,
-       'simulations'=as.vector(simulations))
+       'location' = location)#,
+       # 'statistic' = stat,
+       # 'simulations'=as.vector(simulations))
 }
 
 #' Compute Test Statistic for PCA Distribution Change
