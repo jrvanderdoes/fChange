@@ -7,19 +7,22 @@
 \method{quantile}{dfts}(x, probs = seq(0, 1, 0.25), ...)
 }
 \arguments{
-\item{x}{A dfts object}
+\item{x}{A dfts object. See \code{\link[=dfts]{dfts()}}.}
 
-\item{probs}{Numerics in [0,1] indicating the probabilities of interest}
+\item{probs}{Numerics in [0,1] indicating the probabilities of interest.}
 
-\item{...}{Additional parameters to pass into quantile function}
+\item{...}{Additional parameters to pass into \code{\link[stats:quantile]{stats::quantile()}} function.}
 }
 \value{
-Matrix with columns for each requested quantile
+Matrix with columns for each requested quantile computed pointwise.
 }
 \description{
-Obtain the pointwise quantile information of dfts objects
+Obtain the pointwise quantile information of functional data.
 }
 \examples{
 result <- quantile(electricity)
 result1 <- quantile(electricity,probs = 0.95)
+}
+\seealso{
+\code{\link[stats:quantile]{stats::quantile()}}
 }

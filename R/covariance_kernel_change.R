@@ -20,15 +20,12 @@
 #' @references Horvath, L., Rice, G., & Zhao, Y. (2022). Change point analysis
 #'  of covariance functions: A weighted cumulative sum approach. Journal of
 #'  Multivariate Analysis, 189, 104877-.
-#'  \url{https://doi.org/10.1016/j.jmva.2021.104877}
-#'
-#'  https://github.com/yzhao7322/CovFun_Change
 #'
 #' @examples
 #' #result <- .change_covariance_kernel(electricity$data[,1:18], len=20)
 .change_covariance_kernel <- function(X, statistic, critical,
                                       kappa = 1 / 4, len = 30,
-                                      blocksize=1, M=1000, perm_type='separate',
+                                      blocksize=1, M=1000, resample_blocks='separate',
                                       replace=TRUE, K=bartlett_kernel) {
 
   if(statistic=='Tn'){
@@ -39,9 +36,9 @@
     if(critical == 'simulation'){
       simulations <- .covariance_simulations(xf = X$data, len = len, kappa = kappa,
                                              M=M, statistic=statistic, K=K)
-    } else if(critical == 'permutation'){
+    } else if(critical == 'resample'){
       simulations <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
-                           type = perm_type, replace = replace,
+                           type = resample_blocks, replace = replace,
                            fn = .covariance_statistic,
                            statistic=statistic, kappa = kappa)
     }
@@ -51,9 +48,9 @@
 
   return(list(
     'pvalue' = sum(stat <= simulations) / length(simulations),
-    'location' = location,
-    'statistic' = stat,
-    'simulations' = simulations
+    'location' = location#,
+    # 'statistic' = stat,
+    # 'simulations' = simulations
   ))
   # if (stat_d0[[1]] > cv_d0[2]) {
   #   return(stat_d0[[2]])

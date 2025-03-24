@@ -2,7 +2,7 @@
 % Please edit documentation in R/pca_examination.R
 \name{projection_model}
 \alias{projection_model}
-\title{Forecast using principal component analysis}
+\title{Projection-based functional data model}
 \usage{
 projection_model(
   X,
@@ -19,35 +19,40 @@ projection_model(
 \item{X}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{TVE}{Numeric for the total variance explained to select number
-of components in PCA}
+\item{TVE}{Numeric in [0,1] for the total variance explained to select
+number of PCA components to use to model the data.}
 
 \item{model}{String to indicate method to model components, either
 "ets" or "arima".}
 
-\item{n.ahead}{Number of observations to forecast}
+\item{n.ahead}{Number of observations to forecast.}
 
-\item{alpha}{Significance in [0,1] for intervals when forecasting}
+\item{alpha}{Significance in [0,1] for intervals when forecasting.}
 
 \item{check.cp}{Boolean which indicates if the errors should be checked for
-change points to change forecasts and plots}
+change points to change forecasts and plots.}
 
 \item{frequency}{Numeric for seasonal frequency when component is made a ts
-object}
+object for the models.}
 
-\item{...}{Additional information to pass into pca, change (if check.cp=TRUE),
-and plot}
+\item{...}{Additional information to pass into pca, change (if
+\code{check.cp=TRUE}), and plot.}
 }
 \value{
 List with the following elements:
 \itemize{
-\item fit: dfts object for fit
-\item errors: dfts object for errors from fit
-\item parameters: list with fit parameters like pcs, TVE, and model
+\item fit: dfts object for fit.
+\item forecast_plot: plot of the data with any forecasted values.
+\item residuals: dfts object for residuals from the fit.
+\item changes: vector of any changes when using \code{detect.cp}.
+\item component_models: modeled PCs from the data.
+\item component_true: true data constucted via the PCs.
+\item parameters: list with fit parameters like pcs, TVE, model, and n.ahead.
 }
 }
 \description{
-Forecast using principal component analysis
+Model and forecast functional data using a Hyndman and Ullah projection-based
+model.
 }
 \examples{
 result <- projection_model(dfts(electricity$data[,50:100]),

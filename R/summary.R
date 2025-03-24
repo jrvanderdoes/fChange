@@ -1,21 +1,31 @@
 #' Summary for dfts Object
 #'
+#' General summary function to view data overview. Several plots and test
+#'  statistics are returned to give a general view of the data. More details
+#'  can be found with more specialized functions.
+#'
 #' @param object A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param changes changes, if there are any. Default is NULL.
+#' @param changes Vector of change locations, if there are any. Default is NULL.
 #' @param lag.max Max lags to consider for ACF. Default is 20.
 #' @param d.max Max number of dimensions for QQ-plot.
 #' @param demean Boolean if data should be demeaned based on changes and create
 #'  plots based on these residuals.
-#' @param ... Unused.
+#' @param ... Data to pass into underlying functions like the KPSS, portmanteau,
+#'  and stationary tests. In general it is recommended to not use this and
+#'  instead apply the specialized functions directly.
 #'
-#' @return Plot (ggplot) summarizing the data
+#' @return List with the elements:
+#'  \enumerate{
+#'    \item summary_data: summary results for the data.
+#'    \item summary_plot: summary plot for the data.
+#'  }
 #' @export
 #'
+#' @seealso [base::summary()]
+#'
 #' @examples
-#' res <- summary(dfts(electricity$data[,1:20]), lag.max=2)
-#' # res1 <- summary(dfts(electricity$data[,1:20]), changes=c(3), lag.max=2)
-#' # summary(electricity, changes=c(50,200,300), lag.max=5, demean = TRUE)
+#' res <- summary(electricity[,1:20], lag.max=2)
 summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE, ...){
   object <- dfts(object)
 
@@ -26,7 +36,7 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
       object_tmp <- object
 
       for(d in 1:(length(changes)-1)){
-        object_tmp <- dfts(object$data[,(changes[d]+1):changes[d+1]], intratime = object$intratime)
+        object_tmp <- dfts(object$data[,(changes[d]+1):changes[d+1]], fparam = object$fparam)
         object$data[,(changes[d]+1):changes[d+1]] <- object$data[,(changes[d]+1):changes[d+1]] - mean(object_tmp)
       }
 
@@ -51,10 +61,10 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
     X_cp <- dfts(object$data[,(changes[cp]+1):changes[cp+1]])
     ## WN P-values
     p_values <- rep(NA, lag.max)
-    for(h in 1:lag.max){
-      p_values[h] <- tryCatch({
+    for(h1 in 1:lag.max){
+      p_values[h1] <- tryCatch({
         # .single_lag_test(X_cp, lag = h)$pvalue
-        .multi_lag_test(X_cp, lag = h, method = 'iid')$pvalue
+        .multi_lag_test(X_cp, lag = h1, ... )$pvalue
       }, error = function(e){NA} )
     }
 
@@ -132,7 +142,7 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
 
   #####
   ## Plot Lines
-  data_lines <- cbind(data.frame('Time'=object$intratime),
+  data_lines <- cbind(data.frame('Time'=object$fparam),
                       object$data) %>%
     tidyr::pivot_longer(cols = 1+1:ncol(object$data))
 
@@ -156,7 +166,7 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
       colors_plot[changes[i]:changes[i + 1]] <- tmp_colors[i]
     }
   }
-  data_lines$color <- rep(colors_plot,times=length(object$intratime))
+  data_lines$color <- rep(colors_plot,times=length(object$fparam))
   data_lines$name <- as.numeric(data_lines$name)
 
   Time <- color <- NULL
@@ -187,12 +197,11 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
     endpoints <- as.numeric(strsplit(data_summary$Segment[1], '-')[[1]])
     data_summary[i,'kpss'] <-
       .specify_decimal(
-        kpss_test(object$data[,endpoints[1]:endpoints[2]],
-                     method='block')$pvalue,
+        kpss_test(object$data[,endpoints[1]:endpoints[2]], ...)$pvalue,
         3)
     data_summary[i,'stationarity'] <-
       .specify_decimal(
-        stationarity_test(object$data[,endpoints[1]:endpoints[2]])$pvalue,
+        stationarity_test(object$data[,endpoints[1]:endpoints[2]], ...)$pvalue,
         3)
   }
 
@@ -232,7 +241,7 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
   wn_pvalues <- rep(NA, lag.max)
   for(h in 1:lag.max){
     # wn_pvalues[h] <- .single_lag_test(object,lag = h,method = 'bootstrap')$pvalue
-    wn_pvalues[h] <- .multi_lag_test(object,lag = h)$pvalue
+    wn_pvalues[h] <- .multi_lag_test(object,lag = h, ...)$pvalue
   }
 
   plot_whitenoise <-
@@ -273,7 +282,7 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
 
   #####
   ## Plot Lines
-  data_lines <- cbind(data.frame('Time'=object$intratime),
+  data_lines <- cbind(data.frame('Time'=object$fparam),
                       object$data) %>%
     tidyr::pivot_longer(cols = 1+1:ncol(object$data))
 
@@ -303,10 +312,10 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
     data.frame('Segment'=paste0('1-',ncol(object)),
                'Observations'=ncol(object),
                'kpss'=.specify_decimal(
-                 kpss_test(object$data, method='block')$pvalue,
+                 kpss_test(object$data, ...)$pvalue,
                  3),
                'stationarity'=.specify_decimal(
-                 stationarity_test(object$data)$pvalue,
+                 stationarity_test(object$data, ...)$pvalue,
                  3),
                'Resolution'=nrow(object)
     )

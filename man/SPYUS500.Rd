@@ -7,14 +7,14 @@
 \format{
 \subsection{\code{SPY500}}{
 
-A dfts object
+A dfts object.
 }
 }
 \usage{
 SPYUS500
 }
 \description{
-Intraday prices for the S&P500 index (SPY) for 2019 to 2023. Minutely
-resolution and daily observations.
+Intraday prices for the S&P500 index (SPY) for 2019 to 2023 with holidays and
+weekends removed. Minutely resolution and daily observations.
 }
 \keyword{datasets}

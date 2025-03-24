@@ -10,30 +10,30 @@ autocovariance(X, lags = 0:1, center = TRUE)
 \item{X}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{lags}{Numeric(s) for the lags to estimate the lagged autocovariance / autocorrelation
-operators.}
+\item{lags}{Numeric(s) for the lags to estimate the lagged operator.}
 
 \item{center}{Boolean if the data should be centered. Default is true.}
 }
 \value{
 Return a list or data.frame with the lagged autocovariance function(s)
-estimated from the data. Each function is given by a \eqn{(r x r)}
+estimated from the data. Each function is given by a \eqn{(r } x \eqn{ r)}
 matrix, where \eqn{r} is the number of points observed in each curve.
 }
 \description{
 Obtain the empirical autocovariance function for the given \code{lags} of a
 functional time series, \code{X}. Given a functional time series, the sample
 autocovariance functions \eqn{\hat{C}_{h}(u,v)} are given by:
-\deqn{\hat{C}_{h}(u,v) =  \frac{1}{T} \sum_{i=1}^{T-h}(Y_{i}(u) -
-     \overline{Y}_{T}(u))(Y_{i+h}(v) - \overline{Y}_{T}(v))}
-where
-\eqn{ \overline{Y}_{T}(u) = \frac{1}{T} \sum_{i = 1}^{T} Y_{i}(t)}
-denotes the sample mean function.
+\deqn{\hat{C}_{h}(u,v) =  \frac{1}{N} \sum_{i=1}^{N-|h|}(Y_{i}(u) -
+     \overline{X}_{N}(u))(Y_{i+|h|}(v) - \overline{X}_{N}(v))}
+where \eqn{ \overline{X}_{N}(u) = \frac{1}{N} \sum_{i = 1}^{N} X_{i}(t)}
+denotes the sample mean function and \eqn{h} is the lag parameter.
 }
 \examples{
 v <- seq(0,1,length.out=20)
 lagged_autocov <- autocovariance(
   X = generate_brownian_bridge(100,v=v),
   lags = 1)
-image(x = v, y = v, z = lagged_autocov)
+}
+\seealso{
+\code{\link[=autocorrelation]{autocorrelation()}}, \code{\link[=var]{var()}}
 }

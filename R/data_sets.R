@@ -3,33 +3,30 @@
 #' The hourly electricity spot prices from Spain in 2014.
 #'
 #' @format ## `electricity`
-#' A dfts object
+#' A dfts object.
 #'
 #' @source <www.omie.es>
 "electricity"
 
 #' Australian Temperature Data
 #'
-#' A list of daily minimum temperature data from reporting stations in
-#'  Australia. Any missing data was previously, linearly, interpolated and leap
-#'  days were removed for consistency. Moreover, the data is classified by city
-#'  as only one station was observed in each city.
+#' A list of daily minimum temperature data (1859 - 2012) from reporting station
+#'  in Sydney, Australia. Any missing data was previously, linearly,
+#'  interpolated and leap days were removed for consistency.
 #'
 #' @format ## `temperature`
-#' A list with 8 elements, one for each city. Each element is a data.frame with
-#' 365 rows (one per day), and a variable number of columns related to years of
-#' collected data.
+#' A dfts object.
 #'
 #' @source <www.bom.gov.au>
 "temperature"
 
 #' S&P 500 Index Data
 #'
-#' Intraday prices for the S&P500 index (SPY) for 2019 to 2023. Minutely
-#'  resolution and daily observations.
+#' Intraday prices for the S&P500 index (SPY) for 2019 to 2023 with holidays and
+#'  weekends removed. Minutely resolution and daily observations.
 #'
 #' @format ## `SPY500`
-#' A dfts object
+#' A dfts object.
 "SPYUS500"
 
 
@@ -39,15 +36,15 @@
 #'  cancer in the United States from 1950 to 2021.
 #'
 #' @format ## `cancer`
-#' A data.frame with columns being the year and rows the age groups (5 years)
+#' A data.frame with columns being the year and rows the age groups (5 years).
 "cancer"
 
 
 #' US Yield Curves
 #'
 #' Yield curves in the US for 1 - 360 month maturity from 1990 to 2023
-#'  (removing days without information).
+#'  (removing days without information, i.e. weekends and holidays).
 #'
 #' @format ## `rates`
-#' A dfts object
+#' A dfts object.
 "rates"

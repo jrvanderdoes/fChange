@@ -7,9 +7,7 @@
 \format{
 \subsection{\code{temperature}}{
 
-A list with 8 elements, one for each city. Each element is a data.frame with
-365 rows (one per day), and a variable number of columns related to years of
-collected data.
+A dfts object.
 }
 }
 \source{
@@ -19,9 +17,8 @@ collected data.
 temperature
 }
 \description{
-A list of daily minimum temperature data from reporting stations in
-Australia. Any missing data was previously, linearly, interpolated and leap
-days were removed for consistency. Moreover, the data is classified by city
-as only one station was observed in each city.
+A list of daily minimum temperature data (1859 - 2012) from reporting station
+in Sydney, Australia. Any missing data was previously, linearly,
+interpolated and leap days were removed for consistency.
 }
 \keyword{datasets}

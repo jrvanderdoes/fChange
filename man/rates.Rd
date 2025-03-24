@@ -7,7 +7,7 @@
 \format{
 \subsection{\code{rates}}{
 
-A dfts object
+A dfts object.
 }
 }
 \usage{
@@ -15,6 +15,6 @@ rates
 }
 \description{
 Yield curves in the US for 1 - 360 month maturity from 1990 to 2023
-(removing days without information).
+(removing days without information, i.e. weekends and holidays).
 }
 \keyword{datasets}

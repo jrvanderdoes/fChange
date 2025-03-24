@@ -1,28 +1,30 @@
 #' Principal Component Exploration
 #'
+#' Computes the principal component projection and re-combined data with a myriad
+#'  of figures to understand the projection process.
+#'
+#' @inheritParams pca
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param TVE Numeric in \[0,1\]. Total variance explained to determine the
-#'  number of components to examine
-#' @param d.max Numeric. Max number of components to investigate (if TVE
-#'  suggests too many).
 #'
 #' @return List with the following elements:
 #' \itemize{
-#'  \item Figures: List with figures on all components, summaries, reconstructed
-#'    values, and residuals
-#'  \item reconstruction: Reconstructed value from pcs
-#'  \item residuals: Difference between true and reconstruction
+#'  \item figures: List with figures on all components, summaries, reconstructed
+#'    values, and residuals.
+#'  \item reconstruction: Reconstructed value from PCs.
+#'  \item residuals: Difference between true and reconstruction.
 #' }
 #' @export
 #'
+#' @seealso [pca.dfts()]
+#'
 #' @examples
-#' results <- pca_examination(electricity)
-pca_examination <- function(X, TVE=0.95, d.max = 3){
+#' results <- pca_examination(electricity, TVE=0.9)
+pca_examination <- function(X, TVE=0.95){
   X <- dfts(X)
 
   pc_data <- pca(X,TVE=TVE)
-  num_pcs <- min(length(pc_data$sdev),d.max)
+  num_pcs <- length(pc_data$sdev)
   pc_data$sdev <- pc_data$sdev[1:num_pcs,drop=FALSE]
   pc_data$rotation <- pc_data$rotation[,1:num_pcs,drop=FALSE]
   pc_data$x <- pc_data$x[,1:num_pcs,drop=FALSE]
@@ -52,7 +54,7 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
   plot_reconstruction <-
     .plot_rainbow(dfts(reconstruction)) +
     ggplot2::ggtitle(
-      paste0('Reconstruction With ', d.max,
+      paste0('Reconstruction With ', num_pcs,
              'Principal Components') ) +
     ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
 
@@ -60,11 +62,11 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
   plot_residuals <-
     .plot_rainbow(dfts(residuals)) +
     ggplot2::ggtitle(
-      paste0('Residuals from reconstruction With ', d.max,
+      paste0('Residuals from reconstruction With ', num_pcs,
              ' Principal Components') ) +
     ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
 
-  list(Figures =list(all = plots,
+  list(figures =list(all = plots,
                      summary = plots1,
                      recontruction = plot_reconstruction,
                      residuals = plot_residuals),
@@ -73,28 +75,35 @@ pca_examination <- function(X, TVE=0.95, d.max = 3){
 }
 
 
-#' Forecast using principal component analysis
+#' Projection-based functional data model
+#'
+#' Model and forecast functional data using a Hyndman and Ullah projection-based
+#'  model.
 #'
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param TVE Numeric for the total variance explained to select number
-#'  of components in PCA
+#' @param TVE Numeric in \[0,1\] for the total variance explained to select
+#'  number of PCA components to use to model the data.
 #' @param model String to indicate method to model components, either
 #'  "ets" or "arima".
-#' @param n.ahead Number of observations to forecast
-#' @param alpha Significance in \[0,1\] for intervals when forecasting
+#' @param n.ahead Number of observations to forecast.
+#' @param alpha Significance in \[0,1\] for intervals when forecasting.
 #' @param check.cp Boolean which indicates if the errors should be checked for
-#'  change points to change forecasts and plots
+#'  change points to change forecasts and plots.
 #' @param frequency Numeric for seasonal frequency when component is made a ts
-#'  object
-#' @param ... Additional information to pass into pca, change (if check.cp=TRUE),
-#'  and plot
+#'  object for the models.
+#' @param ... Additional information to pass into pca, change (if
+#'  \code{check.cp=TRUE}), and plot.
 #'
 #' @return List with the following elements:
 #' \itemize{
-#'  \item fit: dfts object for fit
-#'  \item errors: dfts object for errors from fit
-#'  \item parameters: list with fit parameters like pcs, TVE, and model
+#'  \item fit: dfts object for fit.
+#'  \item forecast_plot: plot of the data with any forecasted values.
+#'  \item residuals: dfts object for residuals from the fit.
+#'  \item changes: vector of any changes when using \code{detect.cp}.
+#'  \item component_models: modeled PCs from the data.
+#'  \item component_true: true data constucted via the PCs.
+#'  \item parameters: list with fit parameters like pcs, TVE, model, and n.ahead.
 #' }
 #' @export
 #'
@@ -146,18 +155,18 @@ projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
   errors <- X$data - fit[,1:ncol(X)]
 
   if(n.ahead>0){
-    fit_prep <- dfts(fit, name = 'Fit', intratime=X$intratime)
+    fit_prep <- dfts(fit, name = 'Fit', fparam=X$fparam)
     data_prep <- dfts(cbind(X$data,fit[,(ncol(X)+1):ncol(fit)]),
-                       name = 'Forecast', intratime=X$intratime)
+                       name = 'Forecast', fparam=X$fparam)
   }else{
-    fit_prep <- dfts(fit, labels=X$labels, name='Fit', intratime=X$intratime,)
+    fit_prep <- dfts(fit, labels=X$labels, name='Fit', fparam=X$fparam,)
     data_prep <- dfts(X$data, labels=X$labels,
-                       name = 'Forecast', intratime=X$intratime)
+                       name = 'Forecast', fparam=X$fparam)
   }
 
   # Check changes
   if(check.cp){
-    res <- change(X = dfts(errors), type='segmentation', ...)
+    res <- fchange(X = dfts(errors), type='segmentation', ...)
     if(!is.null(res)){
       changes <- res$location
       errors_use <- dfts(errors[,(max(res$location)+1):ncol(X),drop=FALSE])
@@ -190,7 +199,7 @@ projection_model <- function(X, TVE = 0.95, model=c('ets','arima'),
   list(fit = fit_prep,
        forecast_plot = plt_for,
        fit_plot = plt_for_fit,
-       errors = dfts(errors, labels=X$labels, name='Errors', intratime=X$intratime),
+       residuals = dfts(errors, labels=X$labels, name='Residuals', fparam=X$fparam),
        changes = changes,
        component_models = data_fits,
        component_true = data_reals,

@@ -1,24 +1,26 @@
-#' Compute Spacing Measuring Vectors
+#' Compute Spacing Measuring Functions
 #'
-#' This function is used to compute vectors from spaces to measure the function
-#'     data objects.
+#' This function is used to compute discretized functions, i.e. vectors, to
+#'  explore functional spaces.
 #'
-#' @param M Integer for the number of vectors to generate
-#' @param space String for the space of interest. Options are Brownian motion
-#' ('BM'), OU process ('OU'), principal components ('PC'), and a vectors in iid
-#' standard, random normals ('RN').
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
+#' @param M Integer for the number of functions to generate.
+#' @param space String for the space of interest. Options are Brownian motion
+#' ('BM'), OU process ('OU'), principal components ('PC'), and vectors in iid
+#' standard, random normals ('RN').
 #'
-#' @return Data.frame with columns of vectors describing the space. Columns are
-#'  independent vectors.
+#' @return Data.frame with columns of discretized functions describing the space.
+#'  Columns are independent functions.
 #' @export
 #'
+#' @seealso [fchange()]
+#'
 #' @examples
-#' space_measuring_vectors(M=10, space="BM", X=electricity)
-#' #space_measuring_vectors(M=10, space="OU", X=electricity)
-#' space_measuring_vectors(M=10, space="PC", X=electricity)
-space_measuring_vectors <- function(X, M=20, space='BM') {
+#' space_measuring_functions(M=10, space="BM", X=electricity)
+#' #space_measuring_functions(M=10, space="OU", X=electricity)
+#' space_measuring_functions(M=10, space="PC", X=electricity)
+space_measuring_functions <- function(X, M=20, space='BM') {
   X <- dfts(X)
 
   if (space == "BM") {

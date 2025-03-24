@@ -16,7 +16,7 @@
 #' @param test String if testing single or joint eigenvalues
 #' @param M Number of monte carlo simulations used to get the critical values.
 #' The default value is \code{M=1000}; however, simulations have shown this can
-#' be greatly reduced. Consider this when using permutation.
+#' be greatly reduced. Consider this when using resample.
 #' @param K Kernel function
 #'
 #' @noRd
@@ -52,7 +52,7 @@
 .change_eigen <- function(X, d, h=2, changes = NULL,
                           statistic = c('Tn','Mn'),
                           test = c('joint', 'individual'),
-                          critical = c('simulation','permutation'),
+                          critical = c('simulation','resample'),
                           M = 1000,
                           K=bartlett_kernel,
                           blocksize=1, type='separate', replace=TRUE){
@@ -112,7 +112,7 @@
                          }, N=N, d=d)
       }
 
-    } else if(critical=='permutation'){
+    } else if(critical=='resample'){
       Values <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
                            type = type, replace = replace, fn = .eigen_joint_statistic,
                            statistic=statistic, d=d, h=h, K=K)
@@ -144,7 +144,7 @@
           MARGIN=2, FUN = max)
       }
 
-    } else if(critical=='permutation'){
+    } else if(critical=='resample'){
       Values <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
                            type = type, replace = replace, fn = .single_eigen_statistic,
                            statistic=statistic, d=d, h=h, K=K)
@@ -164,9 +164,9 @@
   }
 
   list('pvalue' = p,
-       'location' = k_star,
-       'statistic' = Sn,
-       'simulations' = Values)
+       'location' = k_star)#,
+       # 'statistic' = Sn,
+       # 'simulations' = Values)
        # eval_before = before,
        # eval_after = after)
 }

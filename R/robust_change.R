@@ -2,11 +2,11 @@
 #'
 #' @param X A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param m Number of interations for permutation
+#' @param m Number of interations for resampling
 #' @param statistic Test statistic of interest. Either Integrated (\code{Tn}) or
 #'  maximized (\code{Mn}). Default is \code{Tn}
 #' @param statistic Threshold method of interest. Either the simulation distribution
-#'  (\code{simulation}) or permutation (\code{permutation}). Default is simulation.
+#'  (\code{simulation}) or resampling (\code{resample}). Default is simulation.
 #'
 #' @return A list with the following elements
 #' \itemize{
@@ -22,16 +22,16 @@
 #'
 #' @references Wegner, L., Wendler, M. Robust change-point detection for
 #'  functional time series based on U-statistics and dependent wild bootstrap.
-#'  Stat Papers (2024). \url{https://doi.org/10.1007/s00362-024-01577-7}
+#'  Stat Papers (2024).
 #'
 #' @examples
 #' #result <- .change_robust(dfts(electricity$data[,1:100]),m=10)
 .change_robust <- function(X, m, statistic=c('Tn','Mn'),
-                          threshold=c('simulation','permutation'),
+                          threshold=c('simulation','resample'),
                           bandwidth = NA){
   # Setup variables
   statistic <- .verify_input(statistic, c('Tn','Mn'))
-  threshold <- .verify_input(threshold, c('simulation','permutation'))
+  threshold <- .verify_input(threshold, c('simulation','resample'))
   X <- dfts(X)
 
   # Create Proper Data and Bandwidths
@@ -272,7 +272,7 @@
       }
     }
 
-  }else if(threshold=='permutation'){
+  }else if(threshold=='resample'){
     # MULTIPLIER BOOTSTRAP
     #   m x n
     U_hC <- fill_U(A_h=Re_A_h,
@@ -294,87 +294,9 @@
 
 
   list("pvalue" = sum(stat <= sims)/m,
-       "location" = location,
-       'statistic' = stat,
-       'simulations' = sims,
-       'extra' = list("bandwidth"=bw_h)
-       )
+       "location" = location)#,
+       # 'statistic' = stat,
+       # 'simulations' = sims,
+       # 'extra' = list("bandwidth"=bw_h)
+       #)
 }
-# .change_robust <- function(X, m, statistic=c('Mn','Tn'),
-#                           threshold=c('bootstrap')){
-#
-#   # Create Proper Data and Bandwidths
-#   Obs <- X$data
-#
-#   ## Get Information - Cov Matrix
-#   Obs_tilde_h <- make_Obs_tilde_h(Obs)
-#   # Obs_tilde_C <- make_Obs_tilde_C(Obs)
-#   bw_h <- adaptive_bw(Obs_tilde_h)
-#   # bw_C <- adaptive_bw(Obs_tilde_C)
-#
-#   # calculate quadratic spectral cov. matrices
-#   ker_h <- kernel(bw_h, ncol(Obs))
-#   A_h <- toeplitz(ker_h)
-#   Re_A_h <- getRealSQM(A_h)
-#   # Re_A_C <- Re_A_h
-#
-#   # # Calculate own Kernel for CUSUM, as needed
-#   # if(bw_C != bw_h){
-#   #   ker_C <- kernel(bw_C, ncol(Obs))
-#   #   A_C <- toeplitz(ker_C)
-#   #   Re_A_C <- getRealSQM(A_C)
-#   # }
-#
-#   ##########
-#   ## Compute Test Statistic And Threshold
-#   ##########
-#   # U_N(x) stacked
-#   hC_Obs <- make_hC_Obs(Obs)
-#   # find max_k U_{n,k} (missing constants)
-#   Te <- fill_T(hC_Obs, ncol(Obs), nrow(Obs))
-#
-#   if(statistic=='Tn'){
-#     stat <- dot_integrate(Te^2)
-#   }else if(statistic=='Mn'){
-#     # T_max <- apply(Te,MARGIN = 2, max)
-#     stat <- max(Te)
-#   }
-#
-#
-#   if(threshold=='bootstrap'){
-#     # MULTIPLIER BOOTSTRAP
-#     #   m x n
-#     U_hC <- fill_U(A_h=Re_A_h,
-#                    # A_C=Re_A_C,
-#                    norm=stats::rnorm(m*ncol(Obs)),
-#                    hC_Obs=hC_Obs,
-#                    m=m, n=ncol(Obs), d=nrow(Obs) )
-#
-#     # Get Sup at each Sim
-#     if(statistic=='Tn'){
-#       nn <- ncol(Obs)-1
-#       maxis <- rep(NA, m)
-#       vh <- rep(NA,nn)
-#       for(t in 1:m){
-#         for(i in 1:nn){
-#           vh[i] <- U_hC[t,i]^2;
-#         }
-#         maxis[t] <- dot_integrate(vh)
-#       }
-#     }else if(statistic=='Mn'){
-#       # find max_k U_{n,k}^(t) for t=1,...,m
-#       #   apply(U_hC,MARGIN = 1,max)
-#       maxis <- find_max(U_hC, m, ncol(Obs))[,1]
-#     }
-#
-#     pvalue <- mean(stat <= maxis)
-#   }
-#
-#
-#   list("pvalue" = pvalue,
-#        # "Cusum_pvalue" = mean(T_max[2]<=maxis[,2]) ,
-#        "bandwidth"=bw_h)#,
-#        # "Cusum_bandwidth"=bw_C)
-# }
-
-

@@ -19,19 +19,20 @@ center(object, changes = NULL, type = "mean", ...)
 \method{center}{dfts}(object, changes = NULL, type = "mean", ...)
 }
 \arguments{
-\item{object}{Object for computation of centering}
+\item{object}{Object for computation of centering.}
 
 \item{changes}{Change points for centering individual sections.}
 
 \item{type}{String of \code{mean} or \code{median} for method of centering.}
 
-\item{...}{Unused}
+\item{...}{Parameters that may be fed into other versions of centering.}
 }
 \value{
-Centered data of the same format as the given data
+Centered data of the same format as the given data.
 }
 \description{
-Generic Centering of Data
+Center data by removing the mean or median. Defining changes allow for
+regional centering.
 }
 \examples{
 center(1:10)

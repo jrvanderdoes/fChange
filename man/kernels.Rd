@@ -26,14 +26,37 @@ daniell_kernel(x)
 flat_top_kernel(x)
 }
 \arguments{
-\item{x}{A numeric value at which to evaluate kernel.
+\item{x}{Numeric value(s) at which to evaluate kernel.
 It often indicates current lag divided by window.}
 }
 \value{
-Values from a given lag in the kernel
+Values from given lag(s) in the kernel.
 }
 \description{
 There are an assortment of (vectorized) kernel functions located in the package.
+
+\emph{Truncated Kernel}: Kernel where \eqn{1, |x|\leq 1} and \eqn{0}
+otherwise. If \eqn{x=0/0} then the value \eqn{1} is given.
+
+\emph{Bartlett Kernel}: Kernel where \eqn{max(0,1-|x|), h\neq 0}. If
+\eqn{x=0/0} then the value \eqn{1} is given.
+
+\emph{Parzen Kernel}: Kernel where \eqn{1 - 6 * x^2 + 6 * |x|^3, |x|<=0.5},
+\eqn{ 2 * (1 - |x|)^3, 0.5<|x|<1}, and \eqn{0, |x|>1}. If \eqn{x=0/0} then
+the value \eqn{1} is given.
+
+\emph{Tukey-Hanning Kernel}: Kernel where \eqn{(1 + cos(\pi x) )/2, |x|<=1}
+and \eqn{0, |x|>1}. If \eqn{x=0/0} then the value \eqn{1} is given.
+
+\emph{Quadratic Spectral Kernel}: Kernel where
+\eqn{\frac{25}{12\pi^2x^2} \left(\frac{sin(6\pi x/5)}{6\pi x/5} - cos(6\pi x/5) \right)}.
+If \eqn{x=0/0} then the value \eqn{1} is given.
+
+\emph{Daniell Kernel}: Kernel where \eqn{sin(pi * x) / (pi * x)*(1 + cos(pi*x)), abs(x)<=1}.
+If \eqn{x=0/0} then the value \eqn{1} is given.
+
+\emph{Flat-Top Kernel}: Kernel where \eqn{min(1, max(1.1-|x|,0)),|x|\leq 1}.
+If \eqn{x=0/0} then the value \eqn{1} is given.
 }
 \examples{
 truncated_kernel(-20:20/15)
@@ -45,17 +68,16 @@ daniell_kernel(-20:20/15)
 flat_top_kernel(-20:20/15)
 }
 \references{
-Horvath, L., & Rice, G. (2024). Change Point Analysis for Time
-Series (1st ed. 2024.). Springer Nature Switzerland.
-\url{https://doi.org/10.1007/978-3-031-51609-2}
+Horvath, L., & Rice, G. (2024). Change point analysis for time
+series (1st ed. 2024.). Springer Nature Switzerland.
 
 L. Horvath, P. Kokoszka, G. Rice (2014) "Testing stationarity of functional
 time series", Journal of Econometrics, 179(1), 66-82.
 
 Politis, D. N. (2003). Adaptive bandwidth choice. Journal of Nonparametric
-Statistics, 15(4-5), 517-533. \url{https://doi.org/10.1080/10485250310001604659}
+Statistics, 15(4-5), 517-533.
 
-Politis, D. N. (2011). HIGHER-ORDER ACCURATE, POSITIVE SEMIDEFINITE
-ESTIMATION OF LARGE-SAMPLE COVARIANCE AND SPECTRAL DENSITY MATRICES.
-Econometric Theory, 27(4), 703-744. \url{http://www.jstor.org/stable/27975501}
+Politis, D. N. (2011). Higher-order accurate, positive semidefinite
+estimation of large-sample covariance and spectral density matrices.
+Econometric Theory, 27(4), 703-744.
 }

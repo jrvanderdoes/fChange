@@ -2,24 +2,27 @@
 % Please edit documentation in R/dfts.R
 \name{lag.dfts}
 \alias{lag.dfts}
-\title{Lag dfts}
+\title{Lag dfts objects}
 \usage{
 \method{lag}{dfts}(x, k = 1, ...)
 }
 \arguments{
-\item{x}{A dfts object or data which can be automatically converted to that
-format. See \code{\link[=dfts]{dfts()}}.}
+\item{x}{A dfts object. See \code{\link[=dfts]{dfts()}}.}
 
-\item{k}{integer indicating the number of lags for the data}
+\item{k}{Integer for the number of lags (in units of observations).}
 
-\item{...}{Unused additional parameters}
+\item{...}{Unused additional parameters.}
 }
 \value{
-A dfts object
+A dfts object.
 }
 \description{
-Lag dfts
+Compute a lagged version of a functional time series, shifting the time base
+back by a given number of observations.
 }
 \examples{
 result <- lag(electricity)
+}
+\seealso{
+\code{\link[stats:lag]{stats::lag()}}, \code{\link[=diff.dfts]{diff.dfts()}}
 }

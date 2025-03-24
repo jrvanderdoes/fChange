@@ -25,7 +25,6 @@
 #' @references Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural
 #'  breaks in functional data without dimension reduction. Journal of the Royal
 #'  Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
-#'  \url{https://doi.org/10.1111/rssb.12257}
 #'
 #' @examples
 #' # .change_mean(generate_brownian_motion(500,v=seq(0,1,length.out=25)), M = 250)
@@ -58,7 +57,7 @@
       .asymp_dist(n, lambda, statistic),
       lambda = lambda, n = ncol(data), statistic = statistic
     )
-  } else if(critical=='permutation'){
+  } else if(critical=='resample'){
     values_sim <- .bootstrap(X = data, blocksize = blocksize, M = M,
                              type = type, replace = replace, fn = .mean_statistic,
                              statistic=statistic)
@@ -67,9 +66,10 @@
   p <- sum(stat <= values_sim) / M
 
 
-  list('pvalue' = p, 'location' = k.star,
+  list('pvalue' = p,
+       'location' = k.star)#,
        # 'change_fun' = mean(data$data[,1:k.star])-mean(data$data[,(k.star+1):n]),
-       'statistic' = stat, 'simulations' = values_sim)
+       # 'statistic' = stat, 'simulations' = values_sim)
 }
 
 

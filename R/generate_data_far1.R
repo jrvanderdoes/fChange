@@ -1,24 +1,25 @@
 #' Generate FAR(1) Data
 #'
-#' Function to generate date according to FAR(1) process.
+#' Function to generate data according to FAR(1) process.
 #'
-#' @param N Numeric for the number of observations
+#' @param N Numeric for the number of observations.
 #' @param resolution Numeric for resolution of data or a vector specifying the
-#'  observation points
-#' @param sd Numeric for standard deviation with Brownian Motion
+#'  observation points.
+#' @param sd Numeric for standard deviation with Brownian motion.
 #' @param dependence Numeric which indicates the dependence on the previous
 #'    curve.
-#' @param dropFirst Booolean if first values should be dropped so the data varies
-#'  at the first rather than starting at 0 (given that is the observed first point)
+#' @param drop_first Booolean if first values should be dropped so the data varies
+#'  at the first rather than starting at 0 (given that is the observed first point).
+#'  Note this will affect the resolution observed.
 #'
-#' @return dfts object of the data
+#' @return dfts object of the data.
 #' @export
 #'
 #' @examples
 #' res <- generate_far1(20,10)
-generate_far1 <- function(N, resolution, sd=1, dependence=1/2, dropFirst=TRUE){
-  if(is.null(dropFirst))
-    dropFirst <- TRUE
+generate_far1 <- function(N, resolution, sd=1, dependence=1/2, drop_first=FALSE){
+  if(is.null(drop_first))
+    drop_first <- TRUE
   if(is.null(dependence))
     dependence <- 0
 
@@ -35,7 +36,7 @@ generate_far1 <- function(N, resolution, sd=1, dependence=1/2, dropFirst=TRUE){
   c <- dependence * 1 / sqrt(dot_integrate(dot_integrate_col(K_mat)))
 
   w <- generate_brownian_motion(N = N, v = resolution, sd = sd)$data
-  if(dropFirst){
+  if(drop_first){
     w <- w[-1,]
     r <- length(resolution)-1
     res <- resolution[-1]
@@ -55,5 +56,5 @@ generate_far1 <- function(N, resolution, sd=1, dependence=1/2, dropFirst=TRUE){
     }
   }
 
-  dfts(X, intratime = res)
+  dfts(X, fparam = res)
 }

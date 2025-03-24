@@ -1,26 +1,31 @@
 
 #' Generate Data via Ornstein-Uhlenbeck Process
 #'
-#' @param resolution Numeric for data resolution or specific observed intratime
-#' @param N Numeric for data length
-#' @param rho Numeric for amount of dependence
+#' Generate autoregressive process with errors according the Ornstein-Uhlenbeck
+#'  process.
 #'
-#' @return dfts object of generated OU data
+#' @param N Numeric for the number of observations.
+#' @param v Numeric for resolution of data or a vector specifying the
+#'  observation points.
+#' @param rho Numeric which indicates the dependence on the previous
+#'    curve.
+#'
+#' @return A dfts object for the generated data.
 #' @export
 #'
 #' @examples
-#' generate_ornstein_uhlenbeck(N=100,resolution=20)
-generate_ornstein_uhlenbeck <- function(N, resolution, rho=0){
+#' generate_ornstein_uhlenbeck(N=100,v=20)
+generate_ornstein_uhlenbeck <- function(N, v, rho=0){
   if(is.null(rho))
     rho <- 0
-  if(length(resolution)==1)
-    resolution <- seq(0,1,length.out=resolution)
-  r <- length(resolution)
+  if(length(v)==1)
+    v <- seq(0,1,length.out=v)
+  r <- length(v)
 
   # Covariance structure (OU process Cov)
   comat <- matrix(NA, r, r)
   for (i in 1:r){
-    comat[i,] <- exp(-abs(resolution[i]-resolution)/2)
+    comat[i,] <- exp(-abs(v[i]-v)/2)
   }
 
   fiid <- MASS::mvrnorm(n = N,

@@ -43,7 +43,7 @@
 #' #)
 .plot_fd <- function(X, changes = NULL, plot_title = X$name,
                     val_axis_title = "Value",
-                    res_axis_title = "Intratime",
+                    res_axis_title = "fparam",
                     FD_axis_title = "Observations",
                     eye = list(x = -1.5, y = -1.5, z = 1.5),
                     aspectratio = NULL,
@@ -112,7 +112,7 @@
 #' @keywords internal
 .plot_evalfd_3dlines <- function(X, plot_title = NULL,
                                  val_axis_title = "Value",
-                                 res_axis_title = "Intratime",
+                                 res_axis_title = "fparam",
                                  FD_axis_title = "Observations",
                                  eye = list(x = -1.5, y = -1.5, z = 1.5),
                                  aspectratio = list(x = 1, y = 1, z = 1),
@@ -123,7 +123,7 @@
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = X$intratime,
+        "resolution" = X$fparam,
         "FDRep" = i, #X$labels[i],
         "Value" = X$data[,i]
       )
@@ -150,8 +150,8 @@
         yaxis = list(
           title = res_axis_title,
           showticklabels = showticklabels,
-          ticktext=round(seq(min(X$intratime),max(X$intratime),length.out=5),3),
-          tickvals=.select_n(vals=seq(min(X$intratime),max(X$intratime),length.out=5), n=5)
+          ticktext=round(seq(min(X$fparam),max(X$fparam),length.out=5),3),
+          tickvals=.select_n(vals=seq(min(X$fparam),max(X$fparam),length.out=5), n=5)
         ),
         xaxis = list(
           title = FD_axis_title,
@@ -235,7 +235,7 @@
 .plot_evalfd_3dlines_changes <- function(X, changes,
                                      plot_title = NULL,
                                      val_axis_title = "Value",
-                                     res_axis_title = "Intratime",
+                                     res_axis_title = "fparam",
                                      FD_axis_title = "Observations",
                                      eye = list(x = -1.5, y = -1.5, z = 1.5),
                                      aspectratio = list(x = 1, y = 1, z = 1),
@@ -247,7 +247,7 @@
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = X$intratime,
+        "resolution" = X$fparam,
         "FDRep" = j,
         "Color" = 1,
         "Value" = X$data[, j]
@@ -259,7 +259,7 @@
     plotData <- rbind(
       plotData,
       data.frame(
-        "resolution" = X$intratime,
+        "resolution" = X$fparam,
         "FDRep" = j,
         "Color" = length(changes) + 1,
         "Value" = X$data[, j]
@@ -274,7 +274,7 @@
         plotData <- rbind(
           plotData,
           data.frame(
-            "resolution" = X$intratime,
+            "resolution" = X$fparam,
             "FDRep" = j,
             "Color" = i,
             "Value" = X$data[, j]
@@ -382,7 +382,7 @@
   }
 
   # data <- X$data
-  # curve_points <- X$intratime
+  # curve_points <- X$fparam
   valRange <- c(
     floor(min(X$data,na.rm = T)),
     ceiling(max(X$data,na.rm = T))
@@ -391,7 +391,7 @@
   name <- V1 <- value <- NULL
   data1 <- X$data
   colnames(data1) <- 1:ncol(X)
-  plotData <- cbind(X$intratime,data1) %>%
+  plotData <- cbind(X$fparam,data1) %>%
     as.data.frame() %>%
     tidyr::pivot_longer(cols = 1+1:ncol(X)) %>%
     dplyr::mutate(name=as.numeric(name)) %>%
@@ -431,12 +431,12 @@
     scale_info <- list(
       col = "black", arrows = FALSE, cex = 1.2,
       x = list(
-        at = seq(min(X$intratime),
-          max(X$intratime),
+        at = seq(min(X$fparam),
+          max(X$fparam),
           length.out = 5
         ),
-        # labels=.specify_decimal(seq(max(X$intratime),
-        #                                 min(X$intratime),
+        # labels=.specify_decimal(seq(max(X$fparam),
+        #                                 min(X$fparam),
         #                                 length.out=5),2)
         labels = NULL
       ),
@@ -457,8 +457,8 @@
     scale_info <- list(
       col = "black", arrows = FALSE, cex = 0.75,
       x = list(
-        at = seq(min(X$intratime),
-          max(X$intratime),
+        at = seq(min(X$fparam),
+          max(X$fparam),
           length.out = 5
         ),
         labels = NULL
@@ -491,7 +491,7 @@
     # screen=list(z = 90, x = -75,y=-45),
     # trellis.par.set(list(axis.text=list(cex=2)),
     #                "axis.line",list(col=NA)),
-    xlim = rev(range(X$intratime)),
+    xlim = rev(range(X$fparam)),
     zlim = valRange,
     aspect = aspectratio,
     drape = TRUE, colorkey = FALSE,

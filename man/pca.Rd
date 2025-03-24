@@ -4,7 +4,7 @@
 \alias{pca}
 \alias{pca.default}
 \alias{pca.dfts}
-\title{Generic pca of Data}
+\title{Generic Function for Principal Component Analysis}
 \usage{
 pca(object, TVE = 1, ...)
 
@@ -13,20 +13,20 @@ pca(object, TVE = 1, ...)
 \method{pca}{dfts}(object, TVE = 1, ...)
 }
 \arguments{
-\item{object}{Data to compute principal component analysis on}
+\item{object}{Object for computation of principle components analysis.}
 
-\item{TVE}{Numeric in [0,1] for the total variance explained. Can use this to
-select only the required components.}
+\item{TVE}{Numeric in [0,1] for the total variance explained, this determines
+the number of components and can be used for dimension reduction.}
 
-\item{...}{Additional information for \code{prcomp}.}
+\item{...}{Additional parameters to extensions based on data. Often this is
+additional information for \code{prcomp}.}
 }
 \value{
-PCA data
-
-Principal component data
+Principal component data.
 }
 \description{
-Build on \code{prcomp}.
+This is a generic function to call PCA on various objects. The default method
+uses \code{\link[stats:prcomp]{stats::prcomp()}}.
 }
 \examples{
 pca(1:10)

@@ -61,7 +61,7 @@
     }else if(statistic=='Mn'){
       Values <- apply(values_sim, MARGIN = 2, max)
     }
-  } else if(critical=='permutation'){
+  } else if(critical=='resample'){
     Values <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
                          type = type, replace = replace, fn = .trace_statistic,
                          statistic=statistic)
@@ -80,10 +80,10 @@
   # tr_before <- sum(data1_pca$sdev)
   # tr_after <- sum(data2_pca$sdev)
   list('pvalue' = p,
-       'location' = k_star,
-       'statistic' = Sn,
-       'simulations' = Values
-       )
+       'location' = k_star)#,
+       # 'statistic' = Sn,
+       # 'simulations' = Values
+       # )
 }
 
 

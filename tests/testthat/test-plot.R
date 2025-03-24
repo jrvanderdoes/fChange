@@ -2,7 +2,7 @@ test_that("Plot Options", {
   tmp <- plot.dfts(electricity, changes=c(50,175),type='spaghetti')
   expect_equal(class(tmp)[1],"plotly")
 
-  tmp <- plot.dfts(electricity, changes=c(50,175),type='highdim')
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='fast')
   expect_equal(class(tmp)[1],"trellis")
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='rainbow')

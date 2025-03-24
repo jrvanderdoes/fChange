@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_ggplot2.R
 \name{stat_3D}
 \alias{stat_3D}
-\title{Draw 3D Geoms}
+\title{Draw 3D Geoms for ggplot2}
 \usage{
 stat_3D(
   mapping = NULL,
@@ -36,9 +36,10 @@ give the geom as \code{"point"}.
 \link[ggplot2:layer_geoms]{layer geom} documentation.
 }}
 
-\item{position}{The azimuthal rotation (degrees).}
+\item{position}{Set position information. Find more details in \code{ggplot2}
+function.}
 
-\item{na.rm}{Boolean if na data should be removed}
+\item{na.rm}{Boolean if na data should be removed.}
 
 \item{show.legend}{logical. Should this layer be included in the legends?
 \code{NA}, the default, includes if any aesthetics are mapped.
@@ -52,20 +53,18 @@ that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 
 \item{...}{Arguments passed on to layer. Often the aesthetics
-like color = "red" or size = 3.}
+like \code{color = "red"} or \code{size = 3}. Two important ones are
+\code{theta} (azimuthal rotation) and \code{phi} (colatitude rotation)
+to define angle in degrees of viewing data.}
 }
 \description{
 This function adds 3D geoms such as points and paths to a ggplot2 plot.
 }
-\details{
-#param theta The azimuthal rotation (degrees).
-#param phi The colatitude rotation (degrees).
-}
 \examples{
 dat <- electricity
 
-data_lines <- cbind(data.frame('Time'=dat$intratime), dat$data) \%>\%
- tidyr::pivot_longer(cols = 1+1:ncol(dat$data))
+data_lines <- cbind(data.frame('Time'=dat$fparam), dat$data) \%>\%
+tidyr::pivot_longer(cols = 1+1:ncol(dat$data))
 
 colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
 colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(dat$data))
@@ -73,14 +72,14 @@ data_lines$color <- rep(colors_plot, nrow(dat$data) )
 data_lines$name <- as.numeric(data_lines$name)
 
 result <- ggplot2::ggplot(data_lines,
-   ggplot2::aes(y=Time, x=name, z=value, color=color)) +
-ggplot2::theme_void() +
-stat_3D(theta=0, phi=15, geom='path') +
-ggplot2::scale_color_manual(
-   breaks = data_lines$color,
-   values = data_lines$color
-) +
-ggplot2::guides(color='none')
+  ggplot2::aes(y=Time, x=name, z=value, color=color)) +
+  ggplot2::theme_void() +
+  stat_3D(theta=0, phi=15, geom='path') +
+  ggplot2::scale_color_manual(
+     breaks = data_lines$color,
+     values = data_lines$color
+  ) +
+  ggplot2::guides(color='none')
 }
 \references{
 Acker D (2024). gg3D: 3D perspective plots for ggplot2. R

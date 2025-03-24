@@ -1,37 +1,38 @@
-#' Plot dfts
+#' Plot dfts objects
 #'
-#' A function to plot dfts objects in many ways.
+#' Provides various visualizations for functional data.
 #'
 #' @param x A dfts object or data which can be automatically converted to that
 #'  format. See [dfts()].
-#' @param changes Vector of change points. Can be NULL.
-#' @param type Choice of plotting method. Options include: 'spaghetti', 'highdim',
+#' @param changes Vector of numeric change point locations. Can be NULL.
+#' @param type Choice of plotting method. Options include: 'spaghetti', 'fast',
 #'  'rainbow','banded','acf', 'pacf', 'summary', 'qq', 'distribution', 'change',
 #'  'interval', and'surface'.
-#' @param plot_title Title to include on the return plot
+#' @param plot_title Title to include on the return plot.
 #' @param val_axis_title,res_axis_title,FD_axis_title Title for the axis giving
-#'  the values (val), the resolution of the intratime (res), and the functional
-#'  observations (FD)
-#' @param eye,aspectratio Angle (eye) and ratio (aspectratio) to view 3d plots
-#' @param showticklabels Boolean if the tick marks should be shown
-#' @param lag.max Max number of lags to consider for ACF/PACF and summary plots
-#' @param d.max Max number of dimensions for qq/distribution and summary plots
-#' @param alpha Significance level to be used in various plots. Value in \[0,1\]
-#' @param TVE Total variance explained used in qq/distribution plots. Value in \[0,1\]
-#' @param distribution String of the distribution to compare against in
+#'  the values (val), the resolution of the fparam (res), and the functional
+#'  observations (FD).
+#' @param eye,aspectratio Angle (eye) and ratio (aspectratio) to view 3d plots.
+#' @param showticklabels Boolean if the tick marks should be shown.
+#' @param lag.max Max number of lags to consider for ACF/PACF and summary plots.
+#' @param d.max Max number of dimensions for qq/distribution and summary plots.
+#' @param alpha Significance level to be used in various plots. Value in \[0,1\].
+#' @param TVE Total variance explained used in qq/distribution plots. Value in \[0,1\].
+#' @param distribution String of the distribution to compare against in.
 #'  distribution plot. The string can be anything such that there is a
 #'  rdistribution and ddistribution function available. For example "exp",
-#'  "gamma". Additional parameters can be passed using ...
+#'  "gamma". Additional parameters can be passed using ... .
 #' @param method Method for computing ACF/PACF. Options include 'Welch', 'MC',
 #'  and 'Imhof'.
-#' @param legend Boolean if legend should be given in qq/distribution plots
-#' @param highlight_changes,int.gradual Boolean if changes should be highlighted
-#'  or confidence interval be solid gray or gradual colors in change plot
+#' @param legend Boolean if legend should be given in qq/distribution plots.
+#' @param highlight_changes Boolean if changes should be highlighted in black.
+#' @param int.gradual  Boolean if confidence interval be solid gray (FALSE) or
+#'  gradual colors (TRUE) when \code{type='change'} plot.
 #' @param intervals Information on confidence intervals of changes for change
 #'  plot. See [confidence_interval()].
-#' @param ... Details for plotting in acf/pacf, summary, or distribution function
+#' @param ... Details for plotting in acf/pacf, summary, or distribution function.
 #'
-#' @returns Plot of varying types
+#' @returns Plot of varying types.
 #' @export
 #'
 #' @references John Fox, & Sanford Weisberg (2019). An R Companion to Applied
@@ -39,9 +40,9 @@
 #'
 #' @examples
 #' plt <- plot(electricity)
-#' plt <- plot(var(electricity), type='surface')
+#' plt <- plot(dfts(var(electricity)), type='surface')
 plot.dfts <- function(x, changes=NULL,
-                       type=c('spaghetti','highdim', 'rainbow','banded',
+                       type=c('spaghetti','fast', 'rainbow','banded',
                               'acf', 'pacf', 'summary', 'qq', 'distribution',
                               'change','interval', 'surface'),
                        plot_title = x$name, val_axis_title = NULL,
@@ -58,7 +59,7 @@ plot.dfts <- function(x, changes=NULL,
                        int.gradual=TRUE, ...
                        ){
   x <- dfts(x, inc.warnings = FALSE)
-  poss_types <- c('spaghetti','highdim', 'rainbow','banded','acf', 'pacf',
+  poss_types <- c('spaghetti','fast', 'rainbow','banded','acf', 'pacf',
                   'summary', 'qq', 'distribution', 'change','interval',
                   'surface')
   type <- .verify_input(type, poss_types)
@@ -77,7 +78,7 @@ plot.dfts <- function(x, changes=NULL,
                                   showticklabels = showticklabels,
                                   interactive = TRUE)
           },
-          highdim = {
+          fast = {
             .plot_fd(X = x, changes = changes,
                                    plot_title = plot_title,
                                    val_axis_title = val_axis_title,

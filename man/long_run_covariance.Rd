@@ -4,28 +4,37 @@
 \alias{long_run_covariance}
 \title{Estimate Long-run Covariance Kernel}
 \usage{
-long_run_covariance(X, h = 0, K = bartlett_kernel)
+long_run_covariance(
+  X,
+  h = 2 * ncol(X)^(1/5),
+  K = bartlett_kernel,
+  changes = NULL
+)
 }
 \arguments{
 \item{X}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
 \item{h}{The window parameter parameter for the estimation of the long run
-covariance kernel. The default value is \code{h=0}, i.e., it assumes iid data}
+covariance kernel. The default value is \code{h=2*ncol(X)^(1/5)}.
+Note there exists an internal check such that \eqn{h=min(h,ncol(X)-1)} when
+alternative options are given.}
 
-\item{K}{(Optional) Function indicating the Kernel to use if h>0}
+\item{K}{Function indicating the kernel to use if \eqn{h>0}.}
+
+\item{changes}{Vector of numeric change point locations. Can be NULL.}
 }
 \value{
-Data.frame of numerics with dim of ncol(data) x ncol(data), that is
-symmetric.
+Symmetric data.frame of numerics with dim of ncol(data) x ncol(data).
 }
 \description{
-This (internal) function estimates the long-run covariance kernel. That is,
-\eqn{C_{\epsilon}(t,t') = \sum_{l=-\inf}^{\inf} \text{Cov}(\epsilon_0(t),
-    \epsilon_l(t'))} with error sequence \eqn{(\epsilon_i : i \in \mathbb{Z})}.
-}
-\details{
-This is an internal function, see use in .change_mean.
+Estimate the long-run covariance kernel for functional data. That is, solve
+\eqn{
+   C_{\epsilon}(t,t') = \sum_{l=-\inf}^{\inf} \text{Cov}(\epsilon_0(t),
+    \epsilon_l(t'))
+ }
+with sequence \eqn{(\epsilon_i : i \in \mathbb{Z})} defined as the centered
+data (can center based on changes if given).
 }
 \examples{
 result <- long_run_covariance(electricity,2)

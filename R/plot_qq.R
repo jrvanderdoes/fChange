@@ -1,40 +1,45 @@
 #' QQ Plot Generic Function
 #'
-#' @param x Data to examine with qqplot
-#' @param ... Additional paramters based on the data
+#' A generic function which by produces a qq-plot of some data. By default, it
+#'  uses [stats::qqplot()].
+#'
+#' @param x Data to examine with a qqplot.
+#' @param ... Additional parameters based on the data.
 #'
 #' @name qqplot
 #'
-#' @seealso [qqplot.dfts()] [qqplot.default()]
+#' @seealso [stats::qqplot()]
 #'
 #' @export
 qqplot <- function(x, ...) UseMethod("qqplot")
 #' @rdname qqplot
 #'
+#' @returns **qqplot.default**: returns results from [stats::qqplot()].
 #' @export
 qqplot.default <- function(x, ...) stats::qqplot(x, ...)
 
 
-#' Generic Function to Compute QQ plot for dfts
+#' Function to Compute QQ plot for dfts Objects
 #'
-#' Creates normal QQ plots on the principal components of functional data
+#' **qqplot.dfts**: Creates normal QQ plots on the principal components of functional data.
 #'
-#' @param x A dfts object or data which can be automatically converted to that
-#'  format. See [dfts()].
+#' @param x A dfts object. See [dfts()].
 #' @param TVE Numeric in \[0,1\] giving the total variance explained for selecting
 #'  the number of principal components.
-#' @param d.max Max number of principal components
-#' @param alpha Significance level, alpha in \[0,1\]
-#' @param changes Vector of change points
-#' @param legend Boolean indicating if legend should be shown
-#' @param ... Unused
+#' @param d.max Max number of principal components. No max when NULL.
+#' @param alpha Significance level, alpha in \[0,1\].
+#' @param changes Vector of change points.
+#' @param legend Boolean indicating if legend should be shown on plot.
+#' @param ... Additional parameters based on the data.
 #'
-#' @return ggplot2 for QQ plot
+#' @returns **qqplot.dfts**: ggplot2 for QQ plot.
 #' @export
 #'
+#' @rdname qqplot
+#'
 #' @examples
-#' result <- qqplot(electricity)
-qqplot.dfts <- function(x, TVE=0.95, d.max=3, alpha = 0.05,
+#' result <- qqplot(electricity, d.max=3)
+qqplot.dfts <- function(x, TVE=0.95, d.max=NULL, alpha = 0.05,
                          changes=NULL, legend = FALSE, ...){
   .plot_distribution(X = x, TVE = TVE, d.max = d.max, distribution = 'norm',
                      alpha = alpha, changes=changes, legend=legend, ...)

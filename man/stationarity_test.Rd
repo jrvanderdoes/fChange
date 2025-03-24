@@ -7,10 +7,10 @@
 stationarity_test(
   X,
   statistic = "Tn",
-  critical = c("simulation", "permutation"),
+  critical = c("simulation", "resample"),
   perm_method = "separate",
   M = 1000,
-  blocksize = 3,
+  blocksize = 2 * ncol(X)^(1/5),
   TVE = 1,
   replace = TRUE
 )
@@ -19,41 +19,46 @@ stationarity_test(
 \item{X}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{statistic}{String for test statistic. Options are \code{Tn} and
-\code{Mn}. Default is \code{Tn}.}
+\item{statistic}{String for test statistic. Options are integrated (\code{Tn})
+and supremum (\code{Mn}). The default is \code{Tn}.}
 
-\item{critical}{String for method of determining the critical values. Options are
-\code{simulation} and \code{permutation}. Default is \code{simulation}.}
+\item{critical}{String for method of determining the critical values. Options
+are \code{simulation} and \code{resample}. Default is \code{simulation}.}
 
-\item{perm_method}{String for method of permutation. Options are \code{separate}
-and \code{sliding}. Default is \code{separate}.}
+\item{perm_method}{String for method of resampling. Options are \code{separate}
+for block resampling and \code{overlapping} for sliding window.
+Default is \code{separate}.}
 
 \item{M}{Numeric for number of simulation to use in determining the null
 distribution. Default is 1000.}
 
-\item{blocksize}{Numeric for blocksize in permutation test. Default is 1.}
+\item{blocksize}{Numeric for blocksize in resample test. Default is \eqn{2N^{1/5}}.}
 
 \item{TVE}{Numeric for total variance explained when using PCA for
 eigenvalues. Default is 1.}
 
-\item{replace}{Boolean if replacement should be used for permutation test.
-Default is TRUE.}
+\item{replace}{Boolean if replacement should be used for resample test. Thus,
+this defines if a bootstrapped or permuted test is used. Default is TRUE.}
 }
 \value{
-List with (1) pvalue, (2) test statistic, and (3) test statistics
-from simulating the null distribuion.
+List with the following elements:
+\enumerate{
+\item pvalue: p-value for the stationarity test.
+\item statistic: test statistic from the test.
+\item simulations: simulations which define the null distribution.
+}
 }
 \description{
 Stationarity test for functional time series with different methods on
 determining the critical values of the test statistic. The Monte Carlo
-method was constructed in Horvath et al. (2014), while the bootstrap-based
-methods have not been validated in the literature (although such an option
-is provided, please use them at your own risk).
+method was constructed in Horvath et al. (2014), while the resample-based
+methods have not been validated in the literature (use the provided option
+at your discretion).
 }
 \examples{
 res <- stationarity_test(
   generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-  critical='permutation', statistic='Mn')
+  critical='resample', statistic='Mn')
 res2 <- stationarity_test(electricity)
 }
 \references{

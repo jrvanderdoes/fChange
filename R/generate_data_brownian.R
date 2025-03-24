@@ -1,16 +1,16 @@
 #' Generate a Brownian Motion Process
 #'
 #' Generate a functional time series according to an iid Brownian Motion process.
-#'  Each observation is discretized in the points indicated in \code{v}.
+#'  Each observation is discretized on the points indicated in \code{v}.
 #'
 #' @param N Numeric. The number of observations for the generated data.
 #' @param v Numeric (vector). Discretization points of the curves.This can be
 #'  the evaluated points or the number of evenly spaced points on \[0,1\].
-#'  By default it is evenly spaced on \[0,1\] with 20 points.
+#'  By default it is evenly spaced on \[0,1\] with 30 points.
 #' @param sd Numeric. Standard deviation of the Brownian Motion process.
 #'  The default is \code{1}.
 #'
-#' @return Functional time series (dfts) object
+#' @return Functional time series (dfts) object.
 #' @export
 #'
 #' @examples
@@ -18,8 +18,7 @@
 #'   v=c(0,0.25,0.4,0.7, 1, 1.5), sd = 1)
 #' bmotion1 <- generate_brownian_motion(N=100,
 #'   v=10, sd = 2)
-generate_brownian_motion <- function(
-    N, v = seq(from = 0, to = 1, length.out = 20), sd = 1){
+generate_brownian_motion <- function(N, v = 30, sd = 1){
 
   # Convert resolution to equally spaced points
   if(length(v)==1){
@@ -38,7 +37,7 @@ generate_brownian_motion <- function(
                    )
   }
 
-  dfts(X=as.matrix(data),intratime = v)
+  dfts(X=as.matrix(data),fparam = v)
 }
 
 
@@ -51,14 +50,13 @@ generate_brownian_motion <- function(
 #'
 #' @inheritParams generate_brownian_motion
 #'
-#' @return Functional time series (dfts) object
+#' @return Functional time series (dfts) object.
 #' @export
 #'
 #' @examples
 #' bbridge <- generate_brownian_bridge(N=100, v=c(0,0.2,0.6,1,1.3), sd=2)
 #' bbridge <- generate_brownian_bridge(N=100, v=10, sd=1)
-generate_brownian_bridge <- function(
-    N, v = seq(from = 0, to = 1, length.out = 100), sd = 1){
+generate_brownian_bridge <- function(N, v = 30, sd = 1){
 
   # Convert resolution to equally spaced points
   if(length(v)==1){
@@ -71,7 +69,7 @@ generate_brownian_bridge <- function(
   data <- data -
     t(data[res,] * t(matrix(rep(v, times = N)/max(v), ncol = N, nrow = res)))
 
-  dfts(X=data,intratime = v)
+  dfts(X=data,fparam = v)
 }
 
 
@@ -99,7 +97,7 @@ generate_brownian_bridge <- function(
     v[1] + X - (v - v[1])/(v[n] - v[1]) * (X[n] - v[1] + v[1])
   },v=v,n=n)
 
-  dfts(X = BB, intratime = v)
+  dfts(X = BB, fparam = v)
 }
 
 
@@ -128,5 +126,5 @@ generate_brownian_bridge <- function(
     (2*v-3*v^2) %*% t(W$data[nrow(W$data),]) +
     (-6*v + 6*v^2) %*% t(dot_integrate_col(W$data, v))
 
-  dfts(X=V,intratime = v)
+  dfts(X=V,fparam = v)
 }

@@ -60,7 +60,7 @@
 #' #res2 <- .change_pca_mean(electricity)
 .change_pca_mean <- function(X, statistic, critical, TVE=0.95,
                             M=1000, K=bartlett_kernel,
-                            blocksize=1, perm_type='separate', replace = TRUE){
+                            blocksize=1, resample_blocks='separate', replace = TRUE){
   X <- center(dfts(X))
 
   pca_X <- pca(dfts(X), TVE=TVE)
@@ -101,18 +101,18 @@
       }, d=d,n=D)
     }
 
-  } else if(critical=='permutation'){
+  } else if(critical=='resample'){
 
     simulations <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
-                              type = perm_type, replace = replace,
+                              type = resample_blocks, replace = replace,
                               fn = .pca_mean_statistic,
                               statistic=statistic, TVE = TVE)
   }
 
   list('pvalue' = sum(stat <= simulations) / M,
-       'location' = location,
-       'statistic' = stat,
-       'simulations'=simulations)
+       'location' = location)#,
+       # 'statistic' = stat,
+       # 'simulations'=simulations)
 }
 
 
@@ -129,6 +129,7 @@
 #' @keywords internal
 .pca_mean_statistic <- function(X, TVE, statistic, location=FALSE){
 
+  # TODO:: Change to LRC
   pca_X <- pca(dfts(X), TVE=TVE)
 
   n <- ncol(X)

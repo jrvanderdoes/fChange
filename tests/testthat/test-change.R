@@ -7,56 +7,56 @@ test_that("Characteristic change", {
   ## No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(X = dat, method='characteristic', h=0,
+  tmp <- fchange(X = dat, method='characteristic', h=0,
                 statistic='Tn', type='Single',
                 critical = 'simulation',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.225)
-  tmp <- change(dat, method='characteristic', h=0,
+  expect_equal(tmp$pvalue, 0.835)
+  tmp <- fchange(dat, method='characteristic', h=0,
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.620)
+  expect_equal(tmp$pvalue, 0.680)
 
   set.seed(123)
-  tmp <- change(X = dat, method='characteristic', h=0,
+  tmp <- fchange(X = dat, method='characteristic', h=0,
                 statistic='Tn', type='Single',
                 critical = 'welch',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.220)
+  expect_equal(tmp$pvalue, 0.810)
   expect_error(change(dat, method='characteristic', h=0,
                       statistic='Mn', type='Single',
                       critical = 'welch',
                       M = 200))
 
   set.seed(123)
-  tmp <- change(X = dat, method='characteristic', h=0,
+  tmp <- fchange(X = dat, method='characteristic', h=0,
                 statistic='Tn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.305)
-  tmp <- change(dat, method='characteristic', h=0,
+  expect_equal(tmp$pvalue, 0.880)
+  tmp <- fchange(dat, method='characteristic', h=0,
                 statistic='Mn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.520)
+  expect_equal(tmp$pvalue, 0.700)
 
 
   ## Change
   set.seed(123)
-  tmp <- change(X = electricity, method='characteristic', h=0,
+  tmp <- fchange(X = electricity, method='characteristic', h=0,
                 statistic='Tn', type='Single',
                 critical = 'simulation',
                 M = 200)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(electricity, method='characteristic', h=0,
+  tmp <- fchange(electricity, method='characteristic', h=0,
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 200)
   expect_equal(tmp$pvalue, 0)
 
   set.seed(123)
-  tmp <- change(X = electricity, method='characteristic', h=0,
+  tmp <- fchange(X = electricity, method='characteristic', h=0,
                 statistic='Tn', type='Single',
                 critical = 'welch',
                 M = 200)
@@ -67,14 +67,14 @@ test_that("Characteristic change", {
                       M = 200))
 
   set.seed(123)
-  tmp <- change(X = electricity, method='characteristic', h=0,
+  tmp <- fchange(X = electricity, method='characteristic', h=0,
                 statistic='Tn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 200)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(electricity, method='characteristic', h=0,
+  tmp <- fchange(electricity, method='characteristic', h=0,
                 statistic='Mn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 200)
   expect_equal(tmp$pvalue, 0)
 })
@@ -84,28 +84,28 @@ test_that("Mean change", {
   # Simulation - No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(dat, method='mean',
+  tmp <- fchange(dat, method='mean',
                 statistic='Tn', type='Single',
                 critical = 'simulation',
                 M = 1000, K = bartlett_kernel)
-  expect_equal(tmp$pvalue, 0.369)
+  expect_equal(tmp$pvalue, 0.511)
 
-  tmp <- change(dat, method='mean',
+  tmp <- fchange(dat, method='mean',
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 1000, K = bartlett_kernel)
-  expect_equal(tmp$pvalue, 0.571)
+  expect_equal(tmp$pvalue, 0.581)
 
-  # Permutation - Change
-  tmp <- change(electricity, method='mean',
+  # resample - Change
+  tmp <- fchange(electricity, method='mean',
                 statistic='Tn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 1000, K = bartlett_kernel)
   expect_equal(tmp$pvalue, 0)
 
-  tmp <- change(electricity, method='mean',
+  tmp <- fchange(electricity, method='mean',
                 statistic='Mn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 1000, K = bartlett_kernel)
   expect_equal(tmp$pvalue, 0)
 })
@@ -115,31 +115,31 @@ test_that("Robust change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(dat, method='robustmean',
+  tmp <- fchange(dat, method='robustmean',
                 statistic='Tn', type='Single',
                 critical = 'simulation',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.263)
+  expect_equal(tmp$pvalue, 0.493)
 
-  tmp <- change(dat, method='robustmean',
+  tmp <- fchange(dat, method='robustmean',
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.418)
+  expect_equal(tmp$pvalue, 0.764)
 
   # Change
   dat$data[,50:100] <- dat$data[,50:100]+5
-  tmp <- change(dat, method='robustmean',
+  tmp <- fchange(dat, method='robustmean',
                 statistic='Tn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 500)
   expect_equal(tmp$pvalue, 0.012)
 
-  tmp <- change(dat, method='robustmean',
+  tmp <- fchange(dat, method='robustmean',
                 statistic='Mn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 500)
-  expect_equal(tmp$pvalue, 0.012)
+  expect_equal(tmp$pvalue, 0.008)
 })
 
 
@@ -147,51 +147,51 @@ test_that("Eigen change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(dat, method='eigenjoint', h=0, eigen_number=1,
+  tmp <- fchange(dat, method='eigenjoint', h=0, eigen_number=1,
                 statistic='Tn',
                 critical = 'simulation',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.615)
-  tmp <- change(dat, method='eigensingle', h=0, eigen_number=1,
+  expect_equal(tmp$pvalue, 0.240)
+  tmp <- fchange(dat, method='eigensingle', h=0, eigen_number=1,
                 statistic='Tn',
                 critical = 'simulation',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.63)
+  expect_equal(tmp$pvalue, 0.280)
 
   set.seed(123)
   # dat <- generate_brownian_bridge(30)
-  tmp <- change(dat, method='eigenjoint', h=0, eigen_number=1,
+  tmp <- fchange(dat, method='eigenjoint', h=0, eigen_number=1,
                 statistic='Mn',
-                critical = 'permutation',
-                M = 5)
-  expect_equal(tmp$pvalue, 0.6)
-  tmp <- change(dat, method='eigensingle', h=0, eigen_number=1,
-                statistic='Mn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 5)
   expect_equal(tmp$pvalue, 0.4)
+  tmp <- fchange(dat, method='eigensingle', h=0, eigen_number=1,
+                statistic='Mn',
+                critical = 'resample',
+                M = 5)
+  expect_equal(tmp$pvalue, 0)
 
   ## Change
   set.seed(123)
-  tmp <- change(electricity, method='eigenjoint', h=0, eigen_number=1,
+  tmp <- fchange(electricity, method='eigenjoint', h=0, eigen_number=1,
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(electricity, method='eigensingle', h=0, eigen_number=1,
+  tmp <- fchange(electricity, method='eigensingle', h=0, eigen_number=1,
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0)
 
-  tmp <- change(electricity, method='eigenjoint', h=0, eigen_number=1,
+  tmp <- fchange(electricity, method='eigenjoint', h=0, eigen_number=1,
                 statistic='Mn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 2)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(electricity, method='eigensingle', h=0, eigen_number=1,
+  tmp <- fchange(electricity, method='eigensingle', h=0, eigen_number=1,
                 statistic='Mn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 10)
   expect_equal(tmp$pvalue,0)
 })
@@ -201,30 +201,30 @@ test_that("Trace change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(dat, method='trace',
+  tmp <- fchange(dat, method='trace',
                 statistic='Tn', type='Single',
                 critical = 'simulation',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.487)
+  expect_equal(tmp$pvalue, 0.292)
 
-  tmp <- change(dat, method='trace',
+  tmp <- fchange(dat, method='trace',
                 statistic='Mn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.401)
+  expect_equal(tmp$pvalue, 0.150)
 
   # Change
-  tmp <- change(electricity, method='trace',
+  tmp <- fchange(electricity, method='trace',
                 statistic='Tn', type='Single',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.01)
+  expect_equal(tmp$pvalue, 0.016)
 
-  tmp <- change(electricity, method='trace',
+  tmp <- fchange(electricity, method='trace',
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.009)
+  expect_equal(tmp$pvalue, 0.011)
 })
 
 
@@ -232,17 +232,17 @@ test_that("Covariance change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(dat, method='covariance',
+  tmp <- fchange(dat, method='covariance',
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000, cov.res = 20)
-  expect_equal(tmp$pvalue, 0.651)
+  expect_equal(tmp$pvalue, 0.051)
   set.seed(123)
-  tmp <- change(dat, method='covariance',
+  tmp <- fchange(dat, method='covariance',
                 statistic='Tn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 10, cov.res = 5)
-  expect_equal(tmp$pvalue, 0.6)
+  expect_equal(tmp$pvalue, 0.2)
 
   expect_error(change(dat, method='covariance',
                 statistic='Mn',
@@ -251,7 +251,7 @@ test_that("Covariance change", {
 
   # Change
   set.seed(123)
-  tmp <- change(electricity, method='covariance',
+  tmp <- fchange(electricity, method='covariance',
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000, cov.res = 15)
@@ -263,36 +263,36 @@ test_that("PCA-Mean change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  tmp <- change(dat, method='projmean',
+  tmp <- fchange(dat, method='projmean',
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.327)
-  tmp <- change(dat, method='projmean',
+  expect_equal(tmp$pvalue, 0.210)
+  tmp <- fchange(dat, method='projmean',
                 statistic='Tn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.182)
+  expect_equal(tmp$pvalue, 0.067)
 
-  tmp <- change(dat, method='projmean',
+  tmp <- fchange(dat, method='projmean',
                 statistic='Mn',
                 critical = 'simulation',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.338)
-  tmp <- change(dat, method='projmean',
+  expect_equal(tmp$pvalue, 0.244)
+  tmp <- fchange(dat, method='projmean',
                 statistic='Mn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.208)
+  expect_equal(tmp$pvalue, 0.135)
 
   # Change
   set.seed(123)
-  tmp <- change(electricity, method='projmean',
+  tmp <- fchange(electricity, method='projmean',
                 statistic='Tn',
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(electricity, method='projmean',
+  tmp <- fchange(electricity, method='projmean',
                 statistic='Mn',
                 critical = 'simulation',
                 M = 1000)
@@ -304,27 +304,27 @@ test_that("PCA-Distribution change", {
   # No Change
   set.seed(123)
   dat <- generate_brownian_bridge(50)
-  tmp <- change(dat, method='projdistribution',
+  tmp <- fchange(dat, method='projdistribution',
                 statistic='Tn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 100)
-  expect_equal(tmp$pvalue, 0.630)
-  tmp <- change(dat, method='projdistribution',
+  expect_equal(tmp$pvalue, 0.530)
+  tmp <- fchange(dat, method='projdistribution',
                 statistic='Mn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 100)
-  expect_equal(tmp$pvalue, 0.870)
+  expect_equal(tmp$pvalue, 0.530)
 
   # Change
   dat$data[,25:50] <- dat$data[,25:50]+5
-  tmp <- change(dat, method='projdistribution',
+  tmp <- fchange(dat, method='projdistribution',
                 statistic='Tn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 100)
   expect_equal(tmp$pvalue, 0)
-  tmp <- change(dat, method='projdistribution',
+  tmp <- fchange(dat, method='projdistribution',
                 statistic='Mn',
-                critical = 'permutation',
+                critical = 'resample',
                 M = 100)
   expect_equal(tmp$pvalue, 0)
 
@@ -342,12 +342,12 @@ test_that("Check Elbow Plots", {
   ## No Change
   set.seed(123)
   dat <- generate_brownian_bridge(100)
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='characteristic',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -358,14 +358,14 @@ test_that("Check Elbow Plots", {
   expect_equal(class(res$plots$variability)[1], 'gg')
   expect_equal(class(res$plots$explained)[1], 'gg')
   expect_equal(class(res$plots$improvement)[1], 'gg')
-  expect_equal(round(sum(res$information[,2]),4), 178.2479)
+  expect_equal(round(sum(res$information[,2]),4), 35.6545)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='mean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -373,12 +373,12 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='robustmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -386,12 +386,12 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='eigenjoint',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -399,12 +399,12 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='eigensingle',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -412,12 +412,12 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='trace',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -425,12 +425,12 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='covariance',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -438,12 +438,12 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='projmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -451,12 +451,12 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='projdistribution',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -467,13 +467,14 @@ test_that("Check Elbow Plots", {
 
   ## Change
   set.seed(123)
+  dat <- generate_brownian_bridge(100)
   dat$data[,51:100] <- dat$data[,51:100] + 5
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='characteristic',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -484,14 +485,14 @@ test_that("Check Elbow Plots", {
   expect_equal(class(res$plots$variability)[1], 'gg')
   expect_equal(class(res$plots$explained)[1], 'gg')
   expect_equal(class(res$plots$improvement)[1], 'gg')
-  expect_equal(round(sum(res$information[,2]),4),  820.6515)
+  expect_equal(round(sum(res$information[,2]),4),  224.252)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='mean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -499,12 +500,12 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,50)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='robustmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -512,38 +513,38 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,50)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='eigenjoint',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
                 errors='L2', recommendation_change_points = 2,
                 recommendation_improvement = 0.15)
-  expect_equal(res$suggestion$changes,c(9,74,34,55,50))
+  expect_equal(res$suggestion$changes,c(52, 49, 50))
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='eigensingle',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
                 errors='L2', recommendation_change_points = 2,
                 recommendation_improvement = 0.15)
-  expect_equal(res$suggestion$changes,c(9,74,34,68,59,54,49,52,50))
+  expect_equal(res$suggestion$changes,c(52, 49, 50))
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='trace',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -551,25 +552,25 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='covariance',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
                 errors='L2', recommendation_change_points = 2,
                 recommendation_improvement = 0.15)
-  expect_equal(res$suggestion$changes,c(92,49,50))
+  expect_equal(res$suggestion$changes,c(39,50))
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='projmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -577,12 +578,12 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,50)
 
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='projdistribution',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -593,12 +594,12 @@ test_that("Check Elbow Plots", {
   ## Errors
   set.seed(1234)
   dat <- generate_brownian_bridge(100)
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='characteristic',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -607,12 +608,12 @@ test_that("Check Elbow Plots", {
   expect_equal(res$suggestion$changes,NA)
 
   dat$data[,51:100] <- dat$data[,51:100] +5
-  res <- change(X = dat,
+  res <- fchange(X = dat,
                 method='characteristic',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
                 eigen_number=2, h=1,
-                W = space_measuring_vectors(X = dat, M = 20, space='BM'),
+                W = space_measuring_functions(X = dat, M = 20, space='BM'),
                 K = bartlett_kernel,
                 weighting = 1/4, TVE=0.95,
                 trim_function = function(X) { 0 },
@@ -626,156 +627,165 @@ test_that("Check Elbow Plots", {
 test_that("Binary Segmentation", {
   set.seed(12345)
   X <- generate_brownian_bridge(150)
-  X$data[,51:150] <- X$data[,51:150] +3
-  X$data[,101:150] <- X$data[,101:150]*2
+  X[,51:150] <- X[,51:150] + 3
+  X[,101:150] <- X[,101:150] * 2
 
-  res <- change(X,
+  res <- fchange(X,
                 method='characteristic',
                 statistic='Tn',
                 critical='welch',
                 type='segmentation',
-                perm_type = 'separate', replace=TRUE,
+                resample_blocks = 'separate', replace=TRUE,
                 blocksize = 1,
                 eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                W = space_measuring_functions(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 })
+                trim_function = function(X) { 0 },
+                silent.binary = TRUE)
   expect_equal(res$location,c(50,99))
   expect_equal(res$pvalue,c(0.000,0.000))
 
-  res <- change(X,
+  res <- fchange(X,
                 method='mean',
                 statistic='Tn',
                 critical='simulation',
                 type='segmentation',
-                perm_type = 'separate', replace=TRUE,
+                resample_blocks = 'separate', replace=TRUE,
                 blocksize = 1,
                 eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                W = space_measuring_functions(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 })
-  expect_equal(res$location,c(52,100))
-  expect_equal(res$pvalue,c(0,0))
+                trim_function = function(X) { 0 },
+                silent.binary = TRUE)
+  expect_equal(res$location,c(50,66,100))
+  expect_equal(res$pvalue,c(0.001,0,0))
 
 
-  res <- change(X,
+  res <- fchange(X,
                 method='robustmean',
                 statistic='Tn',
                 critical='simulation',
                 type='segmentation',
-                perm_type = 'separate', replace=TRUE,
+                resample_blocks = 'separate', replace=TRUE,
                 blocksize = 1,
                 eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                W = space_measuring_functions(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 })
-  expect_equal(res$location,c(52,100))
-  expect_equal(res$pvalue,c(0,0))
+                trim_function = function(X) { 0 },
+                silent.binary = TRUE)
+  expect_equal(res$location,c(50,66,100))
+  expect_equal(res$pvalue,c(0,0,0))
 
-  res <- change(X,
+  res <- fchange(X,
                 method='eigenjoint',
                 statistic='Tn',
                 critical='simulation',
                 type='segmentation',
-                perm_type = 'separate', replace=TRUE,
+                resample_blocks = 'separate', replace=TRUE,
                 blocksize = 1,
                 eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                W = space_measuring_functions(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 })
-  expect_equal(res$location,c(100))
+                trim_function = function(X) { 0 },
+                silent.binary = TRUE)
+  expect_equal(res$location,c(102))
   expect_equal(res$pvalue,c(0))
 
-  res <- change(X,
+  res <- fchange(X,
                 method='eigensingle',
                 statistic='Tn',
                 critical='simulation',
                 type='segmentation',
-                perm_type = 'separate', replace=TRUE,
+                resample_blocks = 'separate', replace=TRUE,
                 blocksize = 1,
                 eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                W = space_measuring_functions(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 })
-  expect_equal(res$location,c(100))
-  expect_equal(res$pvalue,c(0))
+                trim_function = function(X) { 0 },
+                silent.binary = TRUE)
+  expect_equal(res$location,c(102))
+  expect_equal(res$pvalue,c(0.003))
 
-  res <- change(X,
+  res <- fchange(X,
                 method='trace',
                 statistic='Tn',
                 critical='simulation',
                 type='segmentation',
-                perm_type = 'separate', replace=TRUE,
+                resample_blocks = 'separate', replace=TRUE,
                 blocksize = 1,
                 eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                W = space_measuring_functions(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 })
+                trim_function = function(X) { 0 },
+                silent.binary = TRUE)
   expect_equal(res$location,NULL)
   expect_equal(res$pvalue,NULL)
 
-  res <- change(X,
+  res <- fchange(X,
                 method='projmean',
                 statistic='Tn',
                 critical='simulation',
                 type='segmentation',
-                perm_type = 'separate', replace=TRUE,
+                resample_blocks = 'separate', replace=TRUE,
                 blocksize = 1,
                 eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                W = space_measuring_functions(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 })
-  expect_equal(res$location,c(52,100))
-  expect_equal(res$pvalue,c(0,0))
+                trim_function = function(X) { 0 },
+                silent.binary = TRUE)
+  expect_equal(res$location,c(50,66,100))
+  expect_equal(res$pvalue,c(0,0,0))
 
 
   set.seed(123)
   X <- generate_brownian_bridge(50)
   X$data[,26:50] <- X$data[,26:50] +5
 
-  res <- change(X,
+  res <- fchange(X,
                 method='projdistribution',
                 statistic='Tn',
-                critical='permutation',
+                critical='resample',
                 type='segmentation',
-                perm_type = 'separate', replace=TRUE,
+                resample_blocks = 'separate', replace=TRUE,
                 blocksize = 1,
                 eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                W = space_measuring_functions(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 })
+                trim_function = function(X) { 0 },
+                silent.binary = TRUE)
   expect_equal(res$location,c(25))
   expect_equal(res$pvalue,c(0))
 
-  res <- change(X,
+  res <- fchange(X,
                 method='covariance',
                 statistic='Tn',
                 critical='simulation',
                 type='segmentation',
-                perm_type = 'separate', replace=TRUE,
+                resample_blocks = 'separate', replace=TRUE,
                 blocksize = 1,
                 eigen_number=3, h=3,
                 M = 1000, J=50,
-                W = space_measuring_vectors(X = X, M = 20, space='BM'),
+                W = space_measuring_functions(X = X, M = 20, space='BM'),
                 K = bartlett_kernel,
                 alpha=0.05, cov.res = 30, weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 })
+                trim_function = function(X) { 0 },
+                silent.binary = TRUE)
   expect_equal(res$location,NULL)
   expect_equal(res$pvalue,NULL)
 })

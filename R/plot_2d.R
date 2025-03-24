@@ -14,7 +14,7 @@
   object <- dfts(object)
   data <- object$data
   plot_data <-
-    tidyr::pivot_longer(data = cbind(data.frame('Time'=object$intratime),data),
+    tidyr::pivot_longer(data = cbind(data.frame('Time'=object$fparam),data),
                         cols = 1+1:ncol(data))
   # Colors
   ## Setup up Colors
@@ -59,7 +59,7 @@
     means_mat <- matrix(rowMeans(data), nrow=nrow(data), ncol=1)
   }
   means_mat <-
-    tidyr::pivot_longer(data = cbind(data.frame('Time'=object$intratime),
+    tidyr::pivot_longer(data = cbind(data.frame('Time'=object$fparam),
                                      means_mat),
                         cols = 1+1:ncol(means_mat))
   colnames(means_mat)<- c('Time','color','value')
@@ -86,7 +86,7 @@
                                 breaks = plot_data$color) +
     ggplot2::xlab('') +
     ggplot2::ylab('') +
-    ggplot2::xlim(range(object$intratime))
+    ggplot2::xlim(range(object$fparam))
 }
 
 
@@ -123,7 +123,7 @@
   }
 
   plot_data <- tidyr::pivot_longer(
-    data = cbind(data.frame('Time'=object$intratime),subset_data),
+    data = cbind(data.frame('Time'=object$fparam),subset_data),
     cols = 1+1:ncol(subset_data))
   # Colors
   ## Setup up Colors
@@ -169,7 +169,7 @@
     # warnings
     name <- group <- group1 <- group2 <- Time <- color <- type <- value <- . <- NULL
 
-    bounds <- data.frame('Time'=object$intratime)
+    bounds <- data.frame('Time'=object$fparam)
     for (i in 1:(length(changes) - 1)) {
       bounds_tmp <-
         t(apply(object$data[,(changes[i]+1):changes[i+1]], MARGIN = 1,
@@ -192,7 +192,7 @@
                              probs = c(alpha/2,1-alpha/2),
                              na.rm=TRUE)
     colnames(bounds) <- c('L','U')
-    bounds_long <- cbind(data.frame('Time'=object$intratime), bounds) %>%
+    bounds_long <- cbind(data.frame('Time'=object$fparam), bounds) %>%
       tidyr::pivot_longer(cols = colnames(.)[-1]) %>%
       dplyr::mutate('group'='X1',color='gray')
     bounds_wide <- bounds_long %>%
@@ -211,7 +211,7 @@
       ggplot2::aes(x=Time,
                    ymin=L, ymax=U,group=group, fill=color),
       data = bounds_wide,, alpha=0.25) +
-    ggplot2::geom_line(ggplot2::aes(x=object$intratime, y=mean(object)),
+    ggplot2::geom_line(ggplot2::aes(x=object$fparam, y=mean(object)),
                        linewidth=1.5, color='black', linetype='dashed', alpha=0.25) +
     ggplot2::geom_line(ggplot2::aes(x=Time,y=value,
                                     group=name,

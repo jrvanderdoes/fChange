@@ -10,7 +10,7 @@
 \item{object}{A dfts object or data which can be automatically converted to that
 format. See \code{\link[=dfts]{dfts()}}.}
 
-\item{changes}{changes, if there are any. Default is NULL.}
+\item{changes}{Vector of change locations, if there are any. Default is NULL.}
 
 \item{lag.max}{Max lags to consider for ACF. Default is 20.}
 
@@ -19,16 +19,25 @@ format. See \code{\link[=dfts]{dfts()}}.}
 \item{demean}{Boolean if data should be demeaned based on changes and create
 plots based on these residuals.}
 
-\item{...}{Unused.}
+\item{...}{Data to pass into underlying functions like the KPSS, portmanteau,
+and stationary tests. In general it is recommended to not use this and
+instead apply the specialized functions directly.}
 }
 \value{
-Plot (ggplot) summarizing the data
+List with the elements:
+\enumerate{
+\item summary_data: summary results for the data.
+\item summary_plot: summary plot for the data.
+}
 }
 \description{
-Summary for dfts Object
+General summary function to view data overview. Several plots and test
+statistics are returned to give a general view of the data. More details
+can be found with more specialized functions.
 }
 \examples{
-res <- summary(dfts(electricity$data[,1:20]), lag.max=2)
-# res1 <- summary(dfts(electricity$data[,1:20]), changes=c(3), lag.max=2)
-# summary(electricity, changes=c(50,200,300), lag.max=5, demean = TRUE)
+res <- summary(electricity[,1:20], lag.max=2)
+}
+\seealso{
+\code{\link[base:summary]{base::summary()}}
 }
