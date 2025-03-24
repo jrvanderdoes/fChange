@@ -14,7 +14,8 @@
 qqplot <- function(x, ...) UseMethod("qqplot")
 #' @rdname qqplot
 #'
-#' @return **qqplot.default**
+#' @returns **qqplot.default**: returns results from [stats::qqplot()].
+#' @export
 qqplot.default <- function(x, ...) stats::qqplot(x, ...)
 
 
@@ -31,7 +32,7 @@ qqplot.default <- function(x, ...) stats::qqplot(x, ...)
 #' @param legend Boolean indicating if legend should be shown on plot.
 #' @param ... Additional parameters based on the data.
 #'
-#' @return **qqplot.dfts**: ggplot2 for QQ plot.
+#' @returns **qqplot.dfts**: ggplot2 for QQ plot.
 #' @export
 #'
 #' @rdname qqplot

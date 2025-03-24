@@ -37,7 +37,7 @@ the number of principal components.}
 \item{legend}{Boolean indicating if legend should be shown on plot.}
 }
 \value{
-\strong{qqplot.default}
+\strong{qqplot.default}: returns results from \code{\link[stats:qqnorm]{stats::qqplot()}}.
 
 \strong{qqplot.dfts}: ggplot2 for QQ plot.
 }
