@@ -9,7 +9,7 @@ scalar time series or functional time series defined in dfts()."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fChange</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,7 +21,6 @@ scalar time series or functional time series defined in dfts()."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Examples.html">Examples</a></li>
-    <li><a class="dropdown-item" href="../articles/Simulations.html">Simulations</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -77,7 +76,7 @@ scalar time series or functional time series defined in <code><a href="dfts.html
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>Object for computation of (partial) autocorrelation function
-(ACF/PACF).</p></dd>
+(see <code>acf()</code> or <code>pacf</code>).</p></dd>
 
 
 <dt id="arg-lag-max">lag.max<a class="anchor" aria-label="anchor" href="#arg-lag-max"></a></dt>
@@ -86,15 +85,13 @@ that will be used to estimate the (partial) autocorrelation function.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Further arguments passed to the <code>acf.dfts()</code>
-function.</p></dd>
+<dd><p>Further arguments passed to the <code>.plot_FACF</code> function.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>A value between 0 and 1 that indicates
-the confidence interval for the i.i.d. bounds
-of the partial autocorrelation function. By default
-<code>ci = 0.95</code>.</p></dd>
+<dd><p>A value between 0 and 1 that indicates significant level for
+the confidence interval for the i.i.d. bounds of the (partial) autocorrelation
+function. By default <code>alpha = 0.05</code>.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
@@ -111,31 +108,25 @@ Accepted values are:</p><ul><li><p>"Welch": Welch approximation.</p></li>
 
 
 <dt id="arg-figure">figure<a class="anchor" aria-label="anchor" href="#arg-figure"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, plots the
-estimated partial autocorrelation function with the
-specified i.i.d. bound.</p></dd>
+<dd><p>Logical. If <code>TRUE</code>, plots the estimated
+function with the specified bounds.</p></dd>
 
 
 <dt id="arg-n-pcs">n_pcs<a class="anchor" aria-label="anchor" href="#arg-n-pcs"></a></dt>
-<dd><p>Number of principal components
-that will be used to fit the ARH(p) models.</p></dd>
+<dd><p>Number of principal components that will be used to fit the
+ARH(p) models.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>ACF or PACF values and plots</p>
-<p>Return a list with:</p><ul><li><p><code>SWN_bound</code>: The upper prediction
+    <p>List with ACF or PACF values and plots</p>
+<ul><li><p><code>acfs/pacfs</code>: Autocorrelation values for
+each lag of the functional time series.</p></li>
+<li><p><code>SWN_bound</code>: The upper prediction
 bound for the i.i.d. distribution under strong white noise assumption.</p></li>
 <li><p><code>WWN_bound</code>: The upper prediction
 bound for the i.i.d. distribution under weak white noise assumption.</p></li>
-<li><p><code>acfs</code>: Autocorrelation values for
-each lag of the functional time series.</p></li>
 <li><p><code>plot</code>: Plot of autocorrelation values for
-each lag of the functional time series.</p></li>
-</ul><p>Return a list with:</p><ul><li><p><code>Blueline</code>: The upper prediction
-bound for the i.i.d. distribution.</p></li>
-<li><p><code>rho</code>: Partial autocorrelation
-coefficients for
 each lag of the functional time series.</p></li>
 </ul></div>
     <div class="section level2">
@@ -143,27 +134,21 @@ each lag of the functional time series.</p></li>
     <p>Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
 <em>Functional time series model identification and diagnosis by
 means of auto- and partial autocorrelation analysis.</em>
-Computational Statistics &amp; Data Analysis, 155, 107108.
-<a href="https://doi.org/10.1016/j.csda.2020.107108" class="external-link">https://doi.org/10.1016/j.csda.2020.107108</a></p>
+Computational Statistics &amp; Data Analysis, 155, 107108.</p>
 <p>Mestre, G., Portela, J., Munoz San Roque, A., Alonso, E. (2020).
 <em>Forecasting hourly supply curves in the Italian Day-Ahead
 electricity market with a double-seasonal SARMAHX model.</em>
 International Journal of Electrical Power &amp; Energy Systems,
-121, 106083. <a href="https://doi.org/10.1016/j.ijepes.2020.106083" class="external-link">https://doi.org/10.1016/j.ijepes.2020.106083</a></p>
+121, 106083.</p>
 <p>Kokoszka, P., Rice, G., Shang, H.L. (2017).
 <em>Inference for the autocovariance of a functional
 time series under conditional heteroscedasticity</em>
 Journal of Multivariate Analysis,
-162, 32–50. <a href="https://doi.org/10.1016/j.jmva.2017.08.004" class="external-link">https://doi.org/10.1016/j.jmva.2017.08.004</a></p>
-<p>Mestre G., Portela J., Rice G., Munoz San Roque A., Alonso E. (2021).
-<em>Functional time series model identification and diagnosis by
-means of auto- and partial autocorrelation analysis.</em>
-Computational Statistics &amp; Data Analysis, 155, 107108.
-<a href="https://doi.org/10.1016/j.csda.2020.107108" class="external-link">https://doi.org/10.1016/j.csda.2020.107108</a></p>
+162, 32–50.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/acf.html" class="external-link">stats::acf()</a></code>, <code>acf.dfts()</code></p></div>
+    <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/acf.html" class="external-link">stats::acf()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -179,13 +164,6 @@ Computational Statistics &amp; Data Analysis, 155, 107108.
 <span class="r-plt img"><img src="acf-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="acf-4.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="acf-5.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pacfs</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.064037897 0.009777752 0.022652278 0.010114004 0.010038782 0.027484322</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 0.010180744 0.010197617 0.007987793 0.014724775</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $SWN</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.04969999</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -3,8 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   articles/Examples: Examples.html
-  articles/Simulations: Simulations.html
-last_built: 2025-03-04T18:29Z
+last_built: 2025-03-24T02:47Z
 urls:
   reference: https://jrvanderdoes.github.io/fChange/reference
   article: https://jrvanderdoes.github.io/fChange/articles
