@@ -37,9 +37,11 @@
 #'  analysis for spectrum and trace of covariance operators. Environmetrics
 #'  (London, Ont.), 31(1)
 #'
-#' @examples
-#' #.change_trace(generate_brownian_motion(200,v=seq(0,1,0.05)))
-#' #.change_trace(electricity)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .change_trace(generate_brownian_motion(200))
+#'  }
 .change_trace <- function(X, changes = NULL, M = 1000,
                           statistic = 'Tn', critical='simulation',
                           blocksize=1, replace=TRUE, type='separate'){
@@ -105,7 +107,7 @@
   lambda <- Cov_op$eigen_val
   T_1 <- sum(lambda)
   Xi <- sapply(1:N, function(i) X[,i] %*% X[,i])
-  sigma_sq <- sandwich::lrvar(Xi, prewhite = F)
+  sigma_sq <- sandwich::lrvar(Xi, prewhite = FALSE)
   sigma <- sqrt(sigma_sq)
 
   Tn <- rep(0,N)
@@ -158,20 +160,11 @@
 #'
 #' @seealso \code{\link{pca.fd}}
 #'
-#' @examples
-#' #.partial_cov(electricity)
-#' ## Estimated eigenvalues
-#'
-#' #e1 = eigen(autocovariance(electricity,0))
-#' #e2 = .partial_cov(electricity,x=1)
-#' #sum(round(e1$values,4) != round(e2$eigen_val,4) )
-#' #sum(round(e1$vectors,4) != round(e2$eigen_fun,4) )
-#' #sum(round(autocovariance(electricity,0),4) != round(e2$coef_matrix,4) )
-#' ## e1 and e2 will both estimate the eigenvalues of the covariance
-#' ## operator based on the whole sample
-#'
-#' ## estimates using only 90% of the data
-#' #Cov = .partial_cov(electricity, 0.9)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .partial_cov(electricity)
+#'  }
 .partial_cov <- function(X, x = NULL){
   X <- dfts(X)
   if (is.null(x)) x <- 1

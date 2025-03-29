@@ -64,9 +64,12 @@ qqplot.dfts <- function(x, TVE=0.95, d.max=NULL, alpha = 0.05,
 #' @references John Fox, & Sanford Weisberg (2019). An R Companion to Applied
 #'  Regression. Sage.
 #'
-#' @examples
-#' # result <-  .plot_distribution(electricity)
-#' # result1 <- .plot_distribution(electricity,distribution='exp', changes=c(50,175))
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .plot_distribution(electricity)
+#'    \item .plot_distribution(electricity,distribution='exp', changes=c(50,175))
+#'  }
 #'
 #' @noRd
 #' @keywords internal
@@ -223,8 +226,6 @@ qqplot.dfts <- function(x, TVE=0.95, d.max=NULL, alpha = 0.05,
       ggplot2::scale_x_continuous(breaks=floor(min(results$z)):ceiling(max(results$z)))
   }
 
-  # if(!is.null(labels)) p <- p + geom_text( aes(label = label))
-  # print(p)
   p
 }
 

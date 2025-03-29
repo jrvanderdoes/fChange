@@ -6,7 +6,7 @@
 \alias{fChange-package}
 \title{General Information for fChange}
 \description{
-Analyze functional data and its change points. Includes functionality to store and process data, summarize and validate assumptions, characterize and perform inference of change points, and provide visualizations. Data is stored as discretely collected observations without requiring the selection of basis functions.
+Analyze functional data and its change points. Includes functionality to store and process data, summarize and validate assumptions, characterize and perform inference of change points, and provide visualizations. Data is stored as discretely collected observations without requiring the selection of basis functions. For more details see chapter 8 of Horvath and Rice (2024) \doi{10.1007/978-3-031-51609-2}. Additional papers are forthcoming. Focused works are also included in the documentation of corresponding functions.
 }
 \seealso{
 Useful links:

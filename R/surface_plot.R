@@ -12,8 +12,11 @@
 #' @noRd
 #' @keywords internal
 #'
-#' @examples
-#' #.plot_surface(autocovariance(electricity,1))
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .plot_surface(autocovariance(electricity,1))
+#'  }
 .plot_surface <- function(X, ...){
   z <- t(X$data)
 

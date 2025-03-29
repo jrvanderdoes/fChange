@@ -47,7 +47,7 @@ impute <- function(X,
                               'linear','functional'),
                    obs_share_data = FALSE){
   # See :Modern multiple imputation with functional data" for more to add
-  X <- dfts(X, inc.warnings = F)
+  X <- dfts(X, inc.warnings = FALSE)
   method <- .verify_input(method,
                           c('zero','mean_obs','median_obs', 'mean_data',
                             'median_data', 'linear', 'functional') )
@@ -117,7 +117,7 @@ impute <- function(X,
                 call. = FALSE)
          })
 
-  dfts(X_imp,name=X$name,labels=X$labels, fparam=X$fparam, inc.warnings = F)
+  dfts(X_imp,name=X$name,labels=X$labels, fparam=X$fparam, inc.warnings = FALSE)
 }
 
 

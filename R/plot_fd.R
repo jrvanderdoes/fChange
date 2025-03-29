@@ -34,13 +34,12 @@
 #' @noRd
 #' @keywords internal
 #'
-#' @examples
-#' #.plot_fd(X = electricity$data[, 1:10])
-#' #.plot_fd(X = electricity$data[, 1:50], changes = c(25))
-#' #.plot_fd(
-#' #  X = electricity, changes = c(50, 150, 220, 300),
-#' #  interactive = FALSE, showticklabels = FALSE
-#' #)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .plot_fd(X = electricity$data[, 1:10],interactive = FALSE)
+#'    \item .plot_fd(X = electricity$data[, 1:50], changes = c(25))
+#'  }
 .plot_fd <- function(X, changes = NULL, plot_title = X$name,
                     val_axis_title = "Value",
                     res_axis_title = "fparam",
@@ -384,8 +383,8 @@
   # data <- X$data
   # curve_points <- X$fparam
   valRange <- c(
-    floor(min(X$data,na.rm = T)),
-    ceiling(max(X$data,na.rm = T))
+    floor(min(X$data,na.rm = TRUE)),
+    ceiling(max(X$data,na.rm = TRUE))
   )
 
   name <- V1 <- value <- NULL
@@ -423,7 +422,7 @@
 
   ## Set up Tick Labels
   #   TODO:: Test more thoroughly
-  r_z <- range(plotData$Value,na.rm = T)
+  r_z <- range(plotData$Value,na.rm = TRUE)
   r_z[2] <- r_z[2]+4
   z_range <- round(r_z, -nchar(round(max(plotData$Value,na.rm = TRUE)))+1)
 

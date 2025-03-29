@@ -12,9 +12,12 @@
 #' @noRd
 #' @keywords internal
 #'
-#' @examples
-#' # res <- .change_pca_distribution(generate_brownian_motion(20,
-#' #                                 v=seq(0,1,length.out=10)),TVE=0.2)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item res <- .change_pca_distribution(generate_brownian_motion(20,
+#'                                          v=seq(0,1,length.out=10)), TVE=0.2)
+#'  }
 .change_pca_distribution <- function(X, statistic='Tn', critical='resample',
                                      TVE = 0.95, gam = 0.5, M = 200,
                                      blocksize = 1, resample_blocks = 'separate',
@@ -70,9 +73,9 @@
     # },dat=dat,ws=ws)
 
     cmean <- t(apply(dat,MARGIN = 1,cumsum)) /
-      matrix(1:ncol(dat),nrow=length(t_vals),ncol=n,byrow = T)
+      matrix(1:ncol(dat),nrow=length(t_vals),ncol=n,byrow = TRUE)
     cmean1 <- t(apply(dat[,n:2,drop=FALSE],MARGIN = 1,cumsum))[,(n-1):1] /
-      matrix((n-1):1,nrow=length(t_vals),ncol=n-1,byrow = T)
+      matrix((n-1):1,nrow=length(t_vals),ncol=n-1,byrow = TRUE)
     internals <- abs(cmean[,-n] - cmean1)^2 * ws
 
     kappa[i,] <- weights * dot_integrate_col(internals)

@@ -5,7 +5,7 @@ test_that("Integrate Verify", {
 })
 
 test_that("Integrate Columns Verify", {
-  dat <- matrix(c(1:10,c(rep(5,5),rep(10,5))),ncol = 2,nrow = 10,byrow = F)
+  dat <- matrix(c(1:10,c(rep(5,5),rep(10,5))),ncol = 2,nrow = 10,byrow = FALSE)
 
   expect_equal( dot_integrate_col(dat), c(5.5,7.5))
   expect_equal(
@@ -14,7 +14,7 @@ test_that("Integrate Columns Verify", {
 })
 
 test_that("Integrate Agreement Verify", {
-  dat <- matrix(c(1:10,c(rep(2,5),rep(8,5))),ncol = 2,nrow = 10,byrow = F)
+  dat <- matrix(c(1:10,c(rep(2,5),rep(8,5))),ncol = 2,nrow = 10,byrow = FALSE)
   ts <- c(seq(0,0.5, length.out=7),seq(0.7,1,length.out=3))
 
   expect_equal( dot_integrate_col(dat),

@@ -648,9 +648,10 @@ dim.dfts <- function(x, ...) {
 #' Basic formatting to print a dfts object.
 #'
 #' @param x A dfts object. See [dfts()].
-#' @param ... unused parameter
+#' @param ... unused parameter.
 #'
 #' @export
+#' @returns No return value, called to format printing of dfts object to console.
 #'
 #' @examples
 #' electricity

@@ -10,9 +10,12 @@
 #' @noRd
 #' @keywords internal
 #'
-#' @examples
-#' #.plot_change(dfts(electricity$data[,1:150]),changes = c(66, 144))
-#' #.plot_change(electricity,changes = c(66, 144, 204, 243, 305))
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .plot_change(dfts(electricity$data[,1:150]),changes = c(66, 144))
+#'    \item .plot_change(electricity,changes = c(66, 144, 204, 243, 305))
+#'  }
 .plot_change <- function(X, changes,
                   plot_title = NULL,
                   val_axis_title = "Value",
@@ -191,9 +194,12 @@
 #' @noRd
 #' @keywords internal
 #'
-#' @examples
-#' #result <- .plot_interval(dfts(electricity$data[,1:80]),
-#' #                        data.frame('change'=66, 'lower'=60.169, 'upper'=72.542))
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .plot_interval(dfts(electricity$data[,1:80]),
+#'                         data.frame('change'=66, 'lower'=60.17, 'upper'=72.54))
+#'  }
 .plot_interval <- function(X, intervals,
                           plot_title = X$name,
                           val_axis_title = "Value",

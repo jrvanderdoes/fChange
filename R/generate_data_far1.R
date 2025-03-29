@@ -32,7 +32,9 @@ generate_far1 <- function(N, resolution, sd=1, dependence=1/2, drop_first=FALSE)
 
   # c <- dependence * 1 / sqrt(pracma::quad2d(function(x,y,K){ K(x,y)^2 },
   #                                  xa = 0,xb = 1,ya = 0, yb = 1,K=K) )
-  K_mat <- sapply(seq(0,1,length.out=500),function(x,ys,K){K(x,ys)^2}, K=K, y=seq(0,1,length.out=500))
+  K_mat <- sapply(seq(0,1,length.out=500),
+                  function(x,ys,K){ K(x,ys)^2 },
+                  K = K, y = seq(0,1,length.out=500) )
   c <- dependence * 1 / sqrt(dot_integrate(dot_integrate_col(K_mat)))
 
   w <- generate_brownian_motion(N = N, v = resolution, sd = sd)$data
@@ -47,12 +49,19 @@ generate_far1 <- function(N, resolution, sd=1, dependence=1/2, drop_first=FALSE)
 
   X <- data.frame(matrix(0, ncol=N,nrow=r))
   X[,1] <- w[,1]
+  X1 <- X
 
+  K_mat1 <- sapply(resolution,
+                  function(x,ys,K){ K(x,ys) },
+                  K = K, y = seq(0,1,length.out=100) )
+  # TODO:: Improve this
   for(i in 2:N){
     for(j in 1:r){
-      X[j,i] <- c * stats::integrate(function(s,t,X_lag){
-        K(s,t)*X_lag
-      },lower = 0,upper = 1,t=res[j], X_lag=X[j,i-1])$value + w[j,i]
+      X1[j,i] <- c * dot_integrate(K_mat1[,j]*X[j,i-1],
+                                  r = seq(0,1,length.out=100)) + w[j,i]
+      # X[j,i] <- c * stats::integrate(function(s,t,X_lag){
+      #   K(s,t) * X_lag
+      # },lower = 0,upper = 1,t=res[j], X_lag=X[j,i-1])$value + w[j,i]
     }
   }
 

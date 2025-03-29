@@ -57,6 +57,10 @@ like \code{color = "red"} or \code{size = 3}. Two important ones are
 \code{theta} (azimuthal rotation) and \code{phi} (colatitude rotation)
 to define angle in degrees of viewing data.}
 }
+\value{
+No direct return value, called to be used with \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}
+in designing the plot.
+}
 \description{
 This function adds 3D geoms such as points and paths to a ggplot2 plot.
 }

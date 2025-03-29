@@ -279,10 +279,11 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 #' @references Kokoszka P., & Rice G., & Shang H.L. (2017). Inference for the autocovariance of a functional time series
 #' under conditional heteroscedasticity. Journal of Multivariate Analysis, 162, 32-50.
 #'
-#' @examples
-#' # f <- generate_brownian_motion(100)
-#' # .single_lag_test(f, lag = 1)
-#' # .single_lag_test(f, lag = 2, M=100)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .single_lag_test(generate_brownian_motion(100), lag = 1)
+#'  }
 .single_lag_test <- function(
     data, lag=1, alpha=0.05, method = c('iid', 'lowdiscrepancy', 'bootstrap'),
     M=500, resample_blocks = 'separate',
@@ -353,10 +354,11 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 #' @references Kokoszka P., & Rice G., & Shang H.L. (2017). Inference for the autocovariance of a functional time series
 #'  under conditional heteroscedasticity. Journal of Multivariate Analysis, 162, 32-50.
 #'
-#' @examples
-#' # b <- generate_brownian_motion(150)
-#' # .multi_lag_test(b, lag = 5)
-#' # .multi_lag_test(b, lag = 10, M = 50)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .multi_lag_test(generate_brownian_motion(100), lag = 5)
+#'  }
 .multi_lag_test <- function(data, lag = 20, M=NULL,
                            method = c('iid', 'lowdiscrepancy'), alpha=0.05) {
 
@@ -456,11 +458,11 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 #' @references Chen W.W. & Deo R.S. (2004). Power transformations to induce normality and their applications.
 #' Journal of the Royal Statistical Society: Series B (Statistical Methodology), 66, 117-130.
 #'
-#' @examples
-#' # b <- generate_brownian_motion(100)
-#' # .spectral_test(b)
-#' # .spectral_test(b, kernel = 'Parzen', bandwidth = 'adaptive')
-#' # .spectral_test(b, kernel = 'Bartlett', bandwidth = 2)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .spectral_test(generate_brownian_motion(100))
+#'  }
 .spectral_test <- function(data, kernel = bartlett_kernel,
                           bandwidth = NULL, alpha = 0.05, order=NULL) {
 
@@ -535,9 +537,11 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 #' @references Gabrys R., & Kokoszka P. (2007). Portmanteau Test of Independence for Functional Observations.
 #' Journal of the American Statistical Association, 102:480, 1338-1348, DOI: 10.1198/016214507000001111.
 #'
-#' @examples
-#' # b <- generate_brownian_motion(250)
-#' # .independence_test(b, components = 3, lag = 5)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .independence_test(generate_brownian_motion(100), components=3, lag=5)
+#'  }
 .independence_test <- function(data, components, lag, alpha = 0.05) {
   data <- dfts(data)
 
@@ -603,8 +607,11 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 #' @noRd
 #' @keywords internal
 #'
-#' @examples
-#' # .imhof_test(dfts(electricity$data[,1:50]),1)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .imhof_test(dfts(electricity$data[,1:50]),1)
+#'  }
 .imhof_test <- function(data, lag) {
   data <- dfts(data)
 

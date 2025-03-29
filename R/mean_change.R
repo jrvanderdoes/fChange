@@ -26,9 +26,12 @@
 #'  breaks in functional data without dimension reduction. Journal of the Royal
 #'  Statistical Society. Series B, Statistical Methodology, 80(3), 509-529.
 #'
-#' @examples
-#' # .change_mean(generate_brownian_motion(500,v=seq(0,1,length.out=25)), M = 250)
-#' # .change_mean(electricity, M = 250)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .change_mean(generate_brownian_motion(500), M = 250)
+#'    \item .change_mean(electricity, M = 250)
+#'  }
 .change_mean <- function(data, statistic=c('Mn','Tn'), critical='simulation',
                          M = 1000, h = 0, K = bartlett_kernel,
                          blocksize=1, type = 'separate',replace = TRUE) {
@@ -43,14 +46,6 @@
   tmp <- .mean_statistic(data$data, statistic,location=TRUE)
   stat <- tmp[1]
   k.star <- tmp[2]
-  # # Compute Test statistic
-  # if(statistic=='Tn'){
-  #   stat <- dot_integrate(Sn2)
-  # }else if(statistic=='Mn'){
-  #   stat <- max(Sn2,na.rm = T)
-  # }else{
-  #   stop('Set `statistic` to `Tn` or `Mn`.',call. = FALSE)
-  # }
 
   if(critical=='simulation'){
     values_sim <- sapply(1:M, function(k, lambda, n, statistic)
@@ -100,14 +95,14 @@
   if(statistic=='Tn'){
     stat <- dot_integrate(Sn2)
   }else if(statistic=='Mn'){
-    stat <- max(Sn2,na.rm = T)
+    stat <- max(Sn2, na.rm = TRUE)
   }else{
     stop('Set `statistic` to `Tn` or `Mn`.',call. = FALSE)
   }
 
   if(!location) return(stat)
 
-  c(stat, min(which(Sn2 == max(Sn2,na.rm = T))))
+  c(stat, min(which(Sn2 == max(Sn2,na.rm = TRUE))))
 }
 
 
@@ -131,15 +126,9 @@
     diag(lambda))
 
   if(statistic=='Tn'){
-    # for (j in (1:length(lambda))) {
-    #   BridgeLam[j, ] <- lambda[j] * (sde::BBridge(x = 0, y = 0, t0 = 0, T = 1, N = n - 1)^2)
-    # }
     threshold <- dot_integrate(colSums(BridgeLam))
 
   } else if(statistic=='Mn'){
-    # for (j in (1:length(lambda))) {
-    #   BridgeLam[j, ] <- lambda[j] * (sde::BBridge(x = 0, y = 0, t0 = 0, T = 1, N = n - 1)^2)
-    # }
     threshold <- max(colSums(BridgeLam))
   }
 

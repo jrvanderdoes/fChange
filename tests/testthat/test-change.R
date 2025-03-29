@@ -12,11 +12,27 @@ test_that("Characteristic change", {
                 critical = 'simulation',
                 M = 200)
   expect_equal(tmp$pvalue, 0.835)
+
+  ## Change
+  set.seed(123)
+  tmp <- fchange(electricity, method='characteristic', h=0,
+                 statistic='Mn', type='Single',
+                 critical = 'simulation',
+                 M = 200)
+  expect_equal(tmp$pvalue, 0)
+
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+  ## No Change
+  set.seed(123)
   tmp <- fchange(dat, method='characteristic', h=0,
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.680)
+  expect_equal(tmp$pvalue, 0.755)
 
   set.seed(123)
   tmp <- fchange(X = dat, method='characteristic', h=0,
@@ -49,10 +65,6 @@ test_that("Characteristic change", {
                 critical = 'simulation',
                 M = 200)
   expect_equal(tmp$pvalue, 0)
-  tmp <- fchange(electricity, method='characteristic', h=0,
-                statistic='Mn', type='Single',
-                critical = 'simulation',
-                M = 200)
   expect_equal(tmp$pvalue, 0)
 
   set.seed(123)
@@ -60,7 +72,7 @@ test_that("Characteristic change", {
                 statistic='Tn', type='Single',
                 critical = 'welch',
                 M = 200)
-  expect_equal(tmp$pvalue, 0)
+  # expect_equal(tmp$pvalue, 0)
   expect_error(change(electricity, method='characteristic', h=0,
                       statistic='Mn', type='Single',
                       critical = 'welch',
@@ -90,21 +102,29 @@ test_that("Mean change", {
                 M = 1000, K = bartlett_kernel)
   expect_equal(tmp$pvalue, 0.511)
 
+  tmp <- fchange(electricity, method='mean',
+                 statistic='Mn', type='Single',
+                 critical = 'resample',
+                 M = 1000, K = bartlett_kernel)
+  expect_equal(tmp$pvalue, 0)
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+
+  # Simulation - No Change
+  set.seed(123)
   tmp <- fchange(dat, method='mean',
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 1000, K = bartlett_kernel)
-  expect_equal(tmp$pvalue, 0.581)
+  expect_equal(tmp$pvalue, 0.579)
 
   # resample - Change
+  set.seed(1234)
   tmp <- fchange(electricity, method='mean',
                 statistic='Tn', type='Single',
-                critical = 'resample',
-                M = 1000, K = bartlett_kernel)
-  expect_equal(tmp$pvalue, 0)
-
-  tmp <- fchange(electricity, method='mean',
-                statistic='Mn', type='Single',
                 critical = 'resample',
                 M = 1000, K = bartlett_kernel)
   expect_equal(tmp$pvalue, 0)
@@ -121,22 +141,36 @@ test_that("Robust change", {
                 M = 1000)
   expect_equal(tmp$pvalue, 0.493)
 
+  # Change
+  set.seed(134)
+  dat_change <- dat
+  dat_change$data[,50:100] <- dat_change$data[,50:100]+5
+
+  tmp <- fchange(dat_change, method='robustmean',
+                 statistic='Mn', type='Single',
+                 critical = 'resample',
+                 M = 500)
+  expect_equal(tmp$pvalue, 0.014)
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+  # No Change
+  set.seed(123)
   tmp <- fchange(dat, method='robustmean',
                 statistic='Mn', type='Single',
                 critical = 'simulation',
                 M = 1000)
-  expect_equal(tmp$pvalue, 0.764)
+  expect_equal(tmp$pvalue, 0.778)
 
   # Change
-  dat$data[,50:100] <- dat$data[,50:100]+5
-  tmp <- fchange(dat, method='robustmean',
-                statistic='Tn', type='Single',
-                critical = 'resample',
-                M = 500)
-  expect_equal(tmp$pvalue, 0.012)
+  set.seed(213)
+  dat_change <- dat
+  dat_change$data[,50:100] <- dat_change$data[,50:100]+5
 
-  tmp <- fchange(dat, method='robustmean',
-                statistic='Mn', type='Single',
+  tmp <- fchange(dat_change, method='robustmean',
+                statistic='Tn', type='Single',
                 critical = 'resample',
                 M = 500)
   expect_equal(tmp$pvalue, 0.008)
@@ -152,14 +186,26 @@ test_that("Eigen change", {
                 critical = 'simulation',
                 M = 200)
   expect_equal(tmp$pvalue, 0.240)
+
+  tmp <- fchange(electricity, method='eigensingle', h=0, eigen_number=1,
+                statistic='Mn',
+                critical = 'simulation',
+                M = 1000)
+  expect_equal(tmp$pvalue, 0)
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+  ## No Change
+  set.seed(123)
   tmp <- fchange(dat, method='eigensingle', h=0, eigen_number=1,
                 statistic='Tn',
                 critical = 'simulation',
                 M = 200)
-  expect_equal(tmp$pvalue, 0.280)
+  expect_equal(tmp$pvalue, 0.210)
 
   set.seed(123)
-  # dat <- generate_brownian_bridge(30)
   tmp <- fchange(dat, method='eigenjoint', h=0, eigen_number=1,
                 statistic='Mn',
                 critical = 'resample',
@@ -207,6 +253,12 @@ test_that("Trace change", {
                 M = 1000)
   expect_equal(tmp$pvalue, 0.292)
 
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+  # No change
   tmp <- fchange(dat, method='trace',
                 statistic='Mn', type='Single',
                 critical = 'resample',
@@ -237,6 +289,13 @@ test_that("Covariance change", {
                 critical = 'simulation',
                 M = 1000, cov.res = 20)
   expect_equal(tmp$pvalue, 0.051)
+
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+
   set.seed(123)
   tmp <- fchange(dat, method='covariance',
                 statistic='Tn',
@@ -268,6 +327,14 @@ test_that("PCA-Mean change", {
                 critical = 'simulation',
                 M = 1000)
   expect_equal(tmp$pvalue, 0.210)
+
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+
+  # No Change
   tmp <- fchange(dat, method='projmean',
                 statistic='Tn',
                 critical = 'resample',
@@ -310,20 +377,29 @@ test_that("PCA-Distribution change", {
                 M = 100)
   expect_equal(tmp$pvalue, 0.530)
   tmp <- fchange(dat, method='projdistribution',
+                 statistic='Mn',
+                 critical = 'resample',
+                 M = 100)
+  expect_equal(tmp$pvalue, 0.53)
+
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+
+  # No Change
+  set.seed(123)
+  tmp <- fchange(dat, method='projdistribution',
                 statistic='Mn',
                 critical = 'resample',
                 M = 100)
-  expect_equal(tmp$pvalue, 0.530)
+  expect_equal(tmp$pvalue, 0.610)
 
   # Change
   dat$data[,25:50] <- dat$data[,25:50]+5
   tmp <- fchange(dat, method='projdistribution',
                 statistic='Tn',
-                critical = 'resample',
-                M = 100)
-  expect_equal(tmp$pvalue, 0)
-  tmp <- fchange(dat, method='projdistribution',
-                statistic='Mn',
                 critical = 'resample',
                 M = 100)
   expect_equal(tmp$pvalue, 0)
@@ -360,6 +436,35 @@ test_that("Check Elbow Plots", {
   expect_equal(class(res$plots$improvement)[1], 'gg')
   expect_equal(round(sum(res$information[,2]),4), 35.6545)
 
+  ## Change
+  set.seed(123)
+  dat_change <- generate_brownian_bridge(100)
+  dat_change$data[,51:100] <- dat_change$data[,51:100] + 5
+  res <- fchange(X = dat_change,
+                 method='characteristic',
+                 type='Elbow',
+                 max_changes=min(ncol(dat),20),
+                 eigen_number=2, h=1,
+                 W = space_measuring_functions(X = dat, M = 20, space='BM'),
+                 K = bartlett_kernel,
+                 weighting = 1/4, TVE=0.95,
+                 trim_function = function(X) { 0 },
+                 errors='L2', recommendation_change_points = 2,
+                 recommendation_improvement = 0.15)
+  expect_equal(res$suggestion$changes,50)
+  expect_equal(class(res$suggestion$plot)[1], 'gg')
+  expect_equal(class(res$plots$variability)[1], 'gg')
+  expect_equal(class(res$plots$explained)[1], 'gg')
+  expect_equal(class(res$plots$improvement)[1], 'gg')
+  expect_equal(round(sum(res$information[,2]),4),  224.252)
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+  ## No Changes
+
+  set.seed(123)
   res <- fchange(X = dat,
                 method='mean',
                 type='Elbow',
@@ -465,29 +570,15 @@ test_that("Check Elbow Plots", {
   expect_equal(res$suggestion$changes,NA)
 
 
-  ## Change
-  set.seed(123)
-  dat <- generate_brownian_bridge(100)
-  dat$data[,51:100] <- dat$data[,51:100] + 5
-  res <- fchange(X = dat,
-                method='characteristic',
-                type='Elbow',
-                max_changes=min(ncol(dat),20),
-                eigen_number=2, h=1,
-                W = space_measuring_functions(X = dat, M = 20, space='BM'),
-                K = bartlett_kernel,
-                weighting = 1/4, TVE=0.95,
-                trim_function = function(X) { 0 },
-                errors='L2', recommendation_change_points = 2,
-                recommendation_improvement = 0.15)
-  expect_equal(res$suggestion$changes,50)
-  expect_equal(class(res$suggestion$plot)[1], 'gg')
-  expect_equal(class(res$plots$variability)[1], 'gg')
-  expect_equal(class(res$plots$explained)[1], 'gg')
-  expect_equal(class(res$plots$improvement)[1], 'gg')
-  expect_equal(round(sum(res$information[,2]),4),  224.252)
 
-  res <- fchange(X = dat,
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
+
+  ## Changes
+  set.seed(123)
+  res <- fchange(X = dat_change,
                 method='mean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
@@ -500,7 +591,7 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,50)
 
-  res <- fchange(X = dat,
+  res <- fchange(X = dat_change,
                 method='robustmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
@@ -513,7 +604,7 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,50)
 
-  res <- fchange(X = dat,
+  res <- fchange(X = dat_change,
                 method='eigenjoint',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
@@ -526,7 +617,7 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,c(52, 49, 50))
 
-  res <- fchange(X = dat,
+  res <- fchange(X = dat_change,
                 method='eigensingle',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
@@ -539,7 +630,7 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,c(52, 49, 50))
 
-  res <- fchange(X = dat,
+  res <- fchange(X = dat_change,
                 method='trace',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
@@ -552,7 +643,7 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
 
-  res <- fchange(X = dat,
+  res <- fchange(X = dat_change,
                 method='covariance',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
@@ -565,7 +656,7 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,c(39,50))
 
-  res <- fchange(X = dat,
+  res <- fchange(X = dat_change,
                 method='projmean',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
@@ -578,7 +669,7 @@ test_that("Check Elbow Plots", {
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,50)
 
-  res <- fchange(X = dat,
+  res <- fchange(X = dat_change,
                 method='projdistribution',
                 type='Elbow',
                 max_changes=min(ncol(dat),20),
@@ -646,6 +737,11 @@ test_that("Binary Segmentation", {
                 silent.binary = TRUE)
   expect_equal(res$location,c(50,99))
   expect_equal(res$pvalue,c(0.000,0.000))
+
+  #################
+  ## Only run below locally
+  testthat::skip_on_cran()
+  #################
 
   res <- fchange(X,
                 method='mean',

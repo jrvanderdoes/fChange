@@ -106,7 +106,7 @@
   bssamples <- sapply(as.data.frame(idxs),
                       function(loop_iter, Xdata) {
                         Xdata[, stats::na.omit(loop_iter)]
-                      }, Xdata=X$data,simplify = F
+                      }, Xdata=X$data, simplify = FALSE
   )
 
   ## Apply fn if given
