@@ -74,7 +74,7 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>In this article, we examine severl applications for fChange.</p>
+<p>In this article, we examine several applications for fChange.</p>
 </div>
 <div class="section level2">
 <h2 id="electricity">Electricity<a class="anchor" aria-label="anchor" href="#electricity"></a>
@@ -98,7 +98,7 @@ project the data, e.g.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">epca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pca_examination.html">pca_examination</a></span><span class="op">(</span>X <span class="op">=</span> <span class="va">electricity</span>,TVE <span class="op">=</span> <span class="fl">0.99</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">654321</span><span class="op">)</span></span>
-<span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu">change</span><span class="op">(</span>X <span class="op">=</span> <span class="va">epca</span><span class="op">$</span><span class="va">residuals</span>,</span>
+<span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fchange.html">fchange</a></span><span class="op">(</span>X <span class="op">=</span> <span class="va">epca</span><span class="op">$</span><span class="va">residuals</span>,</span>
 <span>                           statistic<span class="op">=</span><span class="st">'Tn'</span>,</span>
 <span>                           critical <span class="op">=</span> <span class="st">'simulation'</span>,method <span class="op">=</span> <span class="st">'characteristic'</span>,</span>
 <span>               type <span class="op">=</span> <span class="st">'segmentation'</span><span class="op">)</span></span></code></pre></div>
@@ -142,13 +142,13 @@ overnight cumulative intraday returns below, and plot it.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">25641</span><span class="op">)</span></span>
-<span><span class="va">spy_min_changes</span> <span class="op">&lt;-</span> <span class="fu">change</span><span class="op">(</span><span class="fu"><a href="../reference/dfts.html">dfts</a></span><span class="op">(</span><span class="va">SPYUS_ocidr</span><span class="op">)</span>, type<span class="op">=</span><span class="st">'segmentation'</span>,</span>
+<span><span class="va">spy_min_changes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fchange.html">fchange</a></span><span class="op">(</span><span class="fu"><a href="../reference/dfts.html">dfts</a></span><span class="op">(</span><span class="va">SPYUS_ocidr</span><span class="op">)</span>, type<span class="op">=</span><span class="st">'segmentation'</span>,</span>
 <span>                                   statistic<span class="op">=</span><span class="st">'Tn'</span>,</span>
 <span>                                   critical<span class="op">=</span><span class="st">'simulation'</span>,</span>
 <span>                                   method <span class="op">=</span> <span class="st">'characteristic'</span><span class="op">)</span></span>
 <span><span class="va">plot_ocidr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/dfts.html">dfts</a></span><span class="op">(</span><span class="va">SPYUS_ocidr</span><span class="op">)</span>,changes <span class="op">=</span> <span class="va">spy_min_changes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>                      val_axis_title <span class="op">=</span> <span class="st">''</span>,res_axis_title <span class="op">=</span> <span class="st">''</span>,FD_axis_title <span class="op">=</span> <span class="st">''</span>,</span>
-<span>                      plot_title <span class="op">=</span> <span class="st">''</span>,type <span class="op">=</span> <span class="st">'highdim'</span><span class="op">)</span></span></code></pre></div>
+<span>                      plot_title <span class="op">=</span> <span class="st">''</span>,type <span class="op">=</span> <span class="st">'fast'</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
