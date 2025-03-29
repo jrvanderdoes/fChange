@@ -17,8 +17,7 @@ selection of basis functions.
 
 ## Installation
 
-You can install the release version of the package on CRAN (after its
-approved):
+You can install the release version of the package on CRAN:
 
 ``` r
 install.packages('fChange')
