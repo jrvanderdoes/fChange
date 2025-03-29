@@ -7,9 +7,12 @@
 #' @noRd
 #' @keywords internal
 #'
-#' @examples
-#' # results <- .plot_rainbow(electricity)
-#' # results1 <- .plot_rainbow(electricity, changes=c(50,100,200))
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .plot_rainbow(electricity)
+#'    \item .plot_rainbow(electricity, changes=c(50,100,200))
+#'  }
 .plot_rainbow <- function(object, changes=NULL){
   object <- dfts(object)
   data <- object$data

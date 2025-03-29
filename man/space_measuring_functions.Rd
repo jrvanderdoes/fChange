@@ -13,8 +13,8 @@ format. See \code{\link[=dfts]{dfts()}}.}
 \item{M}{Integer for the number of functions to generate.}
 
 \item{space}{String for the space of interest. Options are Brownian motion
-('BM'), OU process ('OU'), principal components ('PC'), and vectors in iid
-standard, random normals ('RN').}
+('BM'), principal components ('PC'), and vectors in iid standard,
+random normals ('RN'). Additional options are forthcoming}
 }
 \value{
 Data.frame with columns of discretized functions describing the space.
@@ -26,7 +26,6 @@ explore functional spaces.
 }
 \examples{
 space_measuring_functions(M=10, space="BM", X=electricity)
-#space_measuring_functions(M=10, space="OU", X=electricity)
 space_measuring_functions(M=10, space="PC", X=electricity)
 }
 \seealso{

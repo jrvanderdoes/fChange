@@ -225,12 +225,12 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
 #'
 #' @return Plot (ggplot) summarizing the data
 #'
-#' @examples
-#' # .summary_nochange(
-#' #   generate_brownian_motion(N = 500,
-#' #      v=seq(from = 0, to = 1, length.out = 20)))
-#' # .summary_nochange(electricity,rainbow='full')
-#' # .summary_nochange(generate_far1(20,300))
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .summary_nochange(generate_brownian_motion(500)
+#'    \item .summary_nochange(electricity)
+#'  }
 #'
 #' @keywords internal
 #' @noRd

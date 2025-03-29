@@ -169,7 +169,7 @@ generate_karhunen_loeve <- function(
 
   Zeta <- tryCatch(eval_basis * xi[col(eval_basis)],
                    error = function(e) {
-                     stop(call. = F, paste0(
+                     stop(call. = FALSE, paste0(
                        "Check number of eigenvalues given. ",
                        "It does not match number of basis functions. ",
                        "Note, did you account for the constant function if ",

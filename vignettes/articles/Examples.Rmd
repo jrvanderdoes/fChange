@@ -15,7 +15,7 @@ library(fChange)
 
 # Overview
 
-In this article, we examine severl applications for fChange.
+In this article, we examine several applications for fChange.
 
 # Electricity
 
@@ -34,7 +34,7 @@ This data seems to exhibit some trends over time (perhaps due to season). We wis
 ```{r pca_info, eval=FALSE}
 epca <- pca_examination(X = electricity,TVE = 0.99) 
 set.seed(654321)
-res1 <- change(X = epca$residuals,
+res1 <- fchange(X = epca$residuals,
                            statistic='Tn',
                            critical = 'simulation',method = 'characteristic',
                type = 'segmentation')
@@ -77,13 +77,13 @@ The changes can be detected using binary segmentation as follows.
 ```{r detect_changes_fin, eval=FALSE}
 
 set.seed(25641)
-spy_min_changes <- change(dfts(SPYUS_ocidr), type='segmentation',
+spy_min_changes <- fchange(dfts(SPYUS_ocidr), type='segmentation',
                                    statistic='Tn',
                                    critical='simulation',
                                    method = 'characteristic')
 plot_ocidr <- plot(dfts(SPYUS_ocidr),changes = spy_min_changes[[1]],
                       val_axis_title = '',res_axis_title = '',FD_axis_title = '',
-                      plot_title = '',type = 'highdim')
+                      plot_title = '',type = 'fast')
 ```
 
 

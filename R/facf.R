@@ -353,34 +353,14 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'     \item \code{Reig}: Raw values for iid statistic of each MC simulation.
 #' }
 #'
-#' @examples
-#' #N <- 100
-#' #v <- seq(from = 0, to = 1, length.out = 10)
-#' #sig <- 2
-#' #Y <- generate_brownian_bridge(N, v, sig)
-#' #lag.max <- 1
-#' #autocovSurface <- autocovariance(Y,0:lag.max)
-#' #matindex <- .obtain_suface_L2_norm(v,autocovSurface)
-#' ## Remove lag 0
-#' #matindex <- matindex[-1]
-#' #MC_dist <- .estimate_iid_distr_MC(Y,autocovSurface,matindex)
-#' #plot(MC_dist$ex,MC_dist$ef,type = "l",main = "ecdf obtained by MC simulation")
-#' #grid()
-#'
-#' \donttest{
-#' #N <- 400
-#' #v <- seq(from = 0, to = 1, length.out = 50)
-#' #sig <- 2
-#' #Y <- generate_brownian_bridge(N, v, sig)
-#' #lag.max <- 20
-#' #autocovSurface <- autocovariance(Y,0:lag.max)
-#' #matindex <- .obtain_suface_L2_norm(v,autocovSurface)
-#' ## Remove lag 0
-#' #matindex <- matindex[-1]
-#' #MC_dist <- .estimate_iid_distr_MC(Y,autocovSurface,matindex)
-#' #plot(MC_dist$ex,MC_dist$ef,type = "l",main = "ecdf obtained by MC simulation")
-#' #grid()
-#' }
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item Y <- generate_brownian_bridge(N=200, v=30) \\
+#'          autocovSurface <- autocovariance(Y,0:lag.max) \\
+#'          matindex <- .obtain_suface_L2_norm(v,autocovSurface)[-1] \\
+#'          MC_dist <- .estimate_iid_distr_MC(Y,autocovSurface,matindex)
+#'  }
 #'
 #' @keywords internal
 #' @noRd
@@ -494,33 +474,14 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'     \item \code{ef}: Discretized values of the estimated distribution.
 #' }
 #'
-#' @examples
-#' #N <- 100
-#' #v <- seq(from = 0, to = 1, length.out = 10)
-#' #sig <- 2
-#' #Y <- generate_brownian_bridge(N, v, sig)
-#' #lag.max <- 1
-#' #autocovSurface <- autocovariance(Y,0:lag.max)
-#' #matindex <- .obtain_suface_L2_norm (v,autocovSurface)
-#' ## Remove lag 0
-#' #matindex <- matindex[-1]
-#' #Imhof_dist <- .estimate_iid_distr_Imhof(Y,autocovSurface,matindex)
-#' #plot(Imhof_dist$ex,Imhof_dist$ef,type = "l",main = "ecdf obtained by Imhof's method")
-#' #grid()
-#'
-#' \donttest{
-#' #N <- 400
-#' #v <- seq(from = 0, to = 1, length.out = 50)
-#' #sig <- 2
-#' #Y <- generate_brownian_bridge(N, v, sig)
-#' #autocovSurface <- autocovariance(Y,0:lag.max)
-#' #matindex <- .obtain_suface_L2_norm (v,autocovSurface)
-#' ## Remove lag 0
-#' #matindex <- matindex[-1]
-#' #Imhof_dist <- .estimate_iid_distr_Imhof(Y,autocovSurface,matindex)
-#' #plot(Imhof_dist$ex,Imhof_dist$ef,type = "l",main = "ecdf obtained by Imhof's method")
-#' #grid()
-#' }
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item Y <- generate_brownian_bridge(N=200, v=30) \\
+#'          autocovSurface <- autocovariance(Y,0:lag.max) \\
+#'          matindex <- .obtain_suface_L2_norm(v,autocovSurface)[-1] \\
+#'          MC_dist <- .estimate_iid_distr_Imhof(Y,autocovSurface,matindex)
+#'  }
 #'
 #' @keywords internal
 #' @noRd
@@ -588,32 +549,21 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'  distribution obtained by calling the function \code{acf.dfts}.
 #' @param ... Further arguments passed to the \code{plot} function.
 #'
-#' @examples
-#' #N <- 100
-#' #v <- seq(from = 0, to = 1, length.out = 10)
-#' #sig <- 2
-#' #bbridge <- generate_brownian_bridge(N, v, sig)
-#' #lag.max <- 15
-#' #upper_bound <- 0.95
-#' #fACF <- acf.dfts(x = bbridge, lag.max = lag.max,
-#' #                      alpha=upper_bound, figure = FALSE)
-#' #.plot_FACF(rho = fACF$acfs,SWN = fACF$SWN_bound, WWN = fACF$WWN_bound)
-#'
-#' \donttest{
-#' #N <- 200
-#' #v <- seq(from = 0, to = 1, length.out = 30)
-#' #sig <- 2
-#' #bbridge <- generate_brownian_bridge(N, v, sig)
-#' #lag.max <- 15
-#' #upper_bound <- 0.95
-#' #fACF <- acf.dfts(x = bbridge, lag.max = lag.max,
-#' #                      alpha = upper_bound, figure = FALSE)
-#' #.plot_FACF(rho = fACF$acfs,SWN = fACF$SWN_bound,WWN = fACF$WWN_bound)
-#' }
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item fACF <- acf.dfts(x = generate_brownian_bridge(100), lag.max = 15,
+#'                           alpha=0.95, figure = FALSE) \\
+#'          .plot_FACF(rho = fACF$acfs,SWN = fACF$SWN_bound, WWN = fACF$WWN_bound)
+#'  }
 #'
 #' @keywords internal
 #' @noRd
 .plot_FACF <- function(rho, SWN, WWN, ...){
+  # Save preferences in case of an error
+  oldpar <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(oldpar))
+
   # Define suitable lwd for plotting
   lag.max <- length(rho)
 
@@ -728,40 +678,11 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'   the proportion of variance explained by the first \code{n_pcs} functional
 #'   principal components will be shown. By default \code{show_varprop = TRUE}.
 #'
-#' @examples
-#' # Example 1
-#' #
-#' # Simulate an ARH(1) process
-#' # N <- 250
-#' # dv <- 20
-#' # v <- seq(from = 0, to = 1, length.out = 20)
-#' #
-#' # phi <- 1.3 * ((v) %*% t(v))
-#' #
-#' # persp(v,v,phi,
-#' #       ticktype = "detailed",
-#' #       main = "Integral operator")
-#' #
-#' # set.seed(3)
-#' # white_noise <-  generate_brownian_bridge(N, v = v)
-#' #
-#' # y <- matrix(nrow = dv, ncol = N)
-#' # y[,1] <- white_noise$data[,1]
-#' # for(jj in 2:N){
-#' #     y[,jj] <- white_noise$data[,jj];
-#' #
-#' #     y[,jj] <- y[,jj] + .integral_operator(operator_kernel = phi,
-#' #                                     v = v, curve = y[,jj-1])
-#' # }
-#' #
-#' # # Fit an ARH(1) model
-#' # mod <- .fit_ARHp_FPCA(x = dfts(y,fparam = v), p = 1, n_pcs = 5)
-#'
-#' # Plot results
-#' # plot(v, y[,50], type = "l", lty = 1, ylab = "")
-#' # lines(v, mod$x_est[,50], col = "red")
-#' # legend("bottomleft", legend = c("real","est"),
-#' #        lty = 1, col = c(1,2))
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item mod <- .fit_ARHp_FPCA(x = generate_brownian_motion, p = 1, n_pcs = 5)
+#'  }
 #'
 #' @references Aue, A., Norinho, D. D., Hormann, S. (2015).
 #'  \emph{On the Prediction of Stationary Functional Time Series}

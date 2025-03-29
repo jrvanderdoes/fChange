@@ -9,7 +9,10 @@
 \arguments{
 \item{x}{A dfts object. See \code{\link[=dfts]{dfts()}}.}
 
-\item{...}{unused parameter}
+\item{...}{unused parameter.}
+}
+\value{
+No return value, called to format printing of dfts object to console.
 }
 \description{
 Basic formatting to print a dfts object.

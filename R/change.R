@@ -99,8 +99,6 @@
 #'  based on Empirical Characteristic Functions. Metrika, 63, 145-168.
 #'
 #' @examples
-#' # See article on package website for more details
-#'
 #' res <- fchange(electricity$data[,1:20],method='characteristic',critical = 'welch')
 fchange <- function(X,
                    method=c('characteristic','mean','robustmean','eigenjoint',

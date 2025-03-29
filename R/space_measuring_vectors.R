@@ -7,8 +7,8 @@
 #'  format. See [dfts()].
 #' @param M Integer for the number of functions to generate.
 #' @param space String for the space of interest. Options are Brownian motion
-#' ('BM'), OU process ('OU'), principal components ('PC'), and vectors in iid
-#' standard, random normals ('RN').
+#' ('BM'), principal components ('PC'), and vectors in iid standard,
+#' random normals ('RN'). Additional options are forthcoming
 #'
 #' @return Data.frame with columns of discretized functions describing the space.
 #'  Columns are independent functions.
@@ -18,7 +18,6 @@
 #'
 #' @examples
 #' space_measuring_functions(M=10, space="BM", X=electricity)
-#' #space_measuring_functions(M=10, space="OU", X=electricity)
 #' space_measuring_functions(M=10, space="PC", X=electricity)
 space_measuring_functions <- function(X, M=20, space='BM') {
   X <- dfts(X)

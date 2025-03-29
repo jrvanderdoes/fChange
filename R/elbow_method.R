@@ -39,14 +39,13 @@
 #' @noRd
 #' @keywords internal
 #'
-#' @examples
-#' #results <- .elbow_method(
-#' #  X = electricity$data[, 1:50],
-#' #  trim_function = function(...) {
-#' #   10
-#' #  },
-#' #  max_changes=2
-#' #)
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item results <- .elbow_method( X = electricity$data[, 1:50],
+#'                                    trim_function = function(...) { 10 },
+#'                                    max_changes = 2)
+#'  }
 .elbow_method <- function(X, method, W=NULL,
                          trim_function = function(X) { 0 },
                          max_changes = min(ncol(X),20),
@@ -366,7 +365,7 @@
     T_1 <- sum(lambda)
     Xi <- sapply(1:n, function(i,X1){ X[,i] %*% X[,i] }, X1=X)
     sigma_sq <- tryCatch({
-      suppressWarnings(sandwich::lrvar(Xi, prewhite = F))
+      suppressWarnings(sandwich::lrvar(Xi, prewhite = FALSE))
     },error=function(e){
       NA
     })
@@ -438,9 +437,9 @@
       # },dat=dat,ws=ws)
 
       cmean <- t(apply(dat,MARGIN = 1,cumsum)) /
-        matrix(1:ncol(dat),nrow=length(t_vals),ncol=n,byrow = T)
+        matrix(1:ncol(dat),nrow=length(t_vals),ncol=n,byrow = TRUE)
       cmean1 <- t(apply(dat[,n:2,drop=FALSE],MARGIN = 1,cumsum))[,(n-1):1] /
-        matrix((n-1):1,nrow=length(t_vals),ncol=n-1,byrow = T)
+        matrix((n-1):1,nrow=length(t_vals),ncol=n-1,byrow = TRUE)
       internals <- abs(cmean[,-n] - cmean1)^2 * ws
 
       kappa[i,] <- weights * dot_integrate_col(internals)

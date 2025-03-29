@@ -131,8 +131,6 @@ are given, where single or multiple changes can be detected. Multiple change
 extensions currently include binary segmentation and elbow plots.
 }
 \examples{
-# See article on package website for more details
-
 res <- fchange(electricity$data[,1:20],method='characteristic',critical = 'welch')
 }
 \references{

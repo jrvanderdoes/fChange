@@ -31,9 +31,9 @@ test_that("Plot Options", {
   tmp <- plot.dfts(electricity, changes=c(50,175),type='change')
   expect_equal(class(tmp)[1],"plotly")
 
-  tmp <- plot.dfts(electricity, changes=c(50,175),type='interval',int.gradual = F)
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='interval',int.gradual = FALSE)
   expect_equal(class(tmp)[1],"plotly")
-  tmp <- plot.dfts(electricity, changes=c(50,175),type='interval',int.gradual = T)
+  tmp <- plot.dfts(electricity, changes=c(50,175),type='interval',int.gradual = TRUE)
   expect_equal(class(tmp)[1],"plotly")
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='surface')

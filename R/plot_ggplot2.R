@@ -16,6 +16,8 @@
 #'                package version 0.0.0.9000.
 #'
 #' @export
+#' @returns No direct return value, called to be used with [ggplot2::ggplot()]
+#'  in designing the plot.
 #'
 #' @examples
 #'dat <- electricity

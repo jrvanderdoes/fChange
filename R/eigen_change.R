@@ -40,15 +40,13 @@
 #'  analysis for spectrum and trace of covariance operators. Environmetrics
 #'  (London, Ont.), 31(1)
 #'
-#' @examples
-#' #.change_eigen(electricity, 2, test='joint')
-#' #.change_eigen(electricity, 2, test='individual')
+#' @details The following examples may be useful if this (internal) function
+#'  is investigated.
+#'  \itemize{
+#'    \item .change_eigen(electricity, 2, test='joint')
+#'    \item .change_eigen(electricity, 2, test='individual')
 #'
-#' #\donttest{
-#' #bm <- generate_brownian_motion(200,v=seq(0,1,length.out=20))
-#' #.change_eigen(bm, 3, test='joint')
-#' #.change_eigen(bm, 3, test='individual')
-#' #}
+#'  }
 .change_eigen <- function(X, d, h=2, changes = NULL,
                           statistic = c('Tn','Mn'),
                           test = c('joint', 'individual'),
