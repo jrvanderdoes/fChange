@@ -166,6 +166,7 @@ confidence_interval <- function(X, changes, K=bartlett_kernel,
       }
 
       thetas0 <- rep(NA,2)
+      ## TODO:: Fix to function integrate
       f_CDF <- function(up, weighting, theta, alpha){
         abs(stats::integrate(.f_distribution,-20,up, weighting=weighting, theta=theta)$value - alpha)
       }
