@@ -51,17 +51,17 @@ generate_far1 <- function(N, resolution, sd=1, dependence=1/2, drop_first=FALSE)
   X[,1] <- w[,1]
   X1 <- X
 
-  K_mat1 <- sapply(resolution,
-                  function(x,ys,K){ K(x,ys) },
-                  K = K, y = seq(0,1,length.out=100) )
+  # K_mat1 <- sapply(resolution,
+  #                 function(x,ys,K){ K(x,ys) },
+  #                 K = K, y = seq(0,1,length.out=100) )
   # TODO:: Improve this
   for(i in 2:N){
     for(j in 1:r){
-      X1[j,i] <- c * dot_integrate(K_mat1[,j]*X[j,i-1],
-                                  r = seq(0,1,length.out=100)) + w[j,i]
-      # X[j,i] <- c * stats::integrate(function(s,t,X_lag){
-      #   K(s,t) * X_lag
-      # },lower = 0,upper = 1,t=res[j], X_lag=X[j,i-1])$value + w[j,i]
+      # X1[j,i] <- c * dot_integrate(K_mat1[,j]*X[j,i-1],
+      #                             r = seq(0,1,length.out=100)) + w[j,i]
+      X[j,i] <- c * stats::integrate(function(s,t,X_lag){
+        K(s,t) * X_lag
+      },lower = 0,upper = 1,t=res[j], X_lag=X[j,i-1])$value + w[j,i]
     }
   }
 
