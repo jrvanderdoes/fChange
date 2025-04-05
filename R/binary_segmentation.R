@@ -72,7 +72,7 @@
 
     rval
   }, error = function(e){
-    if (is.na(potential) || is.null(potential)) {
+    if (is.null(potential) || is.na(potential$pvalue)) {
       TRUE
     }
   })
@@ -185,7 +185,8 @@
     changes_new <-
       .single_segment(X=X, method=method, trim_function=trim_function, ...)
 
-    if(changes_new$pvalue>alpha) return()
+    if(is.null(changes_new) || is.na(changes_new$pvalue) ||
+       changes_new$pvalue>alpha) return()
   }
 
   # Order and return
