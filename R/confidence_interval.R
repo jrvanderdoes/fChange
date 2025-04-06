@@ -32,11 +32,6 @@
 #'
 #' @examples
 #' X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
-#'            generate_brownian_motion(100,v=seq(0,1,0.05))$data+1000)
-#' confidence_interval(X,changes = 100)
-#' confidence_interval(X,changes=100,method = 'simulation')
-#'
-#' X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
 #'            generate_brownian_motion(100,v=seq(0,1,0.05))$data+0.5)
 #' confidence_interval(X,100,alpha = 0.1)
 #' confidence_interval(X,changes=100,alpha = 0.1,method = 'simulation')
