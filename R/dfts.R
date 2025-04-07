@@ -158,6 +158,8 @@ dfts <- function(X, name=NULL,
   rownames(dfts_obj$data) <- NULL
   class(dfts_obj) <- 'dfts'
 
+  dfts_obj$fparam <- as.numeric(dfts_obj$fparam)
+
   ## Verification
   # Note if NAs are present
   # if(length(dfts_obj$fparam)!=nrow(dfts_obj$data))
