@@ -107,10 +107,10 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
   rhos <- WWNs <-
     data.frame(matrix(0, nrow=lag.max,ncol=length(data_acf)))
   for(i in 1:length(data_acf)){
-    SWNs[i] <- data_acf[[i]]$SWN_bound
+    SWNs[i] <- data_acf[[i]]$SWN
     max_len <- length(data_acf[[i]]$acfs)
     rhos[1:max_len,i] <- data_acf[[i]]$acfs
-    WWNs[1:max_len,i] <- data_acf[[i]]$WWN_bound
+    WWNs[1:max_len,i] <- data_acf[[i]]$WWN
   }
   rhos <- t( t(rhos) * SWNs/max(SWNs) )
   WWNs <- t( t(WWNs) * SWNs/max(SWNs) )
@@ -265,11 +265,11 @@ summary.dfts <- function(object, changes=NULL, lag.max=20, d.max=2, demean=FALSE
 
   plot_acf <-
     ggplot2::ggplot(
-      mapping=ggplot2::aes( x=1:length(data_acf$WWN_bound) )
+      mapping=ggplot2::aes( x=1:length(data_acf$WWN) )
     ) +
     ggplot2::geom_segment( ggplot2::aes(y=0, yend=data_acf$acfs),
                            linewidth=2) +
-    ggplot2::geom_line(ggplot2::aes( y=data_acf$WWN_bound),
+    ggplot2::geom_line(ggplot2::aes( y=data_acf$WWN),
                        col='red', linetype='dashed',
                        linewidth=2  ) +
     ggplot2::geom_hline(ggplot2::aes(yintercept=data_acf$SWN_bound),
