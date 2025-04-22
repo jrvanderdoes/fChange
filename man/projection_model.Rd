@@ -7,11 +7,13 @@
 projection_model(
   X,
   TVE = 0.95,
-  model = c("ets", "arima"),
+  forecast.model = c("ets", "arima"),
   n.ahead = 0,
   alpha = 0.05,
   check.cp = TRUE,
   frequency = 1,
+  sim.bounds = TRUE,
+  M = 1000,
   ...
 )
 }
@@ -22,7 +24,7 @@ format. See \code{\link[=dfts]{dfts()}}.}
 \item{TVE}{Numeric in [0,1] for the total variance explained to select
 number of PCA components to use to model the data.}
 
-\item{model}{String to indicate method to model components, either
+\item{forecast.model}{String to indicate method to model components, either
 "ets" or "arima".}
 
 \item{n.ahead}{Number of observations to forecast.}
@@ -35,19 +37,23 @@ change points to change forecasts and plots.}
 \item{frequency}{Numeric for seasonal frequency when component is made a ts
 object for the models.}
 
+\item{sim.bounds}{Boolean if the confidence bounds should be simulated or
+computed using the covariance.}
+
+\item{M}{Numeric for the number of iterations used to simulated confidence
+bounds when sim.bounds is TRUE.}
+
 \item{...}{Additional information to pass into pca, change (if
 \code{check.cp=TRUE}), and plot.}
 }
 \value{
 List with the following elements:
 \itemize{
-\item fit: dfts object for fit.
-\item forecast_plot: plot of the data with any forecasted values.
+\item data: List with data information.
+\item plots: List with various plots.
 \item residuals: dfts object for residuals from the fit.
 \item changes: vector of any changes when using \code{detect.cp}.
-\item component_models: modeled PCs from the data.
-\item component_true: true data constucted via the PCs.
-\item parameters: list with fit parameters like pcs, TVE, model, and n.ahead.
+\item parameters: List with fit parameters like pcs, TVE, model, and n.ahead.
 }
 }
 \description{
@@ -56,7 +62,7 @@ model.
 }
 \examples{
 result <- projection_model(dfts(electricity$data[,50:100]),
- n.ahead=1, TVE=0.1, check.cp=FALSE)
+ n.ahead=1, TVE=0.1, check.cp=FALSE, sim.bounds=FALSE)
 }
 \references{
 Hyndman, R. J., & Shahid Ullah, M. (2007). Robust forecasting
