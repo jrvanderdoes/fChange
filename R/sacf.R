@@ -167,11 +167,13 @@ sacf <- function (X, lag.max = 20, alpha = 0.05, figure = TRUE) {
 
 #' Spatial Median
 #'
-#' @param tt TODO
-#' @param x TODO
-#' @param dtyp TODO
+#' Compute Spatial median of data
 #'
-#' @returns spatial median
+#' @param tt Numeric for fparam (intraday) times.
+#' @param x Matrix for data.
+#' @param dtyp String 'n' or 's'.
+#'
+#' @returns Spatial median estimate.
 #'
 #' @noRd
 #' @keywords internal
