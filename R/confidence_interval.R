@@ -141,7 +141,7 @@ confidence_interval <- function(X, changes, K=bartlett_kernel,
       W1 <- generate_brownian_motion(M, v=brown_v)$data[length(brown_v):2,]
       W2 <- generate_brownian_motion(M, v=brown_v)$data
       W <- rbind(W1,W2)
-      xi <- apply(W,MARGIN = 2,function(w,double_t,m){
+      xi <- apply(W, MARGIN = 2, function(w,double_t,m){
         double_t[which.max(w - abs(double_t) * m)]
       },double_t=double_t,m=m)
 
