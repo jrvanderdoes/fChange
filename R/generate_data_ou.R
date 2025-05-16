@@ -1,4 +1,3 @@
-
 #' Generate Data via Ornstein-Uhlenbeck Process
 #'
 #' Generate autoregressive process with errors according the Ornstein-Uhlenbeck
