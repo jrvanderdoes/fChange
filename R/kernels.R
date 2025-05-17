@@ -223,6 +223,17 @@ adaptive_bandwidth <- function(X, kernel=bartlett_kernel,
 }
 
 
+#' Kernel Details
+#'
+#' Move over eventually
+#'
+#' @param kernel Unused
+#' @param namev String for kernel name
+#'
+#' @returns Order and weighting of function
+#'
+#' @noRd
+#' @keywords internal
 .kernel_details <- function(kernel, name){
   if( grepl('bartlett', tolower(name)) ) {
     order <- 1
