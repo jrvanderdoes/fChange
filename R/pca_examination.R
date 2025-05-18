@@ -133,8 +133,6 @@ pca_components <- function(pca, components=1:length(pca$sdev)){
 #' @param alpha Significance in \[0,1\] for intervals when forecasting.
 #' @param check.cp Boolean which indicates if the errors should be checked for
 #'  change points to change forecasts and plots.
-#' @param frequency Numeric for seasonal frequency when component is made a ts
-#'  object for the models.
 #' @param sim.bounds Boolean if the confidence bounds should be simulated or
 #'  computed using the covariance.
 #' @param M Numeric for the number of iterations used to simulated confidence
@@ -158,10 +156,10 @@ pca_components <- function(pca, components=1:length(pca$sdev)){
 #'  https://doi.org/10.1016/j.csda.2006.07.028
 #'
 #' @examples
-#' result <- projection_model(dfts(electricity$data[,50:100]),
+#' result <- projection_model(dfts(electricity$data[,50:100], season=7),
 #'  n.ahead=1, TVE=0.1, check.cp=FALSE, sim.bounds=FALSE)
 projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
-                    n.ahead=0, alpha=0.05, check.cp=TRUE, frequency=1,
+                    n.ahead=0, alpha=0.05, check.cp=TRUE,
                     sim.bounds = TRUE, M=1000, ...){
   if(!requireNamespace('forecast',quietly = TRUE))
     stop("Please install the 'forecast' package",call. = FALSE)
@@ -179,9 +177,9 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
   comps <- comps_fits <- comps_true <- list()
   for (i in 1:ncol(pc_data$x)) {
     if(forecast.model=='ets'){
-      comps[[i]] <- forecast::ets(stats::ts(pc_data$x[, i],frequency =frequency))
+      comps[[i]] <- forecast::ets(stats::ts(pc_data$x[, i],frequency =X$season))
     }else if(forecast.model=='arima'){
-      comps[[i]] <- forecast::auto.arima(stats::ts(pc_data$x[, i],frequency = frequency))
+      comps[[i]] <- forecast::auto.arima(stats::ts(pc_data$x[, i],frequency = X$season))
     }
 
     # Forecast as request
@@ -306,7 +304,7 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
          lower = lower,
          upper = upper
        )
-      )
+  )
 }
 
 
