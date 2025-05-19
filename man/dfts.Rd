@@ -6,7 +6,14 @@
 \alias{is.dfts}
 \title{dfts Objects}
 \usage{
-dfts(X, name = NULL, labels = NULL, fparam = NULL, inc.warnings = TRUE)
+dfts(
+  X,
+  name = NULL,
+  labels = NULL,
+  fparam = NULL,
+  season = 1,
+  inc.warnings = TRUE
+)
 
 as.dfts(X)
 
@@ -28,6 +35,8 @@ names inside of the object X.}
 \item{fparam}{Vector of numerics indicating the points of evaluation for each
 observation. Defaults to even spacing on [0,1], or those included in the
 object. These may be unevenly spaced.}
+
+\item{season}{Numeric indicating the seasonal period in the data.}
 
 \item{inc.warnings}{Boolean on if warnings should be given. Defaults to TRUE.}
 }
