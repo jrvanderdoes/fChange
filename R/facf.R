@@ -568,7 +568,7 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
       y= pmin(0,rho), yend=pmax(0,rho)),
       # position = ggplot2::position_dodge2(preserve='single'),
       # stat = 'identity',
-      col = 'black', #width=0.2, fill='darkgray'
+      col = 'black', linewidth=2 #width=0.2, fill='darkgray'
     ) +
     ggplot2::geom_hline(ggplot2::aes(yintercept=0), col="black") +
     ggplot2::theme_bw() +
@@ -580,25 +580,25 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
   if(min(rho)<0){
     plt <- plt +
       ggplot2::geom_hline(ggplot2::aes(yintercept=-SWN), col="#0073C2FF",
-                          linetype='dashed')
+                          linetype='dashed', linewidth=2 )
     if(!is.null(WWN)){
       plt <- plt +
         ggplot2::geom_line(ggplot2::aes(x=lags,
                                         y=-WWN), col='red',
-                           linetype='dashed')
+                           linetype='dashed', linewidth=2 )
     }
 
   }
   if(max(rho>0)){
     plt <- plt +
       ggplot2::geom_hline(ggplot2::aes(yintercept=SWN), col="#0073C2FF",
-                          linetype='dashed')
+                          linetype='dashed', linewidth=2)
 
     if(!is.null(WWN)){
       plt <- plt +
         ggplot2::geom_line(ggplot2::aes(x=lags,
                                         y=WWN), col='red',
-                           linetype='dashed')
+                           linetype='dashed', linewidth=2)
     }
   }
 
