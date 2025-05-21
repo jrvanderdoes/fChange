@@ -11,7 +11,6 @@ projection_model(
   n.ahead = 0,
   alpha = 0.05,
   check.cp = TRUE,
-  frequency = 1,
   sim.bounds = TRUE,
   M = 1000,
   ...
@@ -33,9 +32,6 @@ number of PCA components to use to model the data.}
 
 \item{check.cp}{Boolean which indicates if the errors should be checked for
 change points to change forecasts and plots.}
-
-\item{frequency}{Numeric for seasonal frequency when component is made a ts
-object for the models.}
 
 \item{sim.bounds}{Boolean if the confidence bounds should be simulated or
 computed using the covariance.}
@@ -61,7 +57,7 @@ Model and forecast functional data using a Hyndman and Ullah projection-based
 model.
 }
 \examples{
-result <- projection_model(dfts(electricity$data[,50:100]),
+result <- projection_model(dfts(electricity$data[,50:100], season=7),
  n.ahead=1, TVE=0.1, check.cp=FALSE, sim.bounds=FALSE)
 }
 \references{
