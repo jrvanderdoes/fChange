@@ -29,7 +29,9 @@ NULL
 #' @param ... Additional parameters to extensions based on data. Often this is
 #'  additional information for \code{prcomp}.
 #'
-#' @return Principal component data.
+#' @return Principal component data. Note that the scores are in x and the eigenfuctions
+#'  in rotation. This is to keep consistency between existing pca methods in R,
+#'  but may change in the future.
 #' @export
 #'
 #' @name pca
@@ -155,6 +157,37 @@ pca.dfts <- function(object, TVE = 1, ...){
     min_pc <- min( which(cumsum(pc$sdev^2)/sum(pc$sdev^2) > TVE) )
   }
 
+  ## Skree plots
+  std_vals <- data.frame('y'=(pc$sdev^2)/sum(pc$sdev^2))
+  std_vals$x <- 1:nrow(std_vals)
+
+  cols <- rep('black',nrow(std_vals))
+  cols[min_pc] <- 'red'
+
+  individual_skree <- ggplot2::ggplot(data=std_vals) +
+    ggplot2::geom_line(ggplot2::aes(x=x, y=y),
+                       col= 'black', linewidth=1) +
+    ggplot2::geom_point(ggplot2::aes(x=x, y=y),
+                        col= cols, size=3) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.title = ggplot2::element_text(size=24),
+                   axis.text = ggplot2::element_text(size=20)) +
+    ggplot2::xlab('Individual Variation Explained') +
+    ggplot2::ylab(NULL)
+  std_vals <- data.frame('y'=cumsum(pc$sdev^2)/sum(pc$sdev^2))
+  std_vals$x <- 1:nrow(std_vals)
+  combined_skree <- ggplot2::ggplot(data=std_vals) +
+    ggplot2::geom_line(ggplot2::aes(x=x, y=y),
+                       col= 'black', linewidth=1) +
+    ggplot2::geom_point(ggplot2::aes(x=x, y=y),
+                        col= cols, size=3) +
+    ggplot2::geom_hline(ggplot2::aes(yintercept=TVE), linetype='dashed', linewidth=2 ) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.title = ggplot2::element_text(size=24),
+                   axis.text = ggplot2::element_text(size=20)) +
+    ggplot2::xlab('Cumulative Variation Explained') +
+    ggplot2::ylab(NULL)
+
   ## TODO:: Check out
   new_rot <- pc$rotation[,1:min_pc,drop=FALSE] * sqrt(nrow(object$data))
 
@@ -177,6 +210,8 @@ pca.dfts <- function(object, TVE = 1, ...){
        center = pc$center,
        scale = pc$scale,
        x = scores,
+       skree = list('ind_skree'=individual_skree,
+                    'comb_skree'=combined_skree),
        orig_pc = pc)
 }
 
