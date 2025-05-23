@@ -22,6 +22,8 @@
 #'  eigenvalues. Default is 1.
 #' @param replace Boolean if replacement should be used for resample test. Thus,
 #'  this defines if a bootstrapped or permuted test is used. Default is TRUE.
+#' @param return.info Boolean if all information on test statistic and null
+#'  distribution should be returned or just the p-value (default).
 #'
 #' @return List with the following elements:
 #'  \enumerate{
@@ -43,7 +45,7 @@
 stationarity_test <-
   function(X, statistic = 'Tn', critical=c('simulation','resample'),
            perm_method='separate',  M=1000, blocksize = 2*ncol(X)^(1/5),
-           TVE=1, replace=TRUE){
+           TVE=1, replace=TRUE, return.info = FALSE){
     critical <- .verify_input(critical, c('simulation','resample'))
 
     X <- dfts(X)
@@ -81,9 +83,15 @@ stationarity_test <-
                             statistic=statistic, v=X$fparam)
   }
 
-  list('pvalue' = sum(stat <= sim_stats)/M,
-       'statistic' = stat,
-       'simulations' = sim_stats)
+  if(return.info){
+    return(
+      list('pvalue' = sum(stat <= sim_stats)/M,
+           'statistic' = stat,
+           'simulations' = sim_stats)
+    )
+  }
+
+  list('pvalue' = sum(stat <= sim_stats)/M)
 }
 
 
