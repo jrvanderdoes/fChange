@@ -164,6 +164,8 @@ pca.dfts <- function(object, TVE = 1, ...){
   cols <- rep('black',nrow(std_vals))
   cols[min_pc] <- 'red'
 
+  x <- y <- NULL # For R checks
+
   individual_skree <- ggplot2::ggplot(data=std_vals) +
     ggplot2::geom_line(ggplot2::aes(x=x, y=y),
                        col= 'black', linewidth=1) +
