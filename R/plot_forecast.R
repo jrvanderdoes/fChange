@@ -14,7 +14,7 @@
                            val_axis_title = "Value",
                            res_axis_title = "Resolution",
                            FD_axis_title = "Observations",
-                           eye = list(x = -1.5, y = -1.5, z = 1.5),
+                           eye = list(x = 0.75, y = -1.5, z = 0.75),
                            aspectratio = NULL,
                            showticklabels = TRUE){
   # Get Sizes
@@ -117,6 +117,7 @@
   }
 
   # Setup View
+  if(is.null(aspectratio)) aspectratio <- list(x = 0.8, y = 0.5, z = 0.5)
   scene <- list(
     camera = list(eye = eye),
     aspectmode = "manual",

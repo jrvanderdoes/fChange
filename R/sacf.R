@@ -89,7 +89,7 @@ sacf <- function (X, lag.max = 20, alpha = 0.05, figure = TRUE) {
       y= pmin(0,coefficients), yend=pmax(0,coefficients)),
       # position = ggplot2::position_dodge2(preserve='single'),
       # stat = 'identity',
-      col = 'black', #width=0.2, fill='darkgray'
+      col = 'black', linewidth=2 #width=0.2, fill='darkgray'
     ) +
     ggplot2::geom_hline(ggplot2::aes(yintercept=0), col="black") +
     ggplot2::theme_bw() +
@@ -98,9 +98,9 @@ sacf <- function (X, lag.max = 20, alpha = 0.05, figure = TRUE) {
     ggplot2::xlab('Lag') +
     ggplot2::ylab(NULL) +
     ggplot2::geom_hline(ggplot2::aes(yintercept=-B_iid_bounds), col="#0073C2FF",
-                        linetype='dashed') +
+                        linetype='dashed', linewidth=2) +
     ggplot2::geom_hline(ggplot2::aes(yintercept=B_iid_bounds), col="#0073C2FF",
-                        linetype='dashed')
+                        linetype='dashed', linewidth=2)
 
   if(figure){
     print(plt)

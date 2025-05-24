@@ -137,6 +137,8 @@ pca_components <- function(pca, components=1:length(pca$sdev)){
 #'  computed using the covariance.
 #' @param M Numeric for the number of iterations used to simulated confidence
 #'  bounds when sim.bounds is TRUE.
+#' @param transformation Argument that specifies any transformations. Currently only
+#'  NULL (no transformation) and 'log' (logarithmic) are acceptable.
 #' @param ... Additional information to pass into pca, change (if
 #'  \code{check.cp=TRUE}), and plot.
 #'
@@ -160,7 +162,7 @@ pca_components <- function(pca, components=1:length(pca$sdev)){
 #'  n.ahead=1, TVE=0.1, check.cp=FALSE, sim.bounds=FALSE)
 projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
                     n.ahead=0, alpha=0.05, check.cp=TRUE,
-                    sim.bounds = TRUE, M=1000, ...){
+                    sim.bounds = TRUE, M=1000, transformation=NULL, ...){
   if(!requireNamespace('forecast',quietly = TRUE))
     stop("Please install the 'forecast' package",call. = FALSE)
   # Verify input
@@ -169,7 +171,18 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
     TVE <- max(min(TVE,1),0)
     warning('TVE should be in [0,1]. It was automatically rounded to ensure this.')
   }
-  X <- dfts(X)
+
+  if(is.null(transformation)){
+    X <- dfts(X)
+    transformation <- 'none'
+  }else if(transformation=='log'){
+    Xmin <- min(X$data)
+    X <- log(dfts(X)+Xmin+1)
+  } else{
+    X <- dfts(X)
+    transformation <- 'none'
+    warning('Check transformation argument. No transformation used')
+  }
 
   # Project data and model each component
   pc_data <- pca(X, TVE = TVE, ...)
@@ -252,9 +265,22 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
       }
     }
 
+    if(transformation=='log'){
+      data_prep <- exp(data_prep)-Xmin-1
+      fit_prep <- exp(fit_prep)-Xmin-1
+      lower <- exp(lower)-Xmin-1
+      upper <- exp(upper)-Xmin-1
+    }
     plt_for <- .plot_forecast(data_prep, lower, upper, changes=changes, ...)
     plt_for_fit <- .plot_forecast(fit_prep, lower, upper, changes=changes, ...)
   } else{
+
+    if(transformation=='log'){
+      data_prep <- exp(data_prep)-Xmin-1
+      fit_prep <- exp(fit_prep)-Xmin-1
+      lower <- exp(lower)-Xmin-1
+      upper <- exp(upper)-Xmin-1
+    }
     plt_for <- plot(data_prep, changes=changes, ...)
     plt_for_fit <- plot(fit_prep, changes=changes, ...)
   }
@@ -263,10 +289,19 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
   components_plots <- list()
   x <- y <- NULL
   for(i in 1:ncol(data_fits)){
+    tmp_dat <- data_fits[1:ncol(X),i]
+    tmp_dat_for <- data_fits[ncol(X)+1:n.ahead,i]
+
+      if(transformation=='log'){
+        tmp_dat <- exp(tmp_dat)-Xmin-1
+        tmp_dat_for <- exp(tmp_dat_for)-Xmin-1
+      }
+
+
       plt <-
         ggplot2::ggplot() +
         ggplot2::geom_line(ggplot2::aes(x=x, y=y),
-                           data=cbind('x'=1:ncol(X),'y'=data_fits[1:ncol(X),i]),
+                           data=cbind('x'=1:ncol(X),'y'=tmp_dat),
                            col='black') +
         ggplot2::xlab("") +
         ggplot2::ylab("") +
@@ -277,7 +312,7 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
       plt <- plt +
         ggplot2::geom_line(ggplot2::aes(x=x, y=y),
                            data=cbind('x'=ncol(X)+1:n.ahead,
-                                      'y'=data_fits[ncol(X)+1:n.ahead,i]),
+                                      'y'=tmp_dat_for),
                            col='red')
 
     }
