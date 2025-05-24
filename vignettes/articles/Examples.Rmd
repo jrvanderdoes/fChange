@@ -43,7 +43,7 @@ res1 <- fchange(X = epca$residuals,
 The previous approach is similar to the next, except without smoothing incorporated. In the next, we show the details more precisely. We use binary segmentation to investigate the residuals in this case.
 ```{r model_electricity, eval=FALSE}
 set.seed(123456)
-elec_mod <- projection_model(electricity,TVE=0.95,model='ets', check.cp=TRUE)
+elec_mod <- projection_model(electricity,TVE=0.95,forecast.model='ets', check.cp=TRUE)
 
 plot(elec_mod$errors,changes = elec_mod$changes) 
 ```

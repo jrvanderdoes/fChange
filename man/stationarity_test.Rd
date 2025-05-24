@@ -12,7 +12,8 @@ stationarity_test(
   M = 1000,
   blocksize = 2 * ncol(X)^(1/5),
   TVE = 1,
-  replace = TRUE
+  replace = TRUE,
+  return.info = FALSE
 )
 }
 \arguments{
@@ -39,6 +40,9 @@ eigenvalues. Default is 1.}
 
 \item{replace}{Boolean if replacement should be used for resample test. Thus,
 this defines if a bootstrapped or permuted test is used. Default is TRUE.}
+
+\item{return.info}{Boolean if all information on test statistic and null
+distribution should be returned or just the p-value (default).}
 }
 \value{
 List with the following elements:

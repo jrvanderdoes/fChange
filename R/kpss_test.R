@@ -16,6 +16,8 @@
 #' @param TVE Numeric for [pca()] to select the number of principle components.
 #' @param replace Boolean to indicate if blocks should be selected with
 #'  replacement when using a resample test.
+#' @param return.info Boolean if all information on test statistic and null
+#'  distribution should be returned or just the p-value (default).
 #'
 #' @return List with the following elements:
 #' \enumerate{
@@ -38,7 +40,8 @@
 #'              method='resample', resample_blocks='overlapping')
 kpss_test <- function(X, method=c('simulation','resample'),# c("MC",'block','sliding'),
                      resample_blocks = 'separate',
-                     M=1000, blocksize = 2*ncol(X)^(1/5), TVE=1, replace=TRUE){
+                     M=1000, blocksize = 2*ncol(X)^(1/5), TVE=1, replace=TRUE,
+                     return.info = FALSE){
   X <- dfts(X)
   method <- .verify_input(method, c('simulation','resample'))
   resample_blocks <- .verify_input(resample_blocks, c('separate','overlapping'))
@@ -83,7 +86,16 @@ kpss_test <- function(X, method=c('simulation','resample'),# c("MC",'block','sli
 
   }
 
-  list(pvalue = sum(RN <= sim_RNs)/M, statistic = RN, simulations=sim_RNs)
+
+  if(return.info){
+    return(
+      list('pvalue' = sum(RN <= sim_RNs)/M,
+           'statistic' = RN,
+           'simulations'=sim_RNs)
+    )
+  }
+
+  list('pvalue' = sum(RN <= sim_RNs)/M)
 }
 
 

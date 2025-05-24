@@ -9,7 +9,7 @@
 #'  that will be used to estimate the (partial) autocorrelation function.
 #' @param ... Additional parameters to appropriate function
 #'
-#' @seealso [stats::acf()]
+#' @seealso [stats::acf()], [sacf()]
 #'
 #' @name acf
 #'
@@ -55,10 +55,9 @@ pacf.default <- function(x, lag.max = NULL, ...) stats::pacf(x)
 #'    \item "Imhof": Estimation using Imhof's method.
 #'  }
 #'  By default, \code{method = "Welch"}.
-#' @param WWN Logical. If \code{TRUE}, WWN bounds are also computed
-#' @param figure Logical. If \code{TRUE}, plots the estimated
+#' @param WWN Logical. If \code{TRUE}, WWN bounds are also computed.
+#' @param figure Logical. If \code{TRUE}, prints plot for the estimated
 #'  function with the specified bounds.
-#' @param ... Further arguments passed to the \code{.plot_FACF} function.
 #'
 #' @return
 #' \itemize{
@@ -161,12 +160,13 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   }
 
   # Plot
-  plt <- .plot_FACF(rho,SWN=SWN_bound, WWN=WWN_bound, ...)
+  plt <- .plot_FACF(rho,SWN=SWN_bound, WWN=WWN_bound)
   if(figure){
-    plt
+    print(plt)
   }
 
-  invisible( list('acfs'=rho, 'SWN_bound'=SWN_bound, 'WWN_bound'=WWN_bound, 'plot'=plt) )
+  invisible( list('acfs'=rho, 'SWN'=SWN_bound, 'WWN'=WWN_bound,
+                  'plot'=plt) )
 }
 
 
@@ -314,13 +314,13 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
     #   sqrt( .obtain_suface_L2_norm(x$fparam, list(Lag0 = sup_corr)) )
   }
 
-  plt <- .plot_FACF(rho = vector_PACF, SWN = FACF$SWN_bound, WWN=NULL, ylab='PACF', ...)
+  plt <- .plot_FACF(rho = vector_PACF, SWN = FACF$SWN, WWN=NULL)
   if(figure){
-    plt
+    print(plt)
   }
 
-  invisible( list('pacfs' = vector_PACF, 'SWN' = FACF$SWN_bound,
-                  'WWN_bound'=NULL, 'plot'=plt) )
+  invisible( list('pacfs' = vector_PACF, 'SWN' = FACF$SWN,
+                  'WWN'=NULL, 'plot'=plt) )
 }
 
 
@@ -547,7 +547,7 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'  distribution obtained by calling the function \code{acf.dfts}.
 #' @param WWN The upper prediction bound for the weak white noise iid
 #'  distribution obtained by calling the function \code{acf.dfts}.
-#' @param ... Further arguments passed to the \code{plot} function.
+#' @param lags Lags to specify x-axis
 #'
 #' @details The following examples may be useful if this (internal) function
 #'  is investigated.
@@ -559,105 +559,50 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'
 #' @keywords internal
 #' @noRd
-.plot_FACF <- function(rho, SWN, WWN, ...){
-  # Save preferences in case of an error
-  oldpar <- graphics::par(no.readonly = TRUE)
-  on.exit(graphics::par(oldpar))
+.plot_FACF <- function(rho, SWN, WWN){
+  lags=1:length(rho)
 
-  # Define suitable lwd for plotting
-  lag.max <- length(rho)
+  plt <- ggplot2::ggplot() +
+    ggplot2::geom_segment(ggplot2::aes(
+      x = lags,
+      y= pmin(0,rho), yend=pmax(0,rho)),
+      # position = ggplot2::position_dodge2(preserve='single'),
+      # stat = 'identity',
+      col = 'black', linewidth=2 #width=0.2, fill='darkgray'
+    ) +
+    ggplot2::geom_hline(ggplot2::aes(yintercept=0), col="black") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.title = ggplot2::element_text(size=24),
+                   axis.text = ggplot2::element_text(size=20)) +
+    ggplot2::xlab('Lag') +
+    ggplot2::ylab(NULL)
 
-  # Check if any additional plotting parameters are present
-  arguments <- list(...)
-  arguments1 <- list()
-  if(!"xlab" %in% names(arguments)){
-    arguments1$xlab <- "Lag"
-  }else{
-    arguments1$xlab <- arguments$xlab
-  }
-  if(!"ylab" %in% names(arguments)){
-    arguments1$ylab <- "ACF"
-  }else{
-    arguments1$ylab <- arguments$ylab
-  }
-  if(!"ylim" %in% names(arguments)){
-    arguments1$ylim <- c(0, min(max(rho)*1.5,1))
-  }else{
-    arguments1$ylim <- arguments$ylim
-  }
-  if(!"lwd"  %in% names(arguments)){
-    arguments1$lwd <- 2#lwd_1
-  }else{
-    arguments1$lwd <- arguments$lwd
-  }
-  if(!"las"  %in% names(arguments)){
-    arguments1$las <- 1
-  }else{
-    arguments1$las <- arguments$las
-  }
-  if(!"lend" %in% names(arguments)){
-    arguments1$lend <- 2
-  }else{
-    arguments1$lend <- arguments$lend
-  }
-  if(!"yaxs" %in% names(arguments)){
-    arguments1$yaxs <- "i"
-  }else{
-    arguments1$yaxs <- arguments$yaxs
-  }
-  if(!"xaxs" %in% names(arguments)){
-    arguments1$xaxs <- "i"
-  }else{
-    arguments1$xaxs <- arguments$xaxs
-  }
-  if(!"main" %in% names(arguments)){
-    arguments1$main <- ""
-  }else{
-    arguments1$main <- arguments$main
-  }
-  if(!"xlim" %in% names(arguments)){
-    arguments1$xlim <- c(0, length(rho)+1)
-  }else{
-    arguments1$xlim <- arguments$xlim
-  }
-  if(!"cex.axis" %in% names(arguments)){
-    arguments1$cex.axis <- 1.5
-  }else{
-    arguments1$cex.axis <- arguments$cex.axis
-  }
-  if(!"cex.lab" %in% names(arguments)){
-    arguments1$cex.lab <- 2.5
-  }else{
-    arguments1$cex.lab <- arguments$cex.lab
-  }
-  if(!"mar" %in% names(arguments)) graphics::par(mar=c(5,6,4,1)+.1)
+  if(min(rho)<0){
+    plt <- plt +
+      ggplot2::geom_hline(ggplot2::aes(yintercept=-SWN), col="#0073C2FF",
+                          linetype='dashed', linewidth=2 )
+    if(!is.null(WWN)){
+      plt <- plt +
+        ggplot2::geom_line(ggplot2::aes(x=lags,
+                                        y=-WWN), col='red',
+                           linetype='dashed', linewidth=2 )
+    }
 
-  arguments1$x <- seq(1, length(rho), by = 1)
-  arguments1$y <- rho
-  arguments1$type <- "h"
-  # arguments$xlim <- c(0,1)
-  #arguments$ylim <- c(0,1.0)
+  }
+  if(max(rho>0)){
+    plt <- plt +
+      ggplot2::geom_hline(ggplot2::aes(yintercept=SWN), col="#0073C2FF",
+                          linetype='dashed', linewidth=2)
 
-  do.call(graphics::plot, arguments1)
-  #grid(lty = 1)
-  do.call(graphics::lines, arguments1)
-  graphics::lines(x = arguments1$x,
-                  y = arguments1$y,
-                  type = arguments1$type,
-                  col = 'black',#"lightgrey",
-                  # lwd = 2,
-                  # lwd = arguments1$lwd - 2,
-                  lend = 2)
-  blue_col <- "#0073C2FF"
-  graphics::abline(h = SWN, col = blue_col, lty = 2)# lwd = 4, lty = 2)
-  graphics::lines(x = arguments1$x, y = WWN, col = 'red', lty = 2)# lwd = 4, lty = 2)
-  # graphics::legend(
-  #   x = "topleft",
-  #   legend = c(paste("i.i.d. bound (",ci*100," % conf.)",sep="")),
-  #   col = blue_col,
-  #   lty = 2,
-  #   lwd = 4)
-  graphics::box()
+    if(!is.null(WWN)){
+      plt <- plt +
+        ggplot2::geom_line(ggplot2::aes(x=lags,
+                                        y=WWN), col='red',
+                           linetype='dashed', linewidth=2)
+    }
+  }
+
+  plt
 }
 
 #' Fit an ARH(p) to a given functional time series

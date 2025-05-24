@@ -36,7 +36,7 @@ pacf(x, lag.max = NULL, ...)
 \item{lag.max}{Number of lagged covariance estimators for the time series
 that will be used to estimate the (partial) autocorrelation function.}
 
-\item{...}{Further arguments passed to the \code{.plot_FACF} function.}
+\item{...}{Additional parameters to appropriate function}
 
 \item{alpha}{A value between 0 and 1 that indicates significant level for
 the confidence interval for the i.i.d. bounds of the (partial) autocorrelation
@@ -52,9 +52,9 @@ Accepted values are:
 }
 By default, \code{method = "Welch"}.}
 
-\item{WWN}{Logical. If \code{TRUE}, WWN bounds are also computed}
+\item{WWN}{Logical. If \code{TRUE}, WWN bounds are also computed.}
 
-\item{figure}{Logical. If \code{TRUE}, plots the estimated
+\item{figure}{Logical. If \code{TRUE}, prints plot for the estimated
 function with the specified bounds.}
 
 \item{n_pcs}{Number of principal components that will be used to fit the
@@ -106,5 +106,5 @@ Journal of Multivariate Analysis,
 162, 32--50.
 }
 \seealso{
-\code{\link[stats:acf]{stats::acf()}}
+\code{\link[stats:acf]{stats::acf()}}, \code{\link[=sacf]{sacf()}}
 }

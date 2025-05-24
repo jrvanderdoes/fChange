@@ -17,6 +17,7 @@
 #' @param fparam Vector of numerics indicating the points of evaluation for each
 #'  observation. Defaults to even spacing on \[0,1\], or those included in the
 #'  object. These may be unevenly spaced.
+#' @param season Numeric indicating the seasonal period in the data.
 #' @param inc.warnings Boolean on if warnings should be given. Defaults to TRUE.
 #'
 #' @name dfts
@@ -31,6 +32,7 @@
 dfts <- function(X, name=NULL,
                   labels=NULL,
                   fparam=NULL,
+                  season=1,
                   inc.warnings=TRUE){
   ## Return if already right object
   if(is.dfts(X)) {
@@ -61,7 +63,8 @@ dfts <- function(X, name=NULL,
       'data' = as.matrix(fda::eval.fd(fparam, fdobj = X)),
       'name' = name,
       'labels' = labels,
-      'fparam' = fparam
+      'fparam' = fparam,
+      'season' = season
     )
   } else if(requireNamespace("fda.usc", quietly = TRUE) &&
             fda.usc::is.fdata(X)){
@@ -78,7 +81,8 @@ dfts <- function(X, name=NULL,
       'data' = as.matrix(t(X$data)),
       'name' = name,
       'labels' = labels,
-      'fparam' = fparam
+      'fparam' = fparam,
+      'season' = season
     )
   } else if(requireNamespace('rainbow', quietly = TRUE) &&
             (inherits(X, "fts") || inherits(X, "fds"))){
@@ -99,7 +103,8 @@ dfts <- function(X, name=NULL,
       'data' = as.matrix(X$y),
       'name' = name,
       'labels' = labels,
-      'fparam' = fparam
+      'fparam' = fparam,
+      'season' = season
     )
   } else if(requireNamespace('funData', quietly = TRUE) &&
             inherits(X, "funData")){
@@ -116,7 +121,8 @@ dfts <- function(X, name=NULL,
       'data' = as.matrix(t(X@X)),
       'name' = name,
       'labels' = labels,
-      'fparam' = fparam
+      'fparam' = fparam,
+      'season' = season
     )
   } else if(inherits(X, "matrix") ||
             inherits(X, "data.frame") ||
@@ -130,7 +136,8 @@ dfts <- function(X, name=NULL,
       'data' = as.matrix(X),
       'name' = name,
       'labels' = labels,
-      'fparam' = fparam
+      'fparam' = fparam,
+      'season' = season
     )
   } else if(inherits(X, "numeric")){
     if(is.null(fparam))
@@ -146,7 +153,8 @@ dfts <- function(X, name=NULL,
       'data' = matrix(X,nrow=1),
       'name' = name,
       'labels' = labels,
-      'fparam' = fparam
+      'fparam' = fparam,
+      'season' = season
     )
   } else{
     stop('Data type not supported.',call. = FALSE)
@@ -157,6 +165,8 @@ dfts <- function(X, name=NULL,
   colnames(dfts_obj$data) <- NULL
   rownames(dfts_obj$data) <- NULL
   class(dfts_obj) <- 'dfts'
+
+  dfts_obj$fparam <- as.numeric(dfts_obj$fparam)
 
   ## Verification
   # Note if NAs are present

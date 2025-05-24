@@ -2,7 +2,7 @@
 % Please edit documentation in R/imputation.R
 \name{impute}
 \alias{impute}
-\title{Functional Imputatio}
+\title{Functional Imputation}
 \usage{
 impute(
   X,

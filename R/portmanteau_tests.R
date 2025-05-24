@@ -97,16 +97,16 @@
 #'  Series B (Statistical Methodology), 66, 117-130.
 #'
 #' @examples
-#' b <- generate_brownian_motion(250)
-#' res0 <- portmanteau_tests(b, test = 'single', lag = 10)
-#' res1 <- portmanteau_tests(b, test = 'multi', lag = 10, alpha = 0.01)
+#' b <- generate_brownian_motion(100)
+#' res0 <- portmanteau_tests(b, test = 'single', lag = 2)
+#' res1 <- portmanteau_tests(b, test = 'multi', lag = 2, alpha = 0.01)
 #' res2 <- portmanteau_tests(b, test = 'spectral', kernel = bartlett_kernel,
 #'                           bandwidth = NULL, alpha = 0.05)
 #' res3 <- portmanteau_tests(b, test = 'spectral', alpha = 0.1,
 #'                           kernel = parzen_kernel,
 #'                           bandwidth = adaptive_bandwidth(b, kernel=parzen_kernel))
-#' res4 <- portmanteau_tests(b, test = 'independence', components = 3, lag = 3)
-#' res5 <- portmanteau_tests(b, test = 'single', lag = 1, M = 250)
+#' res4 <- portmanteau_tests(b, test = 'independence', components = 2, lag = 2)
+#' res5 <- portmanteau_tests(b, test = 'single', lag = 1, M = 50)
 portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
                                       'spectral', 'independence', 'imhof'),
                        lag=5, M=1000,

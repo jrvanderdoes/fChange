@@ -5,9 +5,9 @@
 #'     more change points are detected.
 #'
 #' @inheritParams change
-#' @param ... Additional arguments passed into method
+#' @param ... Additional arguments passed into method.
 #'
-#' @return A data.frame of numeric values indicating change points and pvalues
+#' @return A data.frame of numeric values indicating change points and pvalues.
 #'
 #' @noRd
 #' @keywords internal
@@ -47,12 +47,12 @@
 #' Detect Change Points
 #'
 #' This (internal) function is multiple .single_binary_segmentation for
-#'     complete_binary_segmentation. It recursively calls itself
+#'     complete_binary_segmentation. It recursively calls itself.
 #'
 #' @inheritParams change
-#' @param ... Additional arguments passed into method
+#' @param ... Additional arguments passed into method.
 #'
-#' @return A data.frame of numeric values indicating change points and pvalues
+#' @return A data.frame of numeric values indicating change points and pvalues.
 #'
 #' @noRd
 #' @keywords internal
@@ -72,7 +72,7 @@
 
     rval
   }, error = function(e){
-    if (is.na(potential) || is.null(potential)) {
+    if (is.null(potential) || is.na(potential$pvalue)) {
       TRUE
     }
   })
@@ -123,9 +123,9 @@
 #'
 #'
 #' @inheritParams change
-#' @param ... Additional arguments passed into method
+#' @param ... Additional arguments passed into method.
 #'
-#' @return A data.frame of numeric values indicating change points and pvalues
+#' @return A data.frame of numeric values indicating change points and pvalues.
 #'
 #' @noRd
 #' @keywords internal
@@ -150,10 +150,11 @@
 #' This (internal) function is used to verify change points.
 #'
 #' @inheritParams change
-#' @param changes_info A data.frame of numeric values indicating change points and pvalues
-#' @param ... Additional arguments passed into method
+#' @param changes_info A data.frame of numeric values indicating change points
+#'  and pvalues.
+#' @param ... Additional arguments passed into method.
 #'
-#' @return A data.frame of numeric values indicating change points and pvalues
+#' @return A data.frame of numeric values indicating change points and pvalues.
 #'
 #' @noRd
 #' @keywords internal
@@ -185,7 +186,8 @@
     changes_new <-
       .single_segment(X=X, method=method, trim_function=trim_function, ...)
 
-    if(changes_new$pvalue>alpha) return()
+    if(is.null(changes_new) || is.na(changes_new$pvalue) ||
+       changes_new$pvalue>alpha) return()
   }
 
   # Order and return

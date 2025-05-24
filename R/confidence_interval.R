@@ -32,11 +32,6 @@
 #'
 #' @examples
 #' X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
-#'            generate_brownian_motion(100,v=seq(0,1,0.05))$data+1000)
-#' confidence_interval(X,changes = 100)
-#' confidence_interval(X,changes=100,method = 'simulation')
-#'
-#' X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
 #'            generate_brownian_motion(100,v=seq(0,1,0.05))$data+0.5)
 #' confidence_interval(X,100,alpha = 0.1)
 #' confidence_interval(X,changes=100,alpha = 0.1,method = 'simulation')
@@ -146,7 +141,7 @@ confidence_interval <- function(X, changes, K=bartlett_kernel,
       W1 <- generate_brownian_motion(M, v=brown_v)$data[length(brown_v):2,]
       W2 <- generate_brownian_motion(M, v=brown_v)$data
       W <- rbind(W1,W2)
-      xi <- apply(W,MARGIN = 2,function(w,double_t,m){
+      xi <- apply(W, MARGIN = 2, function(w,double_t,m){
         double_t[which.max(w - abs(double_t) * m)]
       },double_t=double_t,m=m)
 
@@ -166,6 +161,7 @@ confidence_interval <- function(X, changes, K=bartlett_kernel,
       }
 
       thetas0 <- rep(NA,2)
+      ## TODO:: Fix to function integrate
       f_CDF <- function(up, weighting, theta, alpha){
         abs(stats::integrate(.f_distribution,-20,up, weighting=weighting, theta=theta)$value - alpha)
       }

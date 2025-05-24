@@ -11,7 +11,8 @@ kpss_test(
   M = 1000,
   blocksize = 2 * ncol(X)^(1/5),
   TVE = 1,
-  replace = TRUE
+  replace = TRUE,
+  return.info = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ will be identical.}
 
 \item{replace}{Boolean to indicate if blocks should be selected with
 replacement when using a resample test.}
+
+\item{return.info}{Boolean if all information on test statistic and null
+distribution should be returned or just the p-value (default).}
 }
 \value{
 List with the following elements:

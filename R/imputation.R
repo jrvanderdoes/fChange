@@ -1,4 +1,4 @@
-#' Functional Imputatio
+#' Functional Imputation
 #'
 #' Several basic imputation methods for missing values in functional data
 #'  formatted as dfts objects.
