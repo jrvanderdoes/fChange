@@ -2,6 +2,7 @@
 <url><loc>https://jrvanderdoes.github.io/fChange/404.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/LICENSE.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/articles/Examples.html</loc></url>
+<url><loc>https://jrvanderdoes.github.io/fChange/articles/functionaldata.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/articles/index.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/authors.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/index.html</loc></url>
@@ -14,6 +15,7 @@
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/average.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/cancer.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/center.html</loc></url>
+<url><loc>https://jrvanderdoes.github.io/fChange/reference/cidr.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/confidence_interval.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/dfts.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/dfts_group.html</loc></url>
@@ -37,6 +39,7 @@
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/long_run_covariance.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/minmax.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/pca.html</loc></url>
+<url><loc>https://jrvanderdoes.github.io/fChange/reference/pca_components.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/pca_examination.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/pipe.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/plot.dfts.html</loc></url>
@@ -46,6 +49,7 @@
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/qqplot.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/quantile.dfts.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/rates.html</loc></url>
+<url><loc>https://jrvanderdoes.github.io/fChange/reference/sacf.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/sdvar.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/space_measuring_functions.html</loc></url>
 <url><loc>https://jrvanderdoes.github.io/fChange/reference/stat_3D.html</loc></url>
