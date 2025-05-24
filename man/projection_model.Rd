@@ -13,6 +13,7 @@ projection_model(
   check.cp = TRUE,
   sim.bounds = TRUE,
   M = 1000,
+  transformation = NULL,
   ...
 )
 }
@@ -38,6 +39,9 @@ computed using the covariance.}
 
 \item{M}{Numeric for the number of iterations used to simulated confidence
 bounds when sim.bounds is TRUE.}
+
+\item{transformation}{Argument that specifies any transformations. Currently only
+NULL (no transformation) and 'log' (logarithmic) are acceptable.}
 
 \item{...}{Additional information to pass into pca, change (if
 \code{check.cp=TRUE}), and plot.}

@@ -22,7 +22,9 @@ the number of components and can be used for dimension reduction.}
 additional information for \code{prcomp}.}
 }
 \value{
-Principal component data.
+Principal component data. Note that the scores are in x and the eigenfuctions
+in rotation. This is to keep consistency between existing pca methods in R,
+but may change in the future.
 }
 \description{
 This is a generic function to call PCA on various objects. The default method
