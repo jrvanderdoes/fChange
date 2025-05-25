@@ -1,6 +1,6 @@
 #' Forecasting competition Evaluation
 #'
-#' @param estimate Matrix of forecast
+#' @param estimate Matrix of forecast (matrix of 24x30)
 #'
 #' @returns MSE for competition
 #'
@@ -9,14 +9,14 @@
 competition_error <- function(estimate){
 
   urlfile <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
-                     '/main/vignettes/articles/functionaldata/practice.rds')
-  data_true <- readRDS(urlfile)
+                     '/main/vignettes/articles/functionaldata/practice.csv')
+  data_true <- read.csv(urlfile)[,-1]
 
   if(is.dfts(estimate)) estimate <- estimate$data
 
   error <- rep(NA, 14)
   for(i in 1:14){
-    error[i] <- sum((estimate[,i] - data_true$data[,i])^2)
+    error[i] <- sum((estimate[,i] - data_true[,i])^2)
   }
 
   mean(error)
