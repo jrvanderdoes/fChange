@@ -4,6 +4,7 @@
 #' @inheritParams plot.dfts
 #' @param lower Matrix of resolution-by-estimates indicating the lower bounds
 #' @param upper Matrix of resolution-by-estimates indicating the upper bounds
+#' @param ... Unused details
 #'
 #' @returns Plotly Plot
 #'
@@ -16,7 +17,7 @@
                            FD_axis_title = "Observations",
                            eye = list(x = 0.75, y = -1.5, z = 0.75),
                            aspectratio = NULL,
-                           showticklabels = TRUE){
+                           showticklabels = TRUE, ...){
   # Get Sizes
   pred_n <- max(ncol(lower),ncol(upper))
   changes <- unique(c(changes, ncol(X)-pred_n))
