@@ -138,7 +138,7 @@ pca_components <- function(pca, components=1:length(pca$sdev)){
 #' @param M Numeric for the number of iterations used to simulated confidence
 #'  bounds when sim.bounds is TRUE.
 #' @param transformation Argument that specifies any transformations. Currently only
-#'  NULL (no transformation) and 'log' (logarithmic) are acceptable.
+#'  NULL (no transformation) 'log' (logarithmic), and 'sqrt' (square root) are acceptable.
 #' @param ... Additional information to pass into pca, change (if
 #'  \code{check.cp=TRUE}), and plot.
 #'
@@ -178,6 +178,9 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
   }else if(transformation=='log'){
     Xmin <- min(X$data)
     X <- log(dfts(X)+Xmin+1)
+  } else if(transformation=='sqrt'){
+    Xmin <- min(X$data)
+    X <- sqrt(dfts(X)+Xmin+1)
   } else{
     X <- dfts(X)
     transformation <- 'none'
@@ -270,6 +273,11 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
       fit_prep <- exp(fit_prep)-Xmin-1
       lower <- exp(lower)-Xmin-1
       upper <- exp(upper)-Xmin-1
+    }else if(transformation=='sqrt'){
+      data_prep <- (data_prep)^2-Xmin-1
+      fit_prep <- (fit_prep)^2-Xmin-1
+      lower <- (lower)^2-Xmin-1
+      upper <- (upper)^2-Xmin-1
     }
     plt_for <- .plot_forecast(data_prep, lower, upper, changes=changes, ...)
     plt_for_fit <- .plot_forecast(fit_prep, lower, upper, changes=changes, ...)
@@ -278,8 +286,9 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
     if(transformation=='log'){
       data_prep <- exp(data_prep)-Xmin-1
       fit_prep <- exp(fit_prep)-Xmin-1
-      lower <- exp(lower)-Xmin-1
-      upper <- exp(upper)-Xmin-1
+    }else if(transformation=='sqrt'){
+      data_prep <- (data_prep)^2-Xmin-1
+      fit_prep <- (fit_prep)^2-Xmin-1
     }
     plt_for <- plot(data_prep, changes=changes, ...)
     plt_for_fit <- plot(fit_prep, changes=changes, ...)
@@ -290,25 +299,33 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
   x <- y <- NULL
   for(i in 1:ncol(data_fits)){
     tmp_dat <- data_fits[1:ncol(X),i]
-    tmp_dat_for <- data_fits[ncol(X)+1:n.ahead,i]
 
-      if(transformation=='log'){
-        tmp_dat <- exp(tmp_dat)-Xmin-1
-        tmp_dat_for <- exp(tmp_dat_for)-Xmin-1
-      }
+    if(transformation=='log'){
+      tmp_dat <- exp(tmp_dat)-Xmin-1
+    }else if(transformation=='sqrt'){
+      tmp_dat <- (tmp_dat)^2-Xmin-1
+    }
 
 
       plt <-
-        ggplot2::ggplot() +
-        ggplot2::geom_line(ggplot2::aes(x=x, y=y),
-                           data=cbind('x'=1:ncol(X),'y'=tmp_dat),
-                           col='black') +
-        ggplot2::xlab("") +
-        ggplot2::ylab("") +
-        ggplot2::theme_bw() +
-        ggplot2::theme(axis.text = ggplot2::element_text(size=18),
-                       axis.title = ggplot2::element_text(size=22))
+      ggplot2::ggplot() +
+      ggplot2::geom_line(ggplot2::aes(x=x, y=y),
+                         data=cbind('x'=1:ncol(X),'y'=tmp_dat),
+                         col='black') +
+      ggplot2::xlab("") +
+      ggplot2::ylab("") +
+      ggplot2::theme_bw() +
+      ggplot2::theme(axis.text = ggplot2::element_text(size=18),
+                     axis.title = ggplot2::element_text(size=22))
     if(n.ahead>0){
+      tmp_dat_for <- data_fits[ncol(X)+1:n.ahead,i]
+
+      if(transformation=='log'){
+        tmp_dat_for <- exp(tmp_dat_for)-Xmin-1
+      }else if(transformation=='sqrt'){
+        tmp_dat_for <- (tmp_dat_for)^2-Xmin-1
+      }
+
       plt <- plt +
         ggplot2::geom_line(ggplot2::aes(x=x, y=y),
                            data=cbind('x'=ncol(X)+1:n.ahead,
@@ -332,6 +349,7 @@ projection_model <- function(X, TVE = 0.95, forecast.model=c('ets','arima'),
        ),
        changes = changes,
        parameters = list(
+         transformation = transformation,
          pcs = length(pc_data$sdev),
          TVE = TVE,
          forecast.model = forecast.model,
