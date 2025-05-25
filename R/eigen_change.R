@@ -214,10 +214,17 @@
     K_eigs <- which.min(cumsum(eigs$values)/sum(eigs$values) < 0.95)
 
     tmp_inv <- matrix(0, nrow=nrow(Sigma_d), ncol=ncol(Sigma_d))
-    for(i in 1:K_eigs){
-      tmp_inv <- tmp_inv +
-        ( 1 / eigs$values[i] ) * (eigs$vectors[,i] %o% eigs$vectors[,i] )
-    }
+
+    tryCatch({
+      for(i in 1:K_eigs){
+        tmp_inv <- tmp_inv +
+          ( 1 / eigs$values[i] ) * (eigs$vectors[,i] %o% eigs$vectors[,i] )
+      }
+    }, error = function(e){
+      if(!location) return(Inf)
+
+      return(c(Inf, 1))
+    })
 
     tmp_inv
   })

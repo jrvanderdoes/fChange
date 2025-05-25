@@ -150,7 +150,7 @@ pca.default <- function(object, ...) { stats::prcomp(object, ...) }
 pca.dfts <- function(object, TVE = 1, ...){
   if(TVE > 1 || TVE < 0) stop('TVE must be in [0,1].',call. = FALSE)
 
-  pc <- stats::prcomp(x=t(object$data), ...)
+  pc <- suppressWarnings( stats::prcomp(x=t(object$data), ...) )
   if(TVE==1){
     min_pc <- length(pc$sdev)
   } else{
