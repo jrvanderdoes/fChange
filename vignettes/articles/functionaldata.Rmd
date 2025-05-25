@@ -167,11 +167,8 @@ as a functional time series over the years 1816 to
 2022.***](functionaldata/french_rates.png){#fig:fmortality width="5in"}
 ```{r, eval=FALSE}
 urlfile2 <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
-              '/main/vignettes/articles/log_fmort.csv')
-fmort <- read.csv()
-fmort <- dfts(fmort,labels=1816:2022,fparam=0:100)
-
-saveRDS(fmort )
+              '/main/vignettes/articles/log_fmort.rds')
+fmort <- readRDS(url(urlfile2,"rb"))
 
 plot(fmort,
      plot_title = NULL,
@@ -256,7 +253,6 @@ $$\begin{aligned}
 Here equality is understood in the $L^2-$sense, which means that the
 $\|\cdot\|_2$ norm of the difference between the left and right hand
 sides of the above is zero.
-
 
 The equation on CONS, in
 addition to the geometry introduced by the inner product, means that the
@@ -406,7 +402,10 @@ valuable.
 
 ![ ***Unevenly observed electricity prices fit to B-spline basis functions and evaluated at 24 daily observation for smoothing parameter $\lambda=1$.***](functionaldata/electricity_lam1.png){#Fig-elam1 width="5in"}
 ```{r, eval=FALSE}
-uneven_spanish <- readRDS('./vignettes/articles/uneven_spanish.rds')
+urlfile3<-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
+              '/main/vignettes/articles/uneven_spanish.rds')
+uneven_spanish <- readRDS(url(urlfile3,"rb"))
+
 eval_pts <- seq(0, 1, length.out=24)
 elec_eval <- data.frame(matrix(nrow = 24, ncol=length(uneven_spanish)))
 long_data <- data.frame()
@@ -438,7 +437,10 @@ plot(spanish_electricity,plot_title = NULL,
 
 ![ ***Unevenly observed electricity prices fit to B-spline basis functions and evaluated at 24 daily observation for smoothing parameters $\lambda=0.0001$.***](functionaldata/electricity_lam0001.png){#Fig-elam2 width="5in"}
 ```{r, eval=FALSE}
-uneven_spanish <- readRDS('./vignettes/articles/uneven_spanish.rds')
+urlfile3<-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
+              '/main/vignettes/articles/uneven_spanish.rds')
+uneven_spanish <- readRDS(url(urlfile3,"rb"))
+
 eval_pts <- seq(0, 1, length.out=24)
 elec_eval <- data.frame(matrix(nrow = 24, ncol=length(uneven_spanish)))
 long_data <- data.frame()
@@ -597,9 +599,13 @@ considering.
 ![ Scree plot for PCA with the FTS French mortality
 data.](functionaldata/fmortality_skree.png){#fig:fmortality_skree width="5in"}
 ```{r eval=FALSE}
-pca_data <- pca(log_fmort_fdts, TVE=0.95)
+# May want to review the comment figure
+# plot(fmort, type='rainbow')
+
+pca_data <- pca(fmort, TVE=0.95)
 plot(pca_data$center)
 pca_data$skree$comb_skree
+
 ```
 
 We again return the French mortality data. The mean of the observations
@@ -922,10 +928,10 @@ suggesting the use of an ets model gives about a 10% improvement.
 
 ```{r eval=FALSE}
 elec_ets <- projection_model(X = electricity, forecast.model = 'ets', TVE = 0.99, 
-                        n.ahead = 30, check.cp = F, alpha = 0.05,
+                        n.ahead = 14, check.cp = F, alpha = 0.05,
                         sim.bounds = TRUE, M = 1000)
 elec_arima <- projection_model(X = electricity, forecast.model = 'arima', TVE = 0.99, 
-                        n.ahead = 30, check.cp = F, alpha = 0.05,
+                        n.ahead = 14, check.cp = F, alpha = 0.05,
                         sim.bounds = TRUE, M = 1000)
 
 # CV
@@ -956,7 +962,10 @@ for(i in 1:length(pred_idx)){
   
   errors[i,] <- colSums((ests-tmp_pred$data)^2) 
 }
+
 colMeans(errors)/min(colMeans(errors))
+#  fets  farima 
+# 1.000  1.106
 ```
 
 
@@ -996,27 +1005,31 @@ elec_arima$plots$forecast_plot
 
 It may also make sense to transform the data. This can be done manually or using a currently under development parameter `transformation` as shown below.
 ```{r eval=FALSE}
-fit <- projection_model(electricity,check.cp = FALSE);
-fit_log <- projection_model(electricity,transformation='log',check.cp = FALSE);
-fit_sqrt <- projection_model(electricity,transformation='sqrt',check.cp = FALSE)
-
+fit <- projection_model(electricity,check.cp = FALSE, n.ahead = 14);
+fit_log <- projection_model(electricity,transformation='log',check.cp = FALSE, 
+                            n.ahead = 14);
+fit_sqrt <- projection_model(electricity,transformation='sqrt',check.cp = FALSE, 
+                             n.ahead = 14)
+# With fitted data
 fit$plots$fit_plot
 fit_log$plots$fit_plot
 fit_sqrt$plots$fit_plot
+
+# With original data
+fit$plots$forecast_plot
+fit_log$plots$forecast_plot
+fit_sqrt$plots$forecast_plot
 ```
 
-```{r eval=FALSE}
-elec_log_ets <- projection_model(X = electricity, forecast.model = 'ets', TVE = 0.99, 
-                        n.ahead = 30, check.cp = F, alpha = 0.05,
-                        sim.bounds = TRUE, M = 1000,transformation = 'log')
-elec_log_arima <- projection_model(X = electricity, forecast.model = 'arima', TVE = 0.99, 
-                        n.ahead = 30, check.cp = F, alpha = 0.05,
-                        sim.bounds = TRUE, M = 1000,transformation = 'log')
 
+Running CV with log and sqrt root data, returns the following results: 1.000 (fets),  1.106 (farima), 1.460 (log fets), 1.367 (log farima), 1.119 (sqrt fets), and 1.153 (sqrt fets).
+
+
+```{r eval=FALSE}
 # CV with all
 pred_idx <- floor(0.8*ncol(electricity)+1):ncol(electricity)
-errors <- matrix(NA,nrow=length(pred_idx), ncol=4)
-colnames(errors) <- c('fets','farima','fetsLog','farimaLog')
+errors <- matrix(NA,nrow=length(pred_idx), ncol=6)
+colnames(errors) <- c('fets','farima','fetsLog','farimaLog','fetsSqrt','farimaSqrt')
 
 cat('CV (',length(pred_idx),'):')
 for(i in 1:length(pred_idx)){
@@ -1035,6 +1048,10 @@ for(i in 1:length(pred_idx)){
                           check.cp = F,sim.bounds = F,transformation = 'log')
   pm4 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=1,
                           check.cp = F,sim.bounds = F,transformation = 'log')
+  pm5 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=1,
+                          check.cp = F,sim.bounds = F,transformation = 'sqrt')
+  pm6 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=1,
+                          check.cp = F,sim.bounds = F,transformation = 'sqrt')
   
   ests <- data.frame(
     'fets'=as.numeric(
@@ -1044,18 +1061,25 @@ for(i in 1:length(pred_idx)){
     'fetsLog'=as.numeric(
       pm3$data$component_true$data[,idx]),
     'farimaLog'=as.numeric(
-      pm4$data$component_true$data[,idx])
+      pm4$data$component_true$data[,idx]),
+    'fetsSqrt'=as.numeric(
+      pm5$data$component_true$data[,idx]),
+    'farimaSqrt'=as.numeric(
+      pm6$data$component_true$data[,idx])
   )
   
   errors[i,] <- colSums((ests-tmp_pred$data)^2) 
 }
 colMeans(errors)/min(colMeans(errors))
+#   fets   farima  fetsLog  farimaLog   fetsSqrt farimaSqrt 
+#  1.000   1.106   1.460    1.367       1.119     1.153 
 ```
 
 
 ### Pollution
 
-Consider the pollution data. This time we will compare a functional approach to traditional methods.
+Consider the pollution data. This time we will compare a functional approach to traditional methods. CV with $7$ day forecasts are used. Scaled CV results were: 
+1.101 (arima), 2.453 (ets), 1.450 (fets), 1.000 (farima), 1.271 (log fets), and 1.031 (log arima). 
 ```{r eval=FALSE}
 # Forecast horizon: 7 days * 48 half hours = 336 pts
 h <- 7
@@ -1074,9 +1098,9 @@ for(i in 1:length(pred_idx)){
   tmp_pred <- city_dfts[,pred_idx[i]+1:7]
   
   scalar_arima <- forecast::auto.arima(tmp_scalar)
-  arima_for  <- forecast::forecast(tmp_scalar, h = h*48, level = 95)
+  arima_for  <- forecast::forecast(scalar_arima, h = h*48, level = 95)
   scalar_ets <- forecast::ets(tmp_scalar)
-  ets_for  <- forecast::forecast(tmp_scalar, h = h*48, level = 95)
+  ets_for  <- forecast::forecast(scalar_ets, h = h*48, level = 95)
   
   pm1 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=h,
                           check.cp = F,sim.bounds = F)
@@ -1094,23 +1118,29 @@ for(i in 1:length(pred_idx)){
       pm1$data$component_true$data[,(ncol(tmp_dat)+1):ncol(pm1$data$component_true)]),
     'farima'=as.numeric(
       pm2$data$component_true$data[,(ncol(tmp_dat)+1):ncol(pm2$data$component_true)]),
-    'fets7'=as.numeric(
+    'fetsL'=as.numeric(
       pm3$data$component_true$data[,(ncol(tmp_dat)+1):ncol(pm3$data$component_true)]),
-    'farima7'=as.numeric(
+    'farimaL'=as.numeric(
       pm4$data$component_true$data[,(ncol(tmp_dat)+1):ncol(pm4$data$component_true)])
   )
   
   errors[i,] <- colSums((ests-as.vector(tmp_pred$data))^2) 
 }
 colMeans(errors)/min(colMeans(errors))
+#  arima   ets    fets  farima  fets_log  farima_log 
+#  1.101  2.453  1.196  1.000   1.271     1.031
+```
 
+In this case, we know the true errors. When forecasting and comparing to the truth for the next week, similar results are seen: 1.376 (arima), 1.601 (ets), 1.450 (fets), 1.000 (farima), 1.866 (log fets), and 1.073 (log arima). It is clear arima models are better choices than ets for the pollution.
+
+```{r eval=FALSE}
 # Results
 tmp_scalar <- ts(as.vector(city_dfts$data),frequency = 7)
 
 scalar_arima <- forecast::auto.arima(tmp_scalar)
-arima_for  <- forecast::forecast(tmp_scalar, h = h*48, level = 95)
+arima_for  <- forecast::forecast(scalar_arima, h = h*48, level = 95)
 scalar_ets <- forecast::ets(tmp_scalar)
-ets_for  <- forecast::forecast(tmp_scalar, h = h*48, level = 95)
+ets_for  <- forecast::forecast(scalar_ets, h = h*48, level = 95)
 
 pm1 <- projection_model(city_dfts,forecast.model='ets',n.ahead=h,
                         check.cp = F,sim.bounds = F)
@@ -1139,10 +1169,10 @@ true <-read.csv(
   paste0('C:/Users/jerem/OneDrive/Documents/School/Waterloo/Research/RPackages/fChange/vignettes/articles/pollution_true.txt'))[,2]
 res <- colSums((ests_final-true)^2)
 res / min(res)
+#  arima   ets    fets  farima  fets_log  farima_log 
+#  1.376  1.601  1.450  1.000   1.866     1.073 
 ```
 
-We see that CV recommend farima, but all functional models far outperform the scalar. Scaled the CV results were: 
-2.45 (arima), 2.453 (ets), 1.450 (fets), 1.000 (farima), 1.271 (log fets), and 1.031 (log arima). When forecasting and comparing to the true future, similar results are seen: 1.601 (arima), 1.601 (ets), 1.196 (fets), 1.000 (farima), 1.866 (log fets), and 1.073 (log arima).
 
 ![ ***The pollution forecast model.***](functionaldata/pollution_for.png){ width="5in"}
 ```{r, eval=FALSE}
@@ -1228,11 +1258,34 @@ magnitude but also the direction of the serial correlation in the
 series, 2) it is more robust against outliers. See the function
 `sacf()`.
 
+First consider a Brownian motion that is known to have no signal as given below.
+
+![ ***Brownian Motion.***](functionaldata/bm_plot.png){ width="5in"}
+```{r eval=FALSE}
+set.seed(12345)
+data_bm <- generate_brownian_motion(150)
+
+plot(data_bm)
+```
+
+![ ***Autocorrelation via fACF of Brownian Motion.***](functionaldata/bm_acf.png){ width="5in"}
+```{r eval=FALSE}
+acf(data_bm)
+```
+
+![ ***Autocorrelation via fSACF of Brownian Motion.***](functionaldata/bm_sacf.png){ width="5in"}
+```{r eval=FALSE}
+sacf(data_bm)
+```
+
+
+
 The Spanish electricity data contains patterns that are reflected in the
 fACF and fSACF plots given below. The differenced data, which subtracted
 the previous days' prices from current day, shows far less signal but
 with noticeable spikes every 7 lags, suggesting there remains weekly
 seasonality; see below.
+
 
 ![ ***Autocorrelation in the electricity data as described by the fACF.***](functionaldata/electricity_acf.png){ width="5in"}
 ```{r eval=FALSE}
@@ -1288,9 +1341,11 @@ the calculation of a $p-$value of such a white noise test.
 
 Many similar white noise tests for FTS have been developed based on
 other measures and aggregation principles, and a number of them are
-implemented in the function `portmanteau_tests()`.
+implemented in the function `portmanteau_tests()`. The tests below show non-significant values for the brownian motion and significant for the electricity data.
 
 ```{r, eval=FALSE}
+portmanteau_tests(data_bm)
+
 portmanteau_tests(electricity)
 portmanteau_tests(elec_ets$data$residuals)
 portmanteau_tests(elec_arima$data$residuals)
@@ -1319,19 +1374,36 @@ sacf(elec_ets$data$residuals)
 sacf(elec_arima$data$residuals)
 ```
 
+![***Multi-lag white noise portmanteau tests' p-values for the Brownian motion. ***](functionaldata/bm_mlwn.png){
+width="5in"}
+
 ![***Multi-lag white noise portmanteau tests' p-values for the residuals
 from the arima-based Hyndman-Ullah
-model.***](functionaldata/electricity_residuals_mlwn.png){#fig:electricity_residuals_mlwn
+model (arima, ets is similar). ***](functionaldata/electricity_residuals_mlwn.png){#fig:electricity_residuals_mlwn
 width="5in"}
 ```{r eval=FALSE}
 lag.max <- 20
-p_values <- rep(NA, lag.max)
+p_values_bm <- p_values_ets <- p_values_arima <- rep(NA, lag.max)
 for(h1 in 1:lag.max){
+  p_values_bm[h1] <- .multi_lag_test(data_bm, lag = h1 )$pvalue
   p_values_ets[h1] <- .multi_lag_test(elec_ets$data$residuals, lag = h1 )$pvalue
   p_values_arima[h1] <- .multi_lag_test(elec_arima$data$residuals, lag = h1 )$pvalue
 }
   
+# bm wn test
+ggplot2::ggplot() +
+  ggplot2::geom_point(ggplot2::aes(x=1:lag.max, y=p_values_bm),size=3) +
+  ggplot2::geom_hline(ggplot2::aes(yintercept=0.05),linetype='dotted', 
+                      col='red', linewidth=2) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
+  ggplot2::ylim(c(0,1)) +
+  ggplot2::xlab('') +
+  ggplot2::ylab('')  +
+  ggplot2::guides(color='none')
 
+
+# ets residuals wn test
 ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x=1:lag.max, y=p_values_ets),size=3) +
   ggplot2::geom_hline(ggplot2::aes(yintercept=0.05),linetype='dotted', 
@@ -1343,6 +1415,7 @@ ggplot2::ggplot() +
   ggplot2::ylab('')  +
   ggplot2::guides(color='none')
 
+# arima residuals wn test
 ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x=1:lag.max, y=p_values_arima),size=3) +
   ggplot2::geom_hline(ggplot2::aes(yintercept=0.05),linetype='dotted', 
@@ -1356,7 +1429,10 @@ ggplot2::ggplot() +
   
 ```
 
+See also the `summary()` function (plots suppressed).
 ```{r,eval=FALSE}
+summary(bm_data)
+
 summary(electricity)
 summary(elec_ets$data$residuals)
 summary(elec_arima$data$residuals)
@@ -1398,12 +1474,14 @@ Methods are proposed in [@aue:rice:sonmez:2018] and
 evidence against the hypothesis that the data are stationary and that
 there are no change points present based on these statistics.
 
-One stationary test is implemented as `stationary_test()`. The Spanish
-electricity data has a p-value $<0.001$ for the stationary test. The
+One stationary test is implemented as `stationary_test()`. The brownian motion has a non-significant p-value suggesting stationarity for both tests. The Spanish
+electricity data has a p-value $<0.001$ for the tests. The
 first difference and the model residuals both return non-significant
-p-value, suggesting stationarity.
+p-values, suggesting stationarity. 
 
 ```{r, eval=FALSE}
+stationarity_test(data_bm)
+
 stationarity_test(electricity)
 stationarity_test(elec_ets$data$residuals)
 stationarity_test(elec_arima$data$residuals)
@@ -1414,24 +1492,23 @@ kpss_test(elec_arima$data$residuals)
 ```
 
 Applying change point detection on the electricity data, two change
-point are observed; see Figure
+point are observed; see Figures
 [3.5](#fig:electricity_changes){reference-type="ref"
-reference="fig:electricity_changes"}. Since this suggests regions of
-homogeneity in the data, CV was re-run to compare the previous models to
-models based on only the last homogeneous segment: 2281 (ets), 2522
-(arima), 2426 (ets with cp), and 2784 (arima with cp). Although the data
-in the last segment appears to be more homogeneous, in this case the
-reduction of data lead to worse CV performance.
+reference="fig:electricity_changes"} and[3.6](#fig:electricity_changes_plot){reference-type="ref"
+reference="fig:electricity_changes_plot"}.
 
 
 ![***Changes in the distribution of the electricity
 data.***](functionaldata/electricity_changes.png){#fig:electricity_changes
 width="5in"}
+
+![***Changes in the distribution of the electricity
+data, highlighting mean of the segments.***](functionaldata/electricity_changes_plot.png){#fig:electricity_changes_plot
+width="5in"}
 ```{r, eval=FALSE}
 set.seed(12345)
 elec_changes <- fchange(electricity,type = 'segmentation')
 elec_changes$location
-
 
 plot(electricity, changes=elec_changes$location,
      plot_title = NULL,
@@ -1446,9 +1523,16 @@ plot(electricity, changes=elec_changes$location, type='change',
   
 ```
 
+Since changes suggest regions of
+homogeneity in the data, CV was re-run looking at 14 day forecasts in order to compare the previous models to
+models based on only the last homogeneous segment: 1.000 (ets), 1.013
+(arima), 1.157 (ets with cp), and 1.232 (arima with cp). Although the data
+in the last segment appears to be more homogeneous, in this case the
+reduction of data lead to worse CV performance. Try another segmentation and see if it has a different effect!
+
 ```{r, eval=FALSE}
 # CV
-pred_idx <- floor(0.8*ncol(electricity)+1):ncol(electricity)
+pred_idx <- floor(0.8*ncol(electricity)+1):(ncol(electricity)-13)
 errors <- matrix(NA,nrow=length(pred_idx), ncol=4)
 colnames(errors) <- c('fets','farima','fetsC','farimaC')
 
@@ -1462,33 +1546,34 @@ for(i in 1:length(pred_idx)){
   tmp_dat$season <- 7
   tmp_dat1 <- electricity[,cp:(idx-1)]
   tmp_dat1$season <- 7
-  tmp_pred <- electricity[idx]
-  tmp_pred$season <- 7
+  tmp_pred <- electricity[idx+0:6]
   
-  pm1 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=1,
+  pm1 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=14,
                           check.cp = F,sim.bounds = F)
-  pm2 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=1,
+  pm2 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=14,
                           check.cp = F,sim.bounds = F)
-  pm3 <- projection_model(tmp_dat1,forecast.model='ets',n.ahead=1,
+  pm3 <- projection_model(tmp_dat1,forecast.model='ets',n.ahead=14,
                           check.cp = F,sim.bounds = F)
-  pm4 <- projection_model(tmp_dat1,forecast.model='arima',n.ahead=1,
+  pm4 <- projection_model(tmp_dat1,forecast.model='arima',n.ahead=14,
                           check.cp = F,sim.bounds = F)
   
   ests <- data.frame(
     'fets'=as.numeric(
-      pm1$data$component_true$data[,idx]),
+      pm1$data$component_true$data[,idx+0:6]),
     'farima'=as.numeric(
-      pm2$data$component_true$data[,idx]),
+      pm2$data$component_true$data[,idx+0:6]),
     
     'fetsC'=as.numeric(
-      pm3$data$component_true$data[,idx-cp+1]),
+      pm3$data$component_true$data[,idx-cp+1+0:6]),
     'farimaC'=as.numeric(
-      pm4$data$component_true$data[,idx-cp+1])
+      pm4$data$component_true$data[,idx-cp+1+0:6])
   )
   
-  errors[i,] <- colSums((ests-tmp_pred$data)^2) 
+  errors[i,] <- colSums( (ests-as.vector(tmp_pred$data))^2 )
 }
 colMeans(errors)/min(colMeans(errors))
+#   fets   farima  fetsC  farimaC 
+#   1.000  1.013   1.157  1.232
 ```
 
 ## Exercises
