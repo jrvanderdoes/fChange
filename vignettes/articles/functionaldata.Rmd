@@ -1,8 +1,8 @@
 ---
 title: "functionaldata"
-output: pdf_document
-  # html_document:
-  #   df_print: paged
+output: #pdf_document
+  html_document:
+    df_print: paged
 bibliography: refs.bib  
 ---
 <!--  output: pdf_document ; tinytex::install_tinytex()
@@ -1574,6 +1574,16 @@ for(i in 1:length(pred_idx)){
 colMeans(errors)/min(colMeans(errors))
 #   fets   farima  fetsC  farimaC 
 #   1.000  1.013   1.157  1.232
+```
+
+For the French mortality, an example segmentation and forecast is given below.
+
+![***Change and forecast for the French mortality.***](functionaldata/fmort_change_for.png){
+width="5in"}
+```{r, eval=FALSE}
+set.seed(123)
+tmp <- projection_model(fmort,sim.bounds = FALSE,method='eigenjoint',n.ahead = 20)
+tmp$plots$forecast_plot
 ```
 
 ## Exercises
