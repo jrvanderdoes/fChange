@@ -167,8 +167,11 @@ as a functional time series over the years 1816 to
 2022.***](functionaldata/french_rates.png){#fig:fmortality width="5in"}
 ```{r, eval=FALSE}
 urlfile2 <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
-              '/main/vignettes/articles/log_fmort.rds')
-fmort <- readRDS(urlfile2)
+              '/main/vignettes/articles/log_fmort.csv')
+fmort <- read.csv()
+fmort <- dfts(fmort,labels=1816:2022,fparam=0:100)
+
+saveRDS(fmort )
 
 plot(fmort,
      plot_title = NULL,
