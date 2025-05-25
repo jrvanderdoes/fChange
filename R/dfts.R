@@ -668,6 +668,7 @@ dim.dfts <- function(x, ...) {
 print.dfts <- function(x, ...){
   cat(x$name,'\n')
   cat('dimension: ',nrow(x),' x ',ncol(x),'\n',sep = '')
+  cat('season: ',x$season,'\n',sep = '')
   cat('fparam (',length(x$fparam),'): ',sep = '')
   cat(utils::head(x$fparam), ifelse(length(x$fparam)>6,'...',''),'\n')
   cat('labels (',length(x$labels),'): ',sep = '')
