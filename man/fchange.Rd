@@ -32,7 +32,8 @@ fchange(
   errors = "L2",
   recommendation_change_points = 2,
   recommendation_improvement = 0.15,
-  silent.binary = FALSE
+  silent.binary = FALSE,
+  ...
 )
 }
 \arguments{
@@ -107,6 +108,8 @@ plot recommendation.}
 
 \item{silent.binary}{Boolean if output should be printed when running binary
 segmentation.}
+
+\item{...}{Unused additional parameters.}
 }
 \value{
 When type is single, returns a list:

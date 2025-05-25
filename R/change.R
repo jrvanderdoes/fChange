@@ -51,6 +51,7 @@
 #'  plot recommendation.
 #' @param silent.binary Boolean if output should be printed when running binary
 #'  segmentation.
+#' @param ... Unused additional parameters.
 #'
 #' @returns
 #' When type is single, returns a list:
@@ -119,7 +120,7 @@ fchange <- function(X,
                    trim_function = function(X) { 0 },
                    errors='L2', recommendation_change_points = 2,
                    recommendation_improvement = 0.15,
-                   silent.binary = FALSE){
+                   silent.binary = FALSE, ...){
 
   # Check Data
   X <- dfts(X)
