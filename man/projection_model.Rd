@@ -41,7 +41,7 @@ computed using the covariance.}
 bounds when sim.bounds is TRUE.}
 
 \item{transformation}{Argument that specifies any transformations. Currently only
-NULL (no transformation) and 'log' (logarithmic) are acceptable.}
+NULL (no transformation) 'log' (logarithmic), and 'sqrt' (square root) are acceptable.}
 
 \item{...}{Additional information to pass into pca, change (if
 \code{check.cp=TRUE}), and plot.}

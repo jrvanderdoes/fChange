@@ -1,11 +1,13 @@
 ---
 title: "functionaldata"
-output:
-  html_document:
-    df_print: paged
+output: pdf_document
+  # html_document:
+  #   df_print: paged
 bibliography: refs.bib  
 ---
-
+<!--  output: pdf_document ; tinytex::install_tinytex()
+https://stackoverflow.com/questions/7653483/github-relative-link-in-markdown-file
+-->
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -24,6 +26,7 @@ devtools::install_github('https://github.com/jrvanderdoes/fChange.git@main')
 library(fChange)
 ```
 
+
 The data for the included exercises can be downloaded using the following code:
 ```{r,eval=FALSE}
 urlfile <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
@@ -31,7 +34,10 @@ urlfile <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
 data <- read.csv(urlfile)
 ```
 
-The slides can be reached [here](SSC_Short_Course.png).
+The slides can be downloaded [here](https://raw.githubusercontent.com/jrvanderdoes/fChange/main/vignettes/articles/SSC_Short_Course.pdf) and a pdf of this document
+can be downloaded [here](https://raw.githubusercontent.com/jrvanderdoes/fChange/main/vignettes/articles/SSC_Short_Course_markdown.pdf).
+
+
 
 ## Introduction
 
@@ -40,20 +46,21 @@ over time. Such data can be denoted $X_1,...,X_T$, where $X_i$ is the
 data observed at time $i$, and $T$ describes the number of time points
 at which data has been obtained, also referred to as the "length\" of
 the time series. An example of a scalar, or real-valued, time series of
-length $T=504$ is shown in Figure [1.1](#Fig-spot3){reference-type="ref"
-reference="Fig-spot3"}. This depicts electricity spot prices in Spain
+length $T=504$ is shown in the figure below. This depicts electricity spot prices in Spain
 obtained each hour in Euro's per Megawatt/hour during a three week
 period in late spring of 2024. The ultimate goal of time series analysis
 is to try and make inferences about the process that generated the data.
 If we understand how a time series evolves, we can, for example,
 forecast it as well as describe how much variability there might be in
-future values. The time series shown in Figure
-[1.1](#Fig-spot3){reference-type="ref" reference="Fig-spot3"} exhibits
+future values. The time series shown in the figure below exhibits
 apparent daily and weekly "seasonality\" or "periodicity\", which we
 might expect in future data.
 
 ![ ***Hourly electricity spot price in Spain for three weeks in
-2014.***](functionaldata/tweeks.png){#Fig-spot3 width="5in"}
+2014.***](functionaldata/tweeks.png){width="5in"}
+<!-- # ```{r, eval=FALSE} -->
+<!-- # plot(as.vector(electricity$data)[7+1:(24*7*3)]) -->
+<!-- # ``` -->
 
 Many modern time series arise from observing a nearly continuous time
 process at a high frequency. Figure
@@ -66,6 +73,9 @@ expected daily and weekly periodicity in the time series.
 
 ![ ***Hourly electricity spot price in Spain during the year
 2014.***](functionaldata/spwhole.png){#Fig-spot4 width="5in"}
+```{r, eval=FALSE}
+plot(as.vector(electricity$data))
+```
 
 An alternative way to view such data is as what we will call a
 "functional time series\" (FTS). One might imagine here that each data
@@ -83,20 +93,27 @@ observe 24 data points for each daily function. Nonetheless, thinking of
 these data as being "functional\" has some benefits. For instance, we
 might linearly interpolate the observed data to create full "daily price
 curves\", and plot them sequentially as an alternative visualization of
-the data to Figure [1.2](#Fig-spot4){reference-type="ref"
-reference="Fig-spot4"}. Such visualizations are shown in Figures
-[1.3](#Fig-spot5){reference-type="ref" reference="Fig-spot5"} and
-[1.4](#Fig-spot6){reference-type="ref" reference="Fig-spot6"}. There we
+the data (see below). Such visualizations are shown below. There we
 see not only pronounced daily seasonality, but also we observe more
 easily weekly periodicity as well as some overall trends and changes in
 variability throughout the year.
 
 ![ ***Hourly electricity spot price in Spain during the year 2014
-visualized as a functional time series.***](functionaldata/e1.png){#Fig-spot5 width="5in"}
+visualized as a functional time series.***](functionaldata/e1.png){width="5in"}
+```{r, eval=FALSE}
+electricity$labels <- format(as.Date(electricity$labels,'%Y-%m-%d'),'%b')
+plot(electricity, type = 'fast')
+```
 
 ![ ***Another angle of hourly electricity spot price in Spain during the
 year 2014 visualized as a functional time
-series.***](functionaldata/electricity_data.png){#Fig-spot6 width="5in"}
+series.***](functionaldata/electricity_data.png){width="5in"}
+```{r, eval=FALSE}
+plot(electricity, plot_title = NULL,
+       eye = list(x = -0.5, y = -1.5, z = 0.5),
+       aspectratio=list(x = 1, y = 0.6, z = 0.6)
+     )
+```
 
 Such functional time series arise in many different settings. Figure
 [1.5](#Fig-sp){reference-type="ref" reference="Fig-sp"} shows a
@@ -111,10 +128,24 @@ reference="fig:fmortality"}).
 
 ![ ***An FTS constructed from one minute resolution intraday prices from
 the S&P 500.***](functionaldata/yield.png){#Fig-sp width="5in"}
+```{r, eval=FALSE}
+plot(SPYUS500)
+```
 
 ![ ***Levels of particulate matter pollution in parts per million measured
 every 30 minutes in a Graz, Austria, visualized as a functional time
 series.***](functionaldata/pollution1.png){#fig:pollution width="5in"}
+```{r, eval=FALSE}
+urlfile1 <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
+              '/main/vignettes/articles/pollution.txt')
+city <- read.csv(urlfile1, header = TRUE,sep=',')$x
+
+city_dfts <- dfts(matrix(as.numeric(city),nrow = 48),
+                  labels = paste('Day',1:(length(city)/48)),
+                  season = 7)
+
+plot(city_dfts)
+```
 
 
 The benefits of the "functional\" perspective are not just limited to
@@ -134,6 +165,16 @@ and discuss some tools for analyzing them in `R`.
 ![ ***Log mortality rates for French males across ages 0 to 100 over viewed
 as a functional time series over the years 1816 to
 2022.***](functionaldata/french_rates.png){#fig:fmortality width="5in"}
+```{r, eval=FALSE}
+urlfile2 <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
+              '/main/vignettes/articles/log_fmort.rds')
+fmort <- readRDS(urlfile2)
+
+plot(fmort,
+     plot_title = NULL,
+     eye = list(x = -4.75, y = -1.5, z = 2.5),
+     aspectratio=list(x = 2.75, y = 2, z = 2))
+```
 
 ## Function Spaces and $L^2[0,1]$
 
@@ -172,12 +213,12 @@ dimensional\", and so viewing data as residing in these spaces is a
 significant departure from the finite dimensional setting of
 $\mathbb{R}^d$.
 
-::: definition
+*Definition*:
 For a given function space $\mathcal{H}$, e.g. any of the above three
 examples, a *functional time series* (FTS) $X_1,...,X_T$ is an observed
 stretch of data of length $T$ of a function-valued stochastic process
 $\{X_i \in \mathcal{H}, \; i\in \mathbb{Z}\}$.
-:::
+
 
 The choice of space that we view the data as residing in is
 consequential in that it suggests how we might measure distance between
@@ -205,7 +246,7 @@ further the notion of "orthogonality\".
 $i\in \{1,2,...\}$ satisfying the properties 1)
 $\langle \phi_i, \phi_j \rangle = {1}\{i=j\}$, i.e. the functions are
 orthogonal and have norm one, and 2) for any $f\in L^2[0,1]$,
-$$\begin{aligned}\label{cons}
+$$\begin{aligned}
     f(t) =  \sum_{j=1}^{\infty} \langle f , \phi_j \rangle \phi_j(t).
 \end{aligned}$$
 
@@ -213,10 +254,8 @@ Here equality is understood in the $L^2-$sense, which means that the
 $\|\cdot\|_2$ norm of the difference between the left and right hand
 sides of the above is zero.
 
-<!-- @ref(cons) -->
-<!-- \@ref(cons) -->
 
-Equation [\[cons\]](#cons){reference-type="eqref" reference="cons"}, in
+The equation on CONS, in
 addition to the geometry introduced by the inner product, means that the
 space $L^2[0,1]$ is "close\" in a sense to $\mathbb{R}^d$. If for
 instance we were ever able to make the simplification $$\begin{aligned}
@@ -231,7 +270,7 @@ Throughout these notes we generally consider FTS that we think of as
 taking value in $L^2[0,1]$. We conclude this section with a couple of
 remarks.
 
-::: remark
+*Remark*:
 An important result of analysis is that *all* infinite dimensional,
 separable Hilbert spaces are "isometrically isomorphic\". This means
 that for any separable Hilbert spaces $\mathcal{H}_A$ and
@@ -246,21 +285,19 @@ $W^{1,2}$ mentioned above, may be fashioned into separable Hilbert
 spaces, and so in a sense considering methods to analyze data in
 $L^2[0,1]$ has broad implications for analyzing many types of functional
 data.
-:::
 
-::: remark
+*Remark*:
 Analyzing FTS when we think of the data as being elements of a more
 general Banach space, e.g. $C[0,1]$, poses some significant challenges
 from a theoretical perspective. Many problems remain open in this area.
-:::
+
 
 ## Preprocessing FTS {#sec-pre}
 
 In most cases in which FTS analysis is applied (but not all!), the
 observed data are discrete measurements of an underlying process that is
-indexed by a continuous domain. For example, the spot price data
-visualized in Figure [1.3](#Fig-spot5){reference-type="ref"
-reference="Fig-spot5"} we can view as being indexed on the continuous
+indexed by a continuous domain. For example, the spot price electricity data previously
+visualized we can view as being indexed on the continuous
 interval $[0,24]$, although with hourly data we only observe each daily
 function on the points $\{0,....,24\} \subset[0,24]$. The first step in
 FTS is often to complete these data to full curves using
@@ -285,9 +322,7 @@ $[0,1]$.
 
 When we view the underlying curve $X_i$ as a function in $L^2[0,1]$,
 another natural approach to complete such data to a full curve is to
-take advantage of [\[cons\]](#cons){reference-type="eqref"
-reference="cons"} and construct for each $t\in [0,1]$ $$\begin{aligned}
-\label{smoother}
+take advantage of CONS and construct for each $t\in [0,1]$ $$\begin{aligned}
     \hat{X}_i(t)  = \sum_{j=1}^{K} c_i \phi_j(t) = {\bf c}^\top {\bf \Phi}(t),
 \end{aligned}$$ where the $\phi_j$ is a CONS, $K$ is a user-specified
 parameter, ${\bf c} = (c_1,....,c_K)^\top$ and
@@ -298,11 +333,13 @@ optimization procedure. Two popular choices for the basis functions are
 the *standard Fourier basis*, which are functions of the form
 $$\phi_j(t) = \sqrt{2}  \cos (2 \pi j t) + \sqrt{2} \sin (2 \pi j t),$$
 and the bases of *orthogonal B-spline polynomials*. A plot of cubic
-B-spline polynomials based on equally spaced knots is shown in Figure
-[1.9](#Fig-spl){reference-type="ref" reference="Fig-spl"}.
+B-spline polynomials based on equally spaced knots is shown in the figure below.
 
-![ A plot of cubic B-spline polynomials based on equally spaced
-knots.](functionaldata/spline.png){#Fig-spl width="4.55in"}
+![ ***A plot of cubic B-spline polynomials based on equally spaced
+knots.***](functionaldata/spline.png){width="5in"}
+<!-- # ```{r, eval=FALSE} -->
+<!-- # plot(fda::create.bspline.basis(nbasis = 10)) -->
+<!-- # ``` -->
 
 While a detailed explanation of spline interpolation/smoothing is beyond
 the scope of this short course, we mention that this method came about
@@ -317,12 +354,15 @@ think may have been drawn from an underlying continuous or
 differentiable function. Given the flexibility (pun intended) of
 cubic-spline smoothing, it is often used as a default.
 
-![ Example of a functional data object created using penalized cubic
-splines.](functionaldata/splex.png){#Fig-spl width="3.75in"}
+![ ***Example of a functional data object created using penalized cubic
+splines.***](functionaldata/splex.png){#Fig-spl width="5in"}
+<!-- # ```{r, eval=FALSE} -->
+<!-- # plot(fda::create.bspline.basis(nbasis = 10)) -->
+<!-- # ``` -->
+
 
 After choosing a basis, we still must select $K$ and the coefficient
-vector ${\bf c}$ in [\[smoother\]](#smoother){reference-type="eqref"
-reference="smoother"}. This is typically done using least squares: we
+vector ${\bf c}$ in the equation. This is typically done using least squares: we
 choose ${\bf c}$ and $K$ to minimize
 $$\mbox{SSE}_{i,K}({\bf c}) = \sum_{j=1}^{n_i}[X_i(t_{i,j}) - {\bf c}^\top{\bf \Phi}(t_{i,j})]^2.$$
 Here if $K \ge n_i$, the sum of squared errors can be minimized at
@@ -351,8 +391,7 @@ practically once we have created such curves we will re-valuate them at
 some, often dense, grid of equally spaced points for subsequent analyses
 and storage as an array.
 
-Suppose that the Spanish electricity data in Figure
-[1.4](#Fig-spot6){reference-type="ref" reference="Fig-spot6"} was
+Suppose that the Spanish electricity data was
 collected between 20 and 40 times a day, at potentially different points
 of time. Such data could be fit using a B-spline basis and evaluated
 such that each curve is evaluated at the same time each day. Different
@@ -363,9 +402,67 @@ valuable.
 
 
 ![ ***Unevenly observed electricity prices fit to B-spline basis functions and evaluated at 24 daily observation for smoothing parameter $\lambda=1$.***](functionaldata/electricity_lam1.png){#Fig-elam1 width="5in"}
+```{r, eval=FALSE}
+uneven_spanish <- readRDS('./vignettes/articles/uneven_spanish.rds')
+eval_pts <- seq(0, 1, length.out=24)
+elec_eval <- data.frame(matrix(nrow = 24, ncol=length(uneven_spanish)))
+long_data <- data.frame()
+for(i in 1:length(uneven_spanish)){
+  long_data <-
+    rbind(long_data, 
+          data.frame('x'= i + 0:(length(uneven_spanish[[i]]$values)-1) / 
+                       length(uneven_spanish[[i]]$values),
+                     'y'=uneven_spanish[[i]]$values))
+    
+  fda_fit <- fda::Data2fd(uneven_spanish[[i]]$pts,uneven_spanish[[i]]$values,
+                          basisobj = fda::create.bspline.basis(nbasis = 24),
+                          lambda = 1)#,
+                          # lambda = .0001)
+  elec_eval[,i] <- fda::eval.fd(eval_pts, fda_fit)
+}
+colnames(elec_eval) <- seq.Date(from = as.Date("2014-01-01"), to = as.Date("2014-12-31"),by = 1)#electricity$labels
 
-![ ***Unevenly observed electricity prices fit to B-spline basis functions and evaluated at 24 daily observation for smoothing parameters $\lambda=0.0001.***](functionaldata/electricity_lam0001.png){#Fig-elam2 width="5in"}
+spanish_electricity <- 
+  dfts(elec_eval,
+       labels = format(as.Date(colnames(elec_eval),'%Y-%m-%d'),'%b')
+       )
 
+plot(spanish_electricity,plot_title = NULL,
+       eye = list(x = -1, y = -1.5, z = 0.75),
+       aspectratio=list(x = 0.8, y = 0.6, z = 0.6)
+     )
+```
+
+![ ***Unevenly observed electricity prices fit to B-spline basis functions and evaluated at 24 daily observation for smoothing parameters $\lambda=0.0001$.***](functionaldata/electricity_lam0001.png){#Fig-elam2 width="5in"}
+```{r, eval=FALSE}
+uneven_spanish <- readRDS('./vignettes/articles/uneven_spanish.rds')
+eval_pts <- seq(0, 1, length.out=24)
+elec_eval <- data.frame(matrix(nrow = 24, ncol=length(uneven_spanish)))
+long_data <- data.frame()
+for(i in 1:length(uneven_spanish)){
+  long_data <-
+    rbind(long_data, 
+          data.frame('x'= i + 0:(length(uneven_spanish[[i]]$values)-1) / 
+                       length(uneven_spanish[[i]]$values),
+                     'y'=uneven_spanish[[i]]$values))
+    
+  fda_fit <- fda::Data2fd(uneven_spanish[[i]]$pts,uneven_spanish[[i]]$values,
+                          basisobj = fda::create.bspline.basis(nbasis = 24),
+                          lambda = 0.0001)
+  elec_eval[,i] <- fda::eval.fd(eval_pts, fda_fit)
+}
+colnames(elec_eval) <- seq.Date(from = as.Date("2014-01-01"), to = as.Date("2014-12-31"),by = 1)#electricity$labels
+
+spanish_electricity <- 
+  dfts(elec_eval,
+       labels = format(as.Date(colnames(elec_eval),'%Y-%m-%d'),'%b')
+       )
+
+plot(spanish_electricity,plot_title = NULL,
+       eye = list(x = -1, y = -1.5, z = 0.75),
+       aspectratio=list(x = 0.8, y = 0.6, z = 0.6)
+     )
+```
 
 
 ## Visualizing FTS
@@ -390,9 +487,15 @@ faster. Hence, it is well-employed for larger FTS. The second is called a rainbo
 the observations to highlight major shifts.
 
 
-![ ***Fast rainbow spaghetti plot of the FTS French mortality data.***](functionaldata/fmortality_fast.png){#Fig-elam2 width="5in"}
+![ ***Fast rainbow spaghetti plot of the FTS French mortality data.***](functionaldata/fmortality_fast.png){width="5in"}
+```{r eval=FALSE}
+plot(fmort,type='fast')
+```
 
-![ ***Rainbow plot of the FTS French mortality data.***](functionaldata/fmortality_rainbow.png){#Fig-elam1 width="5in"}
+![ ***Rainbow plot of the FTS French mortality data.***](functionaldata/fmortality_rainbow.png){width="5in"}
+```{r eval=FALSE}
+plot(fmort,type='rainbow')
+```
 
 
 ## Mean, covariance, and principal component analysis
@@ -401,13 +504,12 @@ When beginning to analyze an FTS, we often consider computing some
 summary values and performing dimension reduction. Many of these tasks
 are carried out by thinking of the FTS as being *stationary.*
 
-::: definition
+*Definition*:
 An FTS $\{X_i \in \mathcal{H}, \; i \in \mathbb{Z}\}$ is (strictly)
 stationary if for each $p\in \mathbb{N}$, and
 $i_1,...,i_p,h \in \mathbb{Z}$, and all (Borel) subsets
 $B_1,...,B_p \subset \mathcal{H}$,
 $$P(X_{i_1} \in B_1,..., X_{i_p} \in B_p ) = P(X_{i_1+h} \in B_1,..., X_{i_p+h} \in B_p ).$$
-:::
 
 Roughly speaking a time series is stationary if its stochastic
 properties are the same no matter where we look at the series. This
@@ -425,8 +527,7 @@ the sample mean function
 $$\bar{X}_T(t) = \frac{1}{T} \sum_{i=1}^T X_i(t).$$
 
 The *covariance operator* of a stationary FTS is defined by
-$$\label{e:CO}
-    C(x)(t) := E [\langle X_i-\mu, x\rangle (X_i-\mu)(t) ],\ \ \ x \in L^2[0,1],$$
+$$C(x)(t) := E [\langle X_i-\mu, x\rangle (X_i-\mu)(t) ],\ \ \ x \in L^2[0,1],$$
 and is well defined so long as $E\|X_i\|_2^2 < \infty.$ The covariance
 operator is also characterized by the *covariance kernel*
 $$c(t,s) = E[ (X_i(t) - \mu(t) ) (X_i(s) - \mu_i(s))],$$ via the
@@ -438,17 +539,15 @@ is akin to using such a matrix to define a linear operator on the space.
 
 These quantities are most commonly estimated using the empirical
 covariance kernel
-
 $$\widehat{c}(t,s) = \frac{1}{T} \sum_{i=1}^T [X_i(t) - \bar{X}_T(t)][X_i(s) - \bar{X}_T(s) ],$$
 and the empirical covariance operator
 $$\widehat{C}(x)(t) = \int_0^1 \hat{c}(t,s)x(s) ds.$$ The eigenfunctions
 of $C$, denoted by $v_j, j \ge 1$, are often called the *functional
 principal components* (FPCs), i.e. $C(v_j) = \lambda_j v_j$. These functions
 are orthogonal and define a CONS of $L^2[0,1]$. As such they may be used
-to decompose the FTS as in [\[cons\]](#cons){reference-type="eqref"
-reference="cons"}. This turns out to be a somewhat special expansion for
+to decompose the FTS as in the CONS equation. This turns out to be a somewhat special expansion for
 a stationary FTS called the *Karhunen**--**Loéve (KL) expansion*. It
-takes the form $$\label{e:KL}
+takes the form $$
     X_i(t) = \mu(t) + \sum_{j=1}^\infty \xi_{ij} v_j(t), \ \ \
     \xi_{ij} = \langle X_i - \mu, v_j \rangle.$$ The *scores* $\xi_{ij}$
 satisfy $E\xi_{ij} = 0$, $E\xi_{ij}^2 = \lambda_j$,
@@ -456,25 +555,22 @@ $E[\xi_{ij}\xi_{ij^\prime}] = 0$ for $j\neq j^\prime$.
 
 This KL expansion is "optimal\" in the following sense: if we consider
 the truncated expansion $$\begin{aligned}
-\label{fin-dim}
     X_i^{(d)}(t) =  \mu(t) + \sum_{j=1}^d \xi_{ij} v_j(t)
 \end{aligned}$$ for any positive integer $d$, this "finite dimensional\"
 representation of $X_i$ is optimal in that it minimizes the mean
 squared-normed error $$E\| X_i - X_i^{(d)}\|^2_2$$ among all possible
-choices of the functions $v_1,...,v_d$ in
-[\[fin-dim\]](#fin-dim){reference-type="eqref" reference="fin-dim"}.
+choices of the functions $v_1,...,v_d$ in the equation.
 
 Expansion is not directly accessible because $\mu$ and the $v_j$ are
 unknown population parameters, but can be replaced with their empirical
 counterparts. In particular the FPCs $v_j$ and the eigenvalues $\lambda_j$
 are estimated by $\hat v_j$ and $\hat\lambda_j$ defined as the solutions to
-the equations $$\label{e:emp}
+the equations $$
     \widehat{C}(\hat v_j)(t) =  \hat \lambda_j \hat v_j(t),  \ \ 
     j \in \{1,...,T\}.$$
 
 Each curve $X_i$ can then be approximated by a linear combination of a
 finite set of the estimated FPCs $\hat v_j$, i.e. $$\begin{aligned}
-\label{emp-fin-dim}
     X_i(t) \approx \bar{X}_T + \sum_{j=1}^{d} \hat{\xi}_{ij} \hat v_j(t),
 \end{aligned}$$ where the
 $\hat{\xi}_{ij}=\langle X_i-\bar{X}_T, {\hat v}_j \rangle$ are the sample
@@ -496,7 +592,12 @@ conclusion drawn from the data is almost always something worth
 considering.
 
 ![ Scree plot for PCA with the FTS French mortality
-data.](functionaldata/fmortality_skree.png){#fig:fmortality_skree width="40%"}
+data.](functionaldata/fmortality_skree.png){#fig:fmortality_skree width="5in"}
+```{r eval=FALSE}
+pca_data <- pca(log_fmort_fdts, TVE=0.95)
+plot(pca_data$center)
+pca_data$skree$comb_skree
+```
 
 We again return the French mortality data. The mean of the observations
 is shown as the thick gray line in the rainbow plot. This mean is used to center the data
@@ -506,17 +607,28 @@ variation; see skree plot. The first two PCs are also shown with the related coe
 
 
 ![ ***The first PC.***](functionaldata/fmortality_pc2.png){width="5in"}
+```{r eval=FALSE}
+plot(pca_data$rotation[,1],xlab = NA, ylab=NA,cex.axis=2,type='l',lwd=2)
+```
+
 
 
 ![ ***The second PC.***](functionaldata/fmortality_pc2.png){width="5in"}
+```{r eval=FALSE}
+plot(pca_data$rotation[,2],xlab = NA, ylab=NA,cex.axis=2,type='l',lwd=2)
+```
 
 
-
-![ ***The first PC scores.***](functionaldata/fmortality_coef1.png){width="5in"}
+![ ***The first PC scores.***](functionaldata/fmortality_coef1.png){width="5in"}```{r eval=FALSE}
+```{r eval=FALSE}
+plot(pca_data$x[,1],xlab = NA, ylab=NA,cex.axis=2)
+```
 
 
 ![ ***The second PC scores.***](functionaldata/fmortality_coef2.png){ width="5in"}
-
+```{r eval=FALSE}
+plot(pca_data$x[,2],xlab = NA, ylab=NA,cex.axis=2)
+```
 
 ## Exercises
 
@@ -552,7 +664,6 @@ this method is simple **---** if we suppose that the underlying curves
 $X_i$ may be well-approximated by their projection onto the first $J$
 eigenfunctions of the covariance operator $\hat{v}_1,...,\hat{v}_J$, so
 that $$\begin{aligned}
-\label{hu}
     X_i(t) \approx X_i^{(J)}(t) = \hat{\mu}(t) + \sum_{j=1}^J {\xi}_{i, j} \hat{v}_{j}(t),
 \end{aligned}$$ then the time dynamics of the series are characterized
 by the $J$ scalar time series ${\xi}_{i, 1},...,{\xi}_{i, J}.$ Forecasts
@@ -562,14 +673,12 @@ understood problem, and there are a host of methods that can be used to
 produce forecasts of $\xi_{T+h,1},...,\xi_{T+h,J}$, which we denote
 $\hat{\xi}_{T+h,1},...,\hat{\xi}_{T+h,J}$. This leads to the forecast of
 $X_i$ $$\begin{aligned}
-\label{forecast}
     \hat{X}_{T+h}(t) = \hat{\mu}(t) + \sum_{j=1}^J \hat{\xi}_{T+h, j} \hat{v}_{j}(t). 
-\end{aligned}$$
+\end{aligned}$$.
 
 Such forecasts are quite hard to interpret alone without some
 quantification of the uncertainty we expect in them. A simple way
 quantify the uncertainty in the forecast
-[\[forecast\]](#forecast){reference-type="eqref" reference="forecast"}
 is to employ simulation. Many methods to produce forecasts of the
 component series $\xi_{i,j}$ are "model based\", and readily lend
 themselves to simulating potential future values
@@ -581,16 +690,15 @@ $$\hat{X}^{(b)}_{T+h}(t) = \hat{\mu}(t) + \sum_{j=1}^J {\xi}^{(b)}_{T+h, j} \hat
 
 By examining the variability of these simulated curves, we can get an
 idea of how much variability we might expect of future curves as well as
-how much they might deviate from the forecasted curve in
-[\[forecast\]](#forecast){reference-type="eqref" reference="forecast"}.
+how much they might deviate from the forecasted curve.
 For example, a pointwise in $t$ 95% prediction interval for $X_{T+h}(t)$
 is constructed as $$X_{T+h}(t) \in (\hat{q}(0.025),\hat{q}(0.975) ),$$
 where $\hat{q}(\alpha)$ is the $\alpha$ sample quantile of
 $\hat{X}^{(b)}_{T+h}(t),$ $b\in \{1,...,B\}$.
 
-::: remark
+*Remark*:
 We note that a model that takes into account the "dimension reduction
-error\" in [\[hu\]](#hu){reference-type="eqref" reference="hu"} is
+error\" in HU is
 $$X_i(t) =\hat{\mu}(t) + \sum_{j=1}^J {\xi}_{i, j} \hat{v}_{j}(t) + \varepsilon_i(t),$$
 where $\varepsilon_i(t)$ is a "functional residual\"
 $$\varepsilon_i(t)= X_i(t) - X_i^{(J)}(t).$$ By taking $J$ large (or
@@ -603,16 +711,14 @@ can compute simulated curves as
 $$\hat{X}^{(b)}_{T+h}(t) = \hat{\mu}(t) + \sum_{j=1}^J {\xi}^{(b)}_{T+h, j} \hat{v}_{j}(t) + \varepsilon_{T+h}^{(b)}(t), \;\; b\in \{1,...,B\},$$
 where $\varepsilon_{T+h}^{(b)}(t)$ is an iid draw from the residuals
 $X_i(t) - X_i^{(J)}(t), \; i \in \{1,...,T\}.$
-:::
 
-::: remark
+*Remark*:
 Often when we simulate the component series
 $\xi^{(b)}_{T+h,1},...,\xi^{(b)}_{T+h,J}$, we do this *independently
 across the series*. Whether this is reasonable to do is often unclear.
 When the component series are constructed using PCA, the series are
 marginally uncorrelated, although can exhibit complex temporal
 dependency structures.
-:::
 
 ## Forecasting the component series
 
@@ -629,34 +735,29 @@ series analysis since the seminal work of Box and Jenkins
 series of interest $x_t$ is in essence a linear function of a *strong
 white noise sequence*.
 
-::: definition
+*Definition*:
 We say $w_t$, $t\in \mathbb{Z}$ is a strong white noise if it is a
 sequence of mean zero, independent, and identically distributed random
 variables with finite variance.
-:::
+
 
 The *backshift operator* is denoted by $B$, and is defined by
 $$B^jx_t = x_{t-j}, \;\; j\ge 0.$$
 
 Two guiding examples to consider in forecasting are the "strong white
 noise model\", $$\begin{aligned}
-\label{swn}
     x_t = \mu + w_t,
 \end{aligned}$$ and the "random walk model\" $$\begin{aligned}
-\label{rw}
     x_t = \mu_0 + t \mu_1 + \sum_{j=1}^t w_j. 
-\end{aligned}$$
+\end{aligned}$$.
 
-In the case of model [\[swn\]](#swn){reference-type="eqref"
-reference="swn"}, the best predictor of $x_n$ given past values of the
+In the case of the first model, the best predictor of $x_n$ given past values of the
 series is the mean value $\mu$, which can be estimated from
-$x_1,...,x_{n-1}$ by the sample mean $\bar{x}$. Model
-[\[rw\]](#rw){reference-type="eqref" reference="rw"} on the other hand
+$x_1,...,x_{n-1}$ by the sample mean $\bar{x}$. The second model on the other hand
 can be rewritten as
 $$x_t = \mu_1 + x_{t-1} + w_t  \; \iff \; \nabla x_{t} =  x_t - x_{t-1} = (1-B)x_t=  \mu_1 + w_t,$$
 which makes clear that the best forecast for $x_n$ based on
-$x_{n-1},...,x_1$ in this case is $x_{n-1} + \mu_1$. The model
-[\[rw\]](#rw){reference-type="eqref" reference="rw"} is also called an
+$x_{n-1},...,x_1$ in this case is $x_{n-1} + \mu_1$. The second model is also called an
 "integrated model\", since the differenced values of the times series
 are a white noise and can be added (integrated) up to recover the
 original series. ARIMA models in essence choose between these two models
@@ -673,16 +774,13 @@ $$\phi(x) = 1-\phi_1 x - \cdots - \phi_p x^p,$$ so the AR(p) process is
 characterized by $$\phi(B)x_t = w_t.$$ An ARMA (autoregressive moving
 average) model is of the form $$\phi(B)x_t = \theta(B) w_t.$$
 
-::: definition
+*Definition*:
 $x_t$ is said to follow an SARIMA (Seasonal Autoregressive Integrated
 Moving Average) model of orders $p$, $d$, $q$, $P$,$D$,$Q$ and seasonal
-period $s$ if $$\begin{aligned}
-\label{SARIMA}    
+period $s$ if $$\begin{aligned}   
         \Phi_P(B^s)\phi(B)(1-B^s)^D(1-B)^d x_t = \Theta(B^s)\theta(B)w_t.
-    
 \end{aligned}$$ This is abbreviated
 $x_t \sim SARIMA(p,d,q)\times (P,D,Q)_s$.
-:::
 
 The seasonal period is typically supplied by the practitioner and is
 often chosen to match the predominant "seasonality\" or "periodicity\"
@@ -700,8 +798,7 @@ maximum likelihood estimation assuming the model errors $w_t$ are
 Gaussian.
 
 We note that by simulating the error process $w_t$ and iterating the
-recursion for $x_t$ in [\[SARIMA\]](#SARIMA){reference-type="eqref"
-reference="SARIMA"}, we can simulate approximate future values of the
+recursion for $x_t$ in SARIMA, we can simulate approximate future values of the
 series $x_{T+h}^{(b)}$.
 
 ### Exponential Smoothing and the `ets` model 
@@ -807,6 +904,9 @@ Diagram.***](functionaldata/ts_cv.png){#expw width="5in"}
 
 ## Examples
 
+
+### Electricity Prices
+
 Suppose that the goal was to forecast the electricity prices shown previously for the next month. It is natural to assume
 this data has weekly seasonality due to the typical work schedule. Using
 PCA as discussed in Section [1](#ch1){reference-type="ref"
@@ -817,15 +917,237 @@ the models visualizing is difficult, one-step CV one the last 20% of the
 data gives MSE estimates of approximately 2280 (ets) and 2522 (arima),
 suggesting the use of an ets model gives about a 10% improvement.
 
+```{r eval=FALSE}
+elec_ets <- projection_model(X = electricity, forecast.model = 'ets', TVE = 0.99, 
+                        n.ahead = 30, check.cp = F, alpha = 0.05,
+                        sim.bounds = TRUE, M = 1000)
+elec_arima <- projection_model(X = electricity, forecast.model = 'arima', TVE = 0.99, 
+                        n.ahead = 30, check.cp = F, alpha = 0.05,
+                        sim.bounds = TRUE, M = 1000)
+
+# CV
+pred_idx <- floor(0.8*ncol(electricity)+1):ncol(electricity)
+errors <- matrix(NA,nrow=length(pred_idx), ncol=2)
+colnames(errors) <- c('fets','farima')
+
+cat('CV (',length(pred_idx),'):')
+for(i in 1:length(pred_idx)){
+  cat(i,', ')
+  idx <- pred_idx[i]
+  tmp_dat <- electricity[,1:(idx-1)]
+  tmp_dat$season <- 7
+  tmp_pred <- electricity[idx]
+  tmp_pred$season <- 7
+  
+  pm1 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=1,
+                          check.cp = F,sim.bounds = F)
+  pm2 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=1,
+                          check.cp = F,sim.bounds = F)
+  
+  ests <- data.frame(
+    'fets'=as.numeric(
+      pm1$data$component_true$data[,idx]),
+    'farima'=as.numeric(
+      pm2$data$component_true$data[,idx])
+  )
+  
+  errors[i,] <- colSums((ests-tmp_pred$data)^2) 
+}
+colMeans(errors)/min(colMeans(errors))
+```
+
 
 ![ ***The first PC for ets model of electricity.***](functionaldata/electricity_ets1.png){ width="5in"}
+```{r eval=FALSE}
+elec_ets$plots$components$`Component 1`
+```
+
 ![ ***The second PC for ets model of electricity.***](functionaldata/electricity_ets2.png){ width="5in"}
+```{r eval=FALSE}
+elec_ets$plots$components$`Component 2`
+```
+
 ![ ***The ets model of electricity.***](functionaldata/electricity_ets.png){ width="5in"}
+```{r eval=FALSE}
+elec_ets$plots$forecast_plot
+```
+
 
 
 ![ ***The first PC for arima model of electricity.***](functionaldata/electricity_arima1.png){ width="5in"}
+```{r eval=FALSE}
+elec_arima$plots$components$`Component 1`
+```
+
+
 ![ ***The second PC for arima model of electricity.***](functionaldata/electricity_arima2.png){ width="5in"}
+```{r eval=FALSE}
+elec_arima$plots$components$`Component 2`
+```
+
 ![ ***The arima model of electricity.***](functionaldata/electricity_arima.png){ width="5in"}
+```{r eval=FALSE}
+elec_arima$plots$forecast_plot
+```
+
+
+It may also make sense to transform the data. This can be done manually or using a currently under development parameter `transformation` as shown below.
+```{r eval=FALSE}
+fit <- projection_model(electricity,check.cp = FALSE);
+fit_log <- projection_model(electricity,transformation='log',check.cp = FALSE);
+fit_sqrt <- projection_model(electricity,transformation='sqrt',check.cp = FALSE)
+
+fit$plots$fit_plot
+fit_log$plots$fit_plot
+fit_sqrt$plots$fit_plot
+```
+
+```{r eval=FALSE}
+elec_log_ets <- projection_model(X = electricity, forecast.model = 'ets', TVE = 0.99, 
+                        n.ahead = 30, check.cp = F, alpha = 0.05,
+                        sim.bounds = TRUE, M = 1000,transformation = 'log')
+elec_log_arima <- projection_model(X = electricity, forecast.model = 'arima', TVE = 0.99, 
+                        n.ahead = 30, check.cp = F, alpha = 0.05,
+                        sim.bounds = TRUE, M = 1000,transformation = 'log')
+
+# CV with all
+pred_idx <- floor(0.8*ncol(electricity)+1):ncol(electricity)
+errors <- matrix(NA,nrow=length(pred_idx), ncol=4)
+colnames(errors) <- c('fets','farima','fetsLog','farimaLog')
+
+cat('CV (',length(pred_idx),'):')
+for(i in 1:length(pred_idx)){
+  cat(i,', ')
+  idx <- pred_idx[i]
+  tmp_dat <- electricity[,1:(idx-1)]
+  tmp_dat$season <- 7
+  tmp_pred <- electricity[idx]
+  tmp_pred$season <- 7
+  
+  pm1 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=1,
+                          check.cp = F,sim.bounds = F)
+  pm2 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=1,
+                          check.cp = F,sim.bounds = F)
+  pm3 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=1,
+                          check.cp = F,sim.bounds = F,transformation = 'log')
+  pm4 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=1,
+                          check.cp = F,sim.bounds = F,transformation = 'log')
+  
+  ests <- data.frame(
+    'fets'=as.numeric(
+      pm1$data$component_true$data[,idx]),
+    'farima'=as.numeric(
+      pm2$data$component_true$data[,idx]),
+    'fetsLog'=as.numeric(
+      pm3$data$component_true$data[,idx]),
+    'farimaLog'=as.numeric(
+      pm4$data$component_true$data[,idx])
+  )
+  
+  errors[i,] <- colSums((ests-tmp_pred$data)^2) 
+}
+colMeans(errors)/min(colMeans(errors))
+```
+
+
+### Pollution
+
+Consider the pollution data. This time we will compare a functional approach to traditional methods.
+```{r eval=FALSE}
+# Forecast horizon: 7 days * 48 half hours = 336 pts
+h <- 7
+
+# CV
+pred_idx <- ncol(city_dfts)-13:7
+errors <- matrix(NA,nrow=length(pred_idx), ncol=6)
+colnames(errors) <- c('arima','ets','fets','farima','fets_log','farima_log')
+
+cat('CV (',length(pred_idx),'):')
+for(i in 1:length(pred_idx)){
+  cat(i,', ')
+  tmp_dat <- city_dfts[,1:pred_idx[i]]
+  tmp_dat$season <- 7
+  tmp_scalar <- ts(as.vector(tmp_dat$data),frequency = 7)
+  tmp_pred <- city_dfts[,pred_idx[i]+1:7]
+  
+  scalar_arima <- forecast::auto.arima(tmp_scalar)
+  arima_for  <- forecast::forecast(tmp_scalar, h = h*48, level = 95)
+  scalar_ets <- forecast::ets(tmp_scalar)
+  ets_for  <- forecast::forecast(tmp_scalar, h = h*48, level = 95)
+  
+  pm1 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=h,
+                          check.cp = F,sim.bounds = F)
+  pm2 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=h,
+                          check.cp = F,sim.bounds = F)
+  pm3 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=h,
+                          check.cp = F,sim.bounds = F,transformation = 'log')
+  pm4 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=h,
+                          check.cp = F,sim.bounds = F,transformation = 'log')
+  
+  ests <- data.frame(
+    'arima'=arima_for$mean,
+    'ets'=ets_for$mean,
+    'fets'=as.numeric(
+      pm1$data$component_true$data[,(ncol(tmp_dat)+1):ncol(pm1$data$component_true)]),
+    'farima'=as.numeric(
+      pm2$data$component_true$data[,(ncol(tmp_dat)+1):ncol(pm2$data$component_true)]),
+    'fets7'=as.numeric(
+      pm3$data$component_true$data[,(ncol(tmp_dat)+1):ncol(pm3$data$component_true)]),
+    'farima7'=as.numeric(
+      pm4$data$component_true$data[,(ncol(tmp_dat)+1):ncol(pm4$data$component_true)])
+  )
+  
+  errors[i,] <- colSums((ests-as.vector(tmp_pred$data))^2) 
+}
+colMeans(errors)/min(colMeans(errors))
+
+# Results
+tmp_scalar <- ts(as.vector(city_dfts$data),frequency = 7)
+
+scalar_arima <- forecast::auto.arima(tmp_scalar)
+arima_for  <- forecast::forecast(tmp_scalar, h = h*48, level = 95)
+scalar_ets <- forecast::ets(tmp_scalar)
+ets_for  <- forecast::forecast(tmp_scalar, h = h*48, level = 95)
+
+pm1 <- projection_model(city_dfts,forecast.model='ets',n.ahead=h,
+                        check.cp = F,sim.bounds = F)
+pm2 <- projection_model(city_dfts,forecast.model='arima',n.ahead=h,
+                        check.cp = F,sim.bounds = F)
+pm3 <- projection_model(city_dfts,forecast.model='ets',n.ahead=h,
+                        check.cp = F,sim.bounds = F,transformation = 'log')
+pm4 <- projection_model(city_dfts,forecast.model='arima',n.ahead=h,
+                        check.cp = F,sim.bounds = F,transformation = 'log')
+
+ests_final <- data.frame(
+  'arima'=arima_for$mean,
+  'ets'=ets_for$mean,
+  'fets'=as.numeric(
+    pm1$data$component_true$data[,(ncol(city_dfts)+1):ncol(pm1$data$component_true)]),
+  'farima'=as.numeric(
+    pm2$data$component_true$data[,(ncol(city_dfts)+1):ncol(pm2$data$component_true)]),
+  'fets7'=as.numeric(
+    pm3$data$component_true$data[,(ncol(city_dfts)+1):ncol(pm3$data$component_true)]),
+  'farima7'=as.numeric(
+    pm4$data$component_true$data[,(ncol(city_dfts)+1):ncol(pm4$data$component_true)])
+)
+  
+
+true <-read.csv(
+  paste0('C:/Users/jerem/OneDrive/Documents/School/Waterloo/Research/RPackages/fChange/vignettes/articles/pollution_true.txt'))[,2]
+res <- colSums((ests_final-true)^2)
+res / min(res)
+```
+
+We see that CV recommend farima, but all functional models far outperform the scalar. Scaled the CV results were: 
+2.45 (arima), 2.453 (ets), 1.450 (fets), 1.000 (farima), 1.271 (log fets), and 1.031 (log arima). When forecasting and comparing to the true future, similar results are seen: 1.601 (arima), 1.601 (ets), 1.196 (fets), 1.000 (farima), 1.866 (log fets), and 1.073 (log arima).
+
+![ ***The pollution forecast model.***](functionaldata/pollution_for.png){ width="5in"}
+```{r, eval=FALSE}
+mod <- projection_model(city_dfts,forecast.model='arima',n.ahead=h,
+                        check.cp = F,sim.bounds = F)
+mod$plots$forecast_plot
+```
+
 
 ## Exercises
 
@@ -860,22 +1182,19 @@ tests with FTS.
 
 One standard way to investigate the serial dependence of a time series
 is in terms of serial correlation. The *autocovariance operator at lag
-$h$*, $h \ge 0$, is defined by $$\label{e:cov_op}
+$h$*, $h \ge 0$, is defined by $$
     \Gamma_h(x)(t) := \int \gamma_h(t, s) x(s) ds, \ \ \ x\in L^2[0,1],$$
 where $\gamma_h(t, s)$ is the autocovariance kernel defined by
-$$\label{e:cov_den}
-    \gamma_h(t,s) :=E [ (X_i(t)-\mu(t))(X_{i+h} (s)-\mu(s))],\ \ \ \ t,s \in [0,1].$$
+$$\gamma_h(t,s) :=E [ (X_i(t)-\mu(t))(X_{i+h} (s)-\mu(s))],\ \ \ \ t,s \in [0,1].$$
 At lag zero, $\Gamma_0 = C$, where $C$ is the covariance operator in . The
 functions $\gamma_h(\cdot, \cdot)$, $h\ge 0$, characterize the serial
 correlation in the series $\{ X_i\}$. Given functional observations,
 $X_1,\ldots, X_T$, $\gamma_h$ can be estimated using its sample counterpart
-$$\label{e:empcov}
-    \hat\gamma_{T,h}(t,s):=\frac{1}{T}\sum_{i=1}^{T-h} (X_i(t)-\bar{X}_T(t))(X_{i+h}(s)-\bar{X}_T(s)), \ \ \ 0 \le h < T.$$
+$$\hat\gamma_{T,h}(t,s):=\frac{1}{T}\sum_{i=1}^{T-h} (X_i(t)-\bar{X}_T(t))(X_{i+h}(s)-\bar{X}_T(s)), \ \ \ 0 \le h < T.$$
 
 A simple graphical summary of the serial dependence in the series can be
 obtained by plotting $$\begin{aligned}
-\label{e:facf}
-    \hat{\rho}_h =\frac{\|\hat{\gamma}_{T,h}\|_2}{\int \hat{\gamma}_{T,0}(t,t)dt}
+\hat{\rho}_h =\frac{\|\hat{\gamma}_{T,h}\|_2}{\int \hat{\gamma}_{T,0}(t,t)dt}
 \end{aligned}$$ as a function of $h$, which we refer to as the
 *functional autocorrelation function* (fACF).
 
@@ -898,8 +1217,7 @@ A robust graphical summary of the serial dependence in an FTS is the
 *functional spherical autocorrelation function* (fSACF). The fSACF at
 lag $h$ is computed by the average of the inner product of lagged pairs
 of the series $X_i$ and $X_{i+h}$ that have been centered:
-$$\label{e:sacf}
-\tilde\rho_h=\frac{1}{T}\sum_{i=1}^{T-h} \langle \frac{X_i - \tilde{\mu}}{\|X_i - \tilde{\mu}\|}, \frac{X_{i+h} - \tilde{\mu}}{\|X_{i+h} - \tilde{\mu}\|} \rangle,\ \ \ \ 0 \le h < T,$$
+$$\tilde\rho_h=\frac{1}{T}\sum_{i=1}^{T-h} \langle \frac{X_i - \tilde{\mu}}{\|X_i - \tilde{\mu}\|}, \frac{X_{i+h} - \tilde{\mu}}{\|X_{i+h} - \tilde{\mu}\|} \rangle,\ \ \ \ 0 \le h < T,$$
 where $\tilde{\mu}$ is the estimated spatial median of the series. The
 range of the measure is $-1 \le \tilde{\rho}_h \le 1$. The fSACF
 provides advantages that the fACF does not: 1) it captures not only the
@@ -914,16 +1232,39 @@ with noticeable spikes every 7 lags, suggesting there remains weekly
 seasonality; see below.
 
 ![ ***Autocorrelation in the electricity data as described by the fACF.***](functionaldata/electricity_acf.png){ width="5in"}
+```{r eval=FALSE}
+acf(electricity)
+```
+
+
 
 ![ ***Autocorrelation in the electricity data as described by the fSACF.***](functionaldata/electricity_sacf.png){ width="5in"}
+```{r eval=FALSE}
+sacf(electricity)
+```
 
 ![ ***Autocorrelation in the electricity data model residuals as described by the fACF.***](functionaldata/electricity_residuals_acf.png){ width="5in"}
+```{r eval=FALSE}
+acf(elec_ets$data$residuals)
+acf(elec_arima$data$residuals)
+```
 
 ![ ***Autocorrelation in the electricity data model residuals as described by the fSACF.***](functionaldata/electricity_residuals_sacf.png){ width="5in"}
+```{r eval=FALSE}
+sacf(elec_ets$data$residuals)
+sacf(elec_arima$data$residuals)
+```
 
 ![ ***Autocorrelation in the differenced electricity data as described by the fACF.***](functionaldata/electricity_diff_acf.png){ width="5in"}
 
+```{r eval=FALSE}
+acf(diff(electricity))
+```
+
 ![ ***Autocorrelation in the differenced electricity data as described by the fSACF.***](functionaldata/electricity_diff_sacf.png){ width="5in"}
+```{r eval=FALSE}
+sacf(diff(electricity))
+```
 
 
 ## White noise tests
@@ -946,6 +1287,12 @@ Many similar white noise tests for FTS have been developed based on
 other measures and aggregation principles, and a number of them are
 implemented in the function `portmanteau_tests()`.
 
+```{r, eval=FALSE}
+portmanteau_tests(electricity)
+portmanteau_tests(elec_ets$data$residuals)
+portmanteau_tests(elec_arima$data$residuals)
+```
+
 The residuals of the electricity arima-based Hyndman-Ullah model and the
 related fSACF are shown below. It appears that the majority of
 the autocorrelation was captured with the model; however, the residuals
@@ -954,16 +1301,64 @@ white noise tests' p-values shown in Figure
 [3.4](#fig:electricity_residuals_mlwn){reference-type="ref"
 reference="fig:electricity_residuals_mlwn"}.
 
-![***Residuals from the arima-based Hyndman-Ullah model.***](functionaldata/electricity_residuals.png){#fig:electricity_residuals_mlwn
+![***Residuals from the arima-based Hyndman-Ullah model.***](functionaldata/electricity_residuals.png){
 width="5in"}
+```{r eval=FALSE}
+plot(elec_ets$data$residuals)
+plot(elec_arima$data$residuals)
+```
 
-![***Autocorrelation of the residuals from the arima-based Hyndman-Ullah model.***](functionaldata/electricity_residuals_sacf.png){#fig:electricity_residuals_mlwn
+
+![***Autocorrelation of the residuals from the arima-based Hyndman-Ullah model.***](functionaldata/electricity_residuals_sacf.png){
 width="5in"}
+```{r eval=FALSE}
+sacf(elec_ets$data$residuals)
+sacf(elec_arima$data$residuals)
+```
 
 ![***Multi-lag white noise portmanteau tests' p-values for the residuals
 from the arima-based Hyndman-Ullah
 model.***](functionaldata/electricity_residuals_mlwn.png){#fig:electricity_residuals_mlwn
 width="5in"}
+```{r eval=FALSE}
+lag.max <- 20
+p_values <- rep(NA, lag.max)
+for(h1 in 1:lag.max){
+  p_values_ets[h1] <- .multi_lag_test(elec_ets$data$residuals, lag = h1 )$pvalue
+  p_values_arima[h1] <- .multi_lag_test(elec_arima$data$residuals, lag = h1 )$pvalue
+}
+  
+
+ggplot2::ggplot() +
+  ggplot2::geom_point(ggplot2::aes(x=1:lag.max, y=p_values_ets),size=3) +
+  ggplot2::geom_hline(ggplot2::aes(yintercept=0.05),linetype='dotted', 
+                      col='red', linewidth=2) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
+  ggplot2::ylim(c(0,1)) +
+  ggplot2::xlab('') +
+  ggplot2::ylab('')  +
+  ggplot2::guides(color='none')
+
+ggplot2::ggplot() +
+  ggplot2::geom_point(ggplot2::aes(x=1:lag.max, y=p_values_arima),size=3) +
+  ggplot2::geom_hline(ggplot2::aes(yintercept=0.05),linetype='dotted', 
+                      col='red', linewidth=2) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text = ggplot2::element_text(size=18)) +
+  ggplot2::ylim(c(0,1)) +
+  ggplot2::xlab('') +
+  ggplot2::ylab('')  +
+  ggplot2::guides(color='none')
+  
+```
+
+```{r,eval=FALSE}
+summary(electricity)
+summary(elec_ets$data$residuals)
+summary(elec_arima$data$residuals)
+```
+
 
 ## Stationarity and Change-Point Testing
 
@@ -979,12 +1374,10 @@ point analysis*.
 
 Test statistics for stationarity and change point detection often rely
 on the functional partial sum process, $$\begin{aligned}
- \label{eq:partial_sum}
     S_T(x,t) = \frac{1}{\sqrt{T}} \sum_{i=1}^{\lfloor T x\rfloor} X_i(t)
 \end{aligned}$$ where $x\in[0,1]$ is termed the "partial sample
 parameter\". Note that $S_T(1,t) = \sqrt{T}\bar{X}_T$. This can be used
 to define the cumulative sum (CUSUM) process $$\begin{aligned}
- \label{eq:CUSUM}
     Z_T(x, t) = S_T(x,t) - x S_T(1,t)\,.
 \end{aligned}$$ When the data are non-stationary, the CUSUM process
 tends to fluctuate more with respect to the partial sample parameter $x$
@@ -1007,6 +1400,16 @@ electricity data has a p-value $<0.001$ for the stationary test. The
 first difference and the model residuals both return non-significant
 p-value, suggesting stationarity.
 
+```{r, eval=FALSE}
+stationarity_test(electricity)
+stationarity_test(elec_ets$data$residuals)
+stationarity_test(elec_arima$data$residuals)
+
+kpss_test(electricity)
+kpss_test(elec_ets$data$residuals)
+kpss_test(elec_arima$data$residuals)
+```
+
 Applying change point detection on the electricity data, two change
 point are observed; see Figure
 [3.5](#fig:electricity_changes){reference-type="ref"
@@ -1014,12 +1417,76 @@ reference="fig:electricity_changes"}. Since this suggests regions of
 homogeneity in the data, CV was re-run to compare the previous models to
 models based on only the last homogeneous segment: 2281 (ets), 2522
 (arima), 2426 (ets with cp), and 2784 (arima with cp). Although the data
-in the last segement appears to be more homogenous, in this case the
+in the last segment appears to be more homogeneous, in this case the
 reduction of data lead to worse CV performance.
+
 
 ![***Changes in the distribution of the electricity
 data.***](functionaldata/electricity_changes.png){#fig:electricity_changes
 width="5in"}
+```{r, eval=FALSE}
+set.seed(12345)
+elec_changes <- fchange(electricity,type = 'segmentation')
+elec_changes$location
+
+
+plot(electricity, changes=elec_changes$location,
+     plot_title = NULL,
+     eye = list(x = -1, y = -1.5, z = 0.75),
+     aspectratio=list(x = 0.8, y = 0.6, z = 0.6)
+)
+plot(electricity, changes=elec_changes$location, type='change',
+     plot_title = NULL,
+     eye = list(x = -1, y = -1.5, z = 0.75),
+     aspectratio=list(x = 0.8, y = 0.6, z = 0.6)
+)
+  
+```
+
+```{r, eval=FALSE}
+# CV
+pred_idx <- floor(0.8*ncol(electricity)+1):ncol(electricity)
+errors <- matrix(NA,nrow=length(pred_idx), ncol=4)
+colnames(errors) <- c('fets','farima','fetsC','farimaC')
+
+cp <- 120 #max(elec_changes$location)
+
+cat('CV (',length(pred_idx),'):')
+for(i in 1:length(pred_idx)){
+  cat(i,', ')
+  idx <- pred_idx[i]
+  tmp_dat <- electricity[,1:(idx-1)]
+  tmp_dat$season <- 7
+  tmp_dat1 <- electricity[,cp:(idx-1)]
+  tmp_dat1$season <- 7
+  tmp_pred <- electricity[idx]
+  tmp_pred$season <- 7
+  
+  pm1 <- projection_model(tmp_dat,forecast.model='ets',n.ahead=1,
+                          check.cp = F,sim.bounds = F)
+  pm2 <- projection_model(tmp_dat,forecast.model='arima',n.ahead=1,
+                          check.cp = F,sim.bounds = F)
+  pm3 <- projection_model(tmp_dat1,forecast.model='ets',n.ahead=1,
+                          check.cp = F,sim.bounds = F)
+  pm4 <- projection_model(tmp_dat1,forecast.model='arima',n.ahead=1,
+                          check.cp = F,sim.bounds = F)
+  
+  ests <- data.frame(
+    'fets'=as.numeric(
+      pm1$data$component_true$data[,idx]),
+    'farima'=as.numeric(
+      pm2$data$component_true$data[,idx]),
+    
+    'fetsC'=as.numeric(
+      pm3$data$component_true$data[,idx-cp+1]),
+    'farimaC'=as.numeric(
+      pm4$data$component_true$data[,idx-cp+1])
+  )
+  
+  errors[i,] <- colSums((ests-tmp_pred$data)^2) 
+}
+colMeans(errors)/min(colMeans(errors))
+```
 
 ## Exercises
 
