@@ -14,7 +14,7 @@
 .binary_segmentation <- function(X, method,
                                  trim_function = function(X) {
                                    max(10, floor(log(ncol(X))),
-                                       na.rm = TRUE
+                                     na.rm = TRUE
                                    )
                                  },
                                  alpha = 0.05, silent = FALSE, ...) {
@@ -63,20 +63,25 @@
                             silent = FALSE,
                             ...) {
   # Look for a single change
-  potential <- .single_segment(X = X, method = method, trim_function = trim_function, ... )
+  potential <- .single_segment(X = X, method = method, trim_function = trim_function, ...)
 
   # No Change Point Detected
-  return_now <- tryCatch({
-    rval <- FALSE
-    if (potential$pvalue > alpha) rval <- TRUE
+  return_now <- tryCatch(
+    {
+      rval <- FALSE
+      if (potential$pvalue > alpha) rval <- TRUE
 
-    rval
-  }, error = function(e){
-    if (is.null(potential) || is.na(potential$pvalue)) {
-      TRUE
+      rval
+    },
+    error = function(e) {
+      if (is.null(potential) || is.na(potential$pvalue)) {
+        TRUE
+      }
     }
-  })
-  if(return_now) return()
+  )
+  if (return_now) {
+    return()
+  }
 
   # Display progress
   if (!silent) {
@@ -89,30 +94,33 @@
   # Search Recursively
   return(
     rbind(
-    .detect_changes(
-      X = dfts(X$data[, 1:potential$location,drop=FALSE],
-                labels = X$labels[1:potential$location],
-                fparam = X$fparam,inc.warnings = FALSE),
-      method = method,
-      trim_function = trim_function,
-      alpha = alpha,
-      addAmt = addAmt,
-      silent = silent,
-      ...
-    ),
-    data.frame('location'=potential$location + addAmt, 'pvalue'=potential$pvalue),
-    .detect_changes(
-      X = dfts(X$data[, (potential$location + 1):ncol(X),drop=FALSE],
-               labels = X$labels[(potential$location + 1):ncol(X)],
-               fparam = X$fparam,inc.warnings = FALSE),
-      method = method,
-      trim_function = trim_function,
-      alpha = alpha,
-      addAmt = addAmt + potential$location,
-      silent = silent,
-      ...
+      .detect_changes(
+        X = dfts(X$data[, 1:potential$location, drop = FALSE],
+          labels = X$labels[1:potential$location],
+          fparam = X$fparam, inc.warnings = FALSE
+        ),
+        method = method,
+        trim_function = trim_function,
+        alpha = alpha,
+        addAmt = addAmt,
+        silent = silent,
+        ...
+      ),
+      data.frame("location" = potential$location + addAmt, "pvalue" = potential$pvalue),
+      .detect_changes(
+        X = dfts(X$data[, (potential$location + 1):ncol(X), drop = FALSE],
+          labels = X$labels[(potential$location + 1):ncol(X)],
+          fparam = X$fparam, inc.warnings = FALSE
+        ),
+        method = method,
+        trim_function = trim_function,
+        alpha = alpha,
+        addAmt = addAmt + potential$location,
+        silent = silent,
+        ...
+      )
     )
-  ))
+  )
 }
 
 
@@ -134,14 +142,16 @@
   trim_amt <- trim_function(X)
   nStart <- 1 + trim_amt
   nEnd <- ncol(X) - trim_amt
-  if(nStart >= nEnd) return(data.frame('pvalue'=1, 'location'=NA))
+  if (nStart >= nEnd) {
+    return(data.frame("pvalue" = 1, "location" = NA))
+  }
 
 
   # Find test statistic at every candidate change point
-  res <- fchange(X, method=method, type='single', ...)
+  res <- fchange(X, method = method, type = "single", ...)
 
   # Return location if significant
-  data.frame('pvalue'=res$pvalue, 'location'=res$location)
+  data.frame("pvalue" = res$pvalue, "location" = res$location)
 }
 
 
@@ -159,7 +169,7 @@
 #' @noRd
 #' @keywords internal
 .binary_verification <- function(changes_info, X, method, trim_function,
-                                 alpha, silent, ... ) {
+                                 alpha, silent, ...) {
   X <- dfts(X)
   if (!silent) cat("-- Verify Step --\n")
 
@@ -169,29 +179,40 @@
     for (i in 2:(length(tmp_changes) - 1)) {
       ## Get CP
       potential_cp <-
-        .single_segment(X=dfts(X=X$data[, (tmp_changes[i - 1] + 1):tmp_changes[i + 1],drop=FALSE],
-                               labels = X$labels[(tmp_changes[i - 1] + 1):tmp_changes[i + 1]],
-                               fparam = X$fparam, inc.warnings = FALSE),
-                        method=method, trim_function=trim_function, ...)
+        .single_segment(
+          X = dfts(
+            X = X$data[, (tmp_changes[i - 1] + 1):tmp_changes[i + 1], drop = FALSE],
+            labels = X$labels[(tmp_changes[i - 1] + 1):tmp_changes[i + 1]],
+            fparam = X$fparam, inc.warnings = FALSE
+          ),
+          method = method, trim_function = trim_function, ...
+        )
 
-      if(potential_cp$pvalue<=alpha){
-        changes_new <- rbind(changes_new,
-                         data.frame('location'=potential_cp$location+tmp_changes[i - 1],
-                                    'pvalue'=potential_cp$pvalue))
+      if (potential_cp$pvalue <= alpha) {
+        changes_new <- rbind(
+          changes_new,
+          data.frame(
+            "location" = potential_cp$location + tmp_changes[i - 1],
+            "pvalue" = potential_cp$pvalue
+          )
+        )
       }
     }
   } else {
-
     ## Get CP
     changes_new <-
-      .single_segment(X=X, method=method, trim_function=trim_function, ...)
+      .single_segment(X = X, method = method, trim_function = trim_function, ...)
 
-    if(is.null(changes_new) || is.na(changes_new$pvalue) ||
-       changes_new$pvalue>alpha) return()
+    if (is.null(changes_new) || is.na(changes_new$pvalue) ||
+      changes_new$pvalue > alpha) {
+      return()
+    }
   }
 
   # Order and return
-  if(nrow(changes_new)<=1) return(changes_new)
+  if (nrow(changes_new) <= 1) {
+    return(changes_new)
+  }
 
-  changes_new[order(changes_new$location),]
+  changes_new[order(changes_new$location), ]
 }
