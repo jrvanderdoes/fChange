@@ -18,26 +18,29 @@
 #'    \item res <- .change_pca_distribution(generate_brownian_motion(20,
 #'                                          v=seq(0,1,length.out=10)), TVE=0.2)
 #'  }
-.change_pca_distribution <- function(X, statistic='Tn', critical='resample',
+.change_pca_distribution <- function(X, statistic = "Tn", critical = "resample",
                                      TVE = 0.95, gam = 0.5, M = 200,
-                                     blocksize = 1, resample_blocks = 'separate',
+                                     blocksize = 1, resample_blocks = "separate",
                                      replace = TRUE) {
-
   tmp <- .pca_distribution_statistic(X, statistic, TVE, gam, TRUE)
   stat <- tmp[1]
   location <- tmp[2]
 
-  if(critical=='resample'){
-    simulations <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
-                              type = resample_blocks, replace = replace,
-                              fn = .pca_distribution_statistic,
-                              statistic=statistic, TVE = TVE, gam=gam)
+  if (critical == "resample") {
+    simulations <- .bootstrap(
+      X = X$data, blocksize = blocksize, M = M,
+      type = resample_blocks, replace = replace,
+      fn = .pca_distribution_statistic,
+      statistic = statistic, TVE = TVE, gam = gam
+    )
   }
 
-  list('pvalue' = sum(stat <= simulations) / M,
-       'location' = location)#,
-       # 'statistic' = stat,
-       # 'simulations'=as.vector(simulations))
+  list(
+    "pvalue" = sum(stat <= simulations) / M,
+    "location" = location
+  ) # ,
+  # 'statistic' = stat,
+  # 'simulations'=as.vector(simulations))
 }
 
 #' Compute Test Statistic for PCA Distribution Change
@@ -49,50 +52,51 @@
 #'
 #' @noRd
 #' @keywords internal
-.pca_distribution_statistic <- function(X, statistic, TVE, gam, location=FALSE){
-
-  X_pca <- pca(dfts(X), TVE=TVE)
+.pca_distribution_statistic <- function(X, statistic, TVE, gam, location = FALSE) {
+  X_pca <- pca(dfts(X), TVE = TVE)
   n <- ncol(X)
 
-  kappa <- matrix(nrow=length(X_pca$sdev),ncol=nrow(X_pca$x)-1)
+  kappa <- matrix(nrow = length(X_pca$sdev), ncol = nrow(X_pca$x) - 1)
 
   # Params for loop
-  t_vals <- seq(0, 1, length.out=length(X_pca$x[,1]) )
+  t_vals <- seq(0, 1, length.out = length(X_pca$x[, 1]))
   ws <- .w(t_vals)
-  ks <- 1:(n-1)
+  ks <- 1:(n - 1)
   weights <- ((ks * (n - ks)) / n^2)^gam * ((ks * (n - ks)) / n)
 
-  for(i in 1:length(X_pca$sdev)){
-    Y <- X_pca$x[,i]
+  for (i in 1:length(X_pca$sdev)) {
+    Y <- X_pca$x[, i]
 
-    dat <- exp(complex(real = 0, imaginary = 1) * t_vals %*% t(Y) )
+    dat <- exp(complex(real = 0, imaginary = 1) * t_vals %*% t(Y))
 
     ## This commented code is a slow version of below
     # internals <- sapply(ks, function(k, dat, ws){
     #   abs(rowMeans(dat[,1:k,drop=FALSE]) - rowMeans(dat[,(k+1):n,drop=FALSE]) )^2 * ws
     # },dat=dat,ws=ws)
 
-    cmean <- t(apply(dat,MARGIN = 1,cumsum)) /
-      matrix(1:ncol(dat),nrow=length(t_vals),ncol=n,byrow = TRUE)
-    cmean1 <- t(apply(dat[,n:2,drop=FALSE],MARGIN = 1,cumsum))[,(n-1):1] /
-      matrix((n-1):1,nrow=length(t_vals),ncol=n-1,byrow = TRUE)
-    internals <- abs(cmean[,-n] - cmean1)^2 * ws
+    cmean <- t(apply(dat, MARGIN = 1, cumsum)) /
+      matrix(1:ncol(dat), nrow = length(t_vals), ncol = n, byrow = TRUE)
+    cmean1 <- t(apply(dat[, n:2, drop = FALSE], MARGIN = 1, cumsum))[, (n - 1):1] /
+      matrix((n - 1):1, nrow = length(t_vals), ncol = n - 1, byrow = TRUE)
+    internals <- abs(cmean[, -n] - cmean1)^2 * ws
 
-    kappa[i,] <- weights * dot_integrate_col(internals)
+    kappa[i, ] <- weights * dot_integrate_col(internals)
   }
-  if(length(X_pca$sdev)>1){
-    Qnk <-  diag( 1/n * ( t(kappa) %*% diag(1/X_pca$sdev^2) %*% kappa ) )
-  }else{
-    Qnk <-  diag( 1/n * ( t(kappa) %*% (1/X_pca$sdev^2) %*% kappa ) )
+  if (length(X_pca$sdev) > 1) {
+    Qnk <- diag(1 / n * (t(kappa) %*% diag(1 / X_pca$sdev^2) %*% kappa))
+  } else {
+    Qnk <- diag(1 / n * (t(kappa) %*% (1 / X_pca$sdev^2) %*% kappa))
   }
 
-  if(statistic=='Tn'){
+  if (statistic == "Tn") {
     stat <- dot_integrate(Qnk)
-  }else if(statistic=='Mn'){
+  } else if (statistic == "Mn") {
     stat <- max(Qnk)
   }
 
-  if(!location) return(stat)
+  if (!location) {
+    return(stat)
+  }
 
   location <- which.max(Qnk)
 
