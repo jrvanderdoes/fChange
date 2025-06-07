@@ -1,4 +1,3 @@
-
 #' Eigenvalue Changes - Detect eigenvalue changes in the Covariance Operator
 #'
 #' This function tests and detects changes individual or jointly in the
@@ -47,19 +46,19 @@
 #'    \item .change_eigen(electricity, 2, test='individual')
 #'
 #'  }
-.change_eigen <- function(X, d, h=2, changes = NULL,
-                          statistic = c('Tn','Mn'),
-                          test = c('joint', 'individual'),
-                          critical = c('simulation','resample'),
+.change_eigen <- function(X, d, h = 2, changes = NULL,
+                          statistic = c("Tn", "Mn"),
+                          test = c("joint", "individual"),
+                          critical = c("simulation", "resample"),
                           M = 1000,
-                          K=bartlett_kernel,
-                          blocksize=1, type='separate', replace=TRUE){
+                          K = bartlett_kernel,
+                          blocksize = 1, type = "separate", replace = TRUE) {
   # Verification
-  poss_tests <- c('joint', 'individual')
-  test <- .verify_input(test,poss_tests)
+  poss_tests <- c("joint", "individual")
+  test <- .verify_input(test, poss_tests)
 
   # Setup Data
-  X <- center(dfts(X), changes=changes)
+  X <- center(dfts(X), changes = changes)
 
   N <- ncol(X$data)
   D <- nrow(X$data)
@@ -81,71 +80,75 @@
   #   }
   # }
 
-  if(test=='joint'){
+  if (test == "joint") {
     # Sigma_d <- long_run_covariance(X = t(thetas[,1:d]),h=h,K = K)
 
     # Values <- sapply(1:M,
     #                  function(i,N,d) .asymp_joint(N,d),
     #                  N=N, d=d)
 
-    if(critical=='simulation'){
-
-      if(statistic=='Tn'){
+    if (critical == "simulation") {
+      if (statistic == "Tn") {
         Values <- sapply(1:M,
-                         function(i,N,d) {
-                           # tmp <- sapply(1:d,
-                           #               function(dd,N) sde::BBridge(0, 0, 0, 1, N-1),
-                           #               N=N)
-                           tmp <- generate_brownian_bridge(d,v=seq(0,1,length.out=N))$data
-                           dot_integrate(rowSums(tmp^2))
-                         }, N=N, d=d)
-      } else if(statistic=='Mn'){
+          function(i, N, d) {
+            # tmp <- sapply(1:d,
+            #               function(dd,N) sde::BBridge(0, 0, 0, 1, N-1),
+            #               N=N)
+            tmp <- generate_brownian_bridge(d, v = seq(0, 1, length.out = N))$data
+            dot_integrate(rowSums(tmp^2))
+          },
+          N = N, d = d
+        )
+      } else if (statistic == "Mn") {
         Values <- sapply(1:M,
-                         function(i,N,d) {
-                           # tmp <- sapply(1:d,
-                           #               function(dd,N) sde::BBridge(0, 0, 0, 1, N-1),
-                           #               N=N)
-                           tmp <- generate_brownian_bridge(d,v=seq(0,1,length.out=N))$data
-                           max(rowSums(tmp^2))
-                         }, N=N, d=d)
+          function(i, N, d) {
+            # tmp <- sapply(1:d,
+            #               function(dd,N) sde::BBridge(0, 0, 0, 1, N-1),
+            #               N=N)
+            tmp <- generate_brownian_bridge(d, v = seq(0, 1, length.out = N))$data
+            max(rowSums(tmp^2))
+          },
+          N = N, d = d
+        )
       }
-
-    } else if(critical=='resample'){
-      Values <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
-                           type = type, replace = replace, fn = .eigen_joint_statistic,
-                           statistic=statistic, d=d, h=h, K=K)
+    } else if (critical == "resample") {
+      Values <- .bootstrap(
+        X = X$data, blocksize = blocksize, M = M,
+        type = type, replace = replace, fn = .eigen_joint_statistic,
+        statistic = statistic, d = d, h = h, K = K
+      )
     }
 
     # Test statistic
-    tmp <- .eigen_joint_statistic(X$data, statistic, d, h, K,  TRUE)
+    tmp <- .eigen_joint_statistic(X$data, statistic, d, h, K, TRUE)
     Sn <- tmp[1]
     k_star <- tmp[2]
     p <- sum(Sn <= Values) / M # Compute p-value
 
     # before <- pca(X$data[,1:k_star])$sdev[1:d]
     # after <- pca(X$data[,(1+k_star):N])$sdev[1:d]
-
-  } else if(test=='individual'){
-
-    if(critical=='simulation'){
-
-      if(statistic=='Tn'){
+  } else if (test == "individual") {
+    if (critical == "simulation") {
+      if (statistic == "Tn") {
         # Values <- sapply(1:M, function(k)
         #   dot_integrate(sde::BBridge(0, 0, 0, 1, N-1)^2))
         Values <- dot_integrate_col(
-          generate_brownian_bridge(M,v=seq(0,1,length.out=N))$data^2)
-      } else if(statistic=='Mn'){
+          generate_brownian_bridge(M, v = seq(0, 1, length.out = N))$data^2
+        )
+      } else if (statistic == "Mn") {
         # Values <- sapply(1:M, function(k)
         #   max(sde::BBridge(0, 0, 0, 1, N-1)^2))
         Values <- apply(
-          generate_brownian_bridge(M,v=seq(0,1,length.out=N))$data^2,
-          MARGIN=2, FUN = max)
+          generate_brownian_bridge(M, v = seq(0, 1, length.out = N))$data^2,
+          MARGIN = 2, FUN = max
+        )
       }
-
-    } else if(critical=='resample'){
-      Values <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
-                           type = type, replace = replace, fn = .single_eigen_statistic,
-                           statistic=statistic, d=d, h=h, K=K)
+    } else if (critical == "resample") {
+      Values <- .bootstrap(
+        X = X$data, blocksize = blocksize, M = M,
+        type = type, replace = replace, fn = .single_eigen_statistic,
+        statistic = statistic, d = d, h = h, K = K
+      )
     }
 
     # Test statistic
@@ -157,16 +160,18 @@
 
     # before <- pca(X$data[,1:k_star])$sdev[d]
     # after <- pca(X$data[,(1+k_star):N])$sdev[d]
-  }else{
+  } else {
     stop('test must be "joint" or "individual".', call. = FALSE)
   }
 
-  list('pvalue' = p,
-       'location' = k_star)#,
-       # 'statistic' = Sn,
-       # 'simulations' = Values)
-       # eval_before = before,
-       # eval_after = after)
+  list(
+    "pvalue" = p,
+    "location" = k_star
+  ) # ,
+  # 'statistic' = Sn,
+  # 'simulations' = Values)
+  # eval_before = before,
+  # eval_after = after)
 }
 
 
@@ -181,69 +186,78 @@
 #'
 #' @noRd
 #' @keywords internal
-.eigen_joint_statistic <- function(X, statistic, d, h, K, location=FALSE){
-
+.eigen_joint_statistic <- function(X, statistic, d, h, K, location = FALSE) {
   N <- ncol(X)
   D <- nrow(X)
 
   Cov_op <- .partial_cov(X, 1)
 
-  eig2 <- array(dim = c(D,D,D))
-  for(j in 1:D){
-    eig2[,,j] <- Cov_op$eigen_fun[,j] %*% t(Cov_op$eigen_fun[,j])
+  eig2 <- array(dim = c(D, D, D))
+  for (j in 1:D) {
+    eig2[, , j] <- Cov_op$eigen_fun[, j] %*% t(Cov_op$eigen_fun[, j])
   }
-  thetas <- matrix(nrow=N,ncol=D)
-  X2 <- array(dim = c(D,D,N))
-  for(i in 1:N){
-    X2[,,i] <- X[,i] %*% t(X[,i]) - Cov_op$coef_matrix
+  thetas <- matrix(nrow = N, ncol = D)
+  X2 <- array(dim = c(D, D, N))
+  for (i in 1:N) {
+    X2[, , i] <- X[, i] %*% t(X[, i]) - Cov_op$coef_matrix
 
-    for(j in 1:D){
-      thetas[i,j] <- sum(diag( t(eig2[,,j]) %*% X2[,,i] ))
+    for (j in 1:D) {
+      thetas[i, j] <- sum(diag(t(eig2[, , j]) %*% X2[, , i]))
     }
   }
 
-  Sigma_d <- long_run_covariance(X = t(thetas[,1:d]), h = h, K = K)
+  Sigma_d <- long_run_covariance(X = t(thetas[, 1:d]), h = h, K = K)
   # Moore Penrose solve if non-invertable
-  Sigma_d_inv <- tryCatch({
-    solve(Sigma_d)
-  }, error = function(e){
-    eigs <- eigen( Sigma_d )
-    eigs$vectors <- eigs$vectors * sqrt(D)
-    eigs$values <- eigs$values / D
+  Sigma_d_inv <- tryCatch(
+    {
+      solve(Sigma_d)
+    },
+    error = function(e) {
+      eigs <- eigen(Sigma_d)
+      eigs$vectors <- eigs$vectors * sqrt(D)
+      eigs$values <- eigs$values / D
 
-    K_eigs <- which.min(cumsum(eigs$values)/sum(eigs$values) < 0.95)
+      K_eigs <- which.min(cumsum(eigs$values) / sum(eigs$values) < 0.95)
 
-    tmp_inv <- matrix(0, nrow=nrow(Sigma_d), ncol=ncol(Sigma_d))
+      tmp_inv <- matrix(0, nrow = nrow(Sigma_d), ncol = ncol(Sigma_d))
 
-    tryCatch({
-      for(i in 1:K_eigs){
-        tmp_inv <- tmp_inv +
-          ( 1 / eigs$values[i] ) * (eigs$vectors[,i] %o% eigs$vectors[,i] )
-      }
-    }, error = function(e){
-      if(!location) return(Inf)
+      tryCatch(
+        {
+          for (i in 1:K_eigs) {
+            tmp_inv <- tmp_inv +
+              (1 / eigs$values[i]) * (eigs$vectors[, i] %o% eigs$vectors[, i])
+          }
+        },
+        error = function(e) {
+          if (!location) {
+            return(Inf)
+          }
 
-      return(c(Inf, 1))
-    })
+          return(c(Inf, 1))
+        }
+      )
 
-    tmp_inv
-  })
+      tmp_inv
+    }
+  )
 
-  Tns <-  rep(0,N)
-  for(k in 1:N){
-    lam <- .partial_cov(X, k/N)$eigen_val[1:d]
-    kapa <- lam - (k/N) * Cov_op$eigen_val[1:d]
+  Tns <- rep(0, N)
+  for (k in 1:N) {
+    lam <- .partial_cov(X, k / N)$eigen_val[1:d]
+    kapa <- lam - (k / N) * Cov_op$eigen_val[1:d]
     Tns[k] <- N * t(kapa) %*% Sigma_d_inv %*% kapa
     # Tns[k] <- N * t(kapa) %*% solve(Sigma_d) %*% kapa
   }
 
-  if(statistic=='Tn'){
+  if (statistic == "Tn") {
     Sn <- dot_integrate(Tns)
-  } else if(statistic=='Mn'){
+  } else if (statistic == "Mn") {
     Sn <- max(Tns)
   }
 
-  if(!location) return(Sn)
+  if (!location) {
+    return(Sn)
+  }
 
   c(Sn, min(which.max(Tns)))
 }
@@ -259,42 +273,43 @@
 #'
 #' @noRd
 #' @keywords internal
-.single_eigen_statistic <- function(X, statistic, d, h, K, location=FALSE){
-
+.single_eigen_statistic <- function(X, statistic, d, h, K, location = FALSE) {
   N <- ncol(X)
   D <- nrow(X)
 
   Cov_op <- .partial_cov(X, 1)
 
-  eig2 <- array(dim = c(D,D,D))
-  for(j in 1:D){
-    eig2[,,j] <- Cov_op$eigen_fun[,j] %*% t(Cov_op$eigen_fun[,j])
+  eig2 <- array(dim = c(D, D, D))
+  for (j in 1:D) {
+    eig2[, , j] <- Cov_op$eigen_fun[, j] %*% t(Cov_op$eigen_fun[, j])
   }
-  thetas <- matrix(nrow=N,ncol=D)
-  X2 <- array(dim = c(D,D,N))
-  for(i in 1:N){
-    X2[,,i] <- X[,i] %*% t(X[,i]) - Cov_op$coef_matrix
+  thetas <- matrix(nrow = N, ncol = D)
+  X2 <- array(dim = c(D, D, N))
+  for (i in 1:N) {
+    X2[, , i] <- X[, i] %*% t(X[, i]) - Cov_op$coef_matrix
 
-    for(j in 1:D){
-      thetas[i,j] <- sum(diag( t(eig2[,,j]) %*% X2[,,i] ))
+    for (j in 1:D) {
+      thetas[i, j] <- sum(diag(t(eig2[, , j]) %*% X2[, , i]))
     }
   }
 
-  Sigma_d <- long_run_covariance(X = t(thetas[,d]), h = h, K = K)
+  Sigma_d <- long_run_covariance(X = t(thetas[, d]), h = h, K = K)
 
-  Tns <- rep(0,N)
-  for (k in 1:N){
-    lam <- .partial_cov(X, k/N)$eigen_val[d]
-    Tns[k] <- ( N*( lam - (k/N)*Cov_op$eigen_val[d] )^2 ) / Sigma_d
+  Tns <- rep(0, N)
+  for (k in 1:N) {
+    lam <- .partial_cov(X, k / N)$eigen_val[d]
+    Tns[k] <- (N * (lam - (k / N) * Cov_op$eigen_val[d])^2) / Sigma_d
   }
 
-  if(statistic=='Tn'){
+  if (statistic == "Tn") {
     Sn <- dot_integrate(Tns)
-  } else if(statistic=='Mn'){
+  } else if (statistic == "Mn") {
     Sn <- max(Tns)
   }
 
-  if(!location) return(Sn)
+  if (!location) {
+    return(Sn)
+  }
 
   c(Sn, min(which.max(Tns)))
 }
