@@ -32,10 +32,10 @@
 #'    \item .change_mean(generate_brownian_motion(500), M = 250)
 #'    \item .change_mean(electricity, M = 250)
 #'  }
-.change_mean <- function(data, statistic=c('Mn','Tn'), critical='simulation',
+.change_mean <- function(data, statistic = c("Mn", "Tn"), critical = "simulation",
                          M = 1000, h = 0, K = bartlett_kernel,
-                         blocksize=1, type = 'separate',replace = TRUE) {
-  statistic <- .verify_input(statistic, c('Tn','Mn'))
+                         blocksize = 1, type = "separate", replace = TRUE) {
+  statistic <- .verify_input(statistic, c("Tn", "Mn"))
   data <- dfts(data)
   data <- center(data)
 
@@ -43,28 +43,33 @@
   Ceps <- long_run_covariance(data, h, K) # data1
   lambda <- eigen(Ceps)$values
 
-  tmp <- .mean_statistic(data$data, statistic,location=TRUE)
+  tmp <- .mean_statistic(data$data, statistic, location = TRUE)
   stat <- tmp[1]
   k.star <- tmp[2]
 
-  if(critical=='simulation'){
-    values_sim <- sapply(1:M, function(k, lambda, n, statistic)
-      .asymp_dist(n, lambda, statistic),
-      lambda = lambda, n = ncol(data), statistic = statistic
+  if (critical == "simulation") {
+    values_sim <- sapply(1:M, function(k, lambda, n, statistic) {
+      .asymp_dist(n, lambda, statistic)
+    },
+    lambda = lambda, n = ncol(data), statistic = statistic
     )
-  } else if(critical=='resample'){
-    values_sim <- .bootstrap(X = data, blocksize = blocksize, M = M,
-                             type = type, replace = replace, fn = .mean_statistic,
-                             statistic=statistic)
+  } else if (critical == "resample") {
+    values_sim <- .bootstrap(
+      X = data, blocksize = blocksize, M = M,
+      type = type, replace = replace, fn = .mean_statistic,
+      statistic = statistic
+    )
   }
 
   p <- sum(stat <= values_sim) / M
 
 
-  list('pvalue' = p,
-       'location' = k.star)#,
-       # 'change_fun' = mean(data$data[,1:k.star])-mean(data$data[,(k.star+1):n]),
-       # 'statistic' = stat, 'simulations' = values_sim)
+  list(
+    "pvalue" = p,
+    "location" = k.star
+  ) # ,
+  # 'change_fun' = mean(data$data[,1:k.star])-mean(data$data[,(k.star+1):n]),
+  # 'statistic' = stat, 'simulations' = values_sim)
 }
 
 
@@ -78,7 +83,7 @@
 #'
 #' @noRd
 #' @keywords internal
-.mean_statistic <- function(data, statistic, location=FALSE){
+.mean_statistic <- function(data, statistic, location = FALSE) {
   n <- ncol(data)
 
   Sn2 <- rep(0, n)
@@ -86,23 +91,25 @@
   for (k in 1:n) {
     # TODO:: add weights
     # Sn2[k] <- compute_mean_stat(data,k=k,weight=0.5)
-    Sn2[k] <- sum((rowSums(data[, 1:k,drop=FALSE]) -
-                     (k / n) * rowSums(data))^2)
+    Sn2[k] <- sum((rowSums(data[, 1:k, drop = FALSE]) -
+      (k / n) * rowSums(data))^2)
   }
   Sn2 <- Sn2 / n
 
   # Compute Test statistic
-  if(statistic=='Tn'){
+  if (statistic == "Tn") {
     stat <- dot_integrate(Sn2)
-  }else if(statistic=='Mn'){
+  } else if (statistic == "Mn") {
     stat <- max(Sn2, na.rm = TRUE)
-  }else{
-    stop('Set `statistic` to `Tn` or `Mn`.',call. = FALSE)
+  } else {
+    stop("Set `statistic` to `Tn` or `Mn`.", call. = FALSE)
   }
 
-  if(!location) return(stat)
+  if (!location) {
+    return(stat)
+  }
 
-  c(stat, min(which(Sn2 == max(Sn2,na.rm = TRUE))))
+  c(stat, min(which(Sn2 == max(Sn2, na.rm = TRUE))))
 }
 
 
@@ -118,17 +125,16 @@
 #'
 #' @noRd
 #' @keywords internal
-.asymp_dist <- function(n, lambda, statistic='Mn') {
+.asymp_dist <- function(n, lambda, statistic = "Mn") {
   BridgeLam <- matrix(0, length(lambda), n)
 
   BridgeLam <-
-    t(generate_brownian_bridge(length(lambda),v=seq(0,1,length.out=n))$data^2 %*%
-    diag(lambda))
+    t(generate_brownian_bridge(length(lambda), v = seq(0, 1, length.out = n))$data^2 %*%
+      diag(lambda))
 
-  if(statistic=='Tn'){
+  if (statistic == "Tn") {
     threshold <- dot_integrate(colSums(BridgeLam))
-
-  } else if(statistic=='Mn'){
+  } else if (statistic == "Mn") {
     threshold <- max(colSums(BridgeLam))
   }
 
@@ -157,4 +163,3 @@
 #   sum(normalizer * (rowSums(data$data[, 1:k,drop=FALSE]) -
 #          (k / n) * rowSums(data$data))^2) / n
 # }
-

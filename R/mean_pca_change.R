@@ -1,4 +1,3 @@
-
 #' Change Point Analysis - Dimension Reduction
 #'
 #' This function tests whether there is a significant change in the mean
@@ -22,27 +21,27 @@
 #' @param K Kernel function
 #'
 #' @return
-#'\item{\code{pvalue}}{
+#' \item{\code{pvalue}}{
 #' An approximate p value for testing whether there is a significant change in the mean function
-#'}
-#'\item{\code{change}}{
+#' }
+#' \item{\code{change}}{
 #' Estimated change location
-#'}
-#'\item{\code{DataBefore}}{
+#' }
+#' \item{\code{DataBefore}}{
 #' Data before the estimated change
-#'}
-#'\item{\code{DataAfter}}{
+#' }
+#' \item{\code{DataAfter}}{
 #' Data after the estimated change
-#'}
-#'\item{\code{MeanBefore}}{
+#' }
+#' \item{\code{MeanBefore}}{
 #' Mean function before the estimated change
-#'}
-#'\item{\code{MeanAfter}}{
+#' }
+#' \item{\code{MeanAfter}}{
 #' Mean function after the estimated change
-#'}
-#'\item{\code{change_fun}}{
+#' }
+#' \item{\code{change_fun}}{
 #' Estimated change function
-#'}
+#' }
 #'
 #' @references Berkes, I., Gabrys, R.,Horvath, L. & P. Kokoszka (2009).,
 #'  \emph{Detecting changes in the mean of functional observations}
@@ -55,15 +54,15 @@
 #' @keywords internal
 #'
 #' @examples
-#' #res <- .change_pca_mean(generate_brownian_bridge(200,seq(0,1,length.out=10)))
-#' #res1 <- .change_pca_mean(generate_ou(20,200))
-#' #res2 <- .change_pca_mean(electricity)
-.change_pca_mean <- function(X, statistic, critical, TVE=0.95,
-                            M=1000, K=bartlett_kernel,
-                            blocksize=1, resample_blocks='separate', replace = TRUE){
+#' # res <- .change_pca_mean(generate_brownian_bridge(200,seq(0,1,length.out=10)))
+#' # res1 <- .change_pca_mean(generate_ou(20,200))
+#' # res2 <- .change_pca_mean(electricity)
+.change_pca_mean <- function(X, statistic, critical, TVE = 0.95,
+                             M = 1000, K = bartlett_kernel,
+                             blocksize = 1, resample_blocks = "separate", replace = TRUE) {
   X <- center(dfts(X))
 
-  pca_X <- pca(dfts(X), TVE=TVE)
+  pca_X <- pca(dfts(X), TVE = TVE)
   d <- length(pca_X$sdev)
 
   D <- nrow(X$data)
@@ -75,44 +74,43 @@
   location <- tmp[2]
 
   # Critical Values
-  if(critical=='simulation'){
-
-    if(statistic=='Tn'){
-
-      simulations <- sapply(1:M, function(k,d,n){
+  if (critical == "simulation") {
+    if (statistic == "Tn") {
+      simulations <- sapply(1:M, function(k, d, n) {
         # B.Bridges <- rep(0, d)
         # for(j in 1:d){
         #   B.Bridges[j] <- dot_integrate( sde::BBridge(0,0,0,1,n-1)^2 )
         # }
         B.Bridges <-
-          dot_integrate_col(generate_brownian_bridge(d,v=seq(0,1,length.out=n))$data^2)
+          dot_integrate_col(generate_brownian_bridge(d, v = seq(0, 1, length.out = n))$data^2)
         sum(B.Bridges)
-      }, d=d,n=1000)
-    } else if(statistic=='Mn'){
-
-      simulations <- sapply(1:M, function(k,d,n){
+      }, d = d, n = 1000)
+    } else if (statistic == "Mn") {
+      simulations <- sapply(1:M, function(k, d, n) {
         # B.Bridges <- matrix(NA, d,n)
         # for(j in 1:d){
         #   B.Bridges[j,] <-  sde::BBridge(0,0,0,1,n-1)^2
         # }
         B.Bridges <-
-          t(generate_brownian_bridge(d,v=seq(0,1,length.out=n))$data^2)
+          t(generate_brownian_bridge(d, v = seq(0, 1, length.out = n))$data^2)
         max(colSums(B.Bridges))
-      }, d=d,n=D)
+      }, d = d, n = D)
     }
-
-  } else if(critical=='resample'){
-
-    simulations <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
-                              type = resample_blocks, replace = replace,
-                              fn = .pca_mean_statistic,
-                              statistic=statistic, TVE = TVE)
+  } else if (critical == "resample") {
+    simulations <- .bootstrap(
+      X = X$data, blocksize = blocksize, M = M,
+      type = resample_blocks, replace = replace,
+      fn = .pca_mean_statistic,
+      statistic = statistic, TVE = TVE
+    )
   }
 
-  list('pvalue' = sum(stat <= simulations) / M,
-       'location' = location)#,
-       # 'statistic' = stat,
-       # 'simulations'=simulations)
+  list(
+    "pvalue" = sum(stat <= simulations) / M,
+    "location" = location
+  ) # ,
+  # 'statistic' = stat,
+  # 'simulations'=simulations)
 }
 
 
@@ -127,10 +125,9 @@
 #'
 #' @noRd
 #' @keywords internal
-.pca_mean_statistic <- function(X, TVE, statistic, location=FALSE){
-
+.pca_mean_statistic <- function(X, TVE, statistic, location = FALSE) {
   # TODO:: Change to LRC
-  pca_X <- pca(dfts(X), TVE=TVE)
+  pca_X <- pca(dfts(X), TVE = TVE)
 
   n <- ncol(X)
   d <- length(pca_X$sdev)
@@ -139,19 +136,19 @@
 
   ## Test Statistic
   kappa <-
-    sapply(1:n,function(k, eta.hat, n){
-      colSums(eta.hat[1:k, , drop=FALSE]) - k/n * colSums(eta.hat)
-    },eta.hat=eta.hat, n=n)
+    sapply(1:n, function(k, eta.hat, n) {
+      colSums(eta.hat[1:k, , drop = FALSE]) - k / n * colSums(eta.hat)
+    }, eta.hat = eta.hat, n = n)
   # If same names, only 1 pc and sapply flips it incorrectly
-  if(length(unique(names(kappa)))==1) kappa <- t(kappa)
+  if (length(unique(names(kappa))) == 1) kappa <- t(kappa)
 
-  if(length(pca_X$sdev)>1){
-    Qnk <-  diag( 1/n * ( t(kappa) %*% diag(1/pca_X$sdev^2) %*% kappa ) )
-  }else{
-    Qnk <-  diag( 1/n * ( t(kappa) %*% (1/pca_X$sdev^2) %*% kappa ) )
+  if (length(pca_X$sdev) > 1) {
+    Qnk <- diag(1 / n * (t(kappa) %*% diag(1 / pca_X$sdev^2) %*% kappa))
+  } else {
+    Qnk <- diag(1 / n * (t(kappa) %*% (1 / pca_X$sdev^2) %*% kappa))
   }
 
-  if(statistic=='Tn'){
+  if (statistic == "Tn") {
     # Snd_tmp <- rep(NA,d)
     # kappa1 <- matrix(ncol=n,nrow=d)
     # for(l in 1:d){
@@ -165,14 +162,13 @@
     # stat <- 1/n^2 * sum(Snd_tmp)
 
     stat <- dot_integrate(Qnk)
-
-  }else if(statistic=='Mn'){
-
+  } else if (statistic == "Mn") {
     stat <- max(Qnk)
-
   }
 
-  if(!location) return(stat)
+  if (!location) {
+    return(stat)
+  }
 
 
   # kappa <-
