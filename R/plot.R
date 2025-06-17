@@ -40,114 +40,134 @@
 #'
 #' @examples
 #' plt <- plot(electricity)
-#' plt <- plot(dfts(var(electricity)), type='surface')
-plot.dfts <- function(x, changes=NULL,
-                       type=c('spaghetti','fast', 'rainbow','banded',
-                              'acf', 'pacf', 'summary', 'qq', 'distribution',
-                              'change','interval', 'surface'),
-                       plot_title = x$name, val_axis_title = NULL,
-                       res_axis_title = NULL, FD_axis_title = NULL,
-                       eye = NULL, aspectratio = NULL,
-                       showticklabels = TRUE,
-                       lag.max=20, d.max=2,
-                       alpha = 0.05, TVE=0.95,
-                       distribution=c('norm'),
-                       method = c('Welch','MC','Imhof'),
-                       legend=TRUE,
-                       highlight_changes=TRUE,
-                       intervals = confidence_interval(x, changes),
-                       int.gradual=TRUE, ...
-                       ){
+#' plt <- plot(dfts(var(electricity)), type = "surface")
+plot.dfts <- function(x, changes = NULL,
+                      type = c(
+                        "spaghetti", "fast", "rainbow", "banded",
+                        "acf", "pacf", "summary", "qq", "distribution",
+                        "change", "interval", "surface"
+                      ),
+                      plot_title = x$name, val_axis_title = NULL,
+                      res_axis_title = NULL, FD_axis_title = NULL,
+                      eye = NULL, aspectratio = NULL,
+                      showticklabels = TRUE,
+                      lag.max = 20, d.max = 2,
+                      alpha = 0.05, TVE = 0.95,
+                      distribution = c("norm"),
+                      method = c("Welch", "MC", "Imhof"),
+                      legend = TRUE,
+                      highlight_changes = TRUE,
+                      intervals = confidence_interval(x, changes),
+                      int.gradual = TRUE, ...) {
   x <- dfts(x, inc.warnings = FALSE)
-  poss_types <- c('spaghetti','fast', 'rainbow','banded','acf', 'pacf',
-                  'summary', 'qq', 'distribution', 'change','interval',
-                  'surface')
+  poss_types <- c(
+    "spaghetti", "fast", "rainbow", "banded", "acf", "pacf",
+    "summary", "qq", "distribution", "change", "interval",
+    "surface"
+  )
   type <- .verify_input(type, poss_types)
 
-  if(length(changes)==0) changes <- NULL
+  if (length(changes) == 0) changes <- NULL
 
 
-  return_plot <- switch (type,
-          spaghetti = {
-            .plot_fd(X = x, changes = changes,
-                                  plot_title = plot_title,
-                                  val_axis_title = val_axis_title,
-                                  res_axis_title = res_axis_title,
-                                  FD_axis_title = FD_axis_title,
-                                  eye = eye, aspectratio = aspectratio,
-                                  showticklabels = showticklabels,
-                                  interactive = TRUE)
-          },
-          fast = {
-            .plot_fd(X = x, changes = changes,
-                                   plot_title = plot_title,
-                                   val_axis_title = val_axis_title,
-                                   res_axis_title = res_axis_title,
-                                   FD_axis_title = FD_axis_title,
-                                   eye = eye, aspectratio = aspectratio,
-                                   showticklabels = showticklabels,
-                                   interactive = FALSE)
-          },
-          rainbow = {
-            .plot_rainbow(object = x, changes=changes)
-          },
-          banded = {
-            .plot_banded(object=x, changes=changes, alpha=alpha)
-          },
-          acf = {
-            # TODO:: Allow TVE
-            acf.dfts(x = x, lag.max = lag.max, alpha=alpha, method = method,
-                     figure=FALSE, ...)$plot
-          },
-          pacf = {
-            # TODO:: Allow TVE
-            pacf.dfts(x = x, lag.max = lag.max, alpha=alpha, n_pcs = NULL, method=method,
-                      figure=FALSE, ...)$plot
-          },
-          summary = {
-            summary.dfts(object=x, changes=changes, lag.max=lag.max, d.max=d.max, ...)
-          },
-          qq = {
-            qqplot(x=x, changes=changes, TVE=TVE, d.max=d.max,
-                   alpha=alpha, legend=legend)
-          },
-          distribution = {
-            .plot_distribution(X=x, changes=changes, TVE=TVE, d.max = d.max,
-                     distribution = distribution,
-                     alpha = alpha, legend = legend, ...)
-          },
-          change = {
-            if(length(changes)<1)
-              stop('changes must not be NULL to use change plot',call. = FALSE)
-            .plot_change(X=x, changes=changes,
-                        plot_title = plot_title,
-                        val_axis_title = val_axis_title,
-                        res_axis_title = res_axis_title,
-                        FD_axis_title = FD_axis_title,
-                        eye = eye,
-                        aspectratio = aspectratio,
-                        showticklabels = showticklabels,
-                        warnings = FALSE)
-          },
-          interval = {
-            .plot_interval(X=x, intervals=intervals,
-                           plot_title = plot_title,
-                           val_axis_title = val_axis_title,
-                           res_axis_title = res_axis_title,
-                           FD_axis_title = FD_axis_title,
-                           eye = eye,
-                           aspectratio = aspectratio,
-                           showticklabels = showticklabels,
-                           highlight_changes = highlight_changes,
-                           int.gradual=int.gradual)
-          },
-          surface = {
-            ## TODO:: Fix labels
-            .plot_surface(x,...)
-          },
-          {
-            stop('Review documentation for types of plots.',call. = FALSE)
-          }
+  return_plot <- switch(type,
+    spaghetti = {
+      .plot_fd(
+        X = x, changes = changes,
+        plot_title = plot_title,
+        val_axis_title = val_axis_title,
+        res_axis_title = res_axis_title,
+        FD_axis_title = FD_axis_title,
+        eye = eye, aspectratio = aspectratio,
+        showticklabels = showticklabels,
+        interactive = TRUE
+      )
+    },
+    fast = {
+      .plot_fd(
+        X = x, changes = changes,
+        plot_title = plot_title,
+        val_axis_title = val_axis_title,
+        res_axis_title = res_axis_title,
+        FD_axis_title = FD_axis_title,
+        eye = eye, aspectratio = aspectratio,
+        showticklabels = showticklabels,
+        interactive = FALSE
+      )
+    },
+    rainbow = {
+      .plot_rainbow(object = x, changes = changes)
+    },
+    banded = {
+      .plot_banded(object = x, changes = changes, alpha = alpha)
+    },
+    acf = {
+      # TODO:: Allow TVE
+      acf.dfts(
+        x = x, lag.max = lag.max, alpha = alpha, method = method,
+        figure = FALSE, ...
+      )$plot
+    },
+    pacf = {
+      # TODO:: Allow TVE
+      pacf.dfts(
+        x = x, lag.max = lag.max, alpha = alpha, n_pcs = NULL, method = method,
+        figure = FALSE, ...
+      )$plot
+    },
+    summary = {
+      summary.dfts(object = x, changes = changes, lag.max = lag.max, d.max = d.max, ...)
+    },
+    qq = {
+      qqplot(
+        x = x, changes = changes, TVE = TVE, d.max = d.max,
+        alpha = alpha, legend = legend
+      )
+    },
+    distribution = {
+      .plot_distribution(
+        X = x, changes = changes, TVE = TVE, d.max = d.max,
+        distribution = distribution,
+        alpha = alpha, legend = legend, ...
+      )
+    },
+    change = {
+      if (length(changes) < 1) {
+        stop("changes must not be NULL to use change plot", call. = FALSE)
+      }
+      .plot_change(
+        X = x, changes = changes,
+        plot_title = plot_title,
+        val_axis_title = val_axis_title,
+        res_axis_title = res_axis_title,
+        FD_axis_title = FD_axis_title,
+        eye = eye,
+        aspectratio = aspectratio,
+        showticklabels = showticklabels,
+        warnings = FALSE
+      )
+    },
+    interval = {
+      .plot_interval(
+        X = x, intervals = intervals,
+        plot_title = plot_title,
+        val_axis_title = val_axis_title,
+        res_axis_title = res_axis_title,
+        FD_axis_title = FD_axis_title,
+        eye = eye,
+        aspectratio = aspectratio,
+        showticklabels = showticklabels,
+        highlight_changes = highlight_changes,
+        int.gradual = int.gradual
+      )
+    },
+    surface = {
+      ## TODO:: Fix labels
+      .plot_surface(x, ...)
+    },
+    {
+      stop("Review documentation for types of plots.", call. = FALSE)
+    }
   )
 
   return_plot

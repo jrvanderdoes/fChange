@@ -41,23 +41,23 @@
 #'    \item .plot_fd(X = electricity$data[, 1:50], changes = c(25))
 #'  }
 .plot_fd <- function(X, changes = NULL, plot_title = X$name,
-                    val_axis_title = "Value",
-                    res_axis_title = "fparam",
-                    FD_axis_title = "Observations",
-                    eye = list(x = -1.5, y = -1.5, z = 1.5),
-                    aspectratio = NULL,
-                    showticklabels = TRUE, interactive = TRUE) {
+                     val_axis_title = "Value",
+                     res_axis_title = "fparam",
+                     FD_axis_title = "Observations",
+                     eye = list(x = -1.5, y = -1.5, z = 1.5),
+                     aspectratio = NULL,
+                     showticklabels = TRUE, interactive = TRUE) {
   # Setup
-  if(is.null(eye)) eye <- list(x = -1.5, y = -1.5, z = 1.5)
-  if(is.null(val_axis_title)) val_axis_title = ''
-  if(is.null(res_axis_title)) res_axis_title = ''
-  if(is.null(FD_axis_title)) FD_axis_title = ''
+  if (is.null(eye)) eye <- list(x = -1.5, y = -1.5, z = 1.5)
+  if (is.null(val_axis_title)) val_axis_title <- ""
+  if (is.null(res_axis_title)) res_axis_title <- ""
+  if (is.null(FD_axis_title)) FD_axis_title <- ""
 
-  X <- dfts(X,inc.warnings = FALSE)
-  if(!is.null(changes)) changes <- changes[order(changes)]
+  X <- dfts(X, inc.warnings = FALSE)
+  if (!is.null(changes)) changes <- changes[order(changes)]
 
   if (!interactive) {
-    if(is.null(aspectratio)) aspectratio <- c(2.5, 0.75, 1)
+    if (is.null(aspectratio)) aspectratio <- c(2.5, 0.75, 1)
 
     fdPlot <- .plot_evalfd_highdim(
       X = X,
@@ -69,7 +69,7 @@
       showticklabels = showticklabels
     )
   } else if (!is.null(changes) && length(stats::na.omit(changes)) > 0) {
-    if(is.null(aspectratio)) aspectratio <- list(x = 1, y = 1, z = 1)
+    if (is.null(aspectratio)) aspectratio <- list(x = 1, y = 1, z = 1)
 
     fdPlot <- .plot_evalfd_3dlines_changes(
       X = X,
@@ -81,10 +81,10 @@
       showticklabels = showticklabels
     ) # ,FDReps)
   } else {
-    if(is.null(aspectratio)) aspectratio <- list(x = 1, y = 1, z = 1)
+    if (is.null(aspectratio)) aspectratio <- list(x = 1, y = 1, z = 1)
 
     fdPlot <- .plot_evalfd_3dlines(
-      X=X,
+      X = X,
       plot_title = plot_title,
       val_axis_title = val_axis_title,
       res_axis_title = res_axis_title,
@@ -116,15 +116,14 @@
                                  eye = list(x = -1.5, y = -1.5, z = 1.5),
                                  aspectratio = list(x = 1, y = 1, z = 1),
                                  showticklabels = TRUE) {
-
   plotData <- data.frame()
   for (i in 1:ncol(X)) {
     plotData <- rbind(
       plotData,
       data.frame(
         "resolution" = X$fparam,
-        "FDRep" = i, #X$labels[i],
-        "Value" = X$data[,i]
+        "FDRep" = i, # X$labels[i],
+        "Value" = X$data[, i]
       )
     )
   }
@@ -139,24 +138,24 @@
   plot_colors[6] <- "yellow"
 
   plotly::plot_ly(plotData,
-                  x = ~FDRep, y = ~resolution, z = ~Value,
-                  type = "scatter3d", mode = "lines",
-                  color = ~ as.factor(FDRep),
-                  colors = plot_colors
+    x = ~FDRep, y = ~resolution, z = ~Value,
+    type = "scatter3d", mode = "lines",
+    color = ~ as.factor(FDRep),
+    colors = plot_colors
   ) %>%
     plotly::layout(
       scene = list(
         yaxis = list(
           title = res_axis_title,
           showticklabels = showticklabels,
-          ticktext=round(seq(min(X$fparam),max(X$fparam),length.out=5),3),
-          tickvals=.select_n(vals=seq(min(X$fparam),max(X$fparam),length.out=5), n=5)
+          ticktext = round(seq(min(X$fparam), max(X$fparam), length.out = 5), 3),
+          tickvals = .select_n(vals = seq(min(X$fparam), max(X$fparam), length.out = 5), n = 5)
         ),
         xaxis = list(
           title = FD_axis_title,
           showticklabels = showticklabels,
-          ticktext=.select_n(vals=X$labels, n=6),
-          tickvals=.select_n(vals=1:length(X$labels), n=6)
+          ticktext = .select_n(vals = X$labels, n = 6),
+          tickvals = .select_n(vals = 1:length(X$labels), n = 6)
         ),
         zaxis = list(
           title = val_axis_title,
@@ -232,13 +231,13 @@
 #' @noRd
 #' @keywords internal
 .plot_evalfd_3dlines_changes <- function(X, changes,
-                                     plot_title = NULL,
-                                     val_axis_title = "Value",
-                                     res_axis_title = "fparam",
-                                     FD_axis_title = "Observations",
-                                     eye = list(x = -1.5, y = -1.5, z = 1.5),
-                                     aspectratio = list(x = 1, y = 1, z = 1),
-                                     showticklabels = TRUE) {
+                                         plot_title = NULL,
+                                         val_axis_title = "Value",
+                                         res_axis_title = "fparam",
+                                         FD_axis_title = "Observations",
+                                         eye = list(x = -1.5, y = -1.5, z = 1.5),
+                                         aspectratio = list(x = 1, y = 1, z = 1),
+                                         showticklabels = TRUE) {
   plotData <- data.frame()
 
   # Color Group to first CP
@@ -327,11 +326,11 @@
   #   plotly::layout(showlegend = FALSE)
   # )
   plotly::plot_ly(plotData,
-                  x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
-                  type = "scatter3d", mode = "lines",
-                  split = ~ as.factor(FDRep),
-                  color = ~ as.factor(Color),
-                  colors = tmpColors
+    x = ~ as.factor(FDRep), y = ~resolution, z = ~Value,
+    type = "scatter3d", mode = "lines",
+    split = ~ as.factor(FDRep),
+    color = ~ as.factor(Color),
+    colors = tmpColors
   ) %>%
     plotly::layout(
       scene = list(
@@ -383,21 +382,23 @@
   # data <- X$data
   # curve_points <- X$fparam
   valRange <- c(
-    floor(min(X$data,na.rm = TRUE)),
-    ceiling(max(X$data,na.rm = TRUE))
+    floor(min(X$data, na.rm = TRUE)),
+    ceiling(max(X$data, na.rm = TRUE))
   )
 
   name <- V1 <- value <- NULL
   data1 <- X$data
   colnames(data1) <- 1:ncol(X)
-  plotData <- cbind(X$fparam,data1) %>%
+  plotData <- cbind(X$fparam, data1) %>%
     as.data.frame() %>%
-    tidyr::pivot_longer(cols = 1+1:ncol(X)) %>%
-    dplyr::mutate(name=as.numeric(name)) %>%
-    dplyr::rename(resolution=V1,
-           Value=value,
-           FDRep=name)
-  plotData <- plotData[order(plotData$FDRep),]
+    tidyr::pivot_longer(cols = 1 + 1:ncol(X)) %>%
+    dplyr::mutate(name = as.numeric(name)) %>%
+    dplyr::rename(
+      resolution = V1,
+      Value = value,
+      FDRep = name
+    )
+  plotData <- plotData[order(plotData$FDRep), ]
 
   ## Setup up Colors
   #   Rainbow for no changes, colored for changes
@@ -418,13 +419,13 @@
     colors_plot[6] <- "yellow"
     colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(X))
   }
-  plotData[["color"]] <- rep(colors_plot, each = nrow(X) )
+  plotData[["color"]] <- rep(colors_plot, each = nrow(X))
 
   ## Set up Tick Labels
   #   TODO:: Test more thoroughly
-  r_z <- range(plotData$Value,na.rm = TRUE)
-  r_z[2] <- r_z[2]+4
-  z_range <- round(r_z, -nchar(round(max(plotData$Value,na.rm = TRUE)))+1)
+  r_z <- range(plotData$Value, na.rm = TRUE)
+  r_z[2] <- r_z[2] + 4
+  z_range <- round(r_z, -nchar(round(max(plotData$Value, na.rm = TRUE))) + 1)
 
   if (showticklabels) {
     scale_info <- list(
@@ -447,7 +448,7 @@
         at = seq(z_range[1], z_range[2],
           length.out = 5
         ),
-        labels = c('',.specify_decimal(
+        labels = c("", .specify_decimal(
           seq(z_range[1], z_range[2], length.out = 5)[-1], 0
         ))
       )
@@ -495,9 +496,9 @@
     aspect = aspectratio,
     drape = TRUE, colorkey = FALSE,
     scales = scale_info,
-    xlab = list(res_axis_title, rot = 30,cex=1.75),
-    ylab = list(paste0("\n", FD_axis_title), rot = -30,cex=1.75),
-    zlab = list(val_axis_title, rot = 90, just = 0.75,cex=1.75),
+    xlab = list(res_axis_title, rot = 30, cex = 1.75),
+    ylab = list(paste0("\n", FD_axis_title), rot = -30, cex = 1.75),
+    zlab = list(val_axis_title, rot = 90, just = 0.75, cex = 1.75),
     main = plot_title
   )
 }
