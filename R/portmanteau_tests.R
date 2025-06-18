@@ -98,28 +98,31 @@
 #'
 #' @examples
 #' b <- generate_brownian_motion(100)
-#' res0 <- portmanteau_tests(b, test = 'single', lag = 2)
-#' res1 <- portmanteau_tests(b, test = 'multi', lag = 2, alpha = 0.01)
-#' res2 <- portmanteau_tests(b, test = 'spectral', kernel = bartlett_kernel,
-#'                           bandwidth = NULL, alpha = 0.05)
-#' res3 <- portmanteau_tests(b, test = 'spectral', alpha = 0.1,
-#'                           kernel = parzen_kernel,
-#'                           bandwidth = adaptive_bandwidth(b, kernel=parzen_kernel))
-#' res4 <- portmanteau_tests(b, test = 'independence', components = 2, lag = 2)
-#' res5 <- portmanteau_tests(b, test = 'single', lag = 1, M = 50)
-portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
-                                      'spectral', 'independence', 'imhof'),
-                       lag=5, M=1000,
-                       method = c('iid','bootstrap'),
-                       kernel = bartlett_kernel,
-                       block_size = NULL, bandwidth=NULL,
-                       components = 3,
-                       resample_blocks='separate', replace = FALSE, alpha=0.05) {
+#' res0 <- portmanteau_tests(b, test = "single", lag = 2, M=50)
+#' res1 <- portmanteau_tests(b, test = "multi", lag = 2, alpha = 0.01)
+#' res2 <- portmanteau_tests(b,
+#'   test = "spectral", alpha = 0.1,
+#'   kernel = parzen_kernel,
+#'   bandwidth = adaptive_bandwidth(b, kernel = parzen_kernel)
+#' )
+#' res3 <- portmanteau_tests(b, test = "independence", components = 2, lag = 2)
+portmanteau_tests <- function(X, test = c(
+                                "variety", "single", "multi",
+                                "spectral", "independence", "imhof"
+                              ),
+                              lag = 5, M = 1000,
+                              method = c("iid", "bootstrap"),
+                              kernel = bartlett_kernel,
+                              block_size = NULL, bandwidth = NULL,
+                              components = 3,
+                              resample_blocks = "separate", replace = FALSE, alpha = 0.05) {
   X <- dfts(X)
-  poss_tests <- c('variety', 'single', 'multi', 'spectral',
-                    'independence', 'imhof')
-  test <- .verify_input(test,poss_tests)
-  method <- .verify_input(method, c('iid','bootstrap'))
+  poss_tests <- c(
+    "variety", "single", "multi", "spectral",
+    "independence", "imhof"
+  )
+  test <- .verify_input(test, poss_tests)
+  method <- .verify_input(method, c("iid", "bootstrap"))
 
   # Alpha
   if (alpha < 0 | alpha > 1) {
@@ -138,103 +141,129 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
   }
 
   ## Define bandwidth for passing
-  if (!is.null(bandwidth) ) {
+  if (!is.null(bandwidth)) {
     bandwidth <- bandwidth + 0
-  }else if(test %in% c('variety','single','spectral')){
+  } else if (test %in% c("variety", "single", "spectral")) {
     ## Get Kernel
-    tmp <- .kernel_details(kernel,name=deparse(substitute(kernel)))
+    tmp <- .kernel_details(kernel, name = deparse(substitute(kernel)))
     kernel_order <- tmp$order
 
     bandwidth <- ncol(X)^(1 / (2 * kernel_order + 1))
   }
 
   ## RUN TESTS
-  if (test == 'variety') {
+  if (test == "variety") {
     m <- as.table(matrix(0, ncol = 1, 10))
-    colnames(m) <- c('pvalue')
-    rownames(m) <- c('single-lag, lag = 1', 'single-lag, lag = 2',
-                     'single-lag, lag = 3', 'multi-lag, lag = 5',
-                     'multi-lag, lag = 10', 'multi-lag, lag = 20',
-                     'spectral, static bandwidth',
-                     'spectral, adaptive bandwidth',
-                     'independence, 3 components, lag = 3',
-                     'independence, 16 components, lag = 10')
+    colnames(m) <- c("pvalue")
+    rownames(m) <- c(
+      "single-lag, lag = 1", "single-lag, lag = 2",
+      "single-lag, lag = 3", "multi-lag, lag = 5",
+      "multi-lag, lag = 10", "multi-lag, lag = 20",
+      "spectral, static bandwidth",
+      "spectral, adaptive bandwidth",
+      "independence, 3 components, lag = 3",
+      "independence, 16 components, lag = 10"
+    )
 
-    m[1] <- portmanteau_tests(X, test = 'single', lag = 1, alpha=alpha,
-                              M=M, method=method, kernel=kernel,
-                              block_size = block_size, bandwidth=bandwidth,
-                              components = components,  replace =  replace,
-                              resample_blocks=resample_blocks)$pvalue
-    m[2] <- portmanteau_tests(X, test = 'single', lag = 2, alpha=alpha,
-                              M=M, method=method, kernel=kernel,
-                              block_size = block_size, bandwidth=bandwidth,
-                              components = components,  replace =  replace,
-                              resample_blocks=resample_blocks)$pvalue
-    m[3] <- portmanteau_tests(X, test = 'single', lag = 3, alpha=alpha,
-                              M=M, method=method, kernel=kernel,
-                              block_size = block_size, bandwidth=bandwidth,
-                              components = components,  replace =  replace,
-                              resample_blocks=resample_blocks)$pvalue
+    m[1] <- portmanteau_tests(X,
+      test = "single", lag = 1, alpha = alpha,
+      M = M, method = method, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      components = components, replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
+    m[2] <- portmanteau_tests(X,
+      test = "single", lag = 2, alpha = alpha,
+      M = M, method = method, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      components = components, replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
+    m[3] <- portmanteau_tests(X,
+      test = "single", lag = 3, alpha = alpha,
+      M = M, method = method, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      components = components, replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
 
-    m[4] <- portmanteau_tests(X, test = 'multi', lag = 5, alpha=alpha,
-                              M=M, method=method, kernel=kernel,
-                              block_size = block_size, bandwidth=bandwidth,
-                              components = components,  replace =  replace,
-                              resample_blocks=resample_blocks)$pvalue
-    m[5] <- portmanteau_tests(X, test = 'multi', lag = 10, alpha=alpha,
-                              M=M, method=method, kernel=kernel,
-                              block_size = block_size, bandwidth=bandwidth,
-                              components = components,  replace =  replace,
-                              resample_blocks=resample_blocks)$pvalue
-    m[6] <- portmanteau_tests(X, test = 'multi', lag = 20, alpha=alpha,
-                              M=M, method=method, kernel=kernel,
-                              block_size = block_size, bandwidth=bandwidth,
-                              components = components,  replace =  replace,
-                              resample_blocks=resample_blocks)$pvalue
+    m[4] <- portmanteau_tests(X,
+      test = "multi", lag = 5, alpha = alpha,
+      M = M, method = method, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      components = components, replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
+    m[5] <- portmanteau_tests(X,
+      test = "multi", lag = 10, alpha = alpha,
+      M = M, method = method, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      components = components, replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
+    m[6] <- portmanteau_tests(X,
+      test = "multi", lag = 20, alpha = alpha,
+      M = M, method = method, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      components = components, replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
 
-    m[7] <- portmanteau_tests(X, test = 'spectral', lag=lag, method=method,
-                              alpha=alpha, M=M, kernel=kernel,
-                              block_size = block_size, bandwidth=bandwidth,
-                              components = components,  replace =  replace,
-                              resample_blocks=resample_blocks)$pvalue
-    m[8] <- portmanteau_tests(X, test = 'spectral', lag=lag, method=method,
-                              alpha=alpha, M=M, kernel=kernel,
-                              block_size = block_size, bandwidth=bandwidth,
-                              components = components,  replace =  replace,
-                              resample_blocks=resample_blocks)$pvalue
+    m[7] <- portmanteau_tests(X,
+      test = "spectral", lag = lag, method = method,
+      alpha = alpha, M = M, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      components = components, replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
+    m[8] <- portmanteau_tests(X,
+      test = "spectral", lag = lag, method = method,
+      alpha = alpha, M = M, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      components = components, replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
 
-    m[9] <- portmanteau_tests(X, test = 'independence', method=method,
-                       components = 3, lag = 3, alpha=alpha,
-                       M=M, kernel=kernel,
-                       block_size = block_size, bandwidth=bandwidth,
-                       replace =  replace,
-                       resample_blocks=resample_blocks)$pvalue
+    m[9] <- portmanteau_tests(X,
+      test = "independence", method = method,
+      components = 3, lag = 3, alpha = alpha,
+      M = M, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
 
-    m[10] <- portmanteau_tests(X, test = 'independence', method=method,
-                        components = 16, lag = 10, alpha=alpha,
-                        M=M, kernel=kernel,
-                        block_size = block_size, bandwidth=bandwidth,
-                        replace =  replace,
-                        resample_blocks=resample_blocks)$pvalue
+    m[10] <- portmanteau_tests(X,
+      test = "independence", method = method,
+      components = 16, lag = 10, alpha = alpha,
+      M = M, kernel = kernel,
+      block_size = block_size, bandwidth = bandwidth,
+      replace = replace,
+      resample_blocks = resample_blocks
+    )$pvalue
     results <- m
-  } else if (test == 'multi') {
-    method <- 'iid'
-    results <- .multi_lag_test(X, lag, M=M, method=method, alpha=alpha)
-  } else if (test == 'single') {
-    results <- .single_lag_test(X, lag, alpha=alpha,
-                    M=M, method=method,
-                    block_size=block_size,
-                    resample_blocks = resample_blocks,
-                    kernel=kernel, replace=replace)
-  } else if (test == 'spectral') {
-    results <- .spectral_test(X, kernel = kernel, bandwidth = bandwidth,
-                              alpha = alpha)
-  } else if (test == 'independence') {
+  } else if (test == "multi") {
+    method <- "iid"
+    results <- .multi_lag_test(X, lag, M = M, method = method, alpha = alpha)
+  } else if (test == "single") {
+    results <- .single_lag_test(X, lag,
+      alpha = alpha,
+      M = M, method = method,
+      block_size = block_size,
+      resample_blocks = resample_blocks,
+      kernel = kernel, replace = replace
+    )
+  } else if (test == "spectral") {
+    results <- .spectral_test(X,
+      kernel = kernel, bandwidth = bandwidth,
+      alpha = alpha
+    )
+  } else if (test == "independence") {
     results <- .independence_test(X, components = components, lag = lag, alpha = alpha)
-  } else if (test == 'imhof') {
+  } else if (test == "imhof") {
     input <- readline("The imhof test is computationally expensive. \n
                       Press [enter] if you would like to continue.")
-    if (input != '') {
+    if (input != "") {
       stop("User cancelled the test.")
     }
     results <- .imhof_test(X, lag)
@@ -285,33 +314,36 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 #'    \item .single_lag_test(generate_brownian_motion(100), lag = 1)
 #'  }
 .single_lag_test <- function(
-    data, lag=1, alpha=0.05, method = c('iid', 'lowdiscrepancy', 'bootstrap'),
-    M=500, resample_blocks = 'separate',
-    kernel=bartlett_kernel, replace=FALSE,
-    block_size=adaptive_bandwidth(data$data, kernel = kernel) ){
-
+    data, lag = 1, alpha = 0.05, method = c("iid", "lowdiscrepancy", "bootstrap"),
+    M = 500, resample_blocks = "separate",
+    kernel = bartlett_kernel, replace = FALSE,
+    block_size = adaptive_bandwidth(data$data, kernel = kernel)) {
   data <- dfts(data)
 
-  poss_methods <- c('iid', 'lowdiscrepancy', 'bootstrap')
+  poss_methods <- c("iid", "lowdiscrepancy", "bootstrap")
   method <- .verify_input(method, poss_methods)
 
-  if(method=='bootstrap') {
-    stats_distr <- .bootstrap(data, blocksize = block_size,
-                                    M = M, type =  resample_blocks,
-                                    replace = replace, lag=lag, fn=t_statistic_Q)
+  if (method == "bootstrap") {
+    stats_distr <- .bootstrap(data,
+      blocksize = block_size,
+      M = M, type = resample_blocks,
+      replace = replace, lag = lag, fn = t_statistic_Q
+    )
 
     quantile <- stats::quantile(as.numeric(stats_distr), 1 - alpha)
     statistic <- t_statistic_Q(data$data, lag)
     pvalue <- sum(statistic <= stats_distr) / length(stats_distr)
 
-    results <- list(pvalue = as.numeric(pvalue),
-                    statistic = as.numeric(statistic),
-                    quantile = as.numeric(quantile),
-                    block_size = block_size)
-  } else if(method=='lowdiscrepancy') {
-    results <- Q_WS_quantile(data$data, lag, alpha=alpha, M=M, low_disc=TRUE)
-  } else if(method=='iid') {
-    results <- Q_WS_quantile_iid(data$data, alpha=alpha)
+    results <- list(
+      pvalue = as.numeric(pvalue),
+      statistic = as.numeric(statistic),
+      quantile = as.numeric(quantile),
+      block_size = block_size
+    )
+  } else if (method == "lowdiscrepancy") {
+    results <- Q_WS_quantile(data$data, lag, alpha = alpha, M = M, low_disc = TRUE)
+  } else if (method == "iid") {
+    results <- Q_WS_quantile_iid(data$data, alpha = alpha)
   }
 
   results
@@ -359,11 +391,10 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 #'  \itemize{
 #'    \item .multi_lag_test(generate_brownian_motion(100), lag = 5)
 #'  }
-.multi_lag_test <- function(data, lag = 20, M=NULL,
-                           method = c('iid', 'lowdiscrepancy'), alpha=0.05) {
-
+.multi_lag_test <- function(data, lag = 20, M = NULL,
+                            method = c("iid", "lowdiscrepancy"), alpha = 0.05) {
   # Checks
-  poss_methods <- c('iid', 'lowdiscrepancy')
+  poss_methods <- c("iid", "lowdiscrepancy")
   method <- .verify_input(method, poss_methods)
 
   # Setup
@@ -374,39 +405,38 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
   J <- NROW(f_data)
 
   # Statistics
-  if (method=='lowdiscrepancy') {
+  if (method == "lowdiscrepancy") {
     # results <- V_WS_quantile(data$data, lag, alpha=alpha, M=M, low_disc=TRUE)
 
-    bandwidth <- ceiling(0.25 * (N ^ (1/3)))
+    bandwidth <- ceiling(0.25 * (N^(1 / 3)))
 
     covs <- autocovariance(center(dfts(f_data))$data^2,
-                                   lags = 1:lag, center=FALSE)
+      lags = 1:lag, center = FALSE
+    )
     mean_welch <- do.call("sum", covs) / J^2
 
     sum1 <- sum(
-      sapply(1:lag, function(i,f_data,M,low_disc){
-        MCint_eta_approx_i_j(f_data, i, i, M=M, low_disc=low_disc)
-      }, f_data=f_data, M=M, low_disc=TRUE)
+      sapply(1:lag, function(i, f_data, M, low_disc) {
+        MCint_eta_approx_i_j(f_data, i, i, M = M, low_disc = low_disc)
+      }, f_data = f_data, M = M, low_disc = TRUE)
     )
     if (lag > 1) {
-      for (i in 1:(lag-1)) {
-        for (j in (i+1):lag) {
-          if (abs(i-j) > bandwidth) next
+      for (i in 1:(lag - 1)) {
+        for (j in (i + 1):lag) {
+          if (abs(i - j) > bandwidth) next
 
-          sum1 <- sum1 + 2 * MCint_eta_approx_i_j(f_data, i, j, M=M, low_disc=TRUE)
+          sum1 <- sum1 + 2 * MCint_eta_approx_i_j(f_data, i, j, M = M, low_disc = TRUE)
         }
       }
     }
     var_welch <- sum1
-
-
-  } else if(method=='iid') {
+  } else if (method == "iid") {
     # results <- V_WS_quantile_iid(data$data, lag, alpha=alpha)
 
-    cov <- autocovariance(f_data,0)
+    cov <- autocovariance(f_data, 0)
 
     mean_welch <- lag * (sum(diag(cov)) / J)^2
-    var_welch <- lag * 2 * ( sum(cov^2) / J^2 )^2
+    var_welch <- lag * 2 * (sum(cov^2) / J^2)^2
   }
 
   ## Welch Parameters
@@ -464,44 +494,44 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 #'    \item .spectral_test(generate_brownian_motion(100))
 #'  }
 .spectral_test <- function(data, kernel = bartlett_kernel,
-                          bandwidth = NULL, alpha = 0.05, order=NULL) {
-
+                           bandwidth = NULL, alpha = 0.05, order = NULL) {
   J <- NROW(data$data)
   N <- NCOL(data$data)
 
   ## Get Bandwidth
-  if (is.null(bandwidth) ) {
+  if (is.null(bandwidth)) {
     bandwidth <- N^(1 / (2 * order + 1))
   }
 
   ## Compute Statistic
   data_inner_prod <- crossprod(data$data) / J
   C_hat_HS_norm <- numeric(0)
-  for (j in 0:(N-1)) {
-    C_hat_HS_norm[j+1] <-
-      N^(-2) * sum(data_inner_prod[(j+1):N, (j+1):N] *
-                     data_inner_prod[1:(N-j), 1:(N-j)])
+  for (j in 0:(N - 1)) {
+    C_hat_HS_norm[j + 1] <-
+      N^(-2) * sum(data_inner_prod[(j + 1):N, (j + 1):N] *
+        data_inner_prod[1:(N - j), 1:(N - j)])
   }
-  kernel_vals <- sapply(1:(N-1) / bandwidth, kernel)
+  kernel_vals <- sapply(1:(N - 1) / bandwidth, kernel)
   spectral_distance_Q_sq <- 2 * sum((kernel_vals^2) * C_hat_HS_norm[-1])
-  C_n_k <- sum( (1 - 1:(N-1)/N) * kernel_vals^2 )
-  D_n_k <- sum( (1 - 1:(N-2)/N) * (1 - 2:(N-1)/N) * kernel_vals[-(N-1)]^4 )
+  C_n_k <- sum((1 - 1:(N - 1) / N) * kernel_vals^2)
+  D_n_k <- sum((1 - 1:(N - 2) / N) * (1 - 2:(N - 1) / N) * kernel_vals[-(N - 1)]^4)
   sigma_squared_hat <- sum(diag(data_inner_prod)) / N
 
   t_stat_term <- sigma_squared_hat^(-2) * C_hat_HS_norm[1] * sqrt(2 * D_n_k)
   untrans_num <- 2^(-1) * N * sigma_squared_hat^(-2) * spectral_distance_Q_sq
 
   ### TODO: Add case for when H is not R
-  beta <- 1 - (2/3) * sum(kernel_vals^2) * sum(kernel_vals^6) / (sum(kernel_vals^4)^2)
+  beta <- 1 - (2 / 3) * sum(kernel_vals^2) * sum(kernel_vals^6) / (sum(kernel_vals^4)^2)
   t_stat <- ((2^(-1) * N * sigma_squared_hat^(-2) * spectral_distance_Q_sq)^beta -
-               (C_n_k^beta + 2^(-1) * beta * (beta - 1) * C_n_k^(beta-2) * t_stat_term^2)) /
-    (beta * C_n_k^(beta-1) * t_stat_term)
+    (C_n_k^beta + 2^(-1) * beta * (beta - 1) * C_n_k^(beta - 2) * t_stat_term^2)) /
+    (beta * C_n_k^(beta - 1) * t_stat_term)
 
   list(
     pvalue = 1 - stats::pnorm(t_stat),
     statistic = t_stat,
     quantile = stats::qnorm(1 - alpha),
-    bandwidth = bandwidth)
+    bandwidth = bandwidth
+  )
 }
 
 
@@ -545,10 +575,10 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 .independence_test <- function(data, components, lag, alpha = 0.05) {
   data <- dfts(data)
 
-  if ( (components < 1) | (components %% 1 != 0) ) {
+  if ((components < 1) | (components %% 1 != 0)) {
     stop("The 'components parameter must be a positive integer.")
   }
-  if ( (lag < 1) | (lag %% 1 != 0) ) {
+  if ((lag < 1) | (lag %% 1 != 0)) {
     stop("The 'components lag must be a positive integer.")
   }
 
@@ -559,28 +589,29 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
   # TODO:: Convert to internal PCA
   suppressWarnings(
     pc_decomp <- ftsa::ftsm(rainbow::fts(1:J, data$data),
-                            order = components, mean = FALSE)
+      order = components, mean = FALSE
     )
+  )
   scores <- pc_decomp$coeff
   C_0 <- crossprod(scores) / N
-  c_h <- array(0, dim=c(components,components,lag))
+  c_h <- array(0, dim = c(components, components, lag))
   for (h in 1:lag) {
     for (k in 1:components) {
       for (l in 1:components) {
         score_uni <- 0
-        for (t in 1:(N-h)) {
-          score_uni <- score_uni + (scores[t,k] * scores[t+h,l])
+        for (t in 1:(N - h)) {
+          score_uni <- score_uni + (scores[t, k] * scores[t + h, l])
         }
-        c_h[k,l,h] <- score_uni / N
+        c_h[k, l, h] <- score_uni / N
       }
     }
   }
-  r_f_h <- r_b_h <- array(0, dim=c(components,components,lag))
-  summand <- vector('numeric', lag)
+  r_f_h <- r_b_h <- array(0, dim = c(components, components, lag))
+  summand <- vector("numeric", lag)
   for (h in 1:lag) {
-    r_f_h[,,h] <- solve(C_0) %*% c_h[,,h]
-    r_b_h[,,h] <- c_h[,,h] %*% solve(C_0)
-    summand[h] <- sum(r_f_h[,,h] * r_b_h[,,h])
+    r_f_h[, , h] <- solve(C_0) %*% c_h[, , h]
+    r_b_h[, , h] <- c_h[, , h] %*% solve(C_0)
+    summand[h] <- sum(r_f_h[, , h] * r_b_h[, , h])
   }
   Q_n <- N * sum(summand)
   p_val <- as.numeric(1 - stats::pchisq(Q_n, df = components^2 * lag))
@@ -615,13 +646,13 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 .imhof_test <- function(data, lag) {
   data <- dfts(data)
 
-  if (!requireNamespace('tensorA')) {
+  if (!requireNamespace("tensorA")) {
     stop("Please install the 'tensorA' package to perform the imhof test.")
   }
-  if (!requireNamespace('CompQuadForm')) {
+  if (!requireNamespace("CompQuadForm")) {
     stop("Please install the 'CompQuadForm' package to perform the imhof test.")
   }
-  if ( (lag < 1) | (lag %% 1 != 0) ) {
+  if ((lag < 1) | (lag %% 1 != 0)) {
     stop("The 'lag' parameter must a positive integer.")
   }
   N <- NCOL(data$data)
@@ -632,17 +663,17 @@ portmanteau_tests <- function(X, test = c('variety', 'single', 'multi',
 
   tensor <- array(0, c(J, J, J, J))
   sum1 <- 0
-  for (k in 1:(N-lag)) {
-    tensor <- tensor + data$data[,k] %o% data$data[,k+lag] %o%
-      data$data[,k] %o% data$data[,k+lag]
+  for (k in 1:(N - lag)) {
+    tensor <- tensor + data$data[, k] %o% data$data[, k + lag] %o%
+      data$data[, k] %o% data$data[, k + lag]
   }
   tensor <- tensor / N
 
   temp_tensor <- as.numeric(tensor)
-  tensor_numeric <- tensorA::to.tensor(temp_tensor, c(J,J,J,J))
+  tensor_numeric <- tensorA::to.tensor(temp_tensor, c(J, J, J, J))
   names(tensor_numeric) <- c("a", "b", "c", "d")
 
-  SVD <- tensorA::svd.tensor(tensor_numeric, i=c("a", "b"))
+  SVD <- tensorA::svd.tensor(tensor_numeric, i = c("a", "b"))
   eigenvalues <- as.numeric(SVD$d / J^2)
   pval_imhof <- CompQuadForm::imhof(t_statistic_val, lambda = eigenvalues)$Qq
 

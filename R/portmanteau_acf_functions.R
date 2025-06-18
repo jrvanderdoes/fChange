@@ -17,22 +17,23 @@
 #'
 #' @noRd
 #' @keywords internal
-Q_WS_quantile <- function(f_data, lag, alpha=0.05, M=NULL, low_disc=FALSE) {
+Q_WS_quantile <- function(f_data, lag, alpha = 0.05, M = NULL, low_disc = FALSE) {
   # Mean
   # mean_Q_h <- mean_hat_Q_h(f_data, lag)
   J <- NROW(f_data)
   f_data1 <- dfts(f_data)
-  cov <- autocovariance(center(f_data1)$data^2,lags = lag, center=FALSE)
+  cov <- autocovariance(center(f_data1)$data^2, lags = lag, center = FALSE)
 
   mean_Q_h <- as.numeric(unlist(lapply(cov, function(x) sum(x))) / J^2)
 
   # Vars
   # var_Q_h <- variance_hat_Q_h(f_data, lag, M=M, low_disc=low_disc)
   var_Q_h <- sapply(lag,
-                    function(lag,f_data, M, low_disc){
-                      MCint_eta_approx_i_j(f_data, lag, lag, M=M, low_disc=low_disc)
-                    },
-                    f_data=f_data, M=M, low_disc=low_disc)
+    function(lag, f_data, M, low_disc) {
+      MCint_eta_approx_i_j(f_data, lag, lag, M = M, low_disc = low_disc)
+    },
+    f_data = f_data, M = M, low_disc = low_disc
+  )
 
   # Get Welch Parameters
   beta <- var_Q_h / (2 * mean_Q_h)
@@ -60,17 +61,17 @@ Q_WS_quantile <- function(f_data, lag, alpha=0.05, M=NULL, low_disc=FALSE) {
 #'
 #' @noRd
 #' @keywords internal
-Q_WS_quantile_iid <- function(f_data, alpha=0.05) {
+Q_WS_quantile_iid <- function(f_data, alpha = 0.05) {
   J <- NROW(f_data)
 
-  cov <- autocovariance(f_data,0)
+  cov <- autocovariance(f_data, 0)
   # Mean
   # mean_Q_h <- mean_hat_Q_h_iid(f_data)
   mean_Q_h <- (sum(diag(cov)) / J)^2
 
   # Var
   # var_Q_h <- variance_hat_Q_h_iid(f_data)
-  var_Q_h <- 2 * ( sum(cov^2) / J^2 )^2
+  var_Q_h <- 2 * (sum(cov^2) / J^2)^2
 
   # Welch Parameters
   beta <- var_Q_h / (2 * mean_Q_h)
@@ -112,10 +113,12 @@ t_statistic_Q <- function(f_data, lag) {
   # #N * sum(gamma_hat^2) / (J^2)
   # N * colSums(gamma_hat1^2) / (J^2)
 
-  if(length(lag)>1){
-    val <- as.numeric(N * unlist(lapply(autocovariance(f_data,lag),function(x){sum(x^2)})) / J^2)
-  }else{
-    val <- N * sum(autocovariance(f_data,lag)^2) / J^2
+  if (length(lag) > 1) {
+    val <- as.numeric(N * unlist(lapply(autocovariance(f_data, lag), function(x) {
+      sum(x^2)
+    })) / J^2)
+  } else {
+    val <- N * sum(autocovariance(f_data, lag)^2) / J^2
   }
 
   val
@@ -137,25 +140,25 @@ t_statistic_Q <- function(f_data, lag) {
 #'
 #' @noRd
 #' @keywords internal
-MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
+MCint_eta_approx_i_j <- function(f_data, i, j, M = NULL, low_disc = FALSE) {
   J <- NROW(f_data)
   N <- NCOL(f_data)
 
   if (is.null(M)) {
-    M = floor((max(150 - N, 0) + max(100-J,0) + (J / sqrt(2))))
+    M <- floor((max(150 - N, 0) + max(100 - J, 0) + (J / sqrt(2))))
   }
 
   if (low_disc == TRUE) {
-    stop('Low Discrepancy under work')
+    stop("Low Discrepancy under work")
     # https://github.com/cran/fOptions/blob/master/R/LowDiscrepancy.R
     # rand_samp_mat <- apply(J * fOptions::runif.sobol(M, 4, scrambling = 3), 2, floor)
     # rand_samp_mat[which(rand_samp_mat == 0)] <- 1
   } else {
-    rand_samp_mat <- matrix(nrow=M, ncol=4)
+    rand_samp_mat <- matrix(nrow = M, ncol = 4)
     for (k in 1:4) {
       rand_samp <- floor(J * stats::runif(M, 0, 1))
       rand_samp[which(rand_samp == 0)] <- 1
-      rand_samp_mat[,k] <- rand_samp
+      rand_samp_mat[, k] <- rand_samp
     }
   }
 
@@ -164,14 +167,14 @@ MCint_eta_approx_i_j <- function(f_data, i, j, M=NULL, low_disc=FALSE) {
   #   cov <- scalar_covariance_i_j(f_data, i, j, rand_samp_mat[k,])
   #   eta_hat_i_j_sum <- eta_hat_i_j_sum + cov^2
   # }
-  ks <- (1+max(i,j)):N
+  ks <- (1 + max(i, j)):N
   c_f_data <- center(f_data)
 
-  tmp <- rowSums( c_f_data[rand_samp_mat[,1],ks-i,drop=FALSE] *
-                    c_f_data[rand_samp_mat[,2],ks,drop=FALSE] *
-                    c_f_data[rand_samp_mat[,3],ks-j,drop=FALSE] *
-                    c_f_data[rand_samp_mat[,4],ks,drop=FALSE] ) / N
+  tmp <- rowSums(c_f_data[rand_samp_mat[, 1], ks - i, drop = FALSE] *
+    c_f_data[rand_samp_mat[, 2], ks, drop = FALSE] *
+    c_f_data[rand_samp_mat[, 3], ks - j, drop = FALSE] *
+    c_f_data[rand_samp_mat[, 4], ks, drop = FALSE]) / N
   eta_hat_i_j_sum <- sum(tmp^2)
 
-  2/M * eta_hat_i_j_sum
+  2 / M * eta_hat_i_j_sum
 }
