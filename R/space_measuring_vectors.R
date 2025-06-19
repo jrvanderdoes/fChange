@@ -17,14 +17,14 @@
 #' @seealso [fchange()]
 #'
 #' @examples
-#' space_measuring_functions(M=10, space="BM", X=electricity)
-#' space_measuring_functions(M=10, space="PC", X=electricity)
-space_measuring_functions <- function(X, M=20, space='BM') {
+#' space_measuring_functions(M = 10, space = "BM", X = electricity)
+#' space_measuring_functions(M = 10, space = "PC", X = electricity)
+space_measuring_functions <- function(X, M = 20, space = "BM") {
   X <- dfts(X)
 
   if (space == "BM") {
     # W <- as.data.frame(sapply(rep(0, M), sde::BM, N = nrow(X$data) - 1))
-    W <- generate_brownian_motion(M,v=seq(0,1,length.out=nrow(X$data)))$data
+    W <- generate_brownian_motion(M, v = seq(0, 1, length.out = nrow(X$data)))$data
   } else if (space == "PC") {
     pComps <- stats::prcomp(X$data, center = FALSE, scale = FALSE)
     W <- as.data.frame(sapply(rep(nrow(X$data), M),
@@ -35,7 +35,7 @@ space_measuring_functions <- function(X, M=20, space='BM') {
     ))
   } else if (space == "OU") {
     # TODO:: Fix this
-    stop('Sorry, OU space is under testing.',call. = FALSE)
+    stop("Sorry, OU space is under testing.", call. = FALSE)
     x <- seq(0, 1, length.out = nrow(X$data))
     covMat <- (matrix(1, ncol = length(x), nrow = length(x)))
     covMat[, 1] <- covMat[1, ] <- exp(abs(x - x[1]))
