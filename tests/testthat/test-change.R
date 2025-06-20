@@ -430,10 +430,10 @@ test_that("Check Elbow Plots", {
                 errors='L2', recommendation_change_points = 2,
                 recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,NA)
-  expect_equal(class(res$suggestion$plot)[1], 'gg')
-  expect_equal(class(res$plots$variability)[1], 'gg')
-  expect_equal(class(res$plots$explained)[1], 'gg')
-  expect_equal(class(res$plots$improvement)[1], 'gg')
+  expect_true(ggplot2::is_ggplot(res$suggestion$plot))
+  expect_true(ggplot2::is_ggplot(res$plots$variability))
+  expect_true(ggplot2::is_ggplot(res$plots$explained))
+  expect_true(ggplot2::is_ggplot(res$plots$improvement))
   expect_equal(round(sum(res$information[,2]),4), 35.6545)
 
   ## Change
@@ -452,10 +452,10 @@ test_that("Check Elbow Plots", {
                  errors='L2', recommendation_change_points = 2,
                  recommendation_improvement = 0.15)
   expect_equal(res$suggestion$changes,50)
-  expect_equal(class(res$suggestion$plot)[1], 'gg')
-  expect_equal(class(res$plots$variability)[1], 'gg')
-  expect_equal(class(res$plots$explained)[1], 'gg')
-  expect_equal(class(res$plots$improvement)[1], 'gg')
+  expect_true(ggplot2::is_ggplot(res$suggestion$plot))
+  expect_true(ggplot2::is_ggplot(res$plots$variability))
+  expect_true(ggplot2::is_ggplot(res$plots$explained))
+  expect_true(ggplot2::is_ggplot(res$plots$improvement))
   expect_equal(round(sum(res$information[,2]),4),  224.252)
 
   #################

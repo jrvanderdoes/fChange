@@ -6,16 +6,16 @@ test_that("Plot Options", {
   expect_equal(class(tmp)[1],"trellis")
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='rainbow')
-  expect_equal(class(tmp)[1],"gg")
+  expect_true(ggplot2::is_ggplot(tmp))
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='banded')
-  expect_equal(class(tmp)[1],"gg")
+  expect_true(ggplot2::is_ggplot(tmp))
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='acf')
-  expect_equal(class(tmp)[1],"list")
+  expect_true(ggplot2::is_ggplot(tmp))
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='pacf')
-  expect_equal(class(tmp)[1],"list")
+  expect_true(ggplot2::is_ggplot(tmp))
 
   if(Sys.info()['sysname'] !='Linux'){
     tmp <- plot.dfts(electricity, changes=c(50,175),type='summary')
@@ -23,10 +23,10 @@ test_that("Plot Options", {
   }
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='qq')
-  expect_equal(class(tmp)[1],"gg")
+  expect_true(ggplot2::is_ggplot(tmp))
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='distribution')
-  expect_equal(class(tmp)[1],"gg")
+  expect_true(ggplot2::is_ggplot(tmp))
 
   tmp <- plot.dfts(electricity, changes=c(50,175),type='change')
   expect_equal(class(tmp)[1],"plotly")
