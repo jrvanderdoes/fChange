@@ -42,7 +42,7 @@ and upper bounds, under the SWN assumption.
 }
 \examples{
 sacf(electricity)
-sacf(generate_brownian_motion(100) )
+sacf(generate_brownian_motion(100))
 }
 \references{
 Yeh C.K., Rice G., Dubin J.A. (2023). Functional spherical

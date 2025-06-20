@@ -21,28 +21,31 @@
 #' @seealso [autocorrelation()], [var()]
 #'
 #' @examples
-#' v <- seq(0,1,length.out=20)
+#' v <- seq(0, 1, length.out = 20)
 #' lagged_autocov <- autocovariance(
-#'   X = generate_brownian_bridge(100,v=v),
-#'   lags = 1)
-autocovariance <- function(X, lags=0:1, center=TRUE){
+#'   X = generate_brownian_bridge(100, v = v),
+#'   lags = 1
+#' )
+autocovariance <- function(X, lags = 0:1, center = TRUE) {
   X <- dfts(X)
-  if(center) X <- center.dfts(X)
+  if (center) X <- center.dfts(X)
   res <- length(X$fparam)
   obs <- length(X$labels)
 
   autocovs <- list()
-  for(nlag in lags){
+  for (nlag in lags) {
     # autocovs[[paste0("Lag", nlag)]] <-
     #   matrix(0, nrow = res, ncol = res)
-    idxs <- (1+nlag):obs
+    idxs <- (1 + nlag):obs
 
     autocovs[[paste0("Lag", nlag)]] <-
-      X$data[,idxs - nlag,drop=FALSE] %*% t(X$data[,idxs,drop=FALSE]) /
-      obs#(obs-1) #TODO:: n or n-1
+      X$data[, idxs - nlag, drop = FALSE] %*% t(X$data[, idxs, drop = FALSE]) /
+      obs # (obs-1) #TODO:: n or n-1
   }
 
-  if(length(lags)==1) return(autocovs[[1]])
+  if (length(lags) == 1) {
+    return(autocovs[[1]])
+  }
 
   autocovs
 }
@@ -74,33 +77,31 @@ autocovariance <- function(X, lags=0:1, center=TRUE){
 #' v <- seq(from = 0, to = 1, length.out = 10)
 #' bbridge <- generate_brownian_bridge(N = N, v = v)
 #' lagged_autocor <- autocorrelation(X = bbridge, lags = 0:1)
-autocorrelation <- function(X, lags){
+autocorrelation <- function(X, lags) {
   X <- dfts(X)
 
-  lags_use <- unique(c(0,lags))
+  lags_use <- unique(c(0, lags))
 
   autocov <- autocovariance(X, lags_use)
 
-  if(length(lags_use)==1){
+  if (length(lags_use) == 1) {
     normalization.value <-
       dot_integrate(r = X$fparam, v = diag(autocov))
 
     autocor <- autocov / normalization.value
-
-  } else if(length(lags)==1){
+  } else if (length(lags) == 1) {
     normalization.value <-
       dot_integrate(r = X$fparam, v = diag(autocov$Lag0))
 
-    autocor <- autocov[[paste("Lag",lags,sep = "")]] / normalization.value
-
-  }else {
+    autocor <- autocov[[paste("Lag", lags, sep = "")]] / normalization.value
+  } else {
     normalization.value <-
       dot_integrate(r = X$fparam, v = diag(autocov$Lag0))
 
     autocor <- list()
-    for(kk in lags){
-      autocor[[paste("Lag",kk,sep = "")]] <-
-        autocov[[paste("Lag",kk,sep = "")]] / normalization.value
+    for (kk in lags) {
+      autocor[[paste("Lag", kk, sep = "")]] <-
+        autocov[[paste("Lag", kk, sep = "")]] / normalization.value
     }
   }
 

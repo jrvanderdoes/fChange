@@ -22,33 +22,36 @@
 #'  Multivariate Analysis, 189, 104877-.
 #'
 #' @examples
-#' #result <- .change_covariance_kernel(electricity$data[,1:18], len=20)
+#' # result <- .change_covariance_kernel(electricity$data[,1:18], len=20)
 .change_covariance_kernel <- function(X, statistic, critical,
                                       kappa = 1 / 4, len = 30,
-                                      blocksize=1, M=1000, resample_blocks='separate',
-                                      replace=TRUE, K=bartlett_kernel) {
-
-  if(statistic=='Tn'){
-    tmp <- .covariance_statistic(X$data, statistic=statistic, kappa = kappa, location=TRUE)
+                                      blocksize = 1, M = 1000, resample_blocks = "separate",
+                                      replace = TRUE, K = bartlett_kernel) {
+  if (statistic == "Tn") {
+    tmp <- .covariance_statistic(X$data, statistic = statistic, kappa = kappa, location = TRUE)
     stat <- tmp[1]
     location <- tmp[2]
 
-    if(critical == 'simulation'){
-      simulations <- .covariance_simulations(xf = X$data, len = len, kappa = kappa,
-                                             M=M, statistic=statistic, K=K)
-    } else if(critical == 'resample'){
-      simulations <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
-                           type = resample_blocks, replace = replace,
-                           fn = .covariance_statistic,
-                           statistic=statistic, kappa = kappa)
+    if (critical == "simulation") {
+      simulations <- .covariance_simulations(
+        xf = X$data, len = len, kappa = kappa,
+        M = M, statistic = statistic, K = K
+      )
+    } else if (critical == "resample") {
+      simulations <- .bootstrap(
+        X = X$data, blocksize = blocksize, M = M,
+        type = resample_blocks, replace = replace,
+        fn = .covariance_statistic,
+        statistic = statistic, kappa = kappa
+      )
     }
-  } else{
-    stop('Only Tn statistic currently implemented',call. = FALSE)
+  } else {
+    stop("Only Tn statistic currently implemented", call. = FALSE)
   }
 
   return(list(
-    'pvalue' = sum(stat <= simulations) / length(simulations),
-    'location' = location#,
+    "pvalue" = sum(stat <= simulations) / length(simulations),
+    "location" = location # ,
     # 'statistic' = stat,
     # 'simulations' = simulations
   ))
@@ -77,7 +80,7 @@
 #'
 #' @keywords internal
 #' @noRd
-.covariance_simulations <- function(xf, len, kappa, M, statistic, K=bartlett_kernel) {
+.covariance_simulations <- function(xf, len, kappa, M, statistic, K = bartlett_kernel) {
   grid_point <- nrow(xf)
   N <- ncol(xf)
 
@@ -109,18 +112,19 @@
   #   zi[, , i] <- xdm[, i] %o% xdm[, i]
   # }
   zi <- array(apply(xdm, 2, tcrossprod),
-              dim=c(nrow(xdm),nrow(xdm),ncol(xdm)))
+    dim = c(nrow(xdm), nrow(xdm), ncol(xdm))
+  )
   # zimean <-
   #   apply(zi, c(1, 2), mean)
-  zimean <- rowMeans(zi,dims = 2)
+  zimean <- rowMeans(zi, dims = 2)
 
   zm <- array(0, c((len + 1), (len + 1), N))
   for (i in 1:N) {
     zm[, , i] <- zi[, , i] - zimean
   }
 
-  lrcov <- long_run_covariance_4tensor(zm, K=K)
-  lrcov <- tensorA::as.tensor(round(lrcov / (len + 1)^2, 6) )
+  lrcov <- long_run_covariance_4tensor(zm, K = K)
+  lrcov <- tensorA::as.tensor(round(lrcov / (len + 1)^2, 6))
   eigvals <- tensorA::svd.tensor(lrcov, c(3, 4), by = "e")
   eigmat <- as.vector(eigvals$d)
 
@@ -154,10 +158,10 @@
   prek <- matrix(rowSums(apply(as.matrix(xdm[, 1:k]), 2, function(x) {
     x %o% x
   })), grid_point, grid_point)
-  postk <- matrix(rowSums(apply(as.matrix(xdm[, (k+1):N]), 2, function(x) {
+  postk <- matrix(rowSums(apply(as.matrix(xdm[, (k + 1):N]), 2, function(x) {
     x %o% x
   })), grid_point, grid_point)
-  ZNu <- (prek - (k / N) * (prek+postk))
+  ZNu <- (prek - (k / N) * (prek + postk))
 
   ZNu
 }
@@ -176,9 +180,8 @@
 #'
 #' @keywords internal
 #' @noRd
-.covariance_statistic <- function(xf, statistic, kappa, location=FALSE) {
-
-  if(statistic !='Tn') stop('Statistic must be `Tn`',call. = FALSE)
+.covariance_statistic <- function(xf, statistic, kappa, location = FALSE) {
+  if (statistic != "Tn") stop("Statistic must be `Tn`", call. = FALSE)
 
   grid_point <- nrow(xf)
   N <- ncol(xf)
@@ -192,17 +195,19 @@
   zn_cp <- c(rep(0, N))
   for (i in 1:(N - 1)) {
     Zn_stat <- .covariance_statistic_cp(xdm, uind[i])
-    zn2[[i]] <- (Zn_stat/sqrt(N))^2 / ( (uind[i] * (1 - uind[i]))^(2 * kappa) )
+    zn2[[i]] <- (Zn_stat / sqrt(N))^2 / ((uind[i] * (1 - uind[i]))^(2 * kappa))
 
     zn_cp[i] <- (N / (i * (N - i)))^kappa *
-      dot_integrate(dot_integrate_col( Zn_stat^2))
+      dot_integrate(dot_integrate_col(Zn_stat^2))
     #   .int_approx_tensor( (.covariance_statistic_cp(xdm, uind[i]))^2 )
     # sum( sum( (.covariance_statistic_cp(xdm, uind[i]))^2 / grid_point ) / grid_point )
   }
   inm <- Reduce(`+`, zn2) / N
   stat <- (1 / grid_point)^2 * sum(inm)
 
-  if(!location) return(stat)
+  if (!location) {
+    return(stat)
+  }
 
   # TODO:: Remove Trim
   mcp <- max(zn_cp[(0.1 * N):(0.9 * N)])
@@ -220,13 +225,13 @@
 #'
 #' @keywords internal
 #' @noRd
-long_run_covariance_4tensor <- function(dat, K=bartlett_kernel) {
+long_run_covariance_4tensor <- function(dat, K = bartlett_kernel) {
   grid_point <- dim(dat)[1]
   Tval <- dim(dat)[3]
   datmean <- apply(dat, c(1, 2), mean)
   center_dat <- sweep(dat, 1:2, datmean)
 
-  .cov_l <- function(band, nval, K=bartlett_kernel) {
+  .cov_l <- function(band, nval, K = bartlett_kernel) {
     cov_sum <- .gamma_l(0, nval)
 
     for (ik in 1:(nval - 1)) {
@@ -252,7 +257,7 @@ long_run_covariance_4tensor <- function(dat, K=bartlett_kernel) {
   }
 
   hat_h_opt <- Tval^(1 / 4)
-  lr_covop <- .cov_l(band = hat_h_opt, nval = Tval, K=K)
+  lr_covop <- .cov_l(band = hat_h_opt, nval = Tval, K = K)
 
   lr_covop
 }
@@ -381,4 +386,3 @@ long_run_covariance_4tensor <- function(dat, K=bartlett_kernel) {
 #
 #   return(sum(x) / (temp_n^dt))
 # }
-

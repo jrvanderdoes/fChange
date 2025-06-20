@@ -89,20 +89,21 @@ pacf.default <- function(x, lag.max = NULL, ...) stats::pacf(x)
 #'  162, 32--50.
 #'
 #' @examples
-#' x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
-#' acf(x,20)
+#' x <- generate_brownian_bridge(100, seq(0, 1, length.out = 20))
+#' acf(x, 20)
 #'
 #' @export
 #' @rdname acf
-acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
-                      method = c('Welch','MC','Imhof'),
-                      WWN = TRUE, figure = TRUE, ...){
+acf.dfts <- function(x, lag.max = NULL, alpha = 0.05,
+                     method = c("Welch", "MC", "Imhof"),
+                     WWN = TRUE, figure = TRUE, ...) {
   x <- dfts(x)
 
-  if(is.null(lag.max))
-    lag.max <- 20 # 10 * log(ncol(x)/, base=10)
-  if(lag.max<1) stop('Increase lag.max to be greater than 0.',call. = FALSE)
-  lag.max <- min(lag.max, ncol(x$data)-1)
+  if (is.null(lag.max)) {
+    lag.max <- 20
+  } # 10 * log(ncol(x)/, base=10)
+  if (lag.max < 1) stop("Increase lag.max to be greater than 0.", call. = FALSE)
+  lag.max <- min(lag.max, ncol(x$data) - 1)
 
   # Autocov surfaces
   # autocovs <- .compute_autocovariance(x, lag.max)
@@ -111,11 +112,12 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   # L2 norm autocov surfaces
   # l2norms <- .obtain_suface_L2_norm(x$fparam, autocovs)
   # l2norms <- l2norms[-1] # Drop Lag 0
-  l2norms <- sapply(1:lag.max, function(idx,autocovs,res){
+  l2norms <- sapply(1:lag.max, function(idx, autocovs, res) {
     dot_integrate(
-      dot_integrate_col(v=t(autocovs[[idx+1]]^2),r=res),
-      r=res)
-  },autocovs=autocovs,res=x$fparam)
+      dot_integrate_col(v = t(autocovs[[idx + 1]]^2), r = res),
+      r = res
+    )
+  }, autocovs = autocovs, res = x$fparam)
 
   # Obtain autocorrelation estimates
   normalization.value <-
@@ -123,29 +125,29 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   rho <- sqrt(l2norms) / normalization.value
 
   # Estimate distribution of SWN (iid) bound
-  method <- .verify_input(method, c('welch','mc','imhof'))
-  if(method=='welch'){
+  method <- .verify_input(method, c("welch", "mc", "imhof"))
+  if (method == "welch") {
     # Obtain SWN bound for specified confidence value
-    SWN_bound <- rep(NA,length(alpha))
-    for(ii in 1:length(alpha)){
+    SWN_bound <- rep(NA, length(alpha))
+    for (ii in 1:length(alpha)) {
       SWN_bound[ii] <-
-        sqrt(Q_WS_quantile_iid(x$data, alpha=alpha)$quantile) /
-        ( sqrt(NCOL(x$data)) * normalization.value )
+        sqrt(Q_WS_quantile_iid(x$data, alpha = alpha)$quantile) /
+          (sqrt(NCOL(x$data)) * normalization.value)
     }
-  } else{
-    if(method=='mc'){
+  } else {
+    if (method == "mc") {
       iid.distribution <- .estimate_iid_distr_MC(x, autocovs, l2norms)
-    } else if(method=='imhof'){
+    } else if (method == "imhof") {
       iid.distribution <- .estimate_iid_distr_Imhof(x, autocovs, l2norms)
     }
 
     # Obtain SWN bound for specified confidence value
-    SWN_bound <- rep(NA,length(alpha))
-    for(ii in 1:length(alpha)){
-      idx <- min(which(iid.distribution$ef >= 1-alpha[ii]))
+    SWN_bound <- rep(NA, length(alpha))
+    for (ii in 1:length(alpha)) {
+      idx <- min(which(iid.distribution$ef >= 1 - alpha[ii]))
       SWN_bound[ii] <-
-        sqrt( iid.distribution$ex[ idx ] ) /
-        normalization.value
+        sqrt(iid.distribution$ex[idx]) /
+          normalization.value
     }
   }
 
@@ -153,20 +155,22 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
   WWN_bound <- array(NA, lag.max)
   lags <- 1:lag.max
 
-  if(WWN){
-    quantile <- Q_WS_quantile(x$data, lags, alpha=alpha, M=NULL, low_disc=FALSE)$quantile
+  if (WWN) {
+    quantile <- Q_WS_quantile(x$data, lags, alpha = alpha, M = NULL, low_disc = FALSE)$quantile
     WWN_bound <- sqrt(quantile) /
-      ( sqrt(ncol(x$data)) * normalization.value )
+      (sqrt(ncol(x$data)) * normalization.value)
   }
 
   # Plot
-  plt <- .plot_FACF(rho,SWN=SWN_bound, WWN=WWN_bound)
-  if(figure){
+  plt <- .plot_FACF(rho, SWN = SWN_bound, WWN = WWN_bound)
+  if (figure) {
     print(plt)
   }
 
-  invisible( list('acfs'=rho, 'SWN'=SWN_bound, 'WWN'=WWN_bound,
-                  'plot'=plt) )
+  invisible(list(
+    "acfs" = rho, "SWN" = SWN_bound, "WWN" = WWN_bound,
+    "plot" = plt
+  ))
 }
 
 
@@ -176,99 +180,99 @@ acf.dfts <- function(x, lag.max = NULL, alpha=0.05,
 #'   ARH(p) models.
 #'
 #' @examples
-#' x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
-#' pacf(x,lag.max = 10, n_pcs = 2)
+#' x <- generate_brownian_bridge(100, seq(0, 1, length.out = 20))
+#' pacf(x, lag.max = 10, n_pcs = 2)
 #'
 #' @export
 #' @rdname acf
 pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
-                      alpha=0.95, figure = TRUE, ...){
+                      alpha = 0.95, figure = TRUE, ...) {
   x <- dfts(x)
 
-  res <- nrow(x$data) #dv <- length(v)
-  nobs <- ncol(x$data) #dt <- nrow(y)
+  res <- nrow(x$data) # dv <- length(v)
+  nobs <- ncol(x$data) # dt <- nrow(y)
 
   # Allow TVE
-  if(is.null(n_pcs)){
+  if (is.null(n_pcs)) {
     max_pc <- 20
 
     # If there are less discretization points than max_pc, use the disc points
     num_fpc <- min(c(length(x$fparam), max_pc))
 
-    pca <- stats::princomp(t(x$data))#$scores[,1:num_fpc]
+    pca <- stats::princomp(t(x$data)) # $scores[,1:num_fpc]
     eigs <- pca$sdev^2
     varprop <- as.numeric(cumsum(eigs[1:num_fpc]) / sum(eigs))
 
     # Select 95% Coverage or warn
-    if(any(varprop>=0.95)){
-      n_pcs <- which(varprop>=0.95)[1]
-    }else{
-      warning(paste0("Using ", num_fpc,
-                     " functional principal components only explains ",
-                     format(varprop[length(varprop)],digits = 3),"%",
-                     " of the variance"))
+    if (any(varprop >= 0.95)) {
+      n_pcs <- which(varprop >= 0.95)[1]
+    } else {
+      warning(paste0(
+        "Using ", num_fpc,
+        " functional principal components only explains ",
+        format(varprop[length(varprop)], digits = 3), "%",
+        " of the variance"
+      ))
       n_pcs <- num_fpc
     }
   }
 
-  if( is.null(lag.max) ) lag.max <- 20
+  if (is.null(lag.max)) lag.max <- 20
 
   # Initialize FPACF vector
   FPACF <- rep(NA, lag.max)
 
   FACF <- acf.dfts(
     x = x, lag.max = 1,
-    alpha = alpha, figure = FALSE, WWN = FALSE, ...)
+    alpha = alpha, figure = FALSE, WWN = FALSE, ...
+  )
 
   FPACF[1] <- FACF$acfs[1]
 
   vector_PACF <- FPACF
 
-  show_varprop <- TRUE
+  show_varprop <- figure
 
   # Start loop for fitting ARH(p-1)
-  for(pp in 2:lag.max){
+  for (pp in 2:lag.max) {
     lag_PACF <- pp
 
     # 1 - Fit ARH(1) to the series
-    if(show_varprop){
-      Xest_ARIMA <-
-        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
-                       n_pcs = n_pcs)$x_est
-      show_varprop <- FALSE
-    }else{
-      Xest_ARIMA <-
-        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
-                       n_pcs = n_pcs, show_varprop = FALSE)$x_est
-    }
+    Xest_ARIMA <-
+      .fit_ARHp_FPCA(
+        x = x, p = lag_PACF - 1,
+        n_pcs = n_pcs, show_varprop = show_varprop
+      )$x_est
+    show_varprop <- FALSE
 
     # 2 - Fit ARH(1) to the REVERSED series
     x_rev <- x
-    x_rev$data <- x$data[,seq(from = ncol(x$data), to = 1, by = -1)]
+    x_rev$data <- x$data[, seq(from = ncol(x$data), to = 1, by = -1)]
 
     Xest_ARIMA_REV <- .fit_ARHp_FPCA(
-      x = x_rev, p = lag_PACF-1,
-      n_pcs = n_pcs, show_varprop = FALSE)$x_est
+      x = x_rev, p = lag_PACF - 1,
+      n_pcs = n_pcs, show_varprop = FALSE
+    )$x_est
 
     # 3 - Estimate covariance surface for PACF
     Xest_1 <- Xest_ARIMA
     Xest_2 <-
-      Xest_ARIMA_REV[,seq(from = ncol(x$data), to = 1, by = -1)]
+      Xest_ARIMA_REV[, seq(from = ncol(x$data), to = 1, by = -1)]
 
     res_filt_1 <- x$data - Xest_1
     res_filt_2 <- x$data - Xest_2
 
     # Cross-covariance surface
     sup_cov <- matrix(0, res, res)
-    ini_serie <- max(which(is.na(Xest_1[1,]))) + 2
-    fin_serie <- min(which(is.na(Xest_2[1,]))) - 2
+    ini_serie <- max(which(is.na(Xest_1[1, ]))) + 2
+    fin_serie <- min(which(is.na(Xest_2[1, ]))) - 2
 
     count <- 0
-    for(jj in ini_serie:fin_serie){
-      epsilon_1 <- as.matrix(res_filt_1[,jj])
-      epsilon_2 <- as.matrix(res_filt_2[,jj - lag_PACF])
+    for (jj in ini_serie:fin_serie) {
+      epsilon_1 <- as.matrix(res_filt_1[, jj])
+      epsilon_2 <- as.matrix(res_filt_2[, jj - lag_PACF])
 
-      sup_cov <- sup_cov + ( epsilon_1 %*% t(epsilon_2) )
+      sup_cov <- sup_cov + (epsilon_1 %*% t(epsilon_2))
 
       count <- count + 1
     }
@@ -277,10 +281,10 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
     # Estimate traces
     var_1 <- matrix(0, res, res)
     count <- 0
-    for (jj in ini_serie:nobs){
+    for (jj in ini_serie:nobs) {
       epsilon_1 <- as.matrix(res_filt_1[, jj])
 
-      var_1 <- var_1 + ( epsilon_1 %*% t(epsilon_1) )
+      var_1 <- var_1 + (epsilon_1 %*% t(epsilon_1))
 
       count <- count + 1
     }
@@ -290,11 +294,11 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 
     var_2 <- matrix(0, res, res)
     count <- 0
-    for (jj in 1:fin_serie){
-      epsilon_1 <- as.matrix(res_filt_2[,jj])
-      epsilon_2 <- as.matrix(res_filt_2[,jj])
+    for (jj in 1:fin_serie) {
+      epsilon_1 <- as.matrix(res_filt_2[, jj])
+      epsilon_2 <- as.matrix(res_filt_2[, jj])
 
-      var_2 <- var_2 + ( epsilon_1 %*% t(epsilon_2) )
+      var_2 <- var_2 + (epsilon_1 %*% t(epsilon_2))
 
       count <- count + 1
     }
@@ -302,25 +306,28 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 
     traza_2 <- dot_integrate(r = x$fparam, v = diag(var_2))
 
-    sup_corr <- sup_cov / ( sqrt(traza_1)*sqrt(traza_2) )
+    sup_corr <- sup_cov / (sqrt(traza_1) * sqrt(traza_2))
 
     # Check - L2 surface norm
     vector_PACF[lag_PACF] <-
       dot_integrate(
-        dot_integrate_col(v=t(sup_corr^2),r=x$fparam),
-        r=x$fparam)
+        dot_integrate_col(v = t(sup_corr^2), r = x$fparam),
+        r = x$fparam
+      )
 
     # vector_PACF[lag_PACF] <-
     #   sqrt( .obtain_suface_L2_norm(x$fparam, list(Lag0 = sup_corr)) )
   }
 
-  plt <- .plot_FACF(rho = vector_PACF, SWN = FACF$SWN, WWN=NULL)
-  if(figure){
+  plt <- .plot_FACF(rho = vector_PACF, SWN = FACF$SWN, WWN = NULL)
+  if (figure) {
     print(plt)
   }
 
-  invisible( list('pacfs' = vector_PACF, 'SWN' = FACF$SWN,
-                  'WWN'=NULL, 'plot'=plt) )
+  invisible(list(
+    "pacfs" = vector_PACF, "SWN" = FACF$SWN,
+    "WWN" = NULL, "plot" = plt
+  ))
 }
 
 
@@ -365,7 +372,7 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #' @keywords internal
 #' @noRd
 .estimate_iid_distr_MC <-
-  function(x, autocovSurface, matindex, nsims= 10000){
+  function(x, autocovSurface, matindex, nsims = 10000) {
     x <- dfts(x)
 
     # # mat.means <- matrix(rep(colMeans(Y),nrow(Y)),ncol=ncol(Y),byrow = TRUE)
@@ -375,15 +382,15 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
     l <- .obtain_autocov_eigenvalues(center(x))
 
     neig <- length(l)
-    Reig <- rep(0,nsims)
+    Reig <- rep(0, nsims)
 
-    for(jj in 1:neig){
-      for(kk in 1:neig){
+    for (jj in 1:neig) {
+      for (kk in 1:neig) {
         Reig <- Reig +
-          stats::rchisq(n = nsims,df = 1)*l[jj]*l[kk]
+          stats::rchisq(n = nsims, df = 1) * l[jj] * l[kk]
       }
     }
-    #Reig=Reig/nrow(Y)
+    # Reig=Reig/nrow(Y)
     Reig <- Reig / ncol(x$data)
 
     ecdf.aux <- stats::ecdf(Reig)
@@ -400,7 +407,7 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
     #   graphics::grid()
     # }
 
-    list('ex'=ex,'ef'=ef, 'Reig'=Reig)
+    list("ex" = ex, "ef" = ef, "Reig" = Reig)
   }
 
 
@@ -419,38 +426,39 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #' greater than \code{epsilon}.
 #'
 #' @examples
-#' #N <- 100
-#' #v <- seq(from = 0, to = 1, length.out = 10)
-#' #sig <- 2
-#' #Y <- generate_brownian_bridge(N, v, sig)
-#' #lambda <- .obtain_autocov_eigenvalues(x = Y)
+#' # N <- 100
+#' # v <- seq(from = 0, to = 1, length.out = 10)
+#' # sig <- 2
+#' # Y <- generate_brownian_bridge(N, v, sig)
+#' # lambda <- .obtain_autocov_eigenvalues(x = Y)
 #'
 #' @keywords internal
 #' @noRd
-.obtain_autocov_eigenvalues <- function(x, epsilon = 0.0001){
+.obtain_autocov_eigenvalues <- function(x, epsilon = 0.0001) {
   x <- dfts(x)
 
   nobs <- ncol(x$data) # nt
   res <- nrow(x$data) # nv
 
   # w(i,j) = integral of the product of the curves i and j
-  W <- matrix(0,nrow = nobs,ncol = nobs)
+  W <- matrix(0, nrow = nobs, ncol = nobs)
 
-  for(ii in 1:nobs){
-    mat.aux <- matrix(rep(x$data[,ii],each = nobs),
-                      nrow = nobs, ncol = res)*t(x$data)
-    for(jj in 1:nobs){
-      W[ii,jj] <- dot_integrate(r = x$fparam, v = mat.aux[jj,])
+  for (ii in 1:nobs) {
+    mat.aux <- matrix(rep(x$data[, ii], each = nobs),
+      nrow = nobs, ncol = res
+    ) * t(x$data)
+    for (jj in 1:nobs) {
+      W[ii, jj] <- dot_integrate(r = x$fparam, v = mat.aux[jj, ])
     }
   }
 
   # Obtain eigenvalues and eigenfunctions of W/n
-  eigenlist <- eigen(W/nobs)
+  eigenlist <- eigen(W / nobs)
 
   # Obtain all first $m$ eigenvalues such that
   #   \lambda_{m}/\lambda_{1} > \varepsilon
   lambd1 <- eigenlist$values[1]
-  frac <- eigenlist$values/lambd1
+  frac <- eigenlist$values / lambd1
   k <- which(frac > epsilon)
 
   eigenlist$values[k]
@@ -485,10 +493,10 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'
 #' @keywords internal
 #' @noRd
-.estimate_iid_distr_Imhof <- function(x, autocovs, l2norms){
+.estimate_iid_distr_Imhof <- function(x, autocovs, l2norms) {
   x <- dfts(x)
 
-  if(!requireNamespace('CompQuadForm')) stop('Install `CompQuadForm` to run Imhof.')
+  if (!requireNamespace("CompQuadForm")) stop("Install `CompQuadForm` to run Imhof.")
 
   # # mat.means <- matrix(rep(colMeans(Y),nrow(Y)),ncol=ncol(Y),byrow = TRUE)
   # # l <- obtain_autocov_eigenvalues(v,Y - mat.means)
@@ -503,18 +511,18 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
   nx <- length(x)
 
   # Compute products of eigenvalues
-  L <- rep(0,nl*nl)
+  L <- rep(0, nl * nl)
   k <- 1
   for (i in l) {
-    for (j in l){
-      L[k] <- i*j
-      k <- k+1
+    for (j in l) {
+      L[k] <- i * j
+      k <- k + 1
     }
   }
 
   # Obtain ecdf using Imhof function
-  cdf <- rep(0,nx)
-  for (i in 1:nx){
+  cdf <- rep(0, nx)
+  for (i in 1:nx) {
     cdf[i] <- 1 - CompQuadForm::imhof(x[i], L)$Qq
   }
 
@@ -531,7 +539,7 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
   #   graphics::grid()
   # }
 
-  list('ex'=ex, 'ef'=t(cdf))
+  list("ex" = ex, "ef" = t(cdf))
 }
 
 
@@ -559,46 +567,63 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'
 #' @keywords internal
 #' @noRd
-.plot_FACF <- function(rho, SWN, WWN){
-  lags=1:length(rho)
+.plot_FACF <- function(rho, SWN, WWN) {
+  lags <- 1:length(rho)
 
   plt <- ggplot2::ggplot() +
-    ggplot2::geom_segment(ggplot2::aes(
-      x = lags,
-      y= pmin(0,rho), yend=pmax(0,rho)),
+    ggplot2::geom_segment(
+      ggplot2::aes(
+        x = lags,
+        y = pmin(0, rho), yend = pmax(0, rho)
+      ),
       # position = ggplot2::position_dodge2(preserve='single'),
       # stat = 'identity',
-      col = 'black', linewidth=2 #width=0.2, fill='darkgray'
+      col = "black", linewidth = 2 # width=0.2, fill='darkgray'
     ) +
-    ggplot2::geom_hline(ggplot2::aes(yintercept=0), col="black") +
+    ggplot2::geom_hline(ggplot2::aes(yintercept = 0), col = "black") +
     ggplot2::theme_bw() +
-    ggplot2::theme(axis.title = ggplot2::element_text(size=24),
-                   axis.text = ggplot2::element_text(size=20)) +
-    ggplot2::xlab('Lag') +
+    ggplot2::theme(
+      axis.title = ggplot2::element_text(size = 24),
+      axis.text = ggplot2::element_text(size = 20)
+    ) +
+    ggplot2::xlab("Lag") +
     ggplot2::ylab(NULL)
 
-  if(min(rho)<0){
+  if (min(rho) < 0) {
     plt <- plt +
-      ggplot2::geom_hline(ggplot2::aes(yintercept=-SWN), col="#0073C2FF",
-                          linetype='dashed', linewidth=2 )
-    if(!is.null(WWN)){
+      ggplot2::geom_hline(ggplot2::aes(yintercept = -SWN),
+        col = "#0073C2FF",
+        linetype = "dashed", linewidth = 2
+      )
+    if (!is.null(WWN)) {
       plt <- plt +
-        ggplot2::geom_line(ggplot2::aes(x=lags,
-                                        y=-WWN), col='red',
-                           linetype='dashed', linewidth=2 )
+        ggplot2::geom_line(
+          ggplot2::aes(
+            x = lags,
+            y = -WWN
+          ),
+          col = "red",
+          linetype = "dashed", linewidth = 2
+        )
     }
-
   }
-  if(max(rho>0)){
+  if (max(rho > 0)) {
     plt <- plt +
-      ggplot2::geom_hline(ggplot2::aes(yintercept=SWN), col="#0073C2FF",
-                          linetype='dashed', linewidth=2)
+      ggplot2::geom_hline(ggplot2::aes(yintercept = SWN),
+        col = "#0073C2FF",
+        linetype = "dashed", linewidth = 2
+      )
 
-    if(!is.null(WWN)){
+    if (!is.null(WWN)) {
       plt <- plt +
-        ggplot2::geom_line(ggplot2::aes(x=lags,
-                                        y=WWN), col='red',
-                           linetype='dashed', linewidth=2)
+        ggplot2::geom_line(
+          ggplot2::aes(
+            x = lags,
+            y = WWN
+          ),
+          col = "red",
+          linetype = "dashed", linewidth = 2
+        )
     }
   }
 
@@ -636,35 +661,36 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 #'
 #' @keywords internal
 #' @noRd
-.fit_ARHp_FPCA <- function(x, p, n_pcs, show_varprop = TRUE){
+.fit_ARHp_FPCA <- function(x, p, n_pcs, show_varprop = TRUE) {
   x <- dfts(x)
 
-  nobs <- ncol(x$data) #dt <- nrow(y)
-  res <- nrow(x$data) #dv <- length(v)
+  nobs <- ncol(x$data) # dt <- nrow(y)
+  res <- nrow(x$data) # dv <- length(v)
 
   # Step 1: FPCA decomposition of the curves
   pca <- stats::princomp(t(x$data))
   eigs <- pca$sdev^2
   varprop <- as.numeric(cumsum(eigs[1:n_pcs]) / sum(eigs))
 
-  if(show_varprop){
+  if (show_varprop) {
     graphics::plot(1:n_pcs, varprop,
-                   type = "b",
-                   pch = 20,
-                   main = "% Variance explained by FPCA",
-                   xlab = "Number of components",
-                   ylab = "% Var. Expl")
+      type = "b",
+      pch = 20,
+      main = "% Variance explained by FPCA",
+      xlab = "Number of components",
+      ylab = "% Var. Expl"
+    )
   }
 
-  x_scores <- pca$scores[,1:n_pcs]
+  x_scores <- pca$scores[, 1:n_pcs]
 
 
   # Step 2: Fit a VAR(p) model to the scores series
   x_scores_aux <- as.data.frame(x_scores)
-  names(x_scores_aux) <- paste0("x",1:ncol(x_scores))
+  names(x_scores_aux) <- paste0("x", 1:ncol(x_scores))
   mod <- vars::VAR(x_scores_aux, p = p)
 
-  if(show_varprop){
+  if (show_varprop) {
     summary(mod)
   }
 
@@ -672,16 +698,21 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 
   # Fill with NA
   fitted_vals <- rbind(
-    matrix(NA, nrow = nrow(x_scores)-nrow(fitted_vals),
-           ncol = ncol(x_scores)),
-    fitted_vals)
+    matrix(NA,
+      nrow = nrow(x_scores) - nrow(fitted_vals),
+      ncol = ncol(x_scores)
+    ),
+    fitted_vals
+  )
 
   # Step 3: reconstruct the curves
   x_rec <- matrix(nrow = res, ncol = nobs)
-  for(ii in 1:nobs){
-    x_rec[,ii] <- pca$center + pca$loadings[,1:n_pcs] %*% fitted_vals[ii,]
+  for (ii in 1:nobs) {
+    x_rec[, ii] <- pca$center + pca$loadings[, 1:n_pcs] %*% fitted_vals[ii, ]
   }
 
-  list(x_est = x_rec, mod = mod, fpca = pca,
-       fitted_vals = fitted_vals, x = x)
+  list(
+    x_est = x_rec, mod = mod, fpca = pca,
+    fitted_vals = fitted_vals, x = x
+  )
 }

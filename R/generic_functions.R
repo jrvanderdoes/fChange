@@ -51,27 +51,27 @@ NULL
 #'  [center.matrix()], [center.dfts()]
 #'
 #' @export
-center <- function(object, changes=NULL, type='mean', ...) UseMethod("center")
+center <- function(object, changes = NULL, type = "mean", ...) UseMethod("center")
 #' @rdname center
 #' @export
-center.default <- function(object, changes=NULL, type='mean', ...) {
-  type <- .verify_input(type, c('mean','median'))
-  if(type=='mean'){
+center.default <- function(object, changes = NULL, type = "mean", ...) {
+  type <- .verify_input(type, c("mean", "median"))
+  if (type == "mean") {
     method <- mean
-  }else if(type=='median'){
+  } else if (type == "median") {
     method <- stats::median
   }
 
 
-  if(is.null(changes)){
+  if (is.null(changes)) {
     object <- object - method(object)
-  }else{
+  } else {
     changes_use <- unique(c(0, changes, length(object)))
     changes_use <- changes_use[order(changes_use)]
-    for(i in 1:(length(changes_use)-1)){
-      object[(changes_use[i]+1):changes_use[i+1]] <-
-        object[(changes_use[i]+1):changes_use[i+1]] -
-        method(object[(changes_use[i]+1):changes_use[i+1]])
+    for (i in 1:(length(changes_use) - 1)) {
+      object[(changes_use[i] + 1):changes_use[i + 1]] <-
+        object[(changes_use[i] + 1):changes_use[i + 1]] -
+        method(object[(changes_use[i] + 1):changes_use[i + 1]])
     }
   }
 
@@ -79,27 +79,32 @@ center.default <- function(object, changes=NULL, type='mean', ...) {
 }
 #' @rdname center
 #' @export
-center.data.frame <- function(object, changes=NULL, type='mean', ...) { object <- as.matrix(object); NextMethod("center") }
+center.data.frame <- function(object, changes = NULL, type = "mean", ...) {
+  object <- as.matrix(object)
+  NextMethod("center")
+}
 #' @rdname center
 #' @export
-center.matrix <- function(object, changes=NULL, type='mean', ...) {
-  type <- .verify_input(type, c('mean','median'))
-  if(type=='mean'){
+center.matrix <- function(object, changes = NULL, type = "mean", ...) {
+  type <- .verify_input(type, c("mean", "median"))
+  if (type == "mean") {
     row_method <- rowMeans
-  }else if(type=='median'){
-    row_method <- function(y){apply(y, MARGIN = 1, stats::median)}
+  } else if (type == "median") {
+    row_method <- function(y) {
+      apply(y, MARGIN = 1, stats::median)
+    }
   }
 
 
-  if(is.null(changes)){
+  if (is.null(changes)) {
     object <- object - row_method(object)
-  }else{
+  } else {
     changes_use <- unique(c(0, changes, ncol(object)))
     changes_use <- changes_use[order(changes_use)]
-    for(i in 1:(length(changes_use)-1)){
-      object[,(changes_use[i]+1):changes_use[i+1]] <-
-        object[,(changes_use[i]+1):changes_use[i+1],drop=FALSE] -
-        row_method(object[,(changes_use[i]+1):changes_use[i+1],drop=FALSE])
+    for (i in 1:(length(changes_use) - 1)) {
+      object[, (changes_use[i] + 1):changes_use[i + 1]] <-
+        object[, (changes_use[i] + 1):changes_use[i + 1], drop = FALSE] -
+        row_method(object[, (changes_use[i] + 1):changes_use[i + 1], drop = FALSE])
     }
   }
 
@@ -107,24 +112,26 @@ center.matrix <- function(object, changes=NULL, type='mean', ...) {
 }
 #' @rdname center
 #' @export
-center.dfts <- function(object, changes=NULL, type='mean', ...) {
-  type <- .verify_input(type, c('mean','median'))
-  if(type=='mean'){
+center.dfts <- function(object, changes = NULL, type = "mean", ...) {
+  type <- .verify_input(type, c("mean", "median"))
+  if (type == "mean") {
     row_method <- rowMeans
-  }else if(type=='median'){
-    row_method <- function(y){apply(y, MARGIN = 1, stats::median)}
+  } else if (type == "median") {
+    row_method <- function(y) {
+      apply(y, MARGIN = 1, stats::median)
+    }
   }
 
 
-  if(is.null(changes)){
+  if (is.null(changes)) {
     object$data <- object$data - row_method(object$data)
-  }else{
+  } else {
     changes_use <- unique(c(0, changes, ncol(object$data)))
     changes_use <- changes_use[order(changes_use)]
-    for(i in 1:(length(changes_use)-1)){
-      object$data[,(changes_use[i]+1):changes_use[i+1]] <-
-        object$data[,(changes_use[i]+1):changes_use[i+1],drop=FALSE] -
-        row_method(object$data[,(changes_use[i]+1):changes_use[i+1],drop=FALSE])
+    for (i in 1:(length(changes_use) - 1)) {
+      object$data[, (changes_use[i] + 1):changes_use[i + 1]] <-
+        object$data[, (changes_use[i] + 1):changes_use[i + 1], drop = FALSE] -
+        row_method(object$data[, (changes_use[i] + 1):changes_use[i + 1], drop = FALSE])
     }
   }
 
@@ -135,10 +142,12 @@ center.dfts <- function(object, changes=NULL, type='mean', ...) {
 
 #' @rdname pca
 #' @export
-pca <- function(object, TVE = 1,...) UseMethod("pca")
+pca <- function(object, TVE = 1, ...) UseMethod("pca")
 #' @rdname pca
 #' @export
-pca.default <- function(object, ...) { stats::prcomp(object, ...) }
+pca.default <- function(object, ...) {
+  stats::prcomp(object, ...)
+}
 
 
 #' @rdname pca
@@ -147,51 +156,59 @@ pca.default <- function(object, ...) { stats::prcomp(object, ...) }
 #'
 #' @examples
 #' pca(electricity)
-pca.dfts <- function(object, TVE = 1, ...){
-  if(TVE > 1 || TVE < 0) stop('TVE must be in [0,1].',call. = FALSE)
+pca.dfts <- function(object, TVE = 1, ...) {
+  if (TVE > 1 || TVE < 0) stop("TVE must be in [0,1].", call. = FALSE)
 
-  pc <- suppressWarnings( stats::prcomp(x=t(object$data), ...) )
-  if(TVE==1){
+  pc <- suppressWarnings(stats::prcomp(x = t(object$data), ...))
+  if (TVE == 1) {
     min_pc <- length(pc$sdev)
-  } else{
-    min_pc <- min( which(cumsum(pc$sdev^2)/sum(pc$sdev^2) > TVE) )
+  } else {
+    min_pc <- min(which(cumsum(pc$sdev^2) / sum(pc$sdev^2) > TVE))
   }
 
   ## Skree plots
-  std_vals <- data.frame('y'=(pc$sdev^2)/sum(pc$sdev^2))
+  std_vals <- data.frame("y" = (pc$sdev^2) / sum(pc$sdev^2))
   std_vals$x <- 1:nrow(std_vals)
 
-  cols <- rep('black',nrow(std_vals))
-  cols[min_pc] <- 'red'
+  cols <- rep("black", nrow(std_vals))
+  cols[min_pc] <- "red"
 
   x <- y <- NULL # For R checks
 
-  individual_skree <- ggplot2::ggplot(data=std_vals) +
-    ggplot2::geom_line(ggplot2::aes(x=x, y=y),
-                       col= 'black', linewidth=1) +
-    ggplot2::geom_point(ggplot2::aes(x=x, y=y),
-                        col= cols, size=3) +
+  individual_skree <- ggplot2::ggplot(data = std_vals) +
+    ggplot2::geom_line(ggplot2::aes(x = x, y = y),
+      col = "black", linewidth = 1
+    ) +
+    ggplot2::geom_point(ggplot2::aes(x = x, y = y),
+      col = cols, size = 3
+    ) +
     ggplot2::theme_bw() +
-    ggplot2::theme(axis.title = ggplot2::element_text(size=24),
-                   axis.text = ggplot2::element_text(size=20)) +
-    ggplot2::xlab('Individual Variation Explained') +
+    ggplot2::theme(
+      axis.title = ggplot2::element_text(size = 24),
+      axis.text = ggplot2::element_text(size = 20)
+    ) +
+    ggplot2::xlab("Individual Variation Explained") +
     ggplot2::ylab(NULL)
-  std_vals <- data.frame('y'=cumsum(pc$sdev^2)/sum(pc$sdev^2))
+  std_vals <- data.frame("y" = cumsum(pc$sdev^2) / sum(pc$sdev^2))
   std_vals$x <- 1:nrow(std_vals)
-  combined_skree <- ggplot2::ggplot(data=std_vals) +
-    ggplot2::geom_line(ggplot2::aes(x=x, y=y),
-                       col= 'black', linewidth=1) +
-    ggplot2::geom_point(ggplot2::aes(x=x, y=y),
-                        col= cols, size=3) +
-    ggplot2::geom_hline(ggplot2::aes(yintercept=TVE), linetype='dashed', linewidth=2 ) +
+  combined_skree <- ggplot2::ggplot(data = std_vals) +
+    ggplot2::geom_line(ggplot2::aes(x = x, y = y),
+      col = "black", linewidth = 1
+    ) +
+    ggplot2::geom_point(ggplot2::aes(x = x, y = y),
+      col = cols, size = 3
+    ) +
+    ggplot2::geom_hline(ggplot2::aes(yintercept = TVE), linetype = "dashed", linewidth = 2) +
     ggplot2::theme_bw() +
-    ggplot2::theme(axis.title = ggplot2::element_text(size=24),
-                   axis.text = ggplot2::element_text(size=20)) +
-    ggplot2::xlab('Cumulative Variation Explained') +
+    ggplot2::theme(
+      axis.title = ggplot2::element_text(size = 24),
+      axis.text = ggplot2::element_text(size = 20)
+    ) +
+    ggplot2::xlab("Cumulative Variation Explained") +
     ggplot2::ylab(NULL)
 
   ## TODO:: Check out
-  new_rot <- pc$rotation[,1:min_pc,drop=FALSE] * sqrt(nrow(object$data))
+  new_rot <- pc$rotation[, 1:min_pc, drop = FALSE] * sqrt(nrow(object$data))
 
   # scores <- matrix(NA, nrow=ncol(x$data),ncol = min_pc)
   # for(i in 1:ncol(x$data)){
@@ -199,7 +216,7 @@ pca.dfts <- function(object, TVE = 1, ...){
   #     scores[i,l] <- dot_integrate(x$data[,i] %*% t(new_rot[,l]))
   #   }
   # }
-  scores <- (t(object$data-pc$center) %*% new_rot)[,1:min_pc,drop=FALSE]/nrow(object$data)
+  scores <- (t(object$data - pc$center) %*% new_rot)[, 1:min_pc, drop = FALSE] / nrow(object$data)
 
   # res = fda::pca.fd(fda::Data2fd(X$data))
   # pc$sdev^2
@@ -207,14 +224,18 @@ pca.dfts <- function(object, TVE = 1, ...){
   # View(pc$x); View(res$scores)
   # View(pc$rotation); View(fda::eval.fd(seq(0,1,length.out=30),res$harmonics))
 
-  list(sdev = pc$sdev[1:min_pc]/sqrt(nrow(object$data)),
-       rotation = new_rot,
-       center = pc$center,
-       scale = pc$scale,
-       x = scores,
-       skree = list('ind_skree'=individual_skree,
-                    'comb_skree'=combined_skree),
-       orig_pc = pc)
+  list(
+    sdev = pc$sdev[1:min_pc] / sqrt(nrow(object$data)),
+    rotation = new_rot,
+    center = pc$center,
+    scale = pc$scale,
+    x = scores,
+    skree = list(
+      "ind_skree" = individual_skree,
+      "comb_skree" = combined_skree
+    ),
+    orig_pc = pc
+  )
 }
 
 
@@ -251,16 +272,15 @@ sd.default <- function(object, ...) stats::sd(object, ...)
 #' @export
 #'
 #' @examples
-#' sd(electricity,type='pointwise')
-sd.dfts <- function(object, type='pointwise', ...) {
-  type <- c('pointwise')[min(pmatch(type,c('pointwise')))]
+#' sd(electricity, type = "pointwise")
+sd.dfts <- function(object, type = "pointwise", ...) {
+  type <- c("pointwise")[min(pmatch(type, c("pointwise")))]
 
-  if(type=='pointwise'){
-    return( apply(object$data, MARGIN = 1, sd) )
-  } else{
+  if (type == "pointwise") {
+    return(apply(object$data, MARGIN = 1, sd))
+  } else {
     stop('Only type="pointwise" is implemented', call. = FALSE)
   }
-
 }
 
 
@@ -277,17 +297,17 @@ var.default <- function(object, ...) stats::var(object, ...)
 #' @export
 #'
 #' @examples
-#' var(electricity,type='pointwise')
-#' var(electricity,type='operator')
-var.dfts <- function(object, type=c('operator','pointwise'), ...) {
-  type <- c('operator','pointwise')[min(pmatch(type,c('operator','pointwise')))]
+#' var(electricity, type = "pointwise")
+#' var(electricity, type = "operator")
+var.dfts <- function(object, type = c("operator", "pointwise"), ...) {
+  type <- c("operator", "pointwise")[min(pmatch(type, c("operator", "pointwise")))]
 
-  if(type=='operator'){
+  if (type == "operator") {
     # autocov_approx_h(object$data,0)
-    autocovariance(object$data,0)
-  } else if(type=='pointwise'){
+    autocovariance(object$data, 0)
+  } else if (type == "pointwise") {
     apply(object$data, MARGIN = 1, var)
-  } else{
+  } else {
     stop('Type must be "operator" or "pointwise"', call. = FALSE)
   }
 }
@@ -300,10 +320,11 @@ var.dfts <- function(object, type=c('operator','pointwise'), ...) {
 #'
 #' @examples
 #' cumsum(electricity)
-cumsum.dfts <- function(x){
+cumsum.dfts <- function(x) {
   x <- dfts(x)
 
-  dfts(t(apply(x$data,MARGIN = 1,cumsum)),
-        labels = x$labels,
-        fparam = x$fparam)
+  dfts(t(apply(x$data, MARGIN = 1, cumsum)),
+    labels = x$labels,
+    fparam = x$fparam
+  )
 }

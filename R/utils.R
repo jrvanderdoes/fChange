@@ -28,8 +28,8 @@
 #'
 #' @noRd
 #' @keywords internal
-.select_n <- function(vals,n){
-  vals[round(seq(1,length(vals),length.out=n))]
+.select_n <- function(vals, n) {
+  vals[round(seq(1, length(vals), length.out = n))]
 }
 
 
@@ -69,17 +69,18 @@
 #'
 #' @keywords internal
 #' @noRd
-.bootstrap <- function(X, blocksize, M=1000, type='overlapping', replace=TRUE,
-                       fn=NULL, ...){
+.bootstrap <- function(X, blocksize, M = 1000, type = "overlapping", replace = TRUE,
+                       fn = NULL, ...) {
   X <- dfts(X)
   N <- ncol(X$data)
 
   # Get groups
-  if(type=='separate'){
+  if (type == "separate") {
     idxGroups <- .getChunks(1:ncol(X$data), ncol(X$data) / blocksize)
-  } else if(type=='overlapping'){
-    idxGroups <- sapply(0:(N-blocksize), function(x,blocksize){
-      x + 1:blocksize }, blocksize=blocksize, simplify = FALSE)
+  } else if (type == "overlapping") {
+    idxGroups <- sapply(0:(N - blocksize), function(x, blocksize) {
+      x + 1:blocksize
+    }, blocksize = blocksize, simplify = FALSE)
   }
 
   # Get BS sample indices
@@ -87,13 +88,15 @@
   #   Only can occur with replacement (otherwise will pick all)
   min_len <- min(lengths(idxGroups))
   size <- ceiling(ncol(X$data) / blocksize)
-  size_equal_len <- size + ceiling((ncol(X$data)-min_len*size)/min_len)*replace
+  size_equal_len <- size + ceiling((ncol(X$data) - min_len * size) / min_len) * replace
 
-  idxs <- sapply(1:M, function(i, m, indxs, replace,size, N) {
-    samps <- sample(x=1:m, size=size, replace = replace)
+  idxs <- sapply(1:M, function(i, m, indxs, replace, size, N) {
+    samps <- sample(x = 1:m, size = size, replace = replace)
     unlist(indxs[samps], use.names = FALSE)[1:N]
-  }, m = length(idxGroups), indxs = idxGroups, replace = replace,
-  size=size_equal_len, N=N)
+  },
+  m = length(idxGroups), indxs = idxGroups, replace = replace,
+  size = size_equal_len, N = N
+  )
 
 
 
@@ -104,15 +107,16 @@
 
   ## Sample via bootstrap and return
   bssamples <- sapply(as.data.frame(idxs),
-                      function(loop_iter, Xdata) {
-                        Xdata[, stats::na.omit(loop_iter)]
-                      }, Xdata=X$data, simplify = FALSE
+    function(loop_iter, Xdata) {
+      Xdata[, stats::na.omit(loop_iter)]
+    },
+    Xdata = X$data, simplify = FALSE
   )
 
   ## Apply fn if given
-  if(!is.null(fn)){
-    result <- unlist(lapply(bssamples,fn, ...))
-  } else{
+  if (!is.null(fn)) {
+    result <- unlist(lapply(bssamples, fn, ...))
+  } else {
     result <- bssamples
   }
 

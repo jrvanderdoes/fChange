@@ -48,7 +48,7 @@ uses \code{\link[stats:qqnorm]{stats::qqplot()}}.
 \strong{qqplot.dfts}: Creates normal QQ plots on the principal components of functional data.
 }
 \examples{
-result <- qqplot(electricity, d.max=3)
+result <- qqplot(electricity, d.max = 3)
 }
 \seealso{
 \code{\link[stats:qqnorm]{stats::qqplot()}}

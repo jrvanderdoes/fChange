@@ -25,13 +25,13 @@
 #'  Stat Papers (2024).
 #'
 #' @examples
-#' #result <- .change_robust(dfts(electricity$data[,1:100]),m=10)
-.change_robust <- function(X, m, statistic=c('Tn','Mn'),
-                          threshold=c('simulation','resample'),
-                          bandwidth = NA){
+#' # result <- .change_robust(dfts(electricity$data[,1:100]),m=10)
+.change_robust <- function(X, m, statistic = c("Tn", "Mn"),
+                           threshold = c("simulation", "resample"),
+                           bandwidth = NA) {
   # Setup variables
-  statistic <- .verify_input(statistic, c('Tn','Mn'))
-  threshold <- .verify_input(threshold, c('simulation','resample'))
+  statistic <- .verify_input(statistic, c("Tn", "Mn"))
+  threshold <- .verify_input(threshold, c("simulation", "resample"))
   X <- dfts(X)
 
   # Create Proper Data and Bandwidths
@@ -39,9 +39,9 @@
 
   ## Get Information - Cov Matrix
   Obs_tilde_h <- make_Obs_tilde_h(Obs)
-  if(is.na(bandwidth)){
+  if (is.na(bandwidth)) {
     bw_h <- adaptive_bw(Obs_tilde_h)
-  }else{
+  } else {
     bw_h <- bandwidth
   }
 
@@ -59,11 +59,11 @@
   # find max_k U_{n,k} (missing constants)
   Te <- fill_T(hC_Obs, ncol(Obs), nrow(Obs))
 
-  if(statistic=='Tn'){
+  if (statistic == "Tn") {
     stat <- dot_integrate(Te^2) / ncol(Obs)^(3)
-  }else if(statistic=='Mn'){
+  } else if (statistic == "Mn") {
     # T_max <- apply(Te,MARGIN = 2, max)
-    stat <- max(Te) / ncol(Obs)^(3/2)
+    stat <- max(Te) / ncol(Obs)^(3 / 2)
   }
   location <- which.max(Te)
 
@@ -235,7 +235,7 @@
 
   #########################
 
-  if(threshold=='simulation'){
+  if (threshold == "simulation") {
     ## TODO: Set this to use same kernel
     cov_mat <- long_run_covariance(X = Obs_tilde_h, h = bw_h, K = bartlett_kernel)
     lambda <- eigen(cov_mat)$values
@@ -243,11 +243,11 @@
     sims <- rep(NA, m)
     b_res <- 250
 
-    if(statistic=='Tn'){
-      for(i in 1:m){
+    if (statistic == "Tn") {
+      for (i in 1:m) {
         BridgeLam <- lambda *
           dot_integrate_col(
-            generate_brownian_bridge(length(lambda),v=seq(0,1,length.out=b_res))$data^2
+            generate_brownian_bridge(length(lambda), v = seq(0, 1, length.out = b_res))$data^2
           )
         # BridgeLam <- rep(NA,length(lambda))
         # for(j in 1:length(lambda)){
@@ -257,46 +257,46 @@
 
         sims[i] <- sum(BridgeLam)
       }
-
-    }else if(statistic=='Mn'){
-      for(i in 1:m){
+    } else if (statistic == "Mn") {
+      for (i in 1:m) {
         # BridgeLam <- matrix(NA,nrow=length(lambda), ncol=b_res)
         # for(j in 1:length(lambda)){
         #   BridgeLam[j,] <- lambda[j] *
         #     sde::BBridge(x = 0, y = 0, t0 = 0, T = 1, N = b_res-1)^2
         # }
         BridgeLam <-
-          generate_brownian_bridge(length(lambda),v=seq(0,1,length.out=b_res))$data^2 %*%
+          generate_brownian_bridge(length(lambda), v = seq(0, 1, length.out = b_res))$data^2 %*%
           diag(lambda)
         sims[i] <- max(sqrt(rowSums(BridgeLam)))
       }
     }
-
-  }else if(threshold=='resample'){
+  } else if (threshold == "resample") {
     # MULTIPLIER BOOTSTRAP
     #   m x n
-    U_hC <- fill_U(A_h=Re_A_h,
-                   # A_C=Re_A_C,
-                   norm=stats::rnorm(m*ncol(Obs)),
-                   hC_Obs=hC_Obs,
-                   m=m, n=ncol(Obs), d=nrow(Obs) )
+    U_hC <- fill_U(
+      A_h = Re_A_h,
+      # A_C=Re_A_C,
+      norm = stats::rnorm(m * ncol(Obs)),
+      hC_Obs = hC_Obs,
+      m = m, n = ncol(Obs), d = nrow(Obs)
+    )
 
     # Get Sup at each Sim
-    if(statistic=='Tn'){
+    if (statistic == "Tn") {
       sims <- dot_integrate_col(t(U_hC)^2) / ncol(Obs)^(3)
-
-    }else if(statistic=='Mn'){
+    } else if (statistic == "Mn") {
       # find max_k U_{n,k}^(t) for t=1,...,m
-      sims <- 1/ncol(Obs)^(3/2) * find_rowmax(U_hC)
+      sims <- 1 / ncol(Obs)^(3 / 2) * find_rowmax(U_hC)
     }
-
   }
 
 
-  list("pvalue" = sum(stat <= sims)/m,
-       "location" = location)#,
-       # 'statistic' = stat,
-       # 'simulations' = sims,
-       # 'extra' = list("bandwidth"=bw_h)
-       #)
+  list(
+    "pvalue" = sum(stat <= sims) / m,
+    "location" = location
+  ) # ,
+  # 'statistic' = stat,
+  # 'simulations' = sims,
+  # 'extra' = list("bandwidth"=bw_h)
+  # )
 }

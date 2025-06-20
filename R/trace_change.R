@@ -43,30 +43,32 @@
 #'    \item .change_trace(generate_brownian_motion(200))
 #'  }
 .change_trace <- function(X, changes = NULL, M = 1000,
-                          statistic = 'Tn', critical='simulation',
-                          blocksize=1, replace=TRUE, type='separate'){
-  X <- center(dfts(X), changes=changes)
+                          statistic = "Tn", critical = "simulation",
+                          blocksize = 1, replace = TRUE, type = "separate") {
+  X <- center(dfts(X), changes = changes)
 
   N <- ncol(X$data)
   D <- nrow(X$data)
 
-  tmp <- .trace_statistic(X$data, statistic, location=TRUE)
+  tmp <- .trace_statistic(X$data, statistic, location = TRUE)
   Sn <- tmp[1]
   k_star <- tmp[2]
 
-  if(critical=='simulation'){
+  if (critical == "simulation") {
     # values_sim <- sapply(1:M, function(k,N) abs(sde::BBridge(0, 0, 0, 1, N-1)), N=N )
-    values_sim <- abs(generate_brownian_bridge(M,seq(0,1,length.out=N))$data)
+    values_sim <- abs(generate_brownian_bridge(M, seq(0, 1, length.out = N))$data)
 
-    if(statistic=='Tn'){
+    if (statistic == "Tn") {
       Values <- dot_integrate_col(values_sim)
-    }else if(statistic=='Mn'){
+    } else if (statistic == "Mn") {
       Values <- apply(values_sim, MARGIN = 2, max)
     }
-  } else if(critical=='resample'){
-    Values <- .bootstrap(X = X$data, blocksize = blocksize, M = M,
-                         type = type, replace = replace, fn = .trace_statistic,
-                         statistic=statistic)
+  } else if (critical == "resample") {
+    Values <- .bootstrap(
+      X = X$data, blocksize = blocksize, M = M,
+      type = type, replace = replace, fn = .trace_statistic,
+      statistic = statistic
+    )
   }
   # Tn <- rep(0,N)
   # for (k in 1:N) {
@@ -81,11 +83,13 @@
   # data2_pca <- pca(dfts(X$data[,(k_star+1):N]),TVE=1)
   # tr_before <- sum(data1_pca$sdev)
   # tr_after <- sum(data2_pca$sdev)
-  list('pvalue' = p,
-       'location' = k_star)#,
-       # 'statistic' = Sn,
-       # 'simulations' = Values
-       # )
+  list(
+    "pvalue" = p,
+    "location" = k_star
+  ) # ,
+  # 'statistic' = Sn,
+  # 'simulations' = Values
+  # )
 }
 
 
@@ -100,31 +104,33 @@
 #'
 #' @noRd
 #' @keywords internal
-.trace_statistic <- function(X, statistic, location=FALSE){
+.trace_statistic <- function(X, statistic, location = FALSE) {
   N <- ncol(X)
 
   Cov_op <- .partial_cov(X, 1)
   lambda <- Cov_op$eigen_val
   T_1 <- sum(lambda)
-  Xi <- sapply(1:N, function(i) X[,i] %*% X[,i])
+  Xi <- sapply(1:N, function(i) X[, i] %*% X[, i])
   sigma_sq <- sandwich::lrvar(Xi, prewhite = FALSE)
   sigma <- sqrt(sigma_sq)
 
-  Tn <- rep(0,N)
+  Tn <- rep(0, N)
   for (k in 1:N) {
-    T_x <- sum(Xi[1:k])/N
-    Tn[k] <- (1/sigma) * abs(T_x - k/N * T_1)
+    T_x <- sum(Xi[1:k]) / N
+    Tn[k] <- (1 / sigma) * abs(T_x - k / N * T_1)
   }
 
-  if(statistic=='Tn'){
+  if (statistic == "Tn") {
     Sn <- dot_integrate(Tn)
-  }else if(statistic=='Mn'){
+  } else if (statistic == "Mn") {
     Sn <- max(Tn)
   }
 
-  if(!location) return(Sn)
+  if (!location) {
+    return(Sn)
+  }
 
-  c(Sn, min(which.max(Tn)) )
+  c(Sn, min(which.max(Tn)))
 }
 
 
@@ -165,26 +171,27 @@
 #'  \itemize{
 #'    \item .partial_cov(electricity)
 #'  }
-.partial_cov <- function(X, x = NULL){
+.partial_cov <- function(X, x = NULL) {
   X <- dfts(X)
   if (is.null(x)) x <- 1
-  if (x>1 | x<=0) stop("x should be in (0,1]")
+  if (x > 1 | x <= 0) stop("x should be in (0,1]")
 
   n <- ncol(X$data)
   D <- nrow(X$data)
-  k <- floor(n*x)
+  k <- floor(n * x)
 
   X <- center(X)
   C <- matrix(0, D, D)
-  for (i in 1:k){
-    C <- C + X$data[,i] %*% t(X$data[,i])
+  for (i in 1:k) {
+    C <- C + X$data[, i] %*% t(X$data[, i])
   }
-  E <- eigen(C/n)
+  E <- eigen(C / n)
   e_val <- E$values
   e_fun <- E$vectors # fd(E$vectors, fdobj$basis)
 
-  list(eigen_val = E$values,
-       eigen_fun = E$vectors,
-       coef_matrix = C/n)
+  list(
+    eigen_val = E$values,
+    eigen_fun = E$vectors,
+    coef_matrix = C / n
+  )
 }
-

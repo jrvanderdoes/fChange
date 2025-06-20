@@ -13,29 +13,33 @@
 #' @export
 #'
 #' @examples
-#' generate_ornstein_uhlenbeck(N=100,v=20)
-generate_ornstein_uhlenbeck <- function(N, v, rho=0){
-  if(is.null(rho))
+#' generate_ornstein_uhlenbeck(N = 100, v = 20)
+generate_ornstein_uhlenbeck <- function(N, v, rho = 0) {
+  if (is.null(rho)) {
     rho <- 0
-  if(length(v)==1)
-    v <- seq(0,1,length.out=v)
+  }
+  if (length(v) == 1) {
+    v <- seq(0, 1, length.out = v)
+  }
   r <- length(v)
 
   # Covariance structure (OU process Cov)
   comat <- matrix(NA, r, r)
-  for (i in 1:r){
-    comat[i,] <- exp(-abs(v[i]-v)/2)
+  for (i in 1:r) {
+    comat[i, ] <- exp(-abs(v[i] - v) / 2)
   }
 
-  fiid <- MASS::mvrnorm(n = N,
-                        mu = rep(0,r),
-                        Sigma = comat,
-                        empirical = TRUE)
+  fiid <- MASS::mvrnorm(
+    n = N,
+    mu = rep(0, r),
+    Sigma = comat,
+    empirical = TRUE
+  )
 
-  data <- data.frame(matrix(0,ncol = nrow(fiid),nrow=ncol(fiid)))
-  data[,1] <- fiid[1,]
-  for(i in 2:ncol(data)){
-    data[,i] <- rho*data[,i-1] + fiid[i,]
+  data <- data.frame(matrix(0, ncol = nrow(fiid), nrow = ncol(fiid)))
+  data[, 1] <- fiid[1, ]
+  for (i in 2:ncol(data)) {
+    data[, i] <- rho * data[, i - 1] + fiid[i, ]
   }
 
   dfts(data)

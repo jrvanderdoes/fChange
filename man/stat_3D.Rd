@@ -45,12 +45,14 @@ function.}
 \code{NA}, the default, includes if any aesthetics are mapped.
 \code{FALSE} never includes, and \code{TRUE} always includes.
 It can also be a named logical vector to finely select the aesthetics to
-display.}
+display. To include legend keys for all levels, even
+when no data exists, use \code{TRUE}.  If \code{NA}, all levels are shown in legend,
+but unobserved levels are omitted.}
 
-\item{inherit.aes}{If \code{FALSE}, overrides the default aesthetics,
-rather than combining with them. This is most useful for helper functions
-that define both data and aesthetics and shouldn't inherit behaviour from
-the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
+\item{inherit.aes}{If FALSE, overrides the default aesthetics, rather than
+combining with them. This is most useful for helper functions that define
+both data and aesthetics and shouldn't inherit behaviour from the default
+plot specification.}
 
 \item{...}{Arguments passed on to layer. Often the aesthetics
 like \code{color = "red"} or \code{size = 3}. Two important ones are
@@ -67,23 +69,25 @@ This function adds 3D geoms such as points and paths to a ggplot2 plot.
 \examples{
 dat <- electricity
 
-data_lines <- cbind(data.frame('Time'=dat$fparam), dat$data) \%>\%
-tidyr::pivot_longer(cols = 1+1:ncol(dat$data))
+data_lines <- cbind(data.frame("Time" = dat$fparam), dat$data) \%>\%
+  tidyr::pivot_longer(cols = 1 + 1:ncol(dat$data))
 
 colors_plot <- RColorBrewer::brewer.pal(11, "Spectral")
 colors_plot <- grDevices::colorRampPalette(colors_plot)(ncol(dat$data))
-data_lines$color <- rep(colors_plot, nrow(dat$data) )
+data_lines$color <- rep(colors_plot, nrow(dat$data))
 data_lines$name <- as.numeric(data_lines$name)
 
-result <- ggplot2::ggplot(data_lines,
-  ggplot2::aes(y=Time, x=name, z=value, color=color)) +
+result <- ggplot2::ggplot(
+  data_lines,
+  ggplot2::aes(y = Time, x = name, z = value, color = color)
+) +
   ggplot2::theme_void() +
-  stat_3D(theta=0, phi=15, geom='path') +
+  stat_3D(theta = 0, phi = 15, geom = "path") +
   ggplot2::scale_color_manual(
-     breaks = data_lines$color,
-     values = data_lines$color
+    breaks = data_lines$color,
+    values = data_lines$color
   ) +
-  ggplot2::guides(color='none')
+  ggplot2::guides(color = "none")
 }
 \references{
 Acker D (2024). gg3D: 3D perspective plots for ggplot2. R

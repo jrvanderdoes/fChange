@@ -80,11 +80,11 @@ scalar time series or functional time series defined in \code{\link[=dfts]{dfts(
 }
 \examples{
 acf(1:10)
-x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
-acf(x,20)
+x <- generate_brownian_bridge(100, seq(0, 1, length.out = 20))
+acf(x, 20)
 
-x <- generate_brownian_bridge(100, seq(0,1,length.out=20))
-pacf(x,lag.max = 10, n_pcs = 2)
+x <- generate_brownian_bridge(100, seq(0, 1, length.out = 20))
+pacf(x, lag.max = 10, n_pcs = 2)
 
 }
 \references{

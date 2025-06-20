@@ -109,15 +109,14 @@ the test is computationally expensive.
 }
 \examples{
 b <- generate_brownian_motion(100)
-res0 <- portmanteau_tests(b, test = 'single', lag = 2)
-res1 <- portmanteau_tests(b, test = 'multi', lag = 2, alpha = 0.01)
-res2 <- portmanteau_tests(b, test = 'spectral', kernel = bartlett_kernel,
-                          bandwidth = NULL, alpha = 0.05)
-res3 <- portmanteau_tests(b, test = 'spectral', alpha = 0.1,
-                          kernel = parzen_kernel,
-                          bandwidth = adaptive_bandwidth(b, kernel=parzen_kernel))
-res4 <- portmanteau_tests(b, test = 'independence', components = 2, lag = 2)
-res5 <- portmanteau_tests(b, test = 'single', lag = 1, M = 50)
+res0 <- portmanteau_tests(b, test = "single", lag = 2, M=50)
+res1 <- portmanteau_tests(b, test = "multi", lag = 2, alpha = 0.01)
+res2 <- portmanteau_tests(b,
+  test = "spectral", alpha = 0.1,
+  kernel = parzen_kernel,
+  bandwidth = adaptive_bandwidth(b, kernel = parzen_kernel)
+)
+res3 <- portmanteau_tests(b, test = "independence", components = 2, lag = 2)
 }
 \references{
 Kim, M., Kokoszka P., & Rice G. (2023) White noise testing for

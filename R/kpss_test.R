@@ -33,18 +33,17 @@
 #'  series. Statistics, 50(5), 957-973.
 #'
 #' @examples
-#' kpss_test(generate_brownian_motion(100,v=seq(0,1,length.out=20)))
-#' kpss_test(generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-#'              method="resample")
-#' kpss_test(generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-#'              method='resample', resample_blocks='overlapping')
-kpss_test <- function(X, method=c('simulation','resample'),# c("MC",'block','sliding'),
-                     resample_blocks = 'separate',
-                     M=1000, blocksize = 2*ncol(X)^(1/5), TVE=1, replace=TRUE,
-                     return.info = FALSE){
+#' kpss_test(generate_brownian_motion(100, v = seq(0, 1, length.out = 20)))
+#' kpss_test(generate_brownian_motion(100, v = seq(0, 1, length.out = 20)),
+#'   method = "resample", resample_blocks = "overlapping"
+#' )
+kpss_test <- function(X, method = c("simulation", "resample"), # c("MC",'block','sliding'),
+                      resample_blocks = "separate",
+                      M = 1000, blocksize = 2 * ncol(X)^(1 / 5), TVE = 1, replace = TRUE,
+                      return.info = FALSE) {
   X <- dfts(X)
-  method <- .verify_input(method, c('simulation','resample'))
-  resample_blocks <- .verify_input(resample_blocks, c('separate','overlapping'))
+  method <- .verify_input(method, c("simulation", "resample"))
+  resample_blocks <- .verify_input(resample_blocks, c("separate", "overlapping"))
 
   N <- ncol(X$data)
   r <- nrow(X$data)
@@ -53,49 +52,52 @@ kpss_test <- function(X, method=c('simulation','resample'),# c("MC",'block','sli
   RN <- tmp$test_statistic
   hat_eta <- tmp$hat_eta
 
-  if (method=="simulation"){
-
+  if (method == "simulation") {
     # pca_X <- pca(X, TVE=1)$sdev^2
     # eigs <- est_eigenvalue(t(hat_eta), K, 2/5)
-    eigs <- pca(dfts(hat_eta), TVE=TVE)$sdev^2
+    eigs <- pca(dfts(hat_eta), TVE = TVE)$sdev^2
 
-    sim_RNs <- sapply(1:M,function(m,eigs,v){
+    sim_RNs <- sapply(1:M, function(m, eigs, v) {
       sum(eigs *
-            dot_integrate_col(
-              .generate_second_level_brownian_bridge(length(eigs), v = v)$data^2) )
-    },eigs=eigs, v=X$fparam)
+        dot_integrate_col(
+          .generate_second_level_brownian_bridge(length(eigs), v = v)$data^2
+        ))
+    }, eigs = eigs, v = X$fparam)
+  } else if (method == "resample") {
+    xi_hat <- (12 / (N * (N^2 - 1))) *
+      rowSums(matrix(rep(1:N - (N + 1) / 2, r),
+        nrow = r, ncol = N, byrow = TRUE
+      ) * X$data)
+    mu_hat <- rowMeans(X$data) - xi_hat * ((N + 1) / 2)
 
-  } else if(method=='resample'){
-    xi_hat <- (12/(N*(N^2-1))) *
-      rowSums(matrix(rep(1:N-(N+1)/2, r ),
-             nrow=r, ncol=N, byrow = TRUE ) * X$data)
-    mu_hat <- rowMeans(X$data) - xi_hat * ((N+1)/2)
-
-    boot_etas <- .bootstrap(hat_eta, blocksize=blocksize, M=M,
-                           type=resample_blocks,
-                           replace=replace)
+    boot_etas <- .bootstrap(hat_eta,
+      blocksize = blocksize, M = M,
+      type = resample_blocks,
+      replace = replace
+    )
     boot_X <- list()
     sim_RNs <- rep(NA, M)
-    for(i in 1:M){
-      boot_X[[i]] <- matrix(mu_hat,nrow = r,ncol = N) +
-        matrix(1:N,ncol=N, nrow=r,byrow = TRUE) * xi_hat + boot_etas[[i]]
+    for (i in 1:M) {
+      boot_X[[i]] <- matrix(mu_hat, nrow = r, ncol = N) +
+        matrix(1:N, ncol = N, nrow = r, byrow = TRUE) * xi_hat + boot_etas[[i]]
 
       tmp <- .compute_kpss_test_stat(dfts(boot_X[[i]]))
       sim_RNs[i] <- tmp$test_statistic
     }
-
   }
 
 
-  if(return.info){
+  if (return.info) {
     return(
-      list('pvalue' = sum(RN <= sim_RNs)/M,
-           'statistic' = RN,
-           'simulations'=sim_RNs)
+      list(
+        "pvalue" = sum(RN <= sim_RNs) / M,
+        "statistic" = RN,
+        "simulations" = sim_RNs
+      )
     )
   }
 
-  list('pvalue' = sum(RN <= sim_RNs)/M)
+  list("pvalue" = sum(RN <= sim_RNs) / M)
 }
 
 
@@ -108,21 +110,21 @@ kpss_test <- function(X, method=c('simulation','resample'),# c("MC",'block','sli
 #'
 #' @keywords internal
 #' @noRd
-.compute_kpss_test_stat <- function(X){
+.compute_kpss_test_stat <- function(X) {
   N <- ncol(X$data)
   r <- nrow(X$data)
 
-  iX <- rowSums(t( 1:N * t(X$data) ))
+  iX <- rowSums(t(1:N * t(X$data)))
 
   hat_eta <- X$data +
-    t( ( (1:N-(N+1)/2) * 6/(N-1) - 1 )  %*% t(mean(X))) -
-    t( ( 12/(N*(N^2-1))*(1:N-(N+1)/2) ) %*% t(iX) )
+    t(((1:N - (N + 1) / 2) * 6 / (N - 1) - 1) %*% t(mean(X))) -
+    t((12 / (N * (N^2 - 1)) * (1:N - (N + 1) / 2)) %*% t(iX))
 
   # ZN <- 1/sqrt(N) * cumsum(dfts(hat_eta))$data
   ZN <- .kpss_partial_sum(hat_eta)
-  RN <- dot_integrate(dot_integrate_col(ZN^2, X$fparam))# * r
+  RN <- dot_integrate(dot_integrate_col(ZN^2, X$fparam)) # * r
 
-  list('test_statistic'=RN,'hat_eta'=hat_eta)
+  list("test_statistic" = RN, "hat_eta" = hat_eta)
 }
 
 
@@ -136,24 +138,24 @@ kpss_test <- function(X, method=c('simulation','resample'),# c("MC",'block','sli
 #'
 #' @keywords internal
 #' @noRd
-.kpss_partial_sum <- function(X){
+.kpss_partial_sum <- function(X) {
   tX <- t(X)
   N <- nrow(tX)
   res <- ncol(tX)
-  teta <- matrix(rep(0,res*res),ncol=res)
+  teta <- matrix(rep(0, res * res), ncol = res)
 
-  if (floor(N/res)>0) {
-    for (i in 1:floor(N/res)){
-      teta[1,] <- teta[1,] + tX[i,]/sqrt(N)
+  if (floor(N / res) > 0) {
+    for (i in 1:floor(N / res)) {
+      teta[1, ] <- teta[1, ] + tX[i, ] / sqrt(N)
     }
   }
 
-  if (res>1){
-    for (i in 2:res){
-      teta[i,] <- teta[i-1,]
-      if (floor(N*(i-1)/res) < floor(N*i/res)) {
-        for (j in (floor(N*(i-1)/res)+1):floor(N*i/res)){
-          teta[i,] <- teta[i,] + tX[j,]/sqrt(N)
+  if (res > 1) {
+    for (i in 2:res) {
+      teta[i, ] <- teta[i - 1, ]
+      if (floor(N * (i - 1) / res) < floor(N * i / res)) {
+        for (j in (floor(N * (i - 1) / res) + 1):floor(N * i / res)) {
+          teta[i, ] <- teta[i, ] + tX[j, ] / sqrt(N)
         }
       }
     }

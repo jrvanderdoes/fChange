@@ -21,16 +21,16 @@
 #' @export
 #'
 #' @examples
-#' result <- long_run_covariance(electricity,2)
-long_run_covariance <- function(X, h=2*ncol(X)^(1/5), K=bartlett_kernel,
-                                changes=NULL){
+#' result <- long_run_covariance(electricity, 2)
+long_run_covariance <- function(X, h = 2 * ncol(X)^(1 / 5), K = bartlett_kernel,
+                                changes = NULL) {
   X <- center(dfts(X), changes = changes)
 
   N <- ncol(X$data)
   res <- nrow(X$data)
   Ceps <- matrix(NA, nrow = res, ncol = res)
 
-  h <- min(h, N-1)
+  h <- min(h, N - 1)
 
   for (k in 1:res) {
     for (r in k:res) {
@@ -42,7 +42,7 @@ long_run_covariance <- function(X, h=2*ncol(X)^(1/5), K=bartlett_kernel,
           # if( (N - i)>=1 && (i + 1)<=N){}
           a <- as.numeric(X$data[k, 1:(N - i)]) %*% as.numeric(X$data[r, (i + 1):N])
           a <- a + as.numeric(X$data[r, 1:(N - i)]) %*% as.numeric(X$data[k, (i + 1):N])
-          s <- s + K(i/h) * a
+          s <- s + K(i / h) * a
         }
       }
       Ceps[k, r] <- Ceps[r, k] <- s

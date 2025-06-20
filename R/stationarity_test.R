@@ -39,60 +39,68 @@
 #'
 #' @examples
 #' res <- stationarity_test(
-#'   generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-#'   critical='resample', statistic='Mn')
+#'   generate_brownian_motion(100, v = seq(0, 1, length.out = 20)),
+#'   critical = "resample", statistic = "Mn"
+#' )
 #' res2 <- stationarity_test(electricity)
 stationarity_test <-
-  function(X, statistic = 'Tn', critical=c('simulation','resample'),
-           perm_method='separate',  M=1000, blocksize = 2*ncol(X)^(1/5),
-           TVE=1, replace=TRUE, return.info = FALSE){
-    critical <- .verify_input(critical, c('simulation','resample'))
+  function(X, statistic = "Tn", critical = c("simulation", "resample"),
+           perm_method = "separate", M = 1000, blocksize = 2 * ncol(X)^(1 / 5),
+           TVE = 1, replace = TRUE, return.info = FALSE) {
+    critical <- .verify_input(critical, c("simulation", "resample"))
 
     X <- dfts(X)
 
-  N <- ncol(X$data)
-  r <- nrow(X$data)
+    N <- ncol(X$data)
+    r <- nrow(X$data)
 
-  stat <- .compute_stationary_test_stat(X$data, X$fparam, statistic)
+    stat <- .compute_stationary_test_stat(X$data, X$fparam, statistic)
 
-  if(critical=="simulation"){
-    pca_X <- pca(X, TVE = TVE)
+    if (critical == "simulation") {
+      pca_X <- pca(X, TVE = TVE)
 
-    if(statistic == 'Tn'){
-      sim_stats <- sapply(1:M,function(m, eigs, v){
-        sum(eigs *
-              dot_integrate_col(
-                generate_brownian_bridge(length(eigs), v = v)$data^2, v) )
-      },eigs=pca_X$sdev^2, v=X$fparam)
-    }else if(statistic=='Mn'){
-      sim_stats <- sapply(1:M,function(m, eigs, v){
-        vv <- v
-        bbs <- generate_brownian_bridge(length(eigs), v = vv)$data
-        sum(eigs * dot_integrate_col(
-          (bbs - matrix(dot_integrate_col(bbs), nrow = length(vv),
-                        ncol = length(eigs), byrow = TRUE))^2, vv ) )
-      },eigs=pca_X$sdev^2, v=X$fparam)
-  }else{
-      stop('Statistic is incorrect',call. = FALSE)
+      if (statistic == "Tn") {
+        sim_stats <- sapply(1:M, function(m, eigs, v) {
+          sum(eigs *
+            dot_integrate_col(
+              generate_brownian_bridge(length(eigs), v = v)$data^2, v
+            ))
+        }, eigs = pca_X$sdev^2, v = X$fparam)
+      } else if (statistic == "Mn") {
+        sim_stats <- sapply(1:M, function(m, eigs, v) {
+          vv <- v
+          bbs <- generate_brownian_bridge(length(eigs), v = vv)$data
+          sum(eigs * dot_integrate_col(
+            (bbs - matrix(dot_integrate_col(bbs),
+              nrow = length(vv),
+              ncol = length(eigs), byrow = TRUE
+            ))^2, vv
+          ))
+        }, eigs = pca_X$sdev^2, v = X$fparam)
+      } else {
+        stop("Statistic is incorrect", call. = FALSE)
+      }
+    } else if (critical == "resample") {
+      sim_stats <- .bootstrap(X$data,
+        blocksize = blocksize, M = M,
+        type = perm_method, replace = replace,
+        fn = .compute_stationary_test_stat,
+        statistic = statistic, v = X$fparam
+      )
     }
 
-  } else if(critical=="resample"){
-    sim_stats <- .bootstrap(X$data, blocksize=blocksize, M=M,
-                            type=perm_method, replace=replace,
-                            fn=.compute_stationary_test_stat,
-                            statistic=statistic, v=X$fparam)
-  }
+    if (return.info) {
+      return(
+        list(
+          "pvalue" = sum(stat <= sim_stats) / M,
+          "statistic" = stat,
+          "simulations" = sim_stats
+        )
+      )
+    }
 
-  if(return.info){
-    return(
-      list('pvalue' = sum(stat <= sim_stats)/M,
-           'statistic' = stat,
-           'simulations' = sim_stats)
-    )
+    list("pvalue" = sum(stat <= sim_stats) / M)
   }
-
-  list('pvalue' = sum(stat <= sim_stats)/M)
-}
 
 
 #' Compute Stationarity Test Statistic
@@ -105,23 +113,26 @@ stationarity_test <-
 #'
 #' @keywords internal
 #' @noRd
-.compute_stationary_test_stat <- function(X, v, statistic){
+.compute_stationary_test_stat <- function(X, v, statistic) {
   N <- ncol(X)
   r <- nrow(X)
 
   # Test Statistics
   ## TODO:: CUsum with data.frame
-  Zn <- 1/sqrt(N) * ( cumsum(dfts(X))$data -
-                        matrix((1:N)/N, nrow = r, ncol = N, byrow = TRUE) * rowSums(X) )
-  if(statistic == 'Tn'){
+  Zn <- 1 / sqrt(N) * (cumsum(dfts(X))$data -
+    matrix((1:N) / N, nrow = r, ncol = N, byrow = TRUE) * rowSums(X))
+  if (statistic == "Tn") {
     stat <- dot_integrate(dot_integrate_col(Zn^2, v))
-  }else if(statistic=='Mn'){
+  } else if (statistic == "Mn") {
     stat <- dot_integrate(
-      dot_integrate_col( ( Zn -
-                           matrix(dot_integrate_col(t(Zn)), nrow = length(v),
-                                  ncol = N, byrow = FALSE))^2, v) )
-  }else{
-    stop('Statistic is incorrect',call. = FALSE)
+      dot_integrate_col((Zn -
+        matrix(dot_integrate_col(t(Zn)),
+          nrow = length(v),
+          ncol = N, byrow = FALSE
+        ))^2, v)
+    )
+  } else {
+    stop("Statistic is incorrect", call. = FALSE)
   }
 
   stat

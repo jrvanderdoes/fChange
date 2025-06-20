@@ -19,6 +19,6 @@ A dfts object of the pca component(s)
 Evaluates the given pca components as a function.
 }
 \examples{
-tmp <- pca(electricity, TVE=0.1)
-pca_components(tmp, components=1)
+tmp <- pca(electricity, TVE = 0.1)
+pca_components(tmp, components = 1)
 }

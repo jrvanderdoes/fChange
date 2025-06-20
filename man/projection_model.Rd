@@ -61,8 +61,9 @@ Model and forecast functional data using a Hyndman and Ullah projection-based
 model.
 }
 \examples{
-result <- projection_model(dfts(electricity$data[,50:100], season=7),
- n.ahead=1, TVE=0.1, check.cp=FALSE, sim.bounds=FALSE)
+result <- projection_model(dfts(electricity$data[, 50:100], season = 7),
+  n.ahead = 1, TVE = 0.1, check.cp = FALSE, sim.bounds = FALSE
+)
 }
 \references{
 Hyndman, R. J., & Shahid Ullah, M. (2007). Robust forecasting

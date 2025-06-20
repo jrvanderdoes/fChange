@@ -85,7 +85,7 @@ Provides various visualizations for functional data.
 }
 \examples{
 plt <- plot(electricity)
-plt <- plot(dfts(var(electricity)), type='surface')
+plt <- plot(dfts(var(electricity)), type = "surface")
 }
 \references{
 John Fox, & Sanford Weisberg (2019). An R Companion to Applied

@@ -70,19 +70,25 @@ and \code{far1}.
 }
 \examples{
 result <- generate_data(
-  fparam=15,
-  data_details =list('bmotion'=list('N'=100, 'sd'=1),
-                     'bbridge'=list('N'=100, 'sd'=1),
-                     'bbridge'=list('N'=100, 'sd'=1),
-                     'kl'=list('N'=100,
-                               'distribution'='Normal',
-                               'eigenvalues'=1/1:4,
-                               'mean'=0, 'dependence'=0,
-                               'basis'=fda::create.bspline.basis(),
-                               'sd'=1),
-                     'ou'=list('N'=100, 'dependence'=0 ) ,
-                     'far1'=list('N'=100, 'dependence'=0,
-                                 'sd'=1,'vary'=FALSE) )
+  fparam = 15,
+  data_details = list(
+    "bmotion" = list("N" = 100, "sd" = 1),
+    "bbridge" = list("N" = 100, "sd" = 1),
+    "bbridge" = list("N" = 100, "sd" = 1),
+    "kl" = list(
+      "N" = 100,
+      "distribution" = "Normal",
+      "eigenvalues" = 1 / 1:4,
+      "mean" = 0, "dependence" = 0,
+      "basis" = fda::create.bspline.basis(),
+      "sd" = 1
+    ),
+    "ou" = list("N" = 100, "dependence" = 0),
+    "far1" = list(
+      "N" = 100, "dependence" = 0,
+      "sd" = 1, "vary" = FALSE
+    )
+  )
 )
 }
 \seealso{

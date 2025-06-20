@@ -32,9 +32,9 @@ NULL
 #' @export
 #'
 #' @examples
-#' truncated_kernel(-20:20/15)
+#' truncated_kernel(-20:20 / 15)
 truncated_kernel <- function(x) {
-  ifelse(is.nan(abs(x)), 1, ifelse(abs(x)<=1,1,0) )
+  ifelse(is.nan(abs(x)), 1, ifelse(abs(x) <= 1, 1, 0))
 }
 
 
@@ -46,9 +46,9 @@ truncated_kernel <- function(x) {
 #' @export
 #'
 #' @examples
-#' bartlett_kernel(-20:20/15)
+#' bartlett_kernel(-20:20 / 15)
 bartlett_kernel <- function(x) {
-  pmax(0, ifelse(is.nan(1 - abs(x)),1,1 - abs(x)) )
+  pmax(0, ifelse(is.nan(1 - abs(x)), 1, 1 - abs(x)))
 }
 
 
@@ -61,14 +61,16 @@ bartlett_kernel <- function(x) {
 #' @export
 #'
 #' @examples
-#' parzen_kernel(-20:20/15)
+#' parzen_kernel(-20:20 / 15)
 parzen_kernel <- function(x) {
   ifelse(is.nan(x), 1,
     ifelse(abs(x) <= 1,
-           ifelse(abs(x) <= 0.5,
-                  1 - 6 * x^2 + 6 * abs(x)^3,
-                  2 * (1 - abs(x))^3 ),
-           0 )
+      ifelse(abs(x) <= 0.5,
+        1 - 6 * x^2 + 6 * abs(x)^3,
+        2 * (1 - abs(x))^3
+      ),
+      0
+    )
   )
 }
 
@@ -81,12 +83,13 @@ parzen_kernel <- function(x) {
 #' @export
 #'
 #' @examples
-#' tukey_hanning_kernel(-20:20/15)
+#' tukey_hanning_kernel(-20:20 / 15)
 tukey_hanning_kernel <- function(x) {
   ifelse(is.nan(x), 1,
     ifelse(abs(x) <= 1,
-           (1+cos(pi*x))/2,
-           0 )
+      (1 + cos(pi * x)) / 2,
+      0
+    )
   )
 }
 
@@ -100,9 +103,9 @@ tukey_hanning_kernel <- function(x) {
 #' @export
 #'
 #' @examples
-#' quadratic_spectral_kernel(-20:20/15)
+#' quadratic_spectral_kernel(-20:20 / 15)
 quadratic_spectral_kernel <- function(x) {
-  res <- 25/(12 * pi^2 * x^2) * (sin(6*pi*x/5)/(6*pi*x/5) - cos(6*pi*x/5) )
+  res <- 25 / (12 * pi^2 * x^2) * (sin(6 * pi * x / 5) / (6 * pi * x / 5) - cos(6 * pi * x / 5))
   ifelse(is.nan(res), 1, res)
 }
 
@@ -115,12 +118,12 @@ quadratic_spectral_kernel <- function(x) {
 #' @export
 #'
 #' @examples
-#' daniell_kernel(-20:20/15)
+#' daniell_kernel(-20:20 / 15)
 daniell_kernel <- function(x) {
   res <- ifelse(is.nan(x), 1,
-                ifelse(abs(x) <= 1, sin(pi * x) / (pi * x) * (1 + cos(pi*x)), 0 )
+    ifelse(abs(x) <= 1, sin(pi * x) / (pi * x) * (1 + cos(pi * x)), 0)
   )
-  ifelse( is.nan(res), 1, res )
+  ifelse(is.nan(res), 1, res)
 }
 
 
@@ -132,10 +135,10 @@ daniell_kernel <- function(x) {
 #' @export
 #'
 #' @examples
-#' flat_top_kernel(-20:20/15)
+#' flat_top_kernel(-20:20 / 15)
 flat_top_kernel <- function(x) {
   # TODO:: Setup functions to allow FT with arbitrary width
-  ifelse(is.nan(x), 1, pmin(1, pmax(1.1 - abs(x), 0)) )
+  ifelse(is.nan(x), 1, pmin(1, pmax(1.1 - abs(x), 0)))
 }
 
 
@@ -169,8 +172,8 @@ flat_top_kernel <- function(x) {
 #' @examples
 #' adaptive_bandwidth(generate_brownian_motion(100))
 #' adaptive_bandwidth(electricity, parzen_kernel)
-adaptive_bandwidth <- function(X, kernel=bartlett_kernel,
-                               name=NULL, order=NULL, weighting=NULL) {
+adaptive_bandwidth <- function(X, kernel = bartlett_kernel,
+                               name = NULL, order = NULL, weighting = NULL) {
   X <- dfts(X)
 
   r <- nrow(X$data)
@@ -178,15 +181,15 @@ adaptive_bandwidth <- function(X, kernel=bartlett_kernel,
 
   # Get kernel name if not provided for details
 
-  if(is.null(order) || is.null(weighting)){
-    if(is.null(name)) name <- deparse(substitute(kernel))
+  if (is.null(order) || is.null(weighting)) {
+    if (is.null(name)) name <- deparse(substitute(kernel))
     tmp <- .kernel_details(kernel, name)
 
-    if(is.null(order)) order <- tmp$order
-    if(is.null(weighting)) weighting <- tmp$weighting
+    if (is.null(order)) order <- tmp$order
+    if (is.null(weighting)) weighting <- tmp$weighting
   }
 
-  vals_int <- seq(-100,100,0.0001)
+  vals_int <- seq(-100, 100, 0.0001)
   kern_int <- dot_integrate(kernel(vals_int)^2, vals_int)
 
   # Code: Paper
@@ -195,31 +198,31 @@ adaptive_bandwidth <- function(X, kernel=bartlett_kernel,
   # kernel: W
   data_inner_prod <- crossprod(X$data) / (N * r)
   C_hat_HS <- numeric(0)
-  for (j in 0:(N-1)) {
-    C_hat_HS[j+1] <- sum( data_inner_prod[(j+1):N,(j+1):N] *
-                            data_inner_prod[1:(N-j),1:(N-j)] )
+  for (j in 0:(N - 1)) {
+    C_hat_HS[j + 1] <- sum(data_inner_prod[(j + 1):N, (j + 1):N] *
+      data_inner_prod[1:(N - j), 1:(N - j)])
   }
 
   # Pilot info C^(p), (6)
-  initial_band_q <- 4 * N^(1 / (2*order +1))
-  k_n_j_q <- kernel(1:(N-1) / initial_band_q)
+  initial_band_q <- 4 * N^(1 / (2 * order + 1))
+  k_n_j_q <- kernel(1:(N - 1) / initial_band_q)
   initial_band_0 <- initial_band_q / 4
-  k_n_j_0 <- kernel(1:(N-1) / initial_band_0)
+  k_n_j_0 <- kernel(1:(N - 1) / initial_band_0)
 
   Q_hat_sq <- 2 * sum(k_n_j_0^2 * C_hat_HS[-1])
   Q_hat_sq <- Q_hat_sq + sum(C_hat_HS[0])
 
-  Term1 <- 2 * sum(k_n_j_q^2 * ((1:(N-1))^(2*order)) * C_hat_HS[-1]) # C^(q)
+  Term1 <- 2 * sum(k_n_j_q^2 * ((1:(N - 1))^(2 * order)) * C_hat_HS[-1]) # C^(q)
   C_hat_TR <- numeric(0)
-  for (j in 0:(N-1)) {
-    C_hat_TR[j+1] <- sum(data_inner_prod[1:(N-j), (j+1):N])
+  for (j in 0:(N - 1)) {
+    C_hat_TR[j + 1] <- sum(data_inner_prod[1:(N - j), (j + 1):N])
   }
   trace <- 2 * sum(k_n_j_0^2 * C_hat_TR[-1])
   Term3 <- trace + sum(C_hat_TR[1])
   band_constant <- (2 * order * weighting^2 * Term1 /
-                      ( (Q_hat_sq + Term3) * kern_int) )^(1/(2*order + 1)) # After (5)
+    ((Q_hat_sq + Term3) * kern_int))^(1 / (2 * order + 1)) # After (5)
 
-  band_constant * N^(1 / (2*order + 1)) # (5)
+  band_constant * N^(1 / (2 * order + 1)) # (5)
 }
 
 
@@ -234,25 +237,24 @@ adaptive_bandwidth <- function(X, kernel=bartlett_kernel,
 #'
 #' @noRd
 #' @keywords internal
-.kernel_details <- function(kernel, name){
-  if( grepl('bartlett', tolower(name)) ) {
+.kernel_details <- function(kernel, name) {
+  if (grepl("bartlett", tolower(name))) {
     order <- 1
     weighting <- 1
-  } else if( grepl('parzen',tolower(name)) ){
+  } else if (grepl("parzen", tolower(name))) {
     order <- 2
     weighting <- 6
-  } else if( grepl('tukey',tolower(name)) && grepl('hanning',tolower(name)) ){
+  } else if (grepl("tukey", tolower(name)) && grepl("hanning", tolower(name))) {
     order <- 2
     weighting <- (pi^2) / 6
-  } else if( grepl('quadratic',tolower(name)) ){
+  } else if (grepl("quadratic", tolower(name))) {
     order <- 2
-    weighting <- (18*pi^2) / 125
-  } else{
+    weighting <- (18 * pi^2) / 125
+  } else {
     ## TODO:: flat_top, truncated_kernel, daniell_kernel
     stop('kernel variable not named with "barlett", "parzen", "tukey_hanning",
          "quadratic". Rename function or define name, order, and/or weighting.')
-
   }
 
-  list('order'=order, 'weighting'=weighting)
+  list("order" = order, "weighting" = weighting)
 }

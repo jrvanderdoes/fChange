@@ -28,5 +28,5 @@ dfts object of the data.
 Function to generate data according to FAR(1) process.
 }
 \examples{
-res <- generate_far1(20,10)
+res <- generate_far1(20, 10)
 }

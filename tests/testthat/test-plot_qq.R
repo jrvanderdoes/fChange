@@ -1,4 +1,4 @@
 test_that("QQ Plot", {
   tmp <- qqplot(electricity)
-  expect_equal(class(tmp)[1], 'gg')
+  expect_true(ggplot2::is_ggplot(tmp))
 })

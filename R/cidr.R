@@ -1,4 +1,3 @@
-
 #' Compute (Overnight) Cumulative Intraday Returns
 #'
 #' @param X A dfts object or data which can be automatically converted to that
@@ -12,19 +11,23 @@
 #'  Commodity Markets, 32, 100361-.
 #'
 #' @examples
-#' tmp <- dfts(SPYUS500$data[,1:100], name='SP500 100 Days',
-#'  labels = SPYUS500$labels[1:100], fparam=SPYUS500$fparam)
+#' tmp <- dfts(SPYUS500$data[, 1:100],
+#'   name = "SP500 100 Days",
+#'   labels = SPYUS500$labels[1:100], fparam = SPYUS500$fparam
+#' )
 #' cidr(tmp)
-cidr <- function(X){
+cidr <- function(X) {
   X <- dfts(X)
 
   dat_cidr <- X$data
-  for(i in 1:nrow(dat_cidr)){
-    dat_cidr[i,] <- 100*(log(X$data[i,]) - log(X$data[1,]))
+  for (i in 1:nrow(dat_cidr)) {
+    dat_cidr[i, ] <- 100 * (log(X$data[i, ]) - log(X$data[1, ]))
   }
 
-  dfts(dat_cidr, name = paste0('CIDR of ', X$name),labels = X$labels,
-       fparam = X$fparam, inc.warnings = F)
+  dfts(dat_cidr,
+    name = paste0("CIDR of ", X$name), labels = X$labels,
+    fparam = X$fparam, inc.warnings = F
+  )
 }
 
 
@@ -33,20 +36,24 @@ cidr <- function(X){
 #' @export
 #'
 #' @examples
-#' tmp <- dfts(SPYUS500$data[,1:100], name='SP500 100 Days',
-#'  labels = SPYUS500$labels[1:100], fparam=SPYUS500$fparam)
+#' tmp <- dfts(SPYUS500$data[, 1:100],
+#'   name = "SP500 100 Days",
+#'   labels = SPYUS500$labels[1:100], fparam = SPYUS500$fparam
+#' )
 #' ocidr(tmp)
-ocidr <- function(X){
+ocidr <- function(X) {
   X <- dfts(X)
 
   dat_cidr <- X$data
-  dat_cidr[,1]  <- 100*(log(dat_cidr[,1]) - log(dat_cidr[1,1]))
+  dat_cidr[, 1] <- 100 * (log(dat_cidr[, 1]) - log(dat_cidr[1, 1]))
   # Obs
-  for(j in 2:ncol(dat_cidr)){
-    dat_cidr[,j] <- 100 *
-      ( log(X$data[,j]) - log(X$data[nrow(dat_cidr),j-1]) )
+  for (j in 2:ncol(dat_cidr)) {
+    dat_cidr[, j] <- 100 *
+      (log(X$data[, j]) - log(X$data[nrow(dat_cidr), j - 1]))
   }
 
-  dfts(dat_cidr, name = paste0('OCIDR of ', X$name),labels = X$labels,
-       fparam = X$fparam, inc.warnings = F)
+  dfts(dat_cidr,
+    name = paste0("OCIDR of ", X$name), labels = X$labels,
+    fparam = X$fparam, inc.warnings = F
+  )
 }

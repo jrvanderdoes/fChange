@@ -24,8 +24,12 @@ Generate a functional time series according to an iid Brownian Motion process.
 Each observation is discretized on the points indicated in \code{v}.
 }
 \examples{
-bmotion <- generate_brownian_motion(N=100,
-  v=c(0,0.25,0.4,0.7, 1, 1.5), sd = 1)
-bmotion1 <- generate_brownian_motion(N=100,
-  v=10, sd = 2)
+bmotion <- generate_brownian_motion(
+  N = 100,
+  v = c(0, 0.25, 0.4, 0.7, 1, 1.5), sd = 1
+)
+bmotion1 <- generate_brownian_motion(
+  N = 100,
+  v = 10, sd = 2
+)
 }

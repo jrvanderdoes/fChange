@@ -37,5 +37,5 @@ with sequence \eqn{(\epsilon_i : i \in \mathbb{Z})} defined as the centered
 data (can center based on changes if given).
 }
 \examples{
-result <- long_run_covariance(electricity,2)
+result <- long_run_covariance(electricity, 2)
 }

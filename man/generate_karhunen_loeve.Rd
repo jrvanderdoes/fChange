@@ -60,15 +60,17 @@ functions with similar properties.
 }
 \examples{
 dat1 <- generate_karhunen_loeve(
-  Ns=100, eigenvalues=c(1/(1:3)), basis=fda::create.bspline.basis(nbasis=3,norder=3),
-  means=0, distribution='Normal',
-  fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
-  prev_eps=NULL)
+  Ns = 100, eigenvalues = c(1 / (1:3)), basis = fda::create.bspline.basis(nbasis = 3, norder = 3),
+  means = 0, distribution = "Normal",
+  fparam = seq(0, 1, 0.1), dependence = 0, burnin = 100, silent = TRUE, dof = NULL, shape = NULL,
+  prev_eps = NULL
+)
 dat2 <- generate_karhunen_loeve(
-  Ns=50, eigenvalues=c(1/(1:4)), basis=fda::create.bspline.basis(nbasis=4),
-  means=5, distribution='exponential',
-  fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
-  prev_eps=dat1$prev_eps)
+  Ns = 50, eigenvalues = c(1 / (1:4)), basis = fda::create.bspline.basis(nbasis = 4),
+  means = 5, distribution = "exponential",
+  fparam = seq(0, 1, 0.1), dependence = 0, burnin = 100, silent = TRUE, dof = NULL, shape = NULL,
+  prev_eps = dat1$prev_eps
+)
 
-dat <- dfts(cbind(dat1$data$data, dat2$data$data),fparam = dat1$data$fparam)
+dat <- dfts(cbind(dat1$data$data, dat2$data$data), fparam = dat1$data$fparam)
 }

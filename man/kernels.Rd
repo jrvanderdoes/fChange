@@ -59,13 +59,13 @@ If \eqn{x=0/0} then the value \eqn{1} is given.
 If \eqn{x=0/0} then the value \eqn{1} is given.
 }
 \examples{
-truncated_kernel(-20:20/15)
-bartlett_kernel(-20:20/15)
-parzen_kernel(-20:20/15)
-tukey_hanning_kernel(-20:20/15)
-quadratic_spectral_kernel(-20:20/15)
-daniell_kernel(-20:20/15)
-flat_top_kernel(-20:20/15)
+truncated_kernel(-20:20 / 15)
+bartlett_kernel(-20:20 / 15)
+parzen_kernel(-20:20 / 15)
+tukey_hanning_kernel(-20:20 / 15)
+quadratic_spectral_kernel(-20:20 / 15)
+daniell_kernel(-20:20 / 15)
+flat_top_kernel(-20:20 / 15)
 }
 \references{
 Horvath, L., & Rice, G. (2024). Change point analysis for time

@@ -52,7 +52,7 @@ Common functions have been extended to dfts. Details of the storage is best
 left to individual parameters descriptions and exploring examples.
 }
 \examples{
-bm <- dfts(generate_brownian_motion(100, c(0,0.1,0.25,0.5,1)))
+bm <- dfts(generate_brownian_motion(100, c(0, 0.1, 0.25, 0.5, 1)))
 
 result <- dfts(electricity)
 result <- as.dfts(electricity)

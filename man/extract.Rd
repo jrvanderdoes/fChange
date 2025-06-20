@@ -27,11 +27,11 @@ Extract or replace subsets of dfts objects.
 }
 \examples{
 electricity[1:3]
-electricity[1:3,]
-electricity[1:2,1:4]
-electricity[,1:4]
-tmp <- dfts(matrix(1:9,3,3))
+electricity[1:3, ]
+electricity[1:2, 1:4]
+electricity[, 1:4]
+tmp <- dfts(matrix(1:9, 3, 3))
 tmp$data
-tmp[1,1] <- 10
+tmp[1, 1] <- 10
 tmp$data
 }

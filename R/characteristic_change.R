@@ -8,114 +8,124 @@
 #' @noRd
 #' @keywords internal
 .change_characteristic <- function(X, statistic, critical,
-                                   M = 20, J=50,
+                                   M = 20, J = 50,
                                    nSims = 1000, h = 3,
-                                   W = space_measuring_functions(X = X, M = 20, space='BM'),
-                                   K = bartlett_kernel, #space = "BM",
-                                   blocksize=1,
-                                   resample_blocks = 'separate', replace = TRUE,
-                                   alpha=0.05, ...) {
+                                   W = space_measuring_functions(X = X, M = 20, space = "BM"),
+                                   K = bartlett_kernel, # space = "BM",
+                                   blocksize = 1,
+                                   resample_blocks = "separate", replace = TRUE,
+                                   alpha = 0.05, ...) {
   X <- dfts(X)
 
   # Generate Noise
-  if(is.null(W)){
+  if (is.null(W)) {
     W <- space_measuring_functions(X = X, M = 20, ...)
   }
   M <- ncol(W)
 
   # Test Statistic
-  tmp <- .characteristic_statistic(X = X$data,v=X$fparam,
-                                    statistic=statistic, W = W, J = J,
-                                    location = TRUE)
+  tmp <- .characteristic_statistic(
+    X = X$data, v = X$fparam,
+    statistic = statistic, W = W, J = J,
+    location = TRUE
+  )
   stat <- tmp[1]
   location <- tmp[2]
 
-  if(critical=='simulation'){
-
-    sqrtMat <- .compute_sqrtMat(X$data,W,J,h,K)
+  if (critical == "simulation") {
+    sqrtMat <- .compute_sqrtMat(X$data, W, J, h, K)
 
     gamProcess <- c()
     nIters <- nSims / 100
     gamProcess <- sapply(1:nIters, FUN = function(tmp, MJ, sqrtMat, M, J) {
       # (After trans + mult) Rows are iid MNV
-      mvnorms <- matrix(stats::rnorm(100*2*MJ),ncol=100,nrow=2*MJ)
+      mvnorms <- matrix(stats::rnorm(100 * 2 * MJ), ncol = 100, nrow = 2 * MJ)
       mvnorms <- Rfast::mat.mult(t(mvnorms), sqrtMat)
 
-      gamVals <- mvnorms[,1:MJ] + complex(imaginary = 1) * mvnorms[,MJ + 1:MJ]
+      gamVals <- mvnorms[, 1:MJ] + complex(imaginary = 1) * mvnorms[, MJ + 1:MJ]
 
       # Integrate out M
-      results <- matrix(NA,nrow=100, ncol=J)
-      for(j in 1:J){
-        results[,j] <- t(dot_integrate_col(t(abs(gamVals[,(j-1)*M + 1:M])^2)))
+      results <- matrix(NA, nrow = 100, ncol = J)
+      for (j in 1:J) {
+        results[, j] <- t(dot_integrate_col(t(abs(gamVals[, (j - 1) * M + 1:M])^2)))
       }
 
       # Estimate value
-      list(apply(results, MARGIN = 1, dot_integrate),
-           apply(results, MARGIN = 1, max) )
-    }, MJ = M * J, sqrtMat = sqrtMat, M=M, J=J)
+      list(
+        apply(results, MARGIN = 1, dot_integrate),
+        apply(results, MARGIN = 1, max)
+      )
+    }, MJ = M * J, sqrtMat = sqrtMat, M = M, J = J)
 
-    if(statistic=='Tn'){
-      simulations <- as.vector(unlist(gamProcess[1,]))
-    }else if(statistic=='Mn'){
-      simulations <- as.vector(unlist(gamProcess[2,]))
+    if (statistic == "Tn") {
+      simulations <- as.vector(unlist(gamProcess[1, ]))
+    } else if (statistic == "Mn") {
+      simulations <- as.vector(unlist(gamProcess[2, ]))
     }
-
-  } else if(critical=='resample'){
-
-    simulations <- .bootstrap(X = X$data, blocksize = blocksize, M = nSims,
-                         type = resample_blocks, replace = replace,
-                         fn = .characteristic_statistic,
-                         statistic=statistic, v=X$fparam, W = W, J = J)
-
-  } else if(critical=='welch'){
-
-    if(statistic != 'Tn') stop('Test statistic must be for Tn in Welch',call. = FALSE)
+  } else if (critical == "resample") {
+    simulations <- .bootstrap(
+      X = X$data, blocksize = blocksize, M = nSims,
+      type = resample_blocks, replace = replace,
+      fn = .characteristic_statistic,
+      statistic = statistic, v = X$fparam, W = W, J = J
+    )
+  } else if (critical == "welch") {
+    if (statistic != "Tn") stop("Test statistic must be for Tn in Welch", call. = FALSE)
 
     ## Mean
     m_gamma <- 0
-    for(i in 1:M){
-      Cre <- .estimD(K=K, h=h, X=X$data,
-                     lfun=cos, v=W[,i], lfunp=cos, vp=W[,i])
-      Cim <- .estimD(K=K, h=h, X=X$data,
-                     lfun=sin, v=W[,i], lfunp=sin, vp=W[,i])
+    for (i in 1:M) {
+      Cre <- .estimD(
+        K = K, h = h, X = X$data,
+        lfun = cos, v = W[, i], lfunp = cos, vp = W[, i]
+      )
+      Cim <- .estimD(
+        K = K, h = h, X = X$data,
+        lfun = sin, v = W[, i], lfunp = sin, vp = W[, i]
+      )
 
-      m_gamma <- m_gamma + ( Cre + Cim )
+      m_gamma <- m_gamma + (Cre + Cim)
     }
-    m_gamma <- m_gamma / (6*M)
+    m_gamma <- m_gamma / (6 * M)
 
     ## Variance
     sigma2_gamma <- sigma2_gamma1 <- 0
     for (i in 1:M) {
       val <- val1 <- 0
-      for (j in 1:M){
-        if (i==j) next
-        Cre <- .estimD(K=K, h=h, X=X$data,
-                       lfun=cos, v=W[,i], lfunp=cos, vp=W[,j])
-        Cri <- .estimD(K=K, h=h, X=X$data,
-                       lfun=cos, v=W[,i], lfunp=sin, vp=W[,j])
-        Cim <- .estimD(K=K, h=h, X=X$data,
-                       lfun=sin, v=W[,i], lfunp=sin, vp=W[,j])
+      for (j in 1:M) {
+        if (i == j) next
+        Cre <- .estimD(
+          K = K, h = h, X = X$data,
+          lfun = cos, v = W[, i], lfunp = cos, vp = W[, j]
+        )
+        Cri <- .estimD(
+          K = K, h = h, X = X$data,
+          lfun = cos, v = W[, i], lfunp = sin, vp = W[, j]
+        )
+        Cim <- .estimD(
+          K = K, h = h, X = X$data,
+          lfun = sin, v = W[, i], lfunp = sin, vp = W[, j]
+        )
 
-        val <- val + (Cre^2+2*Cri^2+Cim^2)
+        val <- val + (Cre^2 + 2 * Cri^2 + Cim^2)
       }
-      val <- val / (M-1)
+      val <- val / (M - 1)
       sigma2_gamma <- sigma2_gamma + val
     }
     sigma2_gamma <- (2 / 90) * sigma2_gamma / M
 
     ## Welch Paramters
-    beta <- sigma2_gamma / (2*m_gamma)
-    nu <- (2*m_gamma^2) / sigma2_gamma
+    beta <- sigma2_gamma / (2 * m_gamma)
+    nu <- (2 * m_gamma^2) / sigma2_gamma
 
     val_cutoff <- beta * stats::qchisq(1 - alpha, df = nu)
     simulations <- beta * stats::rchisq(n = nSims, df = nu)
-
   }
 
   ## Setup and Return Data
   return_value <- list(
     "pvalue" = sum(stat <= simulations) / nSims,
-    'location' = location#,
+    "location" = location # ,
     # "statistic" = stat,
     # "simulations" = simulations
   )
@@ -143,32 +153,32 @@
 #' @noRd
 #' @keywords internal
 .characteristic_statistic <- function(
-    X, statistic='Tn', v=seq(0,1,length.out=nrow(X)),
-    W = space_measuring_functions(M = 20, X = X, space = 'BM'), J = 50,
-    location = FALSE, all.stats=FALSE){
-
+    X, statistic = "Tn", v = seq(0, 1, length.out = nrow(X)),
+    W = space_measuring_functions(M = 20, X = X, space = "BM"), J = 50,
+    location = FALSE, all.stats = FALSE) {
   n <- ncol(X)
 
   # Compute Zn
   fhat_vals <- as.matrix(.fhat_all(X, W))
-  Zn <- sqrt(n) * (fhat_vals - (seq_len(n)/n) %o% fhat_vals[nrow(fhat_vals),])
+  Zn <- sqrt(n) * (fhat_vals - (seq_len(n) / n) %o% fhat_vals[nrow(fhat_vals), ])
 
   ns <- .select_n(1:n, J)
-  Zn <- Zn[ns,,drop=FALSE]
+  Zn <- Zn[ns, , drop = FALSE]
 
   # Integrate out W
   noW <- dot_integrate_col(t(abs(Zn)^2))
 
-  if(statistic=='Tn'){
+  if (statistic == "Tn") {
     statistic <- dot_integrate(noW)
-
-  } else if (statistic=='Mn'){
+  } else if (statistic == "Mn") {
     statistic <- max(noW)
   }
 
-  if(!location) return(statistic)
+  if (!location) {
+    return(statistic)
+  }
 
-  c( statistic, ns[which.max(noW)] )
+  c(statistic, ns[which.max(noW)])
 }
 
 
@@ -199,21 +209,24 @@
 #'
 #' @keywords internal
 #' @noRd
-.compute_sqrtMat <- function(X,W,J,h,K){
-  x <- seq(0,1,length.out=J)
+.compute_sqrtMat <- function(X, W, J, h, K) {
+  x <- seq(0, 1, length.out = J)
 
   # Compute Gamma Matrix
   covMat <- .estimCovMat(X, W, x, h, K)
 
   # TODO:: Test "GauPro::sqrt_matrix()" which is slightly faster
-  tryCatch({
-    covMat_svd <- La.svd(covMat)
-    sqrtD <- diag(sqrt(covMat_svd$d))
-  }, error = function(e){
-    covMat <- round(covMat, 15)
-    covMat_svd <- La.svd(covMat)
-    sqrtD <- diag(sqrt(covMat_svd$d))
-  })
+  tryCatch(
+    {
+      covMat_svd <- La.svd(covMat)
+      sqrtD <- diag(sqrt(covMat_svd$d))
+    },
+    error = function(e) {
+      covMat <- round(covMat, 15)
+      covMat_svd <- La.svd(covMat)
+      sqrtD <- diag(sqrt(covMat_svd$d))
+    }
+  )
 
   Rfast::mat.mult(
     Rfast::mat.mult(covMat_svd$u, sqrtD), covMat_svd$vt
@@ -317,19 +330,22 @@
   fVals <- as.numeric(.estimf(X, lfun, v))
   fpVals <- as.numeric(.estimf(X, lfunp, vp))
 
-  Kvals <- K(iters/h)
-  data_tmp <- data.frame('K'=Kvals[Kvals>0],
-                         'k'=iters[which(Kvals>0)])
-  values <- apply(data_tmp, MARGIN = 1,
-                  function(kInfo, X1, fVals, fpVals, mean1, mean2) {
-                    kInfo[1] * .estimGamma(
-                      k = kInfo[2], X = X1,
-                      fVals = fVals, fpVals = fpVals,
-                      mean1 = mean1, mean2 = mean2
-                    )
-                  },
-                  X1 = X, fVals = fVals, fpVals = fpVals,
-                  mean1 = mean(fVals), mean2 = mean(fpVals)
+  Kvals <- K(iters / h)
+  data_tmp <- data.frame(
+    "K" = Kvals[Kvals > 0],
+    "k" = iters[which(Kvals > 0)]
+  )
+  values <- apply(data_tmp,
+    MARGIN = 1,
+    function(kInfo, X1, fVals, fpVals, mean1, mean2) {
+      kInfo[1] * .estimGamma(
+        k = kInfo[2], X = X1,
+        fVals = fVals, fpVals = fpVals,
+        mean1 = mean1, mean2 = mean2
+      )
+    },
+    X1 = X, fVals = fVals, fpVals = fpVals,
+    mean1 = mean(fVals), mean2 = mean(fpVals)
   )
 
   sum(values) / ncol(X)
@@ -348,7 +364,6 @@
 #' @keywords internal
 #' @noRd
 .estimGamma <- function(k, X, fVals, fpVals, mean1, mean2) {
-
   if (k >= 0) {
     rs <- 1:(ncol(X) - k)
   } else {

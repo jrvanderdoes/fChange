@@ -28,38 +28,40 @@
 #'
 #' @examples
 #' dat1 <- generate_karhunen_loeve(
-#'   Ns=100, eigenvalues=c(1/(1:3)), basis=fda::create.bspline.basis(nbasis=3,norder=3),
-#'   means=0, distribution='Normal',
-#'   fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
-#'   prev_eps=NULL)
+#'   Ns = 100, eigenvalues = c(1 / (1:3)), basis = fda::create.bspline.basis(nbasis = 3, norder = 3),
+#'   means = 0, distribution = "Normal",
+#'   fparam = seq(0, 1, 0.1), dependence = 0, burnin = 100, silent = TRUE, dof = NULL, shape = NULL,
+#'   prev_eps = NULL
+#' )
 #' dat2 <- generate_karhunen_loeve(
-#'   Ns=50, eigenvalues=c(1/(1:4)), basis=fda::create.bspline.basis(nbasis=4),
-#'   means=5, distribution='exponential',
-#'   fparam=seq(0,1,0.1), dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
-#'   prev_eps=dat1$prev_eps)
+#'   Ns = 50, eigenvalues = c(1 / (1:4)), basis = fda::create.bspline.basis(nbasis = 4),
+#'   means = 5, distribution = "exponential",
+#'   fparam = seq(0, 1, 0.1), dependence = 0, burnin = 100, silent = TRUE, dof = NULL, shape = NULL,
+#'   prev_eps = dat1$prev_eps
+#' )
 #'
-#' dat <- dfts(cbind(dat1$data$data, dat2$data$data),fparam = dat1$data$fparam)
+#' dat <- dfts(cbind(dat1$data$data, dat2$data$data), fparam = dat1$data$fparam)
 generate_karhunen_loeve <- function(
     Ns, eigenvalues, basis, means, distribution,
-    fparam, dependence=0, burnin=100, silent=TRUE, dof=NULL, shape=NULL,
-    prev_eps=NULL) {
+    fparam, dependence = 0, burnin = 100, silent = TRUE, dof = NULL, shape = NULL,
+    prev_eps = NULL) {
   ## Verification
   m <- length(basis$names)
 
-  .check_length <- function(n, vecs, name){
-    if(length(vecs)==1){
+  .check_length <- function(n, vecs, name) {
+    if (length(vecs) == 1) {
       vecs <- rep(vecs, n)
-    }else if(length(vecs)!= n){
-      stop(paste0('Not enough ',name,' given'))
+    } else if (length(vecs) != n) {
+      stop(paste0("Not enough ", name, " given"))
     }
 
     vecs
   }
 
-  eigenvalues <- .check_length(m, eigenvalues, 'eigenvalues')
-  distribution <- .check_length(m, distribution, 'distribution')
+  eigenvalues <- .check_length(m, eigenvalues, "eigenvalues")
+  distribution <- .check_length(m, distribution, "distribution")
 
-  means <- .check_length(Ns, means, 'means')
+  means <- .check_length(Ns, means, "means")
 
   ## Prepare to generate
 
@@ -78,9 +80,9 @@ generate_karhunen_loeve <- function(
   psi <- .getPsi(m, eigenvalues, dependence)
 
   # Burnin for VAR (if not given)
-  if(is.null(prev_eps)){
+  if (is.null(prev_eps)) {
     prev_eps <- data.frame(matrix(0, ncol = length(fparam), nrow = m))
-    if(burnin>0){
+    if (burnin > 0) {
       for (j in 1:burnin) {
         waste <- .KL_Expansion(
           eigenvalues = eigenvalues,
@@ -136,8 +138,10 @@ generate_karhunen_loeve <- function(
     prev_eps <- result[[2]]
   }
 
-  list('data'= dfts(data, fparam = fparam, labels = 1:ncol(data)),
-       'prev_eps'=prev_eps)
+  list(
+    "data" = dfts(data, fparam = fparam, labels = 1:ncol(data)),
+    "prev_eps" = prev_eps
+  )
 }
 
 
@@ -151,8 +155,7 @@ generate_karhunen_loeve <- function(
 #' @noRd
 #' @keywords internal
 .KL_Expansion <- function(
-    eigenvalues, basis, means, distribution, resolution, prev_eps, psi, shape, dof, ...)
-  {
+    eigenvalues, basis, means, distribution, resolution, prev_eps, psi, shape, dof, ...) {
   # Setup
   n <- length(resolution)
   D <- length(eigenvalues)
@@ -161,21 +164,23 @@ generate_karhunen_loeve <- function(
   eval_basis <- fda::eval.basis(resolution, basis)
 
   xi <- sapply(1:length(eigenvalues), function(e, eigenvalues, distribution, dof, shape, ...) {
-    .KL_errors(distribution = distribution[e], sd = sqrt(eigenvalues[e]),
-               n = 1, shape=shape, dof=dof, ...)
-    },
-  eigenvalues = eigenvalues, distribution = distribution, dof = dof, shape=shape, ...
+    .KL_errors(
+      distribution = distribution[e], sd = sqrt(eigenvalues[e]),
+      n = 1, shape = shape, dof = dof, ...
+    )
+  },
+  eigenvalues = eigenvalues, distribution = distribution, dof = dof, shape = shape, ...
   )
 
   Zeta <- tryCatch(eval_basis * xi[col(eval_basis)],
-                   error = function(e) {
-                     stop(call. = FALSE, paste0(
-                       "Check number of eigenvalues given. ",
-                       "It does not match number of basis functions. ",
-                       "Note, did you account for the constant function if ",
-                       "it is in the basis?"
-                     ))
-                   }
+    error = function(e) {
+      stop(call. = FALSE, paste0(
+        "Check number of eigenvalues given. ",
+        "It does not match number of basis functions. ",
+        "Note, did you account for the constant function if ",
+        "it is in the basis?"
+      ))
+    }
   )
 
   eps <- Zeta + t(psi %*% as.matrix(prev_eps))
@@ -214,13 +219,14 @@ generate_karhunen_loeve <- function(
     xi <- stats::rexp(n, rate = 1 / sd) - sd
   } else if (tolower(distribution) == "t") {
     xi <- stats::rt(n, dof)
-    if(dof>2)
+    if (dof > 2) {
       xi <- xi * sqrt(sd^2 * (dof - 2) / dof)
+    }
   } else if (tolower(distribution) == "cauchy") {
     xi <- stats::rt(n, 1)
-  }  else if (tolower(distribution) == "gamma") {
-    xi <- ( stats::rgamma(n,shape = shape, rate = rate) - shape/rate ) /
-      sqrt( shape * (1/rate)^2 ) * sd
+  } else if (tolower(distribution) == "gamma") {
+    xi <- (stats::rgamma(n, shape = shape, rate = rate) - shape / rate) /
+      sqrt(shape * (1 / rate)^2) * sd
   } else if (tolower(distribution) == "laplace") {
     if (!requireNamespace("jmuOutlier", quietly = TRUE)) {
       stop(paste0("Please install 'jmuOutlier'."), call. = FALSE)

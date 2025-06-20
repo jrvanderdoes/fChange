@@ -44,16 +44,18 @@ Several basic imputation methods for missing values in functional data
 formatted as dfts objects.
 }
 \examples{
-temp <- data.frame(c(NA,NA,3:9,NA),
-                   c(NA,stats::rnorm(2),NA, stats::rnorm(6)),
-                   stats::rnorm(10),
-                   c(stats::rnorm(4),rep(NA,3), stats::rnorm(3)),
-                   rep(NA,10),
-                   c(stats::rnorm(1), rep(NA,9)),
-                   c(stats::rnorm(9),NA),
-                   stats::rnorm(10),
-                   stats::rnorm(10),
-                   c(NA,NA,3:9, NA))
-impute(temp, method='mean_obs')
-impute(temp, method='linear', obs_share_data=TRUE)
+temp <- data.frame(
+  c(NA, NA, 3:9, NA),
+  c(NA, stats::rnorm(2), NA, stats::rnorm(6)),
+  stats::rnorm(10),
+  c(stats::rnorm(4), rep(NA, 3), stats::rnorm(3)),
+  rep(NA, 10),
+  c(stats::rnorm(1), rep(NA, 9)),
+  c(stats::rnorm(9), NA),
+  stats::rnorm(10),
+  stats::rnorm(10),
+  c(NA, NA, 3:9, NA)
+)
+impute(temp, method = "mean_obs")
+impute(temp, method = "linear", obs_share_data = TRUE)
 }

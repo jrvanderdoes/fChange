@@ -27,7 +27,7 @@ Computes the principal component projection and re-combined data with a myriad
 of figures to understand the projection process.
 }
 \examples{
-results <- pca_examination(electricity, TVE=0.9)
+results <- pca_examination(electricity, TVE = 0.9)
 }
 \seealso{
 \code{\link[=pca.dfts]{pca.dfts()}}

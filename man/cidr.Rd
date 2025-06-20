@@ -20,11 +20,15 @@ A dfts object with CIDR or OCIDRs
 Compute (Overnight) Cumulative Intraday Returns
 }
 \examples{
-tmp <- dfts(SPYUS500$data[,1:100], name='SP500 100 Days',
- labels = SPYUS500$labels[1:100], fparam=SPYUS500$fparam)
+tmp <- dfts(SPYUS500$data[, 1:100],
+  name = "SP500 100 Days",
+  labels = SPYUS500$labels[1:100], fparam = SPYUS500$fparam
+)
 cidr(tmp)
-tmp <- dfts(SPYUS500$data[,1:100], name='SP500 100 Days',
- labels = SPYUS500$labels[1:100], fparam=SPYUS500$fparam)
+tmp <- dfts(SPYUS500$data[, 1:100],
+  name = "SP500 100 Days",
+  labels = SPYUS500$labels[1:100], fparam = SPYUS500$fparam
+)
 ocidr(tmp)
 }
 \references{
