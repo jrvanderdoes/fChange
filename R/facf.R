@@ -224,23 +224,17 @@ pacf.dfts <- function(x, lag.max = NULL, n_pcs = NULL,
 
   vector_PACF <- FPACF
 
-  show_varprop <- TRUE
+  show_varprop <- figure
 
   # Start loop for fitting ARH(p-1)
   for(pp in 2:lag.max){
     lag_PACF <- pp
 
     # 1 - Fit ARH(1) to the series
-    if(show_varprop){
-      Xest_ARIMA <-
-        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
-                       n_pcs = n_pcs)$x_est
-      show_varprop <- FALSE
-    }else{
-      Xest_ARIMA <-
-        .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
-                       n_pcs = n_pcs, show_varprop = FALSE)$x_est
-    }
+    Xest_ARIMA <-
+      .fit_ARHp_FPCA(x=x, p = lag_PACF-1,
+                     n_pcs = n_pcs,show_varprop = show_varprop)$x_est
+    show_varprop <- FALSE
 
     # 2 - Fit ARH(1) to the REVERSED series
     x_rev <- x
