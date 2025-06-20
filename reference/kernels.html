@@ -134,10 +134,10 @@ Econometric Theory, 27(4), 703-744.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">truncated_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span><span class="op">/</span><span class="fl">15</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">truncated_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span> <span class="op">/</span> <span class="fl">15</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [39] 0 0 0</span>
-<span class="r-in"><span><span class="fu">bartlett_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span><span class="op">/</span><span class="fl">15</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">bartlett_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span> <span class="op">/</span> <span class="fl">15</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 0.06666667 0.13333333 0.20000000 0.26666667 0.33333333 0.40000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] 0.46666667 0.53333333 0.60000000 0.66666667 0.73333333 0.80000000</span>
@@ -145,7 +145,7 @@ Econometric Theory, 27(4), 703-744.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [25] 0.73333333 0.66666667 0.60000000 0.53333333 0.46666667 0.40000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [31] 0.33333333 0.26666667 0.20000000 0.13333333 0.06666667 0.00000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [37] 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000</span>
-<span class="r-in"><span><span class="fu">parzen_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span><span class="op">/</span><span class="fl">15</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">parzen_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span> <span class="op">/</span> <span class="fl">15</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [6] 0.0000000000 0.0005925926 0.0047407407 0.0160000000 0.0379259259</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11] 0.0740740741 0.1280000000 0.2032592593 0.3031111111 0.4240000000</span>
@@ -155,7 +155,7 @@ Econometric Theory, 27(4), 703-744.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [31] 0.0740740741 0.0379259259 0.0160000000 0.0047407407 0.0005925926</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [36] 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [41] 0.0000000000</span>
-<span class="r-in"><span><span class="fu">tukey_hanning_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span><span class="op">/</span><span class="fl">15</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">tukey_hanning_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span> <span class="op">/</span> <span class="fl">15</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 0.01092620 0.04322727 0.09549150 0.16543470 0.25000000 0.34549150</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] 0.44773577 0.55226423 0.65450850 0.75000000 0.83456530 0.90450850</span>
@@ -163,7 +163,7 @@ Econometric Theory, 27(4), 703-744.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [25] 0.83456530 0.75000000 0.65450850 0.55226423 0.44773577 0.34549150</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [31] 0.25000000 0.16543470 0.09549150 0.04322727 0.01092620 0.00000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [37] 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000</span>
-<span class="r-in"><span><span class="fu">quadratic_spectral_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span><span class="op">/</span><span class="fl">15</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">quadratic_spectral_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span> <span class="op">/</span> <span class="fl">15</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] -0.059156968 -0.035757776 -0.004361244  0.035169330  0.082709303</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [6]  0.137860582  0.199949461  0.268034899  0.340927244  0.417217036</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11]  0.495313030  0.573488238  0.649932362  0.722808762  0.790313821</span>
@@ -173,7 +173,7 @@ Econometric Theory, 27(4), 703-744.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [31]  0.495313030  0.417217036  0.340927244  0.268034899  0.199949461</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [36]  0.137860582  0.082709303  0.035169330 -0.004361244 -0.035757776</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [41] -0.059156968</span>
-<span class="r-in"><span><span class="fu">daniell_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span><span class="op">/</span><span class="fl">15</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">daniell_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span> <span class="op">/</span> <span class="fl">15</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.000000000 0.000000000 0.000000000 0.000000000 0.000000000 0.000000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 0.001549499 0.012915141 0.044665639 0.106728094 0.206748336 0.348636272</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] 0.531517459 0.749263553 0.990699050 1.240490015 1.480625327 1.692316012</span>
@@ -181,7 +181,7 @@ Econometric Theory, 27(4), 703-744.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [25] 1.480625327 1.240490015 0.990699050 0.749263553 0.531517459 0.348636272</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [31] 0.206748336 0.106728094 0.044665639 0.012915141 0.001549499 0.000000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [37] 0.000000000 0.000000000 0.000000000 0.000000000 0.000000000</span>
-<span class="r-in"><span><span class="fu">flat_top_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span><span class="op">/</span><span class="fl">15</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">flat_top_kernel</span><span class="op">(</span><span class="op">-</span><span class="fl">20</span><span class="op">:</span><span class="fl">20</span> <span class="op">/</span> <span class="fl">15</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.03333333 0.10000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 0.16666667 0.23333333 0.30000000 0.36666667 0.43333333 0.50000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] 0.56666667 0.63333333 0.70000000 0.76666667 0.83333333 0.90000000</span>
@@ -200,7 +200,7 @@ Econometric Theory, 27(4), 703-744.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

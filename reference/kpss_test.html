@@ -117,19 +117,15 @@ series. Statistics, 50(5), 957-973.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">kpss_test</span><span class="op">(</span><span class="fu"><a href="generate_brownian_motion.html">generate_brownian_motion</a></span><span class="op">(</span><span class="fl">100</span>,v<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out<span class="op">=</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">kpss_test</span><span class="op">(</span><span class="fu"><a href="generate_brownian_motion.html">generate_brownian_motion</a></span><span class="op">(</span><span class="fl">100</span>, v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pvalue</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.461</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.616</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="fu">kpss_test</span><span class="op">(</span><span class="fu"><a href="generate_brownian_motion.html">generate_brownian_motion</a></span><span class="op">(</span><span class="fl">100</span>,v<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out<span class="op">=</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>             method<span class="op">=</span><span class="st">"resample"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">kpss_test</span><span class="op">(</span><span class="fu"><a href="generate_brownian_motion.html">generate_brownian_motion</a></span><span class="op">(</span><span class="fl">100</span>, v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"resample"</span>, resample_blocks <span class="op">=</span> <span class="st">"overlapping"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pvalue</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.071</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="fu">kpss_test</span><span class="op">(</span><span class="fu"><a href="generate_brownian_motion.html">generate_brownian_motion</a></span><span class="op">(</span><span class="fl">100</span>,v<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out<span class="op">=</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>             method<span class="op">=</span><span class="st">'resample'</span>, resample_blocks<span class="op">=</span><span class="st">'overlapping'</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pvalue</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.399</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.441</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
@@ -142,7 +138,7 @@ series. Statistics, 50(5), 957-973.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

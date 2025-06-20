@@ -70,8 +70,10 @@ Commodity Markets, 32, 100361-.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="dfts.html">dfts</a></span><span class="op">(</span><span class="va">SPYUS500</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>, name<span class="op">=</span><span class="st">'SP500 100 Days'</span>,</span></span>
-<span class="r-in"><span> labels <span class="op">=</span> <span class="va">SPYUS500</span><span class="op">$</span><span class="va">labels</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>, fparam<span class="op">=</span><span class="va">SPYUS500</span><span class="op">$</span><span class="va">fparam</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="dfts.html">dfts</a></span><span class="op">(</span><span class="va">SPYUS500</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>  name <span class="op">=</span> <span class="st">"SP500 100 Days"</span>,</span></span>
+<span class="r-in"><span>  labels <span class="op">=</span> <span class="va">SPYUS500</span><span class="op">$</span><span class="va">labels</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>, fparam <span class="op">=</span> <span class="va">SPYUS500</span><span class="op">$</span><span class="va">fparam</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cidr</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CIDR of SP500 100 Days </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> dimension: 390 x 100</span>
@@ -87,8 +89,10 @@ Commodity Markets, 32, 100361-.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.125887319 -0.09223365 -0.01251754  0.05579794  0.00000000 -0.00776497</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.073115156 -0.12890908 -0.08886807 -0.01148003  0.02374580  0.02756077</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.008532857 -0.19705631 -0.08482690 -0.22945470  0.03153009  0.03105385</span>
-<span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="dfts.html">dfts</a></span><span class="op">(</span><span class="va">SPYUS500</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>, name<span class="op">=</span><span class="st">'SP500 100 Days'</span>,</span></span>
-<span class="r-in"><span> labels <span class="op">=</span> <span class="va">SPYUS500</span><span class="op">$</span><span class="va">labels</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>, fparam<span class="op">=</span><span class="va">SPYUS500</span><span class="op">$</span><span class="va">fparam</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="dfts.html">dfts</a></span><span class="op">(</span><span class="va">SPYUS500</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>  name <span class="op">=</span> <span class="st">"SP500 100 Days"</span>,</span></span>
+<span class="r-in"><span>  labels <span class="op">=</span> <span class="va">SPYUS500</span><span class="op">$</span><span class="va">labels</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>, fparam <span class="op">=</span> <span class="va">SPYUS500</span><span class="op">$</span><span class="va">fparam</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">ocidr</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OCIDR of SP500 100 Days </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> dimension: 390 x 100</span>
@@ -115,7 +119,7 @@ Commodity Markets, 32, 100361-.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

@@ -117,19 +117,25 @@ groups. Subsequent groups begin at the end of the last group.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">generate_data</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  fparam<span class="op">=</span><span class="fl">15</span>,</span></span>
-<span class="r-in"><span>  data_details <span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'bmotion'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'N'</span><span class="op">=</span><span class="fl">100</span>, <span class="st">'sd'</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                     <span class="st">'bbridge'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'N'</span><span class="op">=</span><span class="fl">100</span>, <span class="st">'sd'</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                     <span class="st">'bbridge'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'N'</span><span class="op">=</span><span class="fl">100</span>, <span class="st">'sd'</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                     <span class="st">'kl'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'N'</span><span class="op">=</span><span class="fl">100</span>,</span></span>
-<span class="r-in"><span>                               <span class="st">'distribution'</span><span class="op">=</span><span class="st">'Normal'</span>,</span></span>
-<span class="r-in"><span>                               <span class="st">'eigenvalues'</span><span class="op">=</span><span class="fl">1</span><span class="op">/</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>,</span></span>
-<span class="r-in"><span>                               <span class="st">'mean'</span><span class="op">=</span><span class="fl">0</span>, <span class="st">'dependence'</span><span class="op">=</span><span class="fl">0</span>,</span></span>
-<span class="r-in"><span>                               <span class="st">'basis'</span><span class="op">=</span><span class="fu">fda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fda/man/create.bspline.basis.html" class="external-link">create.bspline.basis</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                               <span class="st">'sd'</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                     <span class="st">'ou'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'N'</span><span class="op">=</span><span class="fl">100</span>, <span class="st">'dependence'</span><span class="op">=</span><span class="fl">0</span> <span class="op">)</span> ,</span></span>
-<span class="r-in"><span>                     <span class="st">'far1'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'N'</span><span class="op">=</span><span class="fl">100</span>, <span class="st">'dependence'</span><span class="op">=</span><span class="fl">0</span>,</span></span>
-<span class="r-in"><span>                                 <span class="st">'sd'</span><span class="op">=</span><span class="fl">1</span>,<span class="st">'vary'</span><span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-in"><span>  fparam <span class="op">=</span> <span class="fl">15</span>,</span></span>
+<span class="r-in"><span>  data_details <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="st">"bmotion"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"N"</span> <span class="op">=</span> <span class="fl">100</span>, <span class="st">"sd"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"bbridge"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"N"</span> <span class="op">=</span> <span class="fl">100</span>, <span class="st">"sd"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"bbridge"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"N"</span> <span class="op">=</span> <span class="fl">100</span>, <span class="st">"sd"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"kl"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="st">"N"</span> <span class="op">=</span> <span class="fl">100</span>,</span></span>
+<span class="r-in"><span>      <span class="st">"distribution"</span> <span class="op">=</span> <span class="st">"Normal"</span>,</span></span>
+<span class="r-in"><span>      <span class="st">"eigenvalues"</span> <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>,</span></span>
+<span class="r-in"><span>      <span class="st">"mean"</span> <span class="op">=</span> <span class="fl">0</span>, <span class="st">"dependence"</span> <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>      <span class="st">"basis"</span> <span class="op">=</span> <span class="fu">fda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fda/man/create.bspline.basis.html" class="external-link">create.bspline.basis</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="st">"sd"</span> <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"ou"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"N"</span> <span class="op">=</span> <span class="fl">100</span>, <span class="st">"dependence"</span> <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"far1"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="st">"N"</span> <span class="op">=</span> <span class="fl">100</span>, <span class="st">"dependence"</span> <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>      <span class="st">"sd"</span> <span class="op">=</span> <span class="fl">1</span>, <span class="st">"vary"</span> <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
@@ -142,7 +148,7 @@ groups. Subsequent groups begin at the end of the last group.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
