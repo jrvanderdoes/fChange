@@ -96,11 +96,13 @@ plot.dfts <- function(x, changes=NULL,
           },
           acf = {
             # TODO:: Allow TVE
-            acf.dfts(x = x, lag.max = lag.max, alpha=alpha, method = method, ...)
+            acf.dfts(x = x, lag.max = lag.max, alpha=alpha, method = method,
+                     figure=FALSE, ...)$plot
           },
           pacf = {
             # TODO:: Allow TVE
-            pacf.dfts(x = x, lag.max = lag.max, alpha=alpha, n_pcs = NULL, method=method, ...)
+            pacf.dfts(x = x, lag.max = lag.max, alpha=alpha, n_pcs = NULL, method=method,
+                      figure=FALSE, ...)$plot
           },
           summary = {
             summary.dfts(object=x, changes=changes, lag.max=lag.max, d.max=d.max, ...)
