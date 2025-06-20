@@ -31,7 +31,7 @@ The data for the included exercises can be downloaded using the following code:
 ```{r,eval=FALSE}
 urlfile <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
               '/main/vignettes/articles/german_data.csv')
-data <- read.csv(urlfile)
+data <- utils::read.csv(urlfile)
 ```
 
 The slides can be downloaded [here](https://raw.githubusercontent.com/jrvanderdoes/fChange/main/vignettes/articles/SSC_Short_Course.pdf) and a pdf of this document
@@ -138,7 +138,7 @@ series.***](functionaldata/pollution1.png){#fig:pollution width="5in"}
 ```{r, eval=FALSE}
 urlfile1 <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
               '/main/vignettes/articles/pollution.txt')
-city <- read.csv(urlfile1, header = TRUE,sep=',')$x
+city <- utils::read.csv(urlfile1, header = TRUE,sep=',')$x
 
 city_dfts <- dfts(matrix(as.numeric(city),nrow = 48),
                   labels = paste('Day',1:(length(city)/48)),
@@ -1165,7 +1165,7 @@ ests_final <- data.frame(
 )
   
 
-true <-read.csv(
+true <- utils::read.csv(
   paste0('C:/Users/jerem/OneDrive/Documents/School/Waterloo/Research/RPackages/fChange/vignettes/articles/pollution_true.txt'))[,2]
 res <- colSums((ests_final-true)^2)
 res / min(res)

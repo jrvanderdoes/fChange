@@ -10,7 +10,7 @@ competition_error <- function(estimate){
 
   urlfile <-  paste0('https://raw.githubusercontent.com/jrvanderdoes/fChange',
                      '/main/vignettes/articles/functionaldata/practice.csv')
-  data_true <- read.csv(urlfile)[,-1]
+  data_true <- utils::read.csv(urlfile)[,-1]
 
   if(is.dfts(estimate)) estimate <- estimate$data
 
