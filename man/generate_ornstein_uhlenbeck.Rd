@@ -23,5 +23,5 @@ Generate autoregressive process with errors according the Ornstein-Uhlenbeck
 process.
 }
 \examples{
-generate_ornstein_uhlenbeck(N=100,v=20)
+generate_ornstein_uhlenbeck(N = 100, v = 20)
 }

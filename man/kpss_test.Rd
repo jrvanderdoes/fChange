@@ -52,11 +52,10 @@ Compute the Kwiatkowski–Phillips–Schmidt–Shin (KPSS) statistic for
 functional data.
 }
 \examples{
-kpss_test(generate_brownian_motion(100,v=seq(0,1,length.out=20)))
-kpss_test(generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-             method="resample")
-kpss_test(generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-             method='resample', resample_blocks='overlapping')
+kpss_test(generate_brownian_motion(100, v = seq(0, 1, length.out = 20)))
+kpss_test(generate_brownian_motion(100, v = seq(0, 1, length.out = 20)),
+  method = "resample", resample_blocks = "overlapping"
+)
 }
 \references{
 Chen, Y., & Pun, C. S. (2019). A bootstrap-based KPSS test for

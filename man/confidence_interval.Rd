@@ -48,21 +48,25 @@ Compute confidence intervals for the data based on some changes. The current
 version is tuned to mean changes.
 }
 \examples{
-X <- cbind(generate_brownian_motion(100,v=seq(0,1,0.05))$data,
-           generate_brownian_motion(100,v=seq(0,1,0.05))$data+0.5)
-confidence_interval(X,100,alpha = 0.1)
-confidence_interval(X,changes=100,alpha = 0.1,method = 'simulation')
+X <- cbind(
+  generate_brownian_motion(100, v = seq(0, 1, 0.05))$data,
+  generate_brownian_motion(100, v = seq(0, 1, 0.05))$data + 0.5
+)
+confidence_interval(X, 100, alpha = 0.1)
+confidence_interval(X, changes = 100, alpha = 0.1, method = "simulation")
 
-X <- generate_brownian_motion(200,v=seq(0,1,0.05))
-confidence_interval(X,100)
-confidence_interval(X,100,method = 'simulation')
+X <- generate_brownian_motion(200, v = seq(0, 1, 0.05))
+confidence_interval(X, 100)
+confidence_interval(X, 100, method = "simulation")
 
-X <- cbind(generate_brownian_motion(200,v=seq(0,1,0.05))$data,
-           generate_brownian_motion(100,v=seq(0,1,0.05))$data+0.1,
-           generate_brownian_motion(150,v=seq(0,1,0.05))$data-0.05)
-confidence_interval(X,c(200,300))
+X <- cbind(
+  generate_brownian_motion(200, v = seq(0, 1, 0.05))$data,
+  generate_brownian_motion(100, v = seq(0, 1, 0.05))$data + 0.1,
+  generate_brownian_motion(150, v = seq(0, 1, 0.05))$data - 0.05
+)
+confidence_interval(X, c(200, 300))
 
-confidence_interval(X = electricity, changes = c(64, 120),alpha = 0.1)
+confidence_interval(X = electricity, changes = c(64, 120), alpha = 0.1)
 }
 \references{
 Horvath, L., & Rice, G. (2024). Change Point Analysis for Time

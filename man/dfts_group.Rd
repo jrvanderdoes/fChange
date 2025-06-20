@@ -27,7 +27,7 @@ dfts object with data as cumsum
 Group generic methods defined for things like Math, Ops, and so forth.
 }
 \examples{
-result <- sqrt( electricity )
+result <- sqrt(electricity)
 result <- electricity + electricity
 result1 <- electricity * electricity
 cumsum(electricity)

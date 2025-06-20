@@ -41,9 +41,9 @@ uses \code{\link[stats:cor]{stats::var()}} and \code{\link[stats:sd]{stats::sd()
 \examples{
 sd(1:10)
 var(1:10)
-sd(electricity,type='pointwise')
-var(electricity,type='pointwise')
-var(electricity,type='operator')
+sd(electricity, type = "pointwise")
+var(electricity, type = "pointwise")
+var(electricity, type = "operator")
 }
 \seealso{
 \code{\link[stats:sd]{stats::sd()}}, \code{\link[stats:cor]{stats::var()}}

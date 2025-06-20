@@ -36,7 +36,8 @@ statistics are returned to give a general view of the data. More details
 can be found with more specialized functions.
 }
 \examples{
-res <- summary(electricity[,1:20], lag.max=2)
+# All parameters extremely low for speed
+res <- summary(electricity[, 1:10], lag.max = 1, d.max=1, M=10)
 }
 \seealso{
 \code{\link[base:summary]{base::summary()}}

@@ -61,8 +61,9 @@ at your discretion).
 }
 \examples{
 res <- stationarity_test(
-  generate_brownian_motion(100,v=seq(0,1,length.out=20)),
-  critical='resample', statistic='Mn')
+  generate_brownian_motion(100, v = seq(0, 1, length.out = 20)),
+  critical = "resample", statistic = "Mn"
+)
 res2 <- stationarity_test(electricity)
 }
 \references{

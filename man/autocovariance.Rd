@@ -29,10 +29,11 @@ where \eqn{ \overline{X}_{N}(u) = \frac{1}{N} \sum_{i = 1}^{N} X_{i}(t)}
 denotes the sample mean function and \eqn{h} is the lag parameter.
 }
 \examples{
-v <- seq(0,1,length.out=20)
+v <- seq(0, 1, length.out = 20)
 lagged_autocov <- autocovariance(
-  X = generate_brownian_bridge(100,v=v),
-  lags = 1)
+  X = generate_brownian_bridge(100, v = v),
+  lags = 1
+)
 }
 \seealso{
 \code{\link[=autocorrelation]{autocorrelation()}}, \code{\link[=var]{var()}}

@@ -26,6 +26,6 @@ defined as \eqn{W(t) - tW(1)}. Each functional observation is discretized on
 the points indicated in \code{v}.
 }
 \examples{
-bbridge <- generate_brownian_bridge(N=100, v=c(0,0.2,0.6,1,1.3), sd=2)
-bbridge <- generate_brownian_bridge(N=100, v=10, sd=1)
+bbridge <- generate_brownian_bridge(N = 100, v = c(0, 0.2, 0.6, 1, 1.3), sd = 2)
+bbridge <- generate_brownian_bridge(N = 100, v = 10, sd = 1)
 }

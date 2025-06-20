@@ -25,8 +25,8 @@ This function is used to compute discretized functions, i.e. vectors, to
 explore functional spaces.
 }
 \examples{
-space_measuring_functions(M=10, space="BM", X=electricity)
-space_measuring_functions(M=10, space="PC", X=electricity)
+space_measuring_functions(M = 10, space = "BM", X = electricity)
+space_measuring_functions(M = 10, space = "PC", X = electricity)
 }
 \seealso{
 \code{\link[=fchange]{fchange()}}

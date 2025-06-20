@@ -29,6 +29,6 @@ defined as
 where \eqn{B} is the backshift operator.
 }
 \examples{
-result <- diff(electricity, lag=1)
-result1 <- diff(electricity, differences=2)
+result <- diff(electricity, lag = 1)
+result1 <- diff(electricity, differences = 2)
 }

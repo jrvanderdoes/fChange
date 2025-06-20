@@ -21,7 +21,7 @@ Obtain the pointwise quantile information of functional data.
 }
 \examples{
 result <- quantile(electricity)
-result1 <- quantile(electricity,probs = 0.95)
+result1 <- quantile(electricity, probs = 0.95)
 }
 \seealso{
 \code{\link[stats:quantile]{stats::quantile()}}

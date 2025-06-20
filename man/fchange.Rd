@@ -134,7 +134,7 @@ are given, where single or multiple changes can be detected. Multiple change
 extensions currently include binary segmentation and elbow plots.
 }
 \examples{
-res <- fchange(electricity$data[,1:20],method='characteristic',critical = 'welch')
+res <- fchange(electricity$data[, 1:20], method = "characteristic", critical = "welch")
 }
 \references{
 Aue, A., Rice, G., & Sonmez, O. (2018). Detecting and dating structural
