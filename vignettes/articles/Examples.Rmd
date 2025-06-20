@@ -26,26 +26,29 @@ The goal is to detect any changes in the data.
 This data may be viewed using the following:
 ```{r plot_elec, eval=FALSE}
 plot(electricity,
-        val_axis_title = '',res_axis_title = '',FD_axis_title = '',
-        plot_title = '')
+  val_axis_title = "", res_axis_title = "", FD_axis_title = "",
+  plot_title = ""
+)
 ```
 
 This data seems to exhibit some trends over time (perhaps due to season). We wish to model these trends first, and then search the data for any remaining changes. We'll use principal component analysis to convert the functional data to finite dimensions, fit a model, and return the model to functional data. In \code{fChange}, the functions \code{pca}, \code{pca_examination}, \code{pca_components}, and \code{projection_model} are functions that can be used to project the data, e.g.
 ```{r pca_info, eval=FALSE}
-epca <- pca_examination(X = electricity,TVE = 0.99) 
+epca <- pca_examination(X = electricity, TVE = 0.99)
 set.seed(654321)
-res1 <- fchange(X = epca$residuals,
-                           statistic='Tn',
-                           critical = 'simulation',method = 'characteristic',
-               type = 'segmentation')
+res1 <- fchange(
+  X = epca$residuals,
+  statistic = "Tn",
+  critical = "simulation", method = "characteristic",
+  type = "segmentation"
+)
 ```
 
 The previous approach is similar to the following, except without smoothing incorporated. We show the details more precisely below where binary segmentation is used to investigate the residuals.
 ```{r model_electricity, eval=FALSE}
 set.seed(123456)
-elec_mod <- projection_model(electricity,TVE=0.95,forecast.model='ets', check.cp=TRUE)
+elec_mod <- projection_model(electricity, TVE = 0.95, forecast.model = "ets", check.cp = TRUE)
 
-plot(elec_mod$errors,changes = elec_mod$changes) 
+plot(elec_mod$errors, changes = elec_mod$changes)
 ```
 
 # S\&P 500
@@ -54,36 +57,40 @@ This section is focused on an application in finance, specifically the S\&P500 i
 
 The data is collected at minutely resolution. We convert it into the overnight cumulative intraday returns below, and plot it.
 ```{r fin_functions, eval=FALSE}
-compute_ocidr <- function(dat){
+compute_ocidr <- function(dat) {
   dat_cidr <- dat
-  dat_cidr[,1]  <- 100*(log(dat[,1]) - log(dat[1,1]))
+  dat_cidr[, 1] <- 100 * (log(dat[, 1]) - log(dat[1, 1]))
   # Obs
-  for(j in 2:ncol(dat_cidr)){ 
-    dat_cidr[,j] <- 100 * 
-      ( log(dat[,j]) - log(dat[nrow(dat_cidr),j-1]) )
+  for (j in 2:ncol(dat_cidr)) {
+    dat_cidr[, j] <- 100 *
+      (log(dat[, j]) - log(dat[nrow(dat_cidr), j - 1]))
   }
-  
+
   dat_cidr
 }
 
 SPYUS_ocidr <- compute_ocidr(SPYUS500)
 
 plot_ocidr <- plot(dfts(SPYUS_ocidr),
-                      val_axis_title = '',res_axis_title = '',FD_axis_title = '',
-                      plot_title = '')
+  val_axis_title = "", res_axis_title = "", FD_axis_title = "",
+  plot_title = ""
+)
 ```
 
 The changes can be detected using binary segmentation as follows.
 ```{r detect_changes_fin, eval=FALSE}
-
 set.seed(25641)
-spy_min_changes <- fchange(dfts(SPYUS_ocidr), type='segmentation',
-                                   statistic='Tn',
-                                   critical='simulation',
-                                   method = 'characteristic')
-plot_ocidr <- plot(dfts(SPYUS_ocidr),changes = spy_min_changes[[1]],
-                      val_axis_title = '',res_axis_title = '',FD_axis_title = '',
-                      plot_title = '',type = 'fast')
+spy_min_changes <- fchange(dfts(SPYUS_ocidr),
+  type = "segmentation",
+  statistic = "Tn",
+  critical = "simulation",
+  method = "characteristic"
+)
+plot_ocidr <- plot(dfts(SPYUS_ocidr),
+  changes = spy_min_changes[[1]],
+  val_axis_title = "", res_axis_title = "", FD_axis_title = "",
+  plot_title = "", type = "fast"
+)
 ```
 
 
