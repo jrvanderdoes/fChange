@@ -30,7 +30,7 @@ plot(electricity,
         plot_title = '')
 ```
 
-This data seems to exhibit some trends over time (perhaps due to season). We wish to model these trends first, and then search the data for any remaining changes. We will use principal component analysis to convert it to finite dimensions, fit a model, and return this to functional data. In \code{fChange}, \code{pca_examination} and \code{projection_model} are pre-built functions that can be used to project the data, e.g.
+This data seems to exhibit some trends over time (perhaps due to season). We wish to model these trends first, and then search the data for any remaining changes. We'll use principal component analysis to convert the functional data to finite dimensions, fit a model, and return the model to functional data. In \code{fChange}, the functions \code{pca}, \code{pca_examination}, \code{pca_components}, and \code{projection_model} are functions that can be used to project the data, e.g.
 ```{r pca_info, eval=FALSE}
 epca <- pca_examination(X = electricity,TVE = 0.99) 
 set.seed(654321)
@@ -40,7 +40,7 @@ res1 <- fchange(X = epca$residuals,
                type = 'segmentation')
 ```
 
-The previous approach is similar to the next, except without smoothing incorporated. In the next, we show the details more precisely. We use binary segmentation to investigate the residuals in this case.
+The previous approach is similar to the following, except without smoothing incorporated. We show the details more precisely below where binary segmentation is used to investigate the residuals.
 ```{r model_electricity, eval=FALSE}
 set.seed(123456)
 elec_mod <- projection_model(electricity,TVE=0.95,forecast.model='ets', check.cp=TRUE)
