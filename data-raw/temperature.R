@@ -1,9 +1,9 @@
-#library(tidyverse)
+# library(tidyverse)
 load(file = "./data-raw/Australian_Temp.RData")
 
 temperature <- list()
 
-cities <- 'Sydney'#names(Australian_Temp)
+cities <- "Sydney" # names(Australian_Temp)
 for (i in 1:length(cities)) {
   data_city <- Australian_Temp[[cities[i]]] %>%
     as.data.frame()
@@ -35,7 +35,7 @@ for (i in 1:length(cities)) {
   data_station <- impute(
     X = data_station,
     obs_share_data = TRUE,
-    method =  'linear'
+    method = "linear"
   )
   # temperature[[paste0(cities[i],"_",stations[j])]] <-
   temperature[[cities[i]]] <-
@@ -43,6 +43,6 @@ for (i in 1:length(cities)) {
   # }
 }
 
-temperature <- dfts(temperature$Sydney, name='Sydney Temperature')
+temperature <- dfts(temperature$Sydney, name = "Sydney Temperature")
 
 use_data(temperature)
