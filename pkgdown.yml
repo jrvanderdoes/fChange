@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   articles/Examples: Examples.html
   articles/functionaldata: functionaldata.html
-last_built: 2025-06-20T22:16Z
+last_built: 2025-06-21T02:42Z
 urls:
   reference: https://jrvanderdoes.github.io/fChange/reference
   article: https://jrvanderdoes.github.io/fChange/articles
