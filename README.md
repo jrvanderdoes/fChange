@@ -15,6 +15,10 @@ perform inference of change points, and provide visualizations. Data is
 stored as discretely collected observations without requiring the
 selection of basis functions.
 
+We recommend examining the package
+[website](https://jrvanderdoes.github.io/fChange/) for details and
+examples.
+
 ## Installation
 
 You can install the release version of the package on CRAN:

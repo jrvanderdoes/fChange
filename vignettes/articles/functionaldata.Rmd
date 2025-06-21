@@ -19,8 +19,7 @@ knitr::opts_chunk$set(
 
 ## Prepatory Information
 
-Although the package is available on [CRAN](https://cran.r-project.org/web/packages/fChange/index.html), several functions have been
-updated in preparation for this document and have not yet been uploaded to CRAN. Hence, we recommend installing the code from GitHub as:
+The package is available on [CRAN](https://cran.r-project.org/web/packages/fChange/index.html). Alternatively, the code can also be installed from GitHub as:
 ```{r,eval=FALSE}
 devtools::install_github("https://github.com/jrvanderdoes/fChange.git@main")
 library(fChange)
